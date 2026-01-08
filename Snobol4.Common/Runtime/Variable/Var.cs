@@ -13,17 +13,60 @@ public abstract class Var
 
     #region Properties
 
-    internal bool IsKeyword = false;
-    internal bool IsReadOnly = false;
-    internal bool Succeeded = true;
-    internal Guid UniqueId = Guid.NewGuid();
-    internal string InputChannel = "";
-    internal string OutputChannel = "";
-    internal ValidationDelegate? Validation = null;
-    public string Symbol = "";
-    internal readonly DateTime CreationDateTime = DateTime.Now;
-    internal object? Key = null;
-    internal Var? Collection = null;
+    /// <summary>
+    /// Gets or sets whether this variable is a keyword variable.
+    /// </summary>
+    public bool IsKeyword { get; internal set; }
+
+    /// <summary>
+    /// Gets or sets whether this variable is read-only.
+    /// </summary>
+    public bool IsReadOnly { get; internal set; }
+
+    /// <summary>
+    /// Gets or sets whether the last operation on this variable succeeded.
+    /// </summary>
+    public bool Succeeded { get; internal set; } = true;
+
+    /// <summary>
+    /// Gets the unique identifier for this variable instance.
+    /// </summary>
+    public Guid UniqueId { get; } = Guid.NewGuid();
+
+    /// <summary>
+    /// Gets or sets the input channel associated with this variable.
+    /// </summary>
+    public string InputChannel { get; internal set; } = "";
+
+    /// <summary>
+    /// Gets or sets the output channel associated with this variable.
+    /// </summary>
+    public string OutputChannel { get; internal set; } = "";
+
+    /// <summary>
+    /// Gets or sets the validation delegate for this variable.
+    /// </summary>
+    public ValidationDelegate? Validation { get; internal set; }
+
+    /// <summary>
+    /// Gets or sets the symbol name associated with this variable.
+    /// </summary>
+    public string Symbol { get; internal set; } = "";
+
+    /// <summary>
+    /// Gets the date and time when this variable was created.
+    /// </summary>
+    public DateTime CreationDateTime { get; } = DateTime.Now;
+
+    /// <summary>
+    /// Gets or sets the key if this variable is an element of a collection.
+    /// </summary>
+    public object? Key { get; internal set; }
+
+    /// <summary>
+    /// Gets or sets the parent collection if this variable is an element of a collection.
+    /// </summary>
+    public Var? Collection { get; internal set; }
 
     #endregion
 

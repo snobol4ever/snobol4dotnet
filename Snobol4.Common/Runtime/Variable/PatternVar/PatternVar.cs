@@ -59,7 +59,6 @@ public class PatternVar : Var
         Symbol = template.Symbol;
         Validation = template.Validation;
         IsReadOnly = template.IsReadOnly;
-        UniqueId = template.UniqueId;
         Succeeded = template.Succeeded;
         Data = template.Data;
     }

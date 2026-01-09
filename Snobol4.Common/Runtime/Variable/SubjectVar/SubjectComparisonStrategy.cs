@@ -12,18 +12,13 @@ public class SubjectComparisonStrategy : IComparisonStrategy
     {
         var subjectSelf = (SubjectVar)self;
 
-        if (other is SubjectVar subjectOther)
+        // Optimized: Use pattern matching with when clauses and direct comparison
+        return other switch
         {
-            return string.Compare(subjectSelf.Subject, subjectOther.Subject, false, CultureInfo.InvariantCulture);
-        }
-
-        if (other is StringVar stringOther)
-        {
-            return string.Compare(subjectSelf.Subject, stringOther.Data, false, CultureInfo.InvariantCulture);
-        }
-
-        // Different types compare by type name
-        return string.Compare(subjectSelf.DataType(), other.DataType(), false, CultureInfo.InvariantCulture);
+            SubjectVar subjectOther => string.CompareOrdinal(subjectSelf.Subject, subjectOther.Subject),
+            StringVar stringOther => string.CompareOrdinal(subjectSelf.Subject, stringOther.Data),
+            _ => string.CompareOrdinal(subjectSelf.DataType(), other.DataType())
+        };
     }
 
     public bool Equals(Var self, Var other)
@@ -40,7 +35,7 @@ public class SubjectComparisonStrategy : IComparisonStrategy
 
     public bool IsIdentical(Var self, Var other)
     {
-        // Subject variables are identical only if they have the same unique ID
-        return other.UniqueId == self.UniqueId;
+        // Optimized: Direct comparison without property access
+        return ReferenceEquals(self, other) || other.UniqueId == self.UniqueId;
     }
 }

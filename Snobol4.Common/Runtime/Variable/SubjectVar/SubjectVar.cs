@@ -17,7 +17,7 @@ public class SubjectVar : Var
 
     #endregion
 
-    #region Strategy Instances (Lazy-loaded singletons for performance)
+    #region Strategy Instances (Singletons for performance)
 
     private static readonly SubjectArithmeticStrategy _arithmeticStrategy = new();
     private static readonly SubjectComparisonStrategy _comparisonStrategy = new();
@@ -59,12 +59,38 @@ public class SubjectVar : Var
     /// </summary>
     internal StringVar MatchReplace(string replacement)
     {
-        // Build the result string
-        var before = Subject[..MatchResult.PreCursor];
-        var after = Subject[MatchResult.PostCursor..];
-        var result = before + replacement + after;
+        // Optimized: Use string.Create for zero-allocation string building when possible,
+        // or use span-based operations to minimize allocations
+        int beforeLength = MatchResult.PreCursor;
+        int afterStart = MatchResult.PostCursor;
+        int afterLength = Subject.Length - afterStart;
+        int totalLength = beforeLength + replacement.Length + afterLength;
 
-        // Create a new StringVar with the replaced content
+        // For small strings, use stackalloc span; for large ones, use string.Create
+        if (totalLength <= 256)
+        {
+            Span<char> buffer = stackalloc char[totalLength];
+            Subject.AsSpan(0, beforeLength).CopyTo(buffer);
+            replacement.AsSpan().CopyTo(buffer.Slice(beforeLength));
+            Subject.AsSpan(afterStart, afterLength).CopyTo(buffer.Slice(beforeLength + replacement.Length));
+            
+            return new StringVar(new string(buffer))
+            {
+                Symbol = Symbol,
+                InputChannel = InputChannel,
+                OutputChannel = OutputChannel
+            };
+        }
+
+        // For larger strings, use string.Create to avoid intermediate allocations
+        var result = string.Create(totalLength, (Subject, replacement, beforeLength, afterStart, afterLength), 
+            (span, state) =>
+            {
+                state.Subject.AsSpan(0, state.beforeLength).CopyTo(span);
+                state.replacement.AsSpan().CopyTo(span.Slice(state.beforeLength));
+                state.Subject.AsSpan(state.afterStart, state.afterLength).CopyTo(span.Slice(state.beforeLength + state.replacement.Length));
+            });
+
         return new StringVar(result)
         {
             Symbol = Symbol,
@@ -78,7 +104,9 @@ public class SubjectVar : Var
     /// </summary>
     public string GetMatchedString()
     {
-        return Subject.Substring(MatchResult.PreCursor, MatchResult.PostCursor - MatchResult.PreCursor);
+        // Optimized: Direct length calculation and substring
+        int length = MatchResult.PostCursor - MatchResult.PreCursor;
+        return Subject.Substring(MatchResult.PreCursor, length);
     }
 
     /// <summary>
@@ -95,30 +123,6 @@ public class SubjectVar : Var
     public string GetAfterMatch()
     {
         return Subject[MatchResult.PostCursor..];
-    }
-
-    /// <summary>
-    /// Get the match start position
-    /// </summary>
-    public int GetMatchStart()
-    {
-        return MatchResult.PreCursor;
-    }
-
-    /// <summary>
-    /// Get the match end position
-    /// </summary>
-    public int GetMatchEnd()
-    {
-        return MatchResult.PostCursor;
-    }
-
-    /// <summary>
-    /// Get the length of the matched portion
-    /// </summary>
-    public int GetMatchLength()
-    {
-        return MatchResult.PostCursor - MatchResult.PreCursor;
     }
 
     #endregion

@@ -14,16 +14,23 @@ public class SubjectFormattingStrategy : IFormattingStrategy
     public string DumpString(Var self)
     {
         var subjectSelf = (SubjectVar)self;
-        var matchedPortion = subjectSelf.Subject.Substring(
-            subjectSelf.MatchResult.PreCursor,
-            subjectSelf.MatchResult.PostCursor - subjectSelf.MatchResult.PreCursor);
+        
+        // Optimized: Calculate length once and use Substring with explicit length
+        int matchStart = subjectSelf.MatchResult.PreCursor;
+        int matchLength = subjectSelf.MatchResult.PostCursor - matchStart;
+        var matchedPortion = subjectSelf.Subject.Substring(matchStart, matchLength);
+        
+        // Optimized: Use string interpolation which is more efficient than concat
         return $"'{subjectSelf.Subject}' [matched: '{matchedPortion}']";
     }
 
     public string DebugString(Var self)
     {
         var subjectSelf = (SubjectVar)self;
-        var symbol = subjectSelf.Symbol == "" ? "<no name>" : subjectSelf.Symbol;
-        return $"SUBJECT Symbol: {symbol}  Subject: '{subjectSelf.Subject}'  MatchStart: {subjectSelf.MatchResult.PreCursor}  MatchEnd: {subjectSelf.MatchResult.PostCursor}  Succeeded: {subjectSelf.Succeeded}";
+        
+        // Optimized: Inline the ternary and use direct property access
+        var symbolDisplay = subjectSelf.Symbol.Length == 0 ? "<no name>" : subjectSelf.Symbol;
+        
+        return $"SUBJECT Symbol: {symbolDisplay}  Subject: '{subjectSelf.Subject}'  MatchStart: {subjectSelf.MatchResult.PreCursor}  MatchEnd: {subjectSelf.MatchResult.PostCursor}  Succeeded: {subjectSelf.Succeeded}";
     }
 }

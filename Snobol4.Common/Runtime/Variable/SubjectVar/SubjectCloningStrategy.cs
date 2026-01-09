@@ -1,4 +1,4 @@
-﻿namespace Snobol4.Common;
+﻿    namespace Snobol4.Common;
 
 /// <summary>
 /// Cloning strategy for subject variables

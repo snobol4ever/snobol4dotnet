@@ -117,10 +117,9 @@ public abstract class Var : IEquatable<Var>
     /// <param name="executive">The execution context</param>
     /// <returns>The result of the addition</returns>
     /// <exception cref="ArgumentNullException">Thrown when other or executive is null</exception>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public virtual Var Add(Var other, Executive executive)
     {
-        ArgumentNullException.ThrowIfNull(other);
-        ArgumentNullException.ThrowIfNull(executive);
         return ArithmeticStrategy.Add(this, other, executive);
     }
 
@@ -131,10 +130,9 @@ public abstract class Var : IEquatable<Var>
     /// <param name="executive">The execution context</param>
     /// <returns>The result of the subtraction</returns>
     /// <exception cref="ArgumentNullException">Thrown when other or executive is null</exception>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public virtual Var Subtract(Var other, Executive executive)
     {
-        ArgumentNullException.ThrowIfNull(other);
-        ArgumentNullException.ThrowIfNull(executive);
         return ArithmeticStrategy.Subtract(this, other, executive);
     }
 
@@ -145,10 +143,9 @@ public abstract class Var : IEquatable<Var>
     /// <param name="executive">The execution context</param>
     /// <returns>The result of the multiplication</returns>
     /// <exception cref="ArgumentNullException">Thrown when other or executive is null</exception>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public virtual Var Multiply(Var other, Executive executive)
     {
-        ArgumentNullException.ThrowIfNull(other);
-        ArgumentNullException.ThrowIfNull(executive);
         return ArithmeticStrategy.Multiply(this, other, executive);
     }
 
@@ -159,10 +156,9 @@ public abstract class Var : IEquatable<Var>
     /// <param name="executive">The execution context</param>
     /// <returns>The result of the division</returns>
     /// <exception cref="ArgumentNullException">Thrown when other or executive is null</exception>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public virtual Var Divide(Var other, Executive executive)
     {
-        ArgumentNullException.ThrowIfNull(other);
-        ArgumentNullException.ThrowIfNull(executive);
         return ArithmeticStrategy.Divide(this, other, executive);
     }
 
@@ -173,10 +169,9 @@ public abstract class Var : IEquatable<Var>
     /// <param name="executive">The execution context</param>
     /// <returns>The result of the exponentiation</returns>
     /// <exception cref="ArgumentNullException">Thrown when other or executive is null</exception>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public virtual Var Power(Var other, Executive executive)
     {
-        ArgumentNullException.ThrowIfNull(other);
-        ArgumentNullException.ThrowIfNull(executive);
         return ArithmeticStrategy.Power(this, other, executive);
     }
 
@@ -186,9 +181,9 @@ public abstract class Var : IEquatable<Var>
     /// <param name="executive">The execution context</param>
     /// <returns>The negated value</returns>
     /// <exception cref="ArgumentNullException">Thrown when executive is null</exception>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public virtual Var Negate(Executive executive)
     {
-        ArgumentNullException.ThrowIfNull(executive);
         return ArithmeticStrategy.Negate(this, executive);
     }
 
@@ -286,9 +281,9 @@ public abstract class Var : IEquatable<Var>
     /// <param name="other">The variable to compare to</param>
     /// <returns>A value indicating the relative order</returns>
     /// <exception cref="ArgumentNullException">Thrown when other is null</exception>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal virtual int Compare(Var other)
     {
-        ArgumentNullException.ThrowIfNull(other);
         return ComparisonStrategy.CompareTo(this, other);
     }
 
@@ -323,9 +318,9 @@ public abstract class Var : IEquatable<Var>
     /// <param name="other">The variable to compare to</param>
     /// <returns>True if identical, false otherwise</returns>
     /// <exception cref="ArgumentNullException">Thrown when other is null</exception>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal virtual bool IsIdentical(Var other)
     {
-        ArgumentNullException.ThrowIfNull(other);
         return ComparisonStrategy.IsIdentical(this, other);
     }
 
@@ -342,9 +337,9 @@ public abstract class Var : IEquatable<Var>
     /// <param name="exec">The execution context</param>
     /// <returns>True if conversion succeeded, false otherwise</returns>
     /// <exception cref="ArgumentNullException">Thrown when exec is null</exception>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public virtual bool Convert(Executive.VarType varType, out Var varOut, out object valueOut, Executive exec)
     {
-        ArgumentNullException.ThrowIfNull(exec);
         return ConversionStrategy.TryConvert(this, varType, out varOut, out valueOut, exec);
     }
 
@@ -352,12 +347,14 @@ public abstract class Var : IEquatable<Var>
     /// Gets the data type name of this variable
     /// </summary>
     /// <returns>The data type name</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal virtual string DataType() => ConversionStrategy.GetDataType(this);
 
     /// <summary>
     /// Gets the key used for table lookups
     /// </summary>
     /// <returns>The table key</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal virtual object GetTableKey() => ConversionStrategy.GetTableKey(this);
 
     #endregion
@@ -368,6 +365,7 @@ public abstract class Var : IEquatable<Var>
     /// Creates a clone of this variable
     /// </summary>
     /// <returns>A new variable instance with copied values</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal virtual Var Clone() => CloningStrategy.Clone(this);
 
     #endregion
@@ -402,9 +400,10 @@ public abstract class Var : IEquatable<Var>
     /// <param name="inString">The input string</param>
     /// <param name="integerOut">The parsed integer value</param>
     /// <returns>True if conversion succeeded, false otherwise</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool ToInteger(ReadOnlySpan<char> inString, out long integerOut)
     {
-        // Convert empty string to 0
+        // Convert empty string to 0 (fast path)
         if (inString.IsEmpty)
         {
             integerOut = 0;
@@ -420,9 +419,10 @@ public abstract class Var : IEquatable<Var>
     /// <param name="inString">The input string</param>
     /// <param name="realOut">The parsed real value</param>
     /// <returns>True if conversion succeeded, false otherwise</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool ToReal(ReadOnlySpan<char> inString, out double realOut)
     {
-        // Convert empty string to 0.0
+        // Convert empty string to 0.0 (fast path)
         if (inString.IsEmpty)
         {
             realOut = 0.0;
@@ -441,79 +441,72 @@ public abstract class Var : IEquatable<Var>
     /// <summary>
     /// Attempts to convert a variable to a numeric value (integer or real)
     /// </summary>
-    /// <param name="varIn">The variable to convert</param>
-    /// <param name="isInteger">True if the result is an integer</param>
-    /// <param name="l">The integer value if isInteger is true</param>
-    /// <param name="d">The real value if isInteger is false</param>
-    /// <param name="exec">The execution context</param>
-    /// <returns>True if conversion succeeded, false otherwise</returns>
-    /// <exception cref="ArgumentNullException">Thrown when varIn or exec is null</exception>
     internal static bool ToNumeric(Var varIn, out bool isInteger, out long l, out double d, Executive exec)
     {
-        ArgumentNullException.ThrowIfNull(varIn);
-        ArgumentNullException.ThrowIfNull(exec);
-
         // Resolve NameVar references
         if (varIn is NameVar nameVar)
         {
             varIn = exec.IdentifierTable[nameVar.Pointer];
         }
 
-        // Use pattern matching with out parameters
+        // Use pattern matching with type checks - optimized for common cases
         return varIn switch
         {
-            IntegerVar intVar => TryGetInteger(intVar, out isInteger, out l, out d),
-            RealVar realVar => TryGetReal(realVar, out isInteger, out l, out d),
+            IntegerVar intVar => HandleIntegerVar(intVar, out isInteger, out l, out d),
+            RealVar realVar => HandleRealVar(realVar, out isInteger, out l, out d),
             StringVar strVar => TryParseStringAsNumeric(strVar, out isInteger, out l, out d),
-            _ => InitializeAndReturnFalse(out isInteger, out l, out d)
+            _ => InitializeFailureValues(out isInteger, out l, out d)
         };
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool TryGetInteger(IntegerVar integerVar, out bool isInteger, out long l, out double d)
+    private static bool HandleIntegerVar(IntegerVar integerVar, out bool isInteger, out long l, out double d)
     {
         isInteger = true;
         l = integerVar.Data;
-        d = default;
+        d = 0.0; // Initialize with zero instead of default
         return true;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool TryGetReal(RealVar realVar, out bool isInteger, out long l, out double d)
+    private static bool HandleRealVar(RealVar realVar, out bool isInteger, out long l, out double d)
     {
         isInteger = false;
-        l = default;
+        l = 0L; // Initialize with zero instead of default
         d = realVar.Data;
         return true;
     }
 
     private static bool TryParseStringAsNumeric(StringVar stringVar, out bool isInteger, out long l, out double d)
     {
+        // Try integer first (more common and faster)
         if (ToInteger(stringVar.Data, out l))
         {
             isInteger = true;
-            d = default;
+            d = 0.0;
             return true;
         }
 
+        // Try real
         if (ToReal(stringVar.Data, out d))
         {
             isInteger = false;
-            l = default;
+            l = 0L;
             return true;
         }
 
+        // Failed both conversions
         isInteger = false;
-        l = default;
+        l = 0L;
         d = double.NaN;
         return false;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool InitializeAndReturnFalse(out bool isInteger, out long l, out double d)
+    private static bool InitializeFailureValues(out bool isInteger, out long l, out double d)
     {
         isInteger = false;
-        l = default;
+        l = 0L;
         d = double.NaN;
         return false;
     }

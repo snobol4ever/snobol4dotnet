@@ -48,21 +48,21 @@ public sealed class TableConversionStrategy : IConversionStrategy
         var convertedArray = new ArrayVar();
         convertedArray.ConfigurePrototype($"{count},2", tableSelf.Fill);
 
+        var arrayData = convertedArray.Data;
         var arrayIndex = 0;
-        var data = tableSelf.Data; // Cache reference
 
         // Faster enumeration using foreach on dictionary
-        foreach (var kvp in data)
+        foreach (var kvp in tableSelf.Data)
         {
             // Store key in first column
-            convertedArray.Data[arrayIndex++] = ConvertKeyToVar(kvp.Key, tableSelf);
+            arrayData[arrayIndex++] = ConvertKeyToVar(kvp.Key, tableSelf);
 
             // Store value in second column
-            convertedArray.Data[arrayIndex++] = kvp.Value;
+            arrayData[arrayIndex++] = kvp.Value;
         }
 
         varOut = convertedArray;
-        valueOut = data;
+        valueOut = tableSelf.Data;
         return true;
     }
 

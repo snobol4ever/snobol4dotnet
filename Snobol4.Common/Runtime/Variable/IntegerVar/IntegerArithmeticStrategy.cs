@@ -1,4 +1,6 @@
-﻿namespace Snobol4.Common;
+﻿using System.Runtime.CompilerServices;
+
+namespace Snobol4.Common;
 
 /// <summary>
 /// Arithmetic strategy for integer variables
@@ -41,46 +43,137 @@ public sealed class IntegerArithmeticStrategy : IArithmeticStrategy
             return new RealVar(intSelf.Data).Power(other, executive);
         }
 
-        if (intSelf.Data == 0 && intOther.Data <= 0)
+        long baseValue = intSelf.Data;
+        long exponent = intOther.Data;
+
+        // Handle special cases
+        if (exponent < 0)
         {
-            executive.LogRuntimeException(18);
-            return StringVar.Null();
+            // Negative exponents require real arithmetic
+            return new RealVar(Math.Pow(baseValue, exponent));
         }
 
+        if (baseValue == 0)
+        {
+            if (exponent == 0)
+            {
+                executive.LogRuntimeException(18);
+                return StringVar.Null();
+            }
+            return IntegerVar.Zero;
+        }
+
+        if (exponent == 0)
+        {
+            return IntegerVar.One;
+        }
+
+        if (exponent == 1)
+        {
+            return IntegerVar.Create(baseValue);
+        }
+
+        if (baseValue == 1)
+        {
+            return IntegerVar.One;
+        }
+
+        if (baseValue == -1)
+        {
+            return (exponent & 1) == 0 ? IntegerVar.One : IntegerVar.MinusOne;
+        }
+
+        // Use exponentiation by squaring for better performance
+        return PowerBySquaring(baseValue, exponent, executive);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static Var PowerBySquaring(long baseValue, long exponent, Executive executive)
+    {
+        long result = 1;
+        long currentBase = baseValue;
+        long currentExponent = exponent;
+
+        while (currentExponent > 0)
+        {
+            // If exponent is odd, multiply result by current base
+            if ((currentExponent & 1) == 1)
+            {
+                // Check for overflow
+                if (!TryMultiplySafe(result, currentBase, out long newResult))
+                {
+                    // Fall back to real arithmetic on overflow
+                    return new RealVar(Math.Pow(baseValue, exponent));
+                }
+                result = newResult;
+            }
+
+            // Square the base for next iteration
+            currentExponent >>= 1;
+            if (currentExponent > 0)
+            {
+                if (!TryMultiplySafe(currentBase, currentBase, out long newBase))
+                {
+                    // Fall back to real arithmetic on overflow
+                    return new RealVar(Math.Pow(baseValue, exponent));
+                }
+                currentBase = newBase;
+            }
+        }
+
+        return IntegerVar.Create(result);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool TryMultiplySafe(long left, long right, out long result)
+    {
+        // Fast path for small values
+        if (left == 0 || right == 0)
+        {
+            result = 0;
+            return true;
+        }
+
+        if (left == 1)
+        {
+            result = right;
+            return true;
+        }
+
+        if (right == 1)
+        {
+            result = left;
+            return true;
+        }
+
+        // Manual overflow check for multiplication
         try
         {
             checked
             {
-                long result = 1;
-                for (var i = 0; i < intOther.Data; ++i)
-                {
-                    result *= intSelf.Data;
-                }
-                return new IntegerVar(result);
+                result = left * right;
             }
+            return true;
         }
         catch (OverflowException)
         {
-            // Fall back to real arithmetic on overflow
-            return new RealVar(Math.Pow(intSelf.Data, intOther.Data));
+            result = 0;
+            return false;
         }
     }
 
     public Var Negate(Var self, Executive executive)
     {
         var intSelf = (IntegerVar)self;
+        long value = intSelf.Data;
 
-        try
-        {
-            checked
-            {
-                return new IntegerVar(-intSelf.Data);
-            }
-        }
-        catch (OverflowException)
+        // Check for overflow (only MinValue causes overflow when negated)
+        if (value == long.MinValue)
         {
             executive.LogRuntimeException(11);
             return StringVar.Null();
         }
+
+        return IntegerVar.Create(-value);
     }
 }

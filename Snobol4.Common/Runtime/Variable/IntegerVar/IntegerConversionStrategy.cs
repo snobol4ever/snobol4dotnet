@@ -18,9 +18,12 @@ public sealed class IntegerConversionStrategy : IConversionStrategy
         switch (targetType)
         {
             case Executive.VarType.STRING:
-                varOut = new StringVar(intSelf.Data.ToString(CultureInfo.CurrentCulture));
-                valueOut = ((StringVar)varOut).Data;
-                return true;
+                {
+                    string stringValue = intSelf.Data.ToString(CultureInfo.CurrentCulture);
+                    varOut = new StringVar(stringValue);
+                    valueOut = stringValue;
+                    return true;
+                }
 
             case Executive.VarType.INTEGER:
                 varOut = intSelf;
@@ -28,37 +31,52 @@ public sealed class IntegerConversionStrategy : IConversionStrategy
                 return true;
 
             case Executive.VarType.REAL:
-                varOut = new RealVar(intSelf.Data);
-                valueOut = ((RealVar)varOut).Data;
-                return true;
+                {
+                    double realValue = intSelf.Data;
+                    varOut = new RealVar(realValue);
+                    valueOut = realValue;
+                    return true;
+                }
 
             case Executive.VarType.PATTERN:
-                varOut = new PatternVar(new LiteralPattern(intSelf.Data.ToString(CultureInfo.CurrentCulture)));
-                valueOut = ((PatternVar)varOut).Data;
-                return true;
+                {
+                    string patternString = intSelf.Data.ToString(CultureInfo.CurrentCulture);
+                    var pattern = new LiteralPattern(patternString);
+                    varOut = new PatternVar(pattern);
+                    valueOut = pattern;
+                    return true;
+                }
 
             case Executive.VarType.NAME:
-                var stringData = intSelf.Data.ToString(CultureInfo.CurrentCulture);
-                if (stringData == "")
                 {
-                    return false;
+                    string nameString = intSelf.Data.ToString(CultureInfo.CurrentCulture);
+                    if (nameString.Length == 0)
+                    {
+                        return false;
+                    }
+                    varOut = new NameVar(nameString, intSelf.Key, intSelf.Collection);
+                    valueOut = intSelf.Data;
+                    return true;
                 }
-                varOut = new NameVar(stringData, intSelf.Key, intSelf.Collection);
-                valueOut = intSelf.Data;
-                return true;
 
             case Executive.VarType.EXPRESSION:
-                var previousCaseFolding = exec.Parent.CaseFolding;
-                exec.Parent.CaseFolding = ((IntegerVar)exec.IdentifierTable["&case"]).Data != 0;
-                exec.Parent.CodeMode = true;
-                exec.Parent.Code = new SourceCode(exec.Parent);
-                exec.Parent.Code.ReadCodeInString($" A = *({intSelf.Data.ToString(CultureInfo.CurrentCulture).Trim()})", exec.Parent.FilesToCompile[^1]);
-                exec.Parent.BuildEval();
-                exec.Parent.CaseFolding = previousCaseFolding;
-                exec.Parent.CodeMode = false;
-                varOut = new ExpressionVar(exec.StarFunctionList[^1]);
-                valueOut = ((ExpressionVar)varOut).FunctionName;
-                return true;
+                {
+                    bool previousCaseFolding = exec.Parent.CaseFolding;
+                    exec.Parent.CaseFolding = ((IntegerVar)exec.IdentifierTable["&case"]).Data != 0;
+                    exec.Parent.CodeMode = true;
+                    exec.Parent.Code = new SourceCode(exec.Parent);
+                    
+                    string trimmedValue = intSelf.Data.ToString(CultureInfo.CurrentCulture).Trim();
+                    exec.Parent.Code.ReadCodeInString($" A = *({trimmedValue})", exec.Parent.FilesToCompile[^1]);
+                    exec.Parent.BuildEval();
+                    
+                    exec.Parent.CaseFolding = previousCaseFolding;
+                    exec.Parent.CodeMode = false;
+                    
+                    varOut = new ExpressionVar(exec.StarFunctionList[^1]);
+                    valueOut = ((ExpressionVar)varOut).FunctionName;
+                    return true;
+                }
 
             case Executive.VarType.ARRAY:
             case Executive.VarType.TABLE:

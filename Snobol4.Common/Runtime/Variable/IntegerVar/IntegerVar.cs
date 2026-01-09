@@ -1,5 +1,6 @@
 ﻿#pragma warning disable CS8770 // Method lacks `[DoesNotReturn]` annotation to match implemented or overridden member.
 using System.Diagnostics;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace Snobol4.Common;
@@ -10,6 +11,8 @@ public class IntegerVar : Var
     #region Data
 
     public static readonly IntegerVar Zero = new(0);
+    public static readonly IntegerVar One = new(1);
+    public static readonly IntegerVar MinusOne = new(-1);
     
     // Integer pool for common small values to reduce allocations
     private static readonly IntegerVar[] _pool = InitializePool();
@@ -44,7 +47,7 @@ public class IntegerVar : Var
         var pool = new IntegerVar[PoolMax - PoolMin + 1];
         for (int i = 0; i < pool.Length; i++)
         {
-            pool[i] = new IntegerVar((long)(i + PoolMin));
+            pool[i] = new IntegerVar(i + PoolMin);
         }
         return pool;
     }
@@ -55,7 +58,7 @@ public class IntegerVar : Var
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IntegerVar Create(long value)
     {
-        if (value >= PoolMin && value <= PoolMax)
+        if ((ulong)(value - PoolMin) <= (ulong)(PoolMax - PoolMin))
         {
             return _pool[value - PoolMin];
         }
@@ -108,16 +111,18 @@ public class IntegerVar : Var
     {
         long leftData = left.Data;
         long rightData = Data;
-        long result = leftData + rightData;
 
-        // Fast overflow check: if signs are same and result sign differs, overflow occurred
-        if (((leftData ^ result) & (rightData ^ result)) < 0)
+        // Use checked arithmetic for overflow detection
+        try
+        {
+            long result = checked(leftData + rightData);
+            return Create(result);
+        }
+        catch (OverflowException)
         {
             executive.LogRuntimeException(3);
             return StringVar.Null();
         }
-
-        return Create(result);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -131,16 +136,18 @@ public class IntegerVar : Var
     {
         long leftData = left.Data;
         long rightData = Data;
-        long result = leftData - rightData;
 
-        // Fast overflow check: if signs differ and result sign differs from left, overflow occurred
-        if (((leftData ^ rightData) & (leftData ^ result)) < 0)
+        // Use checked arithmetic for overflow detection
+        try
+        {
+            long result = checked(leftData - rightData);
+            return Create(result);
+        }
+        catch (OverflowException)
         {
             executive.LogRuntimeException(34);
             return StringVar.Null();
         }
-
-        return Create(result);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -155,64 +162,32 @@ public class IntegerVar : Var
         long leftData = left.Data;
         long rightData = Data;
 
-        // Fast path for common cases
-        if (leftData == 0 || rightData == 0)
+        // Fast path for common cases using pattern matching
+        switch (leftData, rightData)
         {
-            return Zero;
+            case (0, _) or (_, 0):
+                return Zero;
+            case (1, _):
+                return Create(rightData);
+            case (_, 1):
+                return Create(leftData);
+            case (-1, _):
+                return Create(-rightData);
+            case (_, -1):
+                return Create(-leftData);
         }
 
-        if (leftData == 1)
+        // Use checked arithmetic for overflow detection
+        try
         {
-            return Create(rightData);
+            long result = checked(leftData * rightData);
+            return Create(result);
         }
-
-        if (rightData == 1)
+        catch (OverflowException)
         {
-            return Create(leftData);
+            executive.LogRuntimeException(28);
+            return StringVar.Null();
         }
-
-        // Check for overflow before multiplication
-        // This is faster than try-catch for the non-overflow case
-        if (leftData > 0)
-        {
-            if (rightData > 0)
-            {
-                if (leftData > long.MaxValue / rightData)
-                {
-                    executive.LogRuntimeException(28);
-                    return StringVar.Null();
-                }
-            }
-            else
-            {
-                if (rightData < long.MinValue / leftData)
-                {
-                    executive.LogRuntimeException(28);
-                    return StringVar.Null();
-                }
-            }
-        }
-        else
-        {
-            if (rightData > 0)
-            {
-                if (leftData < long.MinValue / rightData)
-                {
-                    executive.LogRuntimeException(28);
-                    return StringVar.Null();
-                }
-            }
-            else
-            {
-                if (leftData != 0 && rightData < long.MaxValue / leftData)
-                {
-                    executive.LogRuntimeException(28);
-                    return StringVar.Null();
-                }
-            }
-        }
-
-        return Create(leftData * rightData);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -224,20 +199,24 @@ public class IntegerVar : Var
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected internal override Var DivideInteger(IntegerVar left, Executive executive)
     {
-        if (Data == 0)
+        long divisor = Data;
+
+        if (divisor == 0)
         {
             executive.LogRuntimeException(14);
             return StringVar.Null();
         }
+
+        long dividend = left.Data;
 
         // Check for overflow case: MinValue / -1 causes overflow
-        if (left.Data == long.MinValue && Data == -1)
+        if (dividend == long.MinValue && divisor == -1)
         {
             executive.LogRuntimeException(14);
             return StringVar.Null();
         }
 
-        return Create(left.Data / Data);
+        return Create(dividend / divisor);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

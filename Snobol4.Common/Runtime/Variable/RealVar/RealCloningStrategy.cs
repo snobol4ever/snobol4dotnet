@@ -1,13 +1,16 @@
-﻿namespace Snobol4.Common;
+﻿using System.Runtime.CompilerServices;
+
+namespace Snobol4.Common;
 
 /// <summary>
 /// Cloning strategy for real (floating-point) variables
 /// </summary>
-public class RealCloningStrategy : ICloningStrategy
+public sealed class RealCloningStrategy : ICloningStrategy
 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Var Clone(Var self)
     {
-        var realSelf = (RealVar)self;
+        RealVar realSelf = (RealVar)self;
         return new RealVar(realSelf.Data);
     }
 }

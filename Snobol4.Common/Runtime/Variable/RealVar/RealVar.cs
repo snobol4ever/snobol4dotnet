@@ -1,10 +1,11 @@
 ﻿#pragma warning disable CS8770 // Method lacks `[DoesNotReturn]` annotation to match implemented or overridden member.
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Snobol4.Common;
 
 [DebuggerDisplay("{DebugString()}")]
-public class RealVar : Var
+public sealed class RealVar : Var
 {
     #region Data
 
@@ -30,14 +31,16 @@ public class RealVar : Var
 
     #region Constructors
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public RealVar(double data)
     {
-        InputChannel = "";
-        OutputChannel = "";
-        Symbol = "";
+        InputChannel = string.Empty;
+        OutputChannel = string.Empty;
+        Symbol = string.Empty;
         Data = data;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public RealVar(RealVar template)
     {
         Symbol = template.Symbol;
@@ -46,6 +49,7 @@ public class RealVar : Var
         OutputChannel = template.OutputChannel;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public RealVar(string symbol, double data, string inputChannel, string outputChannel)
     {
         Symbol = symbol;
@@ -60,16 +64,18 @@ public class RealVar : Var
 
     // These methods handle type-specific arithmetic with real numbers
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected internal override Var AddInteger(IntegerVar left, Executive executive)
     {
         return new RealVar(left.Data + Data);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected internal override Var AddReal(RealVar left, Executive executive)
     {
-        var result = left.Data + Data;
+        double result = left.Data + Data;
 
-        if (double.IsInfinity(result) || double.IsNaN(result))
+        if (!double.IsFinite(result))
         {
             executive.LogRuntimeException(261);
             return StringVar.Null();
@@ -78,16 +84,18 @@ public class RealVar : Var
         return new RealVar(result);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected internal override Var SubtractInteger(IntegerVar left, Executive executive)
     {
         return new RealVar(left.Data - Data);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected internal override Var SubtractReal(RealVar left, Executive executive)
     {
-        var result = left.Data - Data;
+        double result = left.Data - Data;
 
-        if (double.IsInfinity(result) || double.IsNaN(result))
+        if (!double.IsFinite(result))
         {
             executive.LogRuntimeException(264);
             return StringVar.Null();
@@ -96,16 +104,18 @@ public class RealVar : Var
         return new RealVar(result);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected internal override Var MultiplyInteger(IntegerVar left, Executive executive)
     {
         return new RealVar(left.Data * Data);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected internal override Var MultiplyReal(RealVar left, Executive executive)
     {
-        var result = left.Data * Data;
+        double result = left.Data * Data;
 
-        if (double.IsInfinity(result) || double.IsNaN(result))
+        if (!double.IsFinite(result))
         {
             executive.LogRuntimeException(263);
             return StringVar.Null();
@@ -114,9 +124,10 @@ public class RealVar : Var
         return new RealVar(result);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected internal override Var DivideInteger(IntegerVar left, Executive executive)
     {
-        if (Math.Abs(Data) < double.Epsilon)
+        if (Data == 0.0)
         {
             executive.LogRuntimeException(14);
             return StringVar.Null();
@@ -125,17 +136,18 @@ public class RealVar : Var
         return new RealVar(left.Data / Data);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected internal override Var DivideReal(RealVar left, Executive executive)
     {
-        if (Math.Abs(Data) < double.Epsilon)
+        if (Data == 0.0)
         {
             executive.LogRuntimeException(14);
             return StringVar.Null();
         }
 
-        var result = left.Data / Data;
+        double result = left.Data / Data;
 
-        if (double.IsInfinity(result) || double.IsNaN(result))
+        if (!double.IsFinite(result))
         {
             executive.LogRuntimeException(262);
             return StringVar.Null();

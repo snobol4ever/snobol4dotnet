@@ -41,7 +41,7 @@ public partial class Lexer
     private readonly Stack<int> _commaStack = [];
 
     // Dictionary of binary operators
-    private static readonly Dictionary<string, Token.Type> BinaryOperators = new()
+    private static readonly Dictionary<string, Token.Type> _binaryOperators = new()
     {
         { "~", Token.Type.BINARY_TILDE },
         { "?", Token.Type.BINARY_QUESTION },
@@ -388,7 +388,7 @@ public partial class Lexer
 
                 if (m.Success)
                 {
-                    if (!BinaryOperators.TryGetValue(m.Groups[1].Value, out var type))
+                    if (!_binaryOperators.TryGetValue(m.Groups[1].Value, out var type))
                     {
                         _parent.LogCompilerException(233, _cursorCurrent, sourceLine);
                         return false;

@@ -16,8 +16,8 @@ public class IntegerVar : Var
     
     // Integer pool for common small values to reduce allocations
     private static readonly IntegerVar[] _pool = InitializePool();
-    private const int PoolMin = -128;
-    private const int PoolMax = 127;
+    private const int _poolMin = -128;
+    private const int _poolMax = 127;
 
     public long Data;
 
@@ -44,10 +44,10 @@ public class IntegerVar : Var
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static IntegerVar[] InitializePool()
     {
-        var pool = new IntegerVar[PoolMax - PoolMin + 1];
-        for (int i = 0; i < pool.Length; i++)
+        var pool = new IntegerVar[_poolMax - _poolMin + 1];
+        for (var i = 0; i < pool.Length; i++)
         {
-            pool[i] = new IntegerVar(i + PoolMin);
+            pool[i] = new IntegerVar(i + _poolMin);
         }
         return pool;
     }
@@ -58,9 +58,9 @@ public class IntegerVar : Var
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IntegerVar Create(long value)
     {
-        if ((ulong)(value - PoolMin) <= (ulong)(PoolMax - PoolMin))
+        if ((ulong)(value - _poolMin) <= (ulong)(_poolMax - _poolMin))
         {
-            return _pool[value - PoolMin];
+            return _pool[value - _poolMin];
         }
         return new IntegerVar(value);
     }
@@ -109,13 +109,13 @@ public class IntegerVar : Var
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected internal override Var AddInteger(IntegerVar left, Executive executive)
     {
-        long leftData = left.Data;
-        long rightData = Data;
+        var leftData = left.Data;
+        var rightData = Data;
 
         // Use checked arithmetic for overflow detection
         try
         {
-            long result = checked(leftData + rightData);
+            var result = checked(leftData + rightData);
             return Create(result);
         }
         catch (OverflowException)
@@ -134,13 +134,13 @@ public class IntegerVar : Var
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected internal override Var SubtractInteger(IntegerVar left, Executive executive)
     {
-        long leftData = left.Data;
-        long rightData = Data;
+        var leftData = left.Data;
+        var rightData = Data;
 
         // Use checked arithmetic for overflow detection
         try
         {
-            long result = checked(leftData - rightData);
+            var result = checked(leftData - rightData);
             return Create(result);
         }
         catch (OverflowException)
@@ -159,8 +159,8 @@ public class IntegerVar : Var
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected internal override Var MultiplyInteger(IntegerVar left, Executive executive)
     {
-        long leftData = left.Data;
-        long rightData = Data;
+        var leftData = left.Data;
+        var rightData = Data;
 
         // Fast path for common cases using pattern matching
         switch (leftData, rightData)
@@ -180,7 +180,7 @@ public class IntegerVar : Var
         // Use checked arithmetic for overflow detection
         try
         {
-            long result = checked(leftData * rightData);
+            var result = checked(leftData * rightData);
             return Create(result);
         }
         catch (OverflowException)
@@ -199,7 +199,7 @@ public class IntegerVar : Var
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected internal override Var DivideInteger(IntegerVar left, Executive executive)
     {
-        long divisor = Data;
+        var divisor = Data;
 
         if (divisor == 0)
         {
@@ -207,7 +207,7 @@ public class IntegerVar : Var
             return StringVar.Null();
         }
 
-        long dividend = left.Data;
+        var dividend = left.Data;
 
         // Check for overflow case: MinValue / -1 causes overflow
         if (dividend == long.MinValue && divisor == -1)

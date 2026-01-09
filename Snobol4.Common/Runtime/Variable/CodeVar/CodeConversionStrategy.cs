@@ -7,7 +7,7 @@ namespace Snobol4.Common;
 /// </summary>
 public sealed class CodeConversionStrategy : IConversionStrategy
 {
-    private const string CodeTypeString = "code";
+    private const string _codeTypeString = "code";
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool TryConvert(Var self, Executive.VarType targetType, out Var varOut, out object valueOut, Executive exec)
@@ -28,7 +28,7 @@ public sealed class CodeConversionStrategy : IConversionStrategy
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string GetDataType(Var self)
     {
-        return CodeTypeString;
+        return _codeTypeString;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

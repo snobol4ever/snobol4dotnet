@@ -3,7 +3,7 @@
 public partial class Executive
 {
     // Lock object for thread synchronization
-    private readonly object _multiplicationLock = new();
+    private readonly Lock _multiplicationLock = new();
 
     internal void Multiply(List<Var> arguments)
     {

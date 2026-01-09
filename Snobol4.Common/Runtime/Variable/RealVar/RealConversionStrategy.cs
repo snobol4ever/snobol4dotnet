@@ -10,7 +10,7 @@ public sealed class RealConversionStrategy : IConversionStrategy
 {
     public bool TryConvert(Var self, Executive.VarType targetType, out Var varOut, out object valueOut, Executive exec)
     {
-        RealVar realSelf = (RealVar)self;
+        var realSelf = (RealVar)self;
         varOut = StringVar.Null();
         valueOut = string.Empty;
 
@@ -38,11 +38,11 @@ public sealed class RealConversionStrategy : IConversionStrategy
     private static bool ConvertToInteger(RealVar realSelf, out Var varOut, out object valueOut)
     {
         // Round towards zero (truncate)
-        double rounded = Math.Round(realSelf.Data, MidpointRounding.ToZero);
+        var rounded = Math.Round(realSelf.Data, MidpointRounding.ToZero);
 
         try
         {
-            long intValue = checked((long)rounded);
+            var intValue = checked((long)rounded);
             varOut = IntegerVar.Create(intValue);
             valueOut = intValue;
             return true;
@@ -73,7 +73,7 @@ public sealed class RealConversionStrategy : IConversionStrategy
 
     private static bool ConvertToName(RealVar realSelf, out Var varOut, out object valueOut)
     {
-        string stringData = realSelf.Data.ToString(CultureInfo.InvariantCulture);
+        var stringData = realSelf.Data.ToString(CultureInfo.InvariantCulture);
         
         if (stringData.Length == 0)
         {
@@ -89,12 +89,12 @@ public sealed class RealConversionStrategy : IConversionStrategy
 
     private static bool ConvertToExpression(RealVar realSelf, Executive exec, out Var varOut, out object valueOut)
     {
-        bool previousCaseFolding = exec.Parent.CaseFolding;
+        var previousCaseFolding = exec.Parent.CaseFolding;
         exec.Parent.CaseFolding = ((IntegerVar)exec.IdentifierTable["&case"]).Data != 0;
         exec.Parent.CodeMode = true;
         exec.Parent.Code = new SourceCode(exec.Parent);
         
-        string realString = realSelf.Data.ToString(CultureInfo.InvariantCulture).Trim();
+        var realString = realSelf.Data.ToString(CultureInfo.InvariantCulture).Trim();
         exec.Parent.Code.ReadCodeInString($" A = *({realString})", exec.Parent.FilesToCompile[^1]);
         exec.Parent.BuildEval();
         
@@ -115,7 +115,7 @@ public sealed class RealConversionStrategy : IConversionStrategy
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public object GetTableKey(Var self)
     {
-        RealVar realSelf = (RealVar)self;
+        var realSelf = (RealVar)self;
         return realSelf.Data;
     }
 }

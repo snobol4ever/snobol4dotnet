@@ -19,7 +19,7 @@ public partial class Builder
 {
     #region Members
 
-    private static readonly MetadataReference[] References =
+    private static readonly MetadataReference[] _references =
     [
         MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
         MetadataReference.CreateFromFile(typeof(Console).Assembly.Location),
@@ -58,7 +58,7 @@ public partial class Builder
         var compilation = CSharpCompilation.Create(
             assemblyName,
             syntaxTrees: [encoded],
-            references: References,
+            references: _references,
             options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
                 .WithOptimizationLevel(optimizationLevel)
                 .WithPlatform(Platform.AnyCpu));

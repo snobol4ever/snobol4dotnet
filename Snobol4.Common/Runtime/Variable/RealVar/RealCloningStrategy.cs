@@ -10,7 +10,7 @@ public sealed class RealCloningStrategy : ICloningStrategy
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Var Clone(Var self)
     {
-        RealVar realSelf = (RealVar)self;
+        var realSelf = (RealVar)self;
         return new RealVar(realSelf.Data);
     }
 }

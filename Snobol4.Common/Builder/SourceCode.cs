@@ -149,7 +149,7 @@ public class SourceCode
         }
     }
 
-    private static readonly List<string> Extensions =
+    private static readonly List<string> _extensions =
     [
         "",
         ".sno",
@@ -169,7 +169,7 @@ public class SourceCode
         if (!string.IsNullOrEmpty(extension))
             return file;
 
-        foreach (var ext in Extensions.Where(ext => new FileInfo(file + ext).Exists))
+        foreach (var ext in _extensions.Where(ext => new FileInfo(file + ext).Exists))
             return Path.ChangeExtension(file, ext);
 
         return file;

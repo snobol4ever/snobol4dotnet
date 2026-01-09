@@ -43,8 +43,8 @@ public sealed class IntegerArithmeticStrategy : IArithmeticStrategy
             return new RealVar(intSelf.Data).Power(other, executive);
         }
 
-        long baseValue = intSelf.Data;
-        long exponent = intOther.Data;
+        var baseValue = intSelf.Data;
+        var exponent = intOther.Data;
 
         // Handle special cases
         if (exponent < 0)
@@ -91,8 +91,8 @@ public sealed class IntegerArithmeticStrategy : IArithmeticStrategy
     private static Var PowerBySquaring(long baseValue, long exponent, Executive executive)
     {
         long result = 1;
-        long currentBase = baseValue;
-        long currentExponent = exponent;
+        var currentBase = baseValue;
+        var currentExponent = exponent;
 
         while (currentExponent > 0)
         {
@@ -100,7 +100,7 @@ public sealed class IntegerArithmeticStrategy : IArithmeticStrategy
             if ((currentExponent & 1) == 1)
             {
                 // Check for overflow
-                if (!TryMultiplySafe(result, currentBase, out long newResult))
+                if (!TryMultiplySafe(result, currentBase, out var newResult))
                 {
                     // Fall back to real arithmetic on overflow
                     return new RealVar(Math.Pow(baseValue, exponent));
@@ -112,7 +112,7 @@ public sealed class IntegerArithmeticStrategy : IArithmeticStrategy
             currentExponent >>= 1;
             if (currentExponent > 0)
             {
-                if (!TryMultiplySafe(currentBase, currentBase, out long newBase))
+                if (!TryMultiplySafe(currentBase, currentBase, out var newBase))
                 {
                     // Fall back to real arithmetic on overflow
                     return new RealVar(Math.Pow(baseValue, exponent));
@@ -165,7 +165,7 @@ public sealed class IntegerArithmeticStrategy : IArithmeticStrategy
     public Var Negate(Var self, Executive executive)
     {
         var intSelf = (IntegerVar)self;
-        long value = intSelf.Data;
+        var value = intSelf.Data;
 
         // Check for overflow (only MinValue causes overflow when negated)
         if (value == long.MinValue)

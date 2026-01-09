@@ -3,8 +3,8 @@
 public partial class Executive
 {
     // Lock object for thread synchronization
-    private readonly object _tableCreationLock = new();
-    private readonly object _tableIndexLock = new();
+    private readonly Lock _tableCreationLock = new();
+    private readonly Lock _tableIndexLock = new();
 
     /// <summary>
     /// Factory to create a table (Thread-Safe)

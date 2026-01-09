@@ -16,8 +16,8 @@ public class SubjectFormattingStrategy : IFormattingStrategy
         var subjectSelf = (SubjectVar)self;
         
         // Optimized: Calculate length once and use Substring with explicit length
-        int matchStart = subjectSelf.MatchResult.PreCursor;
-        int matchLength = subjectSelf.MatchResult.PostCursor - matchStart;
+        var matchStart = subjectSelf.MatchResult.PreCursor;
+        var matchLength = subjectSelf.MatchResult.PostCursor - matchStart;
         var matchedPortion = subjectSelf.Subject.Substring(matchStart, matchLength);
         
         // Optimized: Use string interpolation which is more efficient than concat

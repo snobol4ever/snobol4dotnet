@@ -3,7 +3,7 @@
 public partial class Executive
 {
     // Lock object for thread synchronization
-    private readonly object _sortLock = new();
+    private readonly Lock _sortLock = new();
 
     #region BaseSort
 

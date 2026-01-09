@@ -67,7 +67,7 @@ public class ArrayVar : Var
 
             prototypeSpan = prototypeSpan[match.Length..];
 
-            if (!TryParseDimensionBounds(match, out long lower, out long upper, out int errorCode))
+            if (!TryParseDimensionBounds(match, out var lower, out var upper, out var errorCode))
                 return errorCode;
 
             // Validate bounds

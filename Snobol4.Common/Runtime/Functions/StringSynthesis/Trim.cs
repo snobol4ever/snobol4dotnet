@@ -2,7 +2,7 @@
 
 public partial class Executive
 {
-    private static readonly char[] WhiteSpace = [' ', '\t'];
+    private static readonly char[] _whiteSpace = [' ', '\t'];
     public void Trim(List<Var> arguments)
     {
         if (!arguments[0].Convert(VarType.STRING, out _, out var str, this))
@@ -11,6 +11,6 @@ public partial class Executive
             return;
         }
 
-        SystemStack.Push(new StringVar(((string)str).TrimEnd(WhiteSpace)));
+        SystemStack.Push(new StringVar(((string)str).TrimEnd(_whiteSpace)));
     }
 }

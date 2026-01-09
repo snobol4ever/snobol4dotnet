@@ -8,12 +8,12 @@ namespace Snobol4.Common;
 /// </summary>
 public sealed class RealComparisonStrategy : IComparisonStrategy
 {
-    private const double Epsilon = double.Epsilon;
+    private const double _epsilon = double.Epsilon;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int CompareTo(Var self, Var other)
     {
-        RealVar realSelf = (RealVar)self;
+        var realSelf = (RealVar)self;
 
         return other switch
         {
@@ -26,12 +26,12 @@ public sealed class RealComparisonStrategy : IComparisonStrategy
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Equals(Var self, Var other)
     {
-        RealVar realSelf = (RealVar)self;
+        var realSelf = (RealVar)self;
 
         return other switch
         {
-            IntegerVar intOther => double.Abs(realSelf.Data - intOther.Data) < Epsilon,
-            RealVar realOther => double.Abs(realSelf.Data - realOther.Data) < Epsilon,
+            IntegerVar intOther => double.Abs(realSelf.Data - intOther.Data) < _epsilon,
+            RealVar realOther => double.Abs(realSelf.Data - realOther.Data) < _epsilon,
             _ => false
         };
     }
@@ -42,7 +42,7 @@ public sealed class RealComparisonStrategy : IComparisonStrategy
         if (other is not RealVar realOther)
             return false;
 
-        RealVar realSelf = (RealVar)self;
+        var realSelf = (RealVar)self;
 
         // For real numbers, use exact comparison (as in original code)
         // ReSharper disable once CompareOfFloatsByEqualityOperator

@@ -73,7 +73,7 @@ public sealed class RealVar : Var
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected internal override Var AddReal(RealVar left, Executive executive)
     {
-        double result = left.Data + Data;
+        var result = left.Data + Data;
 
         if (!double.IsFinite(result))
         {
@@ -93,7 +93,7 @@ public sealed class RealVar : Var
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected internal override Var SubtractReal(RealVar left, Executive executive)
     {
-        double result = left.Data - Data;
+        var result = left.Data - Data;
 
         if (!double.IsFinite(result))
         {
@@ -113,7 +113,7 @@ public sealed class RealVar : Var
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected internal override Var MultiplyReal(RealVar left, Executive executive)
     {
-        double result = left.Data * Data;
+        var result = left.Data * Data;
 
         if (!double.IsFinite(result))
         {
@@ -145,7 +145,7 @@ public sealed class RealVar : Var
             return StringVar.Null();
         }
 
-        double result = left.Data / Data;
+        var result = left.Data / Data;
 
         if (!double.IsFinite(result))
         {

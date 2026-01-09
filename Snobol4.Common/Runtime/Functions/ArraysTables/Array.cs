@@ -3,8 +3,8 @@
 public partial class Executive
 {
     // Lock objects for thread synchronization
-    private readonly object _arrayCreationLock = new();
-    private readonly object _indexCollectionLock = new();
+    private readonly Lock _arrayCreationLock = new();
+    private readonly Lock _indexCollectionLock = new();
 
     #region Factories
 

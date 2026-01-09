@@ -61,10 +61,10 @@ public class SubjectVar : Var
     {
         // Optimized: Use string.Create for zero-allocation string building when possible,
         // or use span-based operations to minimize allocations
-        int beforeLength = MatchResult.PreCursor;
-        int afterStart = MatchResult.PostCursor;
-        int afterLength = Subject.Length - afterStart;
-        int totalLength = beforeLength + replacement.Length + afterLength;
+        var beforeLength = MatchResult.PreCursor;
+        var afterStart = MatchResult.PostCursor;
+        var afterLength = Subject.Length - afterStart;
+        var totalLength = beforeLength + replacement.Length + afterLength;
 
         // For small strings, use stackalloc span; for large ones, use string.Create
         if (totalLength <= 256)
@@ -105,7 +105,7 @@ public class SubjectVar : Var
     public string GetMatchedString()
     {
         // Optimized: Direct length calculation and substring
-        int length = MatchResult.PostCursor - MatchResult.PreCursor;
+        var length = MatchResult.PostCursor - MatchResult.PreCursor;
         return Subject.Substring(MatchResult.PreCursor, length);
     }
 

@@ -3,7 +3,7 @@
 public partial class Executive
 {
     // Lock object for thread synchronization
-    private readonly object _additionLock = new();
+    private readonly Lock _additionLock = new();
 
     internal void Add(List<Var> arguments)
     {

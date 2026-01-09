@@ -45,7 +45,7 @@ public class Parser
 
     private readonly Stack<Token> _operatorStack = [];
 
-    private static readonly Dictionary<Token.Type, Order> Operators = new()
+    private static readonly Dictionary<Token.Type, Order> _operators = new()
     {
         { Token.Type.BINARY_EQUAL,new Order(1,Order.Association.RIGHT, false)},
         { Token.Type.BINARY_QUESTION, new Order(2, Order.Association.LEFT, false)},
@@ -67,7 +67,7 @@ public class Parser
         { Token.Type.UNARY_STAR, new Order(15, Order.Association.RIGHT, true)}
     };
 
-    private static readonly Dictionary<Token.Type, Token.Type> MatchingParenBracket = new()
+    private static readonly Dictionary<Token.Type, Token.Type> _matchingParenBracket = new()
     {
         { Token.Type.R_ANGLE, Token.Type.L_ANGLE},
         { Token.Type.R_PAREN_CHOICE, Token.Type.L_PAREN_CHOICE},
@@ -188,7 +188,7 @@ public class Parser
                 case Token.Type.R_ANGLE:
                 case Token.Type.R_PAREN_FUNCTION:
                 case Token.Type.R_SQUARE:
-                    var match = MatchingParenBracket[token.TokenType];
+                    var match = _matchingParenBracket[token.TokenType];
                     while (_operatorStack.Peek().TokenType != match)
                         outputTokenList.Add(_operatorStack.Pop());
                     _operatorStack.Pop();
@@ -233,15 +233,15 @@ public class Parser
     private bool PopAddCriteria(Token x)
     {
         // Check for an operator at the top of the operator stack
-        if (_operatorStack.Count == 0 || !Operators.TryGetValue(_operatorStack.Peek().TokenType, out _))
+        if (_operatorStack.Count == 0 || !_operators.TryGetValue(_operatorStack.Peek().TokenType, out _))
             return false;
 
-        return Operators[_operatorStack.Peek().TokenType].Associativity switch
+        return _operators[_operatorStack.Peek().TokenType].Associativity switch
         {
-            Order.Association.LEFT => Operators[x.TokenType].Precedence <=
-                                      Operators[_operatorStack.Peek().TokenType].Precedence,
-            Order.Association.RIGHT => Operators[x.TokenType].Precedence <
-                                       Operators[_operatorStack.Peek().TokenType].Precedence,
+            Order.Association.LEFT => _operators[x.TokenType].Precedence <=
+                                      _operators[_operatorStack.Peek().TokenType].Precedence,
+            Order.Association.RIGHT => _operators[x.TokenType].Precedence <
+                                       _operators[_operatorStack.Peek().TokenType].Precedence,
             _ => false
         };
     }

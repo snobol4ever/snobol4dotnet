@@ -19,7 +19,7 @@ public sealed class IntegerConversionStrategy : IConversionStrategy
         {
             case Executive.VarType.STRING:
                 {
-                    string stringValue = intSelf.Data.ToString(CultureInfo.CurrentCulture);
+                    var stringValue = intSelf.Data.ToString(CultureInfo.CurrentCulture);
                     varOut = new StringVar(stringValue);
                     valueOut = stringValue;
                     return true;
@@ -40,7 +40,7 @@ public sealed class IntegerConversionStrategy : IConversionStrategy
 
             case Executive.VarType.PATTERN:
                 {
-                    string patternString = intSelf.Data.ToString(CultureInfo.CurrentCulture);
+                    var patternString = intSelf.Data.ToString(CultureInfo.CurrentCulture);
                     var pattern = new LiteralPattern(patternString);
                     varOut = new PatternVar(pattern);
                     valueOut = pattern;
@@ -49,7 +49,7 @@ public sealed class IntegerConversionStrategy : IConversionStrategy
 
             case Executive.VarType.NAME:
                 {
-                    string nameString = intSelf.Data.ToString(CultureInfo.CurrentCulture);
+                    var nameString = intSelf.Data.ToString(CultureInfo.CurrentCulture);
                     if (nameString.Length == 0)
                     {
                         return false;
@@ -61,12 +61,12 @@ public sealed class IntegerConversionStrategy : IConversionStrategy
 
             case Executive.VarType.EXPRESSION:
                 {
-                    bool previousCaseFolding = exec.Parent.CaseFolding;
+                    var previousCaseFolding = exec.Parent.CaseFolding;
                     exec.Parent.CaseFolding = ((IntegerVar)exec.IdentifierTable["&case"]).Data != 0;
                     exec.Parent.CodeMode = true;
                     exec.Parent.Code = new SourceCode(exec.Parent);
                     
-                    string trimmedValue = intSelf.Data.ToString(CultureInfo.CurrentCulture).Trim();
+                    var trimmedValue = intSelf.Data.ToString(CultureInfo.CurrentCulture).Trim();
                     exec.Parent.Code.ReadCodeInString($" A = *({trimmedValue})", exec.Parent.FilesToCompile[^1]);
                     exec.Parent.BuildEval();
                     

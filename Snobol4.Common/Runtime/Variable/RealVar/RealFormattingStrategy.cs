@@ -11,21 +11,21 @@ public sealed class RealFormattingStrategy : IFormattingStrategy
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string ToString(Var self)
     {
-        RealVar realSelf = (RealVar)self;
+        var realSelf = (RealVar)self;
         return realSelf.Data.ToString(CultureInfo.CurrentCulture);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string DumpString(Var self)
     {
-        RealVar realSelf = (RealVar)self;
+        var realSelf = (RealVar)self;
         return $"{realSelf.Data}";
     }
 
     public string DebugString(Var self)
     {
-        RealVar realSelf = (RealVar)self;
-        string symbol = realSelf.Symbol.Length == 0 ? "<no name>" : realSelf.Symbol;
+        var realSelf = (RealVar)self;
+        var symbol = realSelf.Symbol.Length == 0 ? "<no name>" : realSelf.Symbol;
         return $"REAL Symbol: {symbol}  Data: {realSelf.Data}  Succeeded: {realSelf.Succeeded}";
     }
 }

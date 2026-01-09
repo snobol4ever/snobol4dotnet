@@ -7,12 +7,12 @@ namespace Snobol4.Common;
 /// </summary>
 public sealed class CodeFormattingStrategy : IFormattingStrategy
 {
-    private const string CodeTypeString = "code";
+    private const string _codeTypeString = "code";
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string ToString(Var self)
     {
-        return CodeTypeString;
+        return _codeTypeString;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

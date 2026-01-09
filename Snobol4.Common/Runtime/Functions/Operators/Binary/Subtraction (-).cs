@@ -3,7 +3,7 @@
 public partial class Executive
 {
     // Lock object for thread synchronization
-    private readonly object _subtractionLock = new();
+    private readonly Lock _subtractionLock = new();
 
     internal void Subtract(List<Var> arguments)
     {

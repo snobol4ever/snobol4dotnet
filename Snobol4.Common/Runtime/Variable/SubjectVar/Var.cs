@@ -464,7 +464,8 @@ public abstract class Var : IEquatable<Var>
             return false;
         }
 
-        return !double.IsNaN(realOut) && !double.IsInfinity(realOut);
+        // Simplified: IsFinite checks both NaN and Infinity in one call
+        return double.IsFinite(realOut);
     }
 
     /// <summary>

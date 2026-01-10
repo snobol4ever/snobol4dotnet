@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Buffers;
+using System.Diagnostics;
 
 namespace Snobol4.Common;
 
@@ -50,6 +51,12 @@ internal class AnyPattern : TerminalPattern
     private string _charList;
     private readonly ExpressionVar? _expression;
 
+    /// <summary>
+    /// Optimized character search values using hardware acceleration when available.
+    /// Nullable to support dynamic expression evaluation.
+    /// </summary>
+    private SearchValues<char>? _searchValues;
+
     #endregion
 
     #region Construction
@@ -61,6 +68,8 @@ internal class AnyPattern : TerminalPattern
     internal AnyPattern(string charList)
     {
         _charList = charList;
+        // Create SearchValues for hardware-accelerated character matching
+        _searchValues = SearchValues.Create(charList);
     }
 
     /// <summary>
@@ -71,6 +80,7 @@ internal class AnyPattern : TerminalPattern
     {
         _charList = "";
         _expression = expression;
+        _searchValues = null; // Will be created after expression evaluation
     }
 
     #endregion
@@ -95,6 +105,10 @@ internal class AnyPattern : TerminalPattern
     /// Success if current character is in the set and cursor advances by one,
     /// Failure if at end of subject or character not in set
     /// </returns>
+    /// <remarks>
+    /// Uses SearchValues for hardware-accelerated character matching, providing significant
+    /// performance improvements for character set lookups.
+    /// </remarks>
     internal override MatchResult Scan(int node, Scanner scan)
     {
         // Check if at end of subject
@@ -102,25 +116,32 @@ internal class AnyPattern : TerminalPattern
             return MatchResult.Failure(scan);
 
         // If using expression, evaluate it to get the character set
-        if (_expression == null)
-            return _charList.Contains(scan.Subject[scan.CursorPosition++])
-                ? MatchResult.Success(scan)
-                : MatchResult.Failure(scan);
-
-        _expression.FunctionName(scan.Exec);
-        var result = scan.Exec.SystemStack.Pop();
-
-        if (!result.Succeeded || !result.Convert(Executive.VarType.STRING, out _, out var value, scan.Exec))
+        if (_expression != null)
         {
-            scan.Exec.LogRuntimeException(43);
-            return MatchResult.Failure(scan);
+            _expression.FunctionName(scan.Exec);
+            var result = scan.Exec.SystemStack.Pop();
+
+            if (!result.Succeeded || !result.Convert(Executive.VarType.STRING, out _, out var value, scan.Exec))
+            {
+                scan.Exec.LogRuntimeException(43);
+                return MatchResult.Failure(scan);
+            }
+
+            _charList = (string)value;
+            // Create SearchValues for the evaluated expression
+            _searchValues = SearchValues.Create(_charList);
         }
 
-        _charList = (string)value;
-        
-        return _charList.Contains(scan.Subject[scan.CursorPosition++]) 
-            ? MatchResult.Success(scan) 
-            : MatchResult.Failure(scan);
+        var currentChar = scan.Subject[scan.CursorPosition];
+
+        // Use SearchValues for optimized character matching
+        if (_searchValues!.Contains(currentChar))
+        {
+            scan.CursorPosition++;
+            return MatchResult.Success(scan);
+        }
+
+        return MatchResult.Failure(scan);
     }
 
     #endregion

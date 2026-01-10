@@ -1,4 +1,6 @@
-﻿namespace Snobol4.Common;
+﻿using System.Buffers;
+
+namespace Snobol4.Common;
 
 /// <summary>
 /// Represents a pattern that matches a single character NOT in a specified set.
@@ -47,6 +49,12 @@ internal class NotAnyPattern : TerminalPattern
 
     private readonly string _charList;
 
+    /// <summary>
+    /// Optimized character search values using hardware acceleration when available.
+    /// SearchValues provides vectorized character matching for significantly improved performance.
+    /// </summary>
+    private readonly SearchValues<char> _searchValues;
+
     #endregion
 
     #region Constructors
@@ -58,6 +66,8 @@ internal class NotAnyPattern : TerminalPattern
     internal NotAnyPattern(string charList)
     {
         _charList = charList;
+        // Create SearchValues for hardware-accelerated character matching
+        _searchValues = SearchValues.Create(charList);
     }
 
     #endregion
@@ -82,16 +92,27 @@ internal class NotAnyPattern : TerminalPattern
     /// Success if current character is not in the excluded set and cursor advances by one,
     /// Failure if at end of subject or character is in the excluded set
     /// </returns>
+    /// <remarks>
+    /// Uses SearchValues for hardware-accelerated character matching, providing significant
+    /// performance improvements for character set exclusion checks.
+    /// </remarks>
     internal override MatchResult Scan(int node, Scanner scan)
     {
         // Check if at end of subject
         if (scan.CursorPosition >= scan.Subject.Length)
             return MatchResult.Failure(scan);
 
+        var currentChar = scan.Subject[scan.CursorPosition];
+
+        // Use SearchValues for optimized inverse matching
         // Match if character is NOT in the excluded list
-        return !_charList.Contains(scan.Subject[scan.CursorPosition++]) 
-            ? MatchResult.Success(scan) 
-            : MatchResult.Failure(scan);
+        if (!_searchValues.Contains(currentChar))
+        {
+            scan.CursorPosition++;
+            return MatchResult.Success(scan);
+        }
+
+        return MatchResult.Failure(scan);
     }
 
     #endregion

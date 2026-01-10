@@ -1,4 +1,4 @@
-﻿using System.Buffers;
+﻿    using System.Buffers;
 
 namespace Snobol4.Common;
 
@@ -159,7 +159,7 @@ internal class BreakPattern : TerminalPattern
                 scan.Exec.LogRuntimeException(59);
                 return MatchResult.Failure(scan);
             }
-
+            
             charList = (string)str;
 
             // Only recreate SearchValues if charset has changed (optimization for expression patterns)

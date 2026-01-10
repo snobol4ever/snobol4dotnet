@@ -120,8 +120,8 @@ internal class TabPattern : TerminalPattern
     /// </remarks>
     internal override MatchResult Scan(int node, Scanner scan)
     {
-        // Fail if cursor already past target or target exceeds subject length
-        if (scan.CursorPosition > scan.Subject.Length || Position > scan.Subject.Length)
+        // Single check: fail if cursor already past target or target exceeds subject length
+        if (scan.CursorPosition > Position || Position > scan.Subject.Length)
             return MatchResult.Failure(scan);
 
         // Advance cursor to target position

@@ -67,6 +67,12 @@ internal class NotAnyPattern : TerminalPattern
     private SearchValues<char>? _searchValues;
 
     /// <summary>
+    /// Cached character list from last expression evaluation to avoid recreating SearchValues.
+    /// Only used when _expression is not null.
+    /// </summary>
+    private string _lastEvaluatedCharList = "";
+
+    /// <summary>
     /// Threshold for using SearchValues. For very small character sets (1-3 chars),
     /// direct comparison is faster than SearchValues overhead.
     /// </summary>
@@ -129,6 +135,7 @@ internal class NotAnyPattern : TerminalPattern
     /// Uses SearchValues for hardware-accelerated character matching with larger character sets,
     /// or direct comparison for small sets (1-3 chars) to avoid SearchValues overhead.
     /// Provides significant performance improvements for character set exclusion checks.
+    /// Caches SearchValues for expression-based patterns to avoid recreating on every match.
     /// </remarks>
     internal override MatchResult Scan(int node, Scanner scan)
     {
@@ -157,10 +164,14 @@ internal class NotAnyPattern : TerminalPattern
                 return MatchResult.Success(scan);
             }
 
-            // Create SearchValues only for larger character sets
-            _searchValues = _charList.Length >= SearchValuesThreshold
-                ? SearchValues.Create(_charList)
-                : null;
+            // Only recreate SearchValues if charset has changed (optimization for expression patterns)
+            if (_charList != _lastEvaluatedCharList)
+            {
+                _lastEvaluatedCharList = _charList;
+                _searchValues = _charList.Length >= SearchValuesThreshold
+                    ? SearchValues.Create(_charList)
+                    : null;
+            }
         }
 
         var currentChar = scan.Subject[scan.CursorPosition];

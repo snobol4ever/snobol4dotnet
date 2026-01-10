@@ -1,4 +1,6 @@
-﻿namespace Snobol4.Common;
+﻿using System.Buffers;
+
+namespace Snobol4.Common;
 
 /// <summary>
 /// Represents a pattern that matches characters up to (but not including) a character from a specified set.
@@ -48,8 +50,27 @@ internal class BreakPattern : TerminalPattern
 {
     #region Members
 
-    private readonly string _charList;
+    private string _charList;
     private readonly ExpressionVar? _expression;
+
+    /// <summary>
+    /// Optimized character search values using hardware acceleration when available.
+    /// SearchValues provides vectorized character matching for significantly improved performance.
+    /// Nullable to support dynamic expression evaluation and small character set optimization.
+    /// </summary>
+    private SearchValues<char>? _searchValues;
+
+    /// <summary>
+    /// Cached character list from last expression evaluation to avoid recreating SearchValues.
+    /// Only used when _expression is not null.
+    /// </summary>
+    private string _lastEvaluatedCharList = "";
+
+    /// <summary>
+    /// Threshold for using SearchValues. For very small character sets (1-2 chars),
+    /// direct IndexOfAny is competitive with SearchValues overhead.
+    /// </summary>
+    private const int SearchValuesThreshold = 3;
 
     #endregion
 
@@ -63,6 +84,10 @@ internal class BreakPattern : TerminalPattern
     {
         _charList = charList;
         _expression = null;
+        // Create SearchValues only for larger character sets
+        _searchValues = !string.IsNullOrEmpty(charList) && charList.Length >= SearchValuesThreshold
+            ? SearchValues.Create(charList)
+            : null;
     }
 
     /// <summary>
@@ -73,6 +98,7 @@ internal class BreakPattern : TerminalPattern
     {
         _charList = "";
         _expression = expressionVar;
+        _searchValues = null; // Will be created after expression evaluation
     }
 
     /// <summary>
@@ -84,6 +110,10 @@ internal class BreakPattern : TerminalPattern
     {
         _charList = charList;
         _expression = expressionVar;
+        // Create SearchValues only for larger character sets
+        _searchValues = !string.IsNullOrEmpty(charList) && charList.Length >= SearchValuesThreshold
+            ? SearchValues.Create(charList)
+            : null;
     }
 
     #endregion
@@ -109,8 +139,9 @@ internal class BreakPattern : TerminalPattern
     /// Failure if no break character found in remaining subject
     /// </returns>
     /// <remarks>
-    /// Uses ReadOnlySpan to avoid allocating character arrays, improving performance
-    /// for break character searches.
+    /// Uses SearchValues for hardware-accelerated character searching with larger character sets,
+    /// or ReadOnlySpan.IndexOfAny for small sets to avoid SearchValues overhead.
+    /// Caches SearchValues for expression-based patterns to avoid recreating on every match.
     /// </remarks>
     internal override MatchResult Scan(int node, Scanner scan)
     {
@@ -128,7 +159,17 @@ internal class BreakPattern : TerminalPattern
                 scan.Exec.LogRuntimeException(59);
                 return MatchResult.Failure(scan);
             }
+
             charList = (string)str;
+
+            // Only recreate SearchValues if charset has changed (optimization for expression patterns)
+            if (charList != _lastEvaluatedCharList)
+            {
+                _lastEvaluatedCharList = charList;
+                _searchValues = charList.Length >= SearchValuesThreshold
+                    ? SearchValues.Create(charList)
+                    : null;
+            }
         }
 
         if (scan.Subject.Length == 0)
@@ -136,7 +177,19 @@ internal class BreakPattern : TerminalPattern
 
         // Use ReadOnlySpan to avoid allocating character arrays
         var searchSpan = scan.Subject.AsSpan(scan.CursorPosition);
-        var index = searchSpan.IndexOfAny(charList.AsSpan());
+
+        // Use SearchValues for larger sets, direct IndexOfAny for small sets
+        int index;
+        if (_searchValues != null)
+        {
+            // Hardware-accelerated search for larger character sets
+            index = searchSpan.IndexOfAny(_searchValues);
+        }
+        else
+        {
+            // Direct IndexOfAny is efficient for small character sets
+            index = searchSpan.IndexOfAny(charList.AsSpan());
+        }
 
         if (index < 0)
             return MatchResult.Failure(scan);

@@ -9,7 +9,7 @@ namespace Snobol4.Common;
 /// Tables can use any data type as keys and values, with a fill value for missing keys
 /// </summary>
 [DebuggerDisplay("{DebugString()}")]
-public class TableVar : Var
+public sealed class TableVar : Var
 {
     #region Data
 
@@ -84,7 +84,7 @@ public class TableVar : Var
     internal Var GetOrDefault(object key)
     {
         ArgumentNullException.ThrowIfNull(key);
-        
+
         // Use CollectionsMarshal.GetValueRefOrNullRef for faster lookups in .NET 9
         ref var value = ref System.Runtime.InteropServices.CollectionsMarshal.GetValueRefOrNullRef(Data, key);
         if (!System.Runtime.CompilerServices.Unsafe.IsNullRef(ref value))

@@ -11,7 +11,7 @@ namespace Snobol4.Common;
 /// Supports arbitrary lower and upper bounds per dimension.
 /// </summary>
 [DebuggerDisplay("{DebugString()}")]
-public class ArrayVar : Var
+public sealed class ArrayVar : Var
 {
     #region Data
 
@@ -135,10 +135,10 @@ public class ArrayVar : Var
     private int InitializeArrayData()
     {
         var dimensions = (int)Dimensions;
-        
+
         // Pre-allocate lists with known capacity
         Multipliers.Capacity = dimensions;
-        
+
         // Calculate multipliers for index conversion
         Multipliers.Add(1);
         for (var j = 0; j < dimensions - 1; ++j)
@@ -154,10 +154,10 @@ public class ArrayVar : Var
             return 67; // Array too large
 
         var totalSize = (int)TotalSize;
-        
+
         // Pre-allocate array data with exact capacity
         Data = new List<Var>(totalSize);
-        
+
         // Fill array efficiently - avoid repeated property access
         for (var i = 0; i < totalSize; i++)
             Data.Add(Fill);
@@ -174,14 +174,14 @@ public class ArrayVar : Var
     private void BuildPrototypeString()
     {
         var dimensions = (int)Dimensions;
-        
+
         // Use Span-based string concatenation for better performance
         if (dimensions == 1)
         {
             Prototype = $"{LowerBounds[0]}:{UpperBounds[0]}";
             return;
         }
-        
+
         var parts = new string[dimensions];
         for (var d = dimensions - 1; d >= 0; --d)
         {
@@ -199,13 +199,13 @@ public class ArrayVar : Var
     internal long Index(List<long> indices)
     {
         ArgumentNullException.ThrowIfNull(indices);
-        
+
         var dimensions = (int)Dimensions;
         if (indices.Count != dimensions)
             throw new ArgumentException($"Expected {dimensions} indices but got {indices.Count}", nameof(indices));
 
         long key = 0;
-        
+
         // Unroll small dimension counts for performance
         switch (dimensions)
         {
@@ -248,7 +248,7 @@ public class ArrayVar : Var
     internal void SetElement(List<long> indices, Var value)
     {
         ArgumentNullException.ThrowIfNull(value);
-        
+
         var index = Index(indices);
         if (index < 0 || index >= Data.Count)
             throw new ArgumentOutOfRangeException(nameof(indices), "Computed index is out of bounds");

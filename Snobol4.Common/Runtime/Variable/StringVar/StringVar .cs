@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 namespace Snobol4.Common;
 
 [DebuggerDisplay("{DebugString()}")]
-public class StringVar : Var
+public sealed class StringVar : Var
 {
     #region Data
 

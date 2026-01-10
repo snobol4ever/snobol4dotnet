@@ -8,7 +8,7 @@ namespace Snobol4.Common;
 /// Used for pattern replacement operations.
 /// </summary>
 [DebuggerDisplay("{DebugString()}")]
-public class SubjectVar : Var
+public sealed class SubjectVar : Var
 {
     #region Data
 
@@ -73,7 +73,7 @@ public class SubjectVar : Var
             Subject.AsSpan(0, beforeLength).CopyTo(buffer);
             replacement.AsSpan().CopyTo(buffer.Slice(beforeLength));
             Subject.AsSpan(afterStart, afterLength).CopyTo(buffer.Slice(beforeLength + replacement.Length));
-            
+
             return new StringVar(new string(buffer))
             {
                 Symbol = Symbol,
@@ -83,7 +83,7 @@ public class SubjectVar : Var
         }
 
         // For larger strings, use string.Create to avoid intermediate allocations
-        var result = string.Create(totalLength, (Subject, replacement, beforeLength, afterStart, afterLength), 
+        var result = string.Create(totalLength, (Subject, replacement, beforeLength, afterStart, afterLength),
             (span, state) =>
             {
                 state.Subject.AsSpan(0, state.beforeLength).CopyTo(span);

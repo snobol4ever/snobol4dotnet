@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 namespace Snobol4.Common;
 
 [DebuggerDisplay("{DebugString()}")]
-public class PatternVar : Var
+public sealed class PatternVar : Var
 {
     #region Data
 

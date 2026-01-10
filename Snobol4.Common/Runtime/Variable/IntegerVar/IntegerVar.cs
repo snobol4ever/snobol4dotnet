@@ -6,14 +6,14 @@ using System.Runtime.CompilerServices;
 namespace Snobol4.Common;
 
 [DebuggerDisplay("{DebugString()}")]
-public class IntegerVar : Var
+public sealed class IntegerVar : Var
 {
     #region Data
 
     public static readonly IntegerVar Zero = new(0);
     public static readonly IntegerVar One = new(1);
     public static readonly IntegerVar MinusOne = new(-1);
-    
+
     // Integer pool for common small values to reduce allocations
     private static readonly IntegerVar[] _pool = InitializePool();
     private const int _poolMin = -128;

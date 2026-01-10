@@ -70,10 +70,23 @@ internal class LiteralPattern : TerminalPattern
     /// Success if the literal matches at the current position,
     /// Failure otherwise
     /// </returns>
+    /// <remarks>
+    /// Uses ReadOnlySpan to avoid substring allocations, significantly improving performance
+    /// for pattern matching operations.
+    /// </remarks>
     internal override MatchResult Scan(int node, Scanner scan)
     {
-        // Check if the remaining subject starts with our literal
-        if (!scan.Subject[scan.CursorPosition..].StartsWith(Literal))
+        var remainingLength = scan.Subject.Length - scan.CursorPosition;
+
+        // Early exit if not enough characters remain
+        if (remainingLength < Literal.Length)
+            return MatchResult.Failure(scan);
+
+        // Use ReadOnlySpan to avoid substring allocation
+        var subjectSpan = scan.Subject.AsSpan(scan.CursorPosition, Literal.Length);
+
+        // Use SequenceEqual for optimized comparison
+        if (!subjectSpan.SequenceEqual(Literal.AsSpan()))
             return MatchResult.Failure(scan);
 
         // Advance cursor past the matched literal

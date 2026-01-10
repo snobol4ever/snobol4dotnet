@@ -108,6 +108,10 @@ internal class BreakPattern : TerminalPattern
     /// Success if a break character is found (advances cursor to that position),
     /// Failure if no break character found in remaining subject
     /// </returns>
+    /// <remarks>
+    /// Uses ReadOnlySpan to avoid allocating character arrays, improving performance
+    /// for break character searches.
+    /// </remarks>
     internal override MatchResult Scan(int node, Scanner scan)
     {
         var charList = _charList;
@@ -118,7 +122,7 @@ internal class BreakPattern : TerminalPattern
             _expression.FunctionName(scan.Exec);
             var charVar = scan.Exec.SystemStack.Pop();
 
-            if (!charVar.Convert(Executive.VarType.STRING, out _, out var str, scan.Exec) || 
+            if (!charVar.Convert(Executive.VarType.STRING, out _, out var str, scan.Exec) ||
                 string.IsNullOrEmpty((string)str))
             {
                 scan.Exec.LogRuntimeException(59);
@@ -130,14 +134,15 @@ internal class BreakPattern : TerminalPattern
         if (scan.Subject.Length == 0)
             return MatchResult.Failure(scan);
 
-        // Find the first occurrence of any break character
-        var index = scan.Subject.IndexOfAny(charList.ToCharArray(), scan.CursorPosition);
+        // Use ReadOnlySpan to avoid allocating character arrays
+        var searchSpan = scan.Subject.AsSpan(scan.CursorPosition);
+        var index = searchSpan.IndexOfAny(charList.AsSpan());
 
         if (index < 0)
             return MatchResult.Failure(scan);
 
         // Advance cursor to the break character (but don't consume it)
-        scan.CursorPosition = index;
+        scan.CursorPosition += index;
         return MatchResult.Success(scan);
     }
 

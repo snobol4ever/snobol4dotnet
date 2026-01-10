@@ -131,11 +131,15 @@ internal class BalPattern : Pattern
         /// Success if a balanced string is found (with backtracking support),
         /// Failure if at end of subject or next character is ')'
         /// </returns>
+        /// <remarks>
+        /// Uses ReadOnlySpan to avoid substring allocations during parenthesis matching,
+        /// improving performance for balanced expression parsing.
+        /// </remarks>
         internal override MatchResult Scan(int node, Scanner scan)
         {
             // Fail if there are no more characters to scan or
             // the next character is a closing parenthesis
-            if (scan.CursorPosition == scan.Subject.Length || 
+            if (scan.CursorPosition == scan.Subject.Length ||
                 scan.Subject[scan.CursorPosition] == ')')
                 return MatchResult.Failure(scan);
 
@@ -151,11 +155,14 @@ internal class BalPattern : Pattern
             }
 
             // If the next character in the subject is a parenthesis, look for a balanced match
+            // Use ReadOnlySpan to avoid substring allocation
+            var subject = scan.Subject.AsSpan(scan.CursorPosition);
             var parenCount = 1;
-            ++scan.CursorPosition;
-            while (scan.CursorPosition < scan.Subject.Length && parenCount > 0)
+            var pos = 1;
+
+            while (pos < subject.Length && parenCount > 0)
             {
-                switch (scan.Subject[scan.CursorPosition])
+                switch (subject[pos])
                 {
                     case ')':
                         parenCount--;
@@ -165,7 +172,7 @@ internal class BalPattern : Pattern
                         break;
                 }
 
-                ++scan.CursorPosition;
+                pos++;
             }
 
             // Fail if there are no more characters to scan and no balance was found.
@@ -175,6 +182,7 @@ internal class BalPattern : Pattern
             // If a balanced string was matched, succeed.
             // This pattern is pushed. If a subsequent fails,
             // the Bal pattern can be extended.
+            scan.CursorPosition += pos;
             scan.SaveAlternate(node);
             return MatchResult.Success(scan);
         }

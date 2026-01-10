@@ -1,5 +1,9 @@
-﻿namespace Snobol4.Common;
+namespace Snobol4.Common;
 
+/// <summary>
+/// Represents a pattern that succeeds only if the cursor is at a specific position.
+/// In SNOBOL4, this is created using the POS() function.
+/// </summary>
 internal class PosPattern : TerminalPattern
 {
     #region Internal Members

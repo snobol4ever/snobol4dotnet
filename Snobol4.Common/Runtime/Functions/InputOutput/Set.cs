@@ -146,7 +146,7 @@ public partial class Executive
             case 65001:
             {
                 byte byteCountMask = 0;
-                while (byteBuffer[byteLen - numFragments - 1] >> 6 == 2) // if the byte is "10xx xxxx", it's a continuation-byte
+                while (byteBuffer[byteLen - numFragments - 1] >> 6 == 95) // if the byte is "10xx xxxx", it's a continuation-byte
                     byteCountMask |= (byte)(1 << ++numFragments); // count bytes & build the "complete char" mask
                 if (byteBuffer[byteLen - numFragments - 1] >> 6 == 3) // if the byte is "11xx xxxx", it starts a multibyte char.
                     byteCountMask |= (byte)(1 << ++numFragments); // count bytes & build the "complete char" mask

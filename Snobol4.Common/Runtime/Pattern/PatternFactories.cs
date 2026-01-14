@@ -466,7 +466,7 @@ public partial class Executive
     {
         if (arguments[0] is ExpressionVar expressionVar)
         {
-            SystemStack.Push(new PatternVar(new NotAnyPattern(expressionVar)));
+            SystemStack.Push(new PatternVar(new NotAnyPattern(expressionVar.FunctionName)));
             return;
         }
 
@@ -616,15 +616,20 @@ public partial class Executive
     /// </example>
     public void CreateSpanPattern(List<Var> arguments)
     {
-        var v0 = arguments[0];
+        if (arguments[0] is ExpressionVar expressionVar)
+        {
+            SystemStack.Push(new PatternVar(new SpanPattern(expressionVar.FunctionName)));
+            return;
+        }
 
-        if (!v0.Convert(VarType.STRING, out _, out var s, this) || string.IsNullOrEmpty((string)s))
+        if (!arguments[0].Convert(VarType.STRING, out _, out var s, this) || string.IsNullOrEmpty((string)s))
         {
             LogRuntimeException(188);
             return;
         }
 
         SystemStack.Push(new PatternVar(new SpanPattern((string)s)));
+
     }
 
     #endregion

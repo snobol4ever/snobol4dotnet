@@ -49,7 +49,7 @@ internal class AnyPattern : TerminalPattern
     #region Members
 
     private string _charList;
-    private readonly Executive.DeferredCode _functionName;
+    private Executive.DeferredCode? _functionName;
 
     /// <summary>
     /// Optimized character search values using hardware acceleration when available.
@@ -87,7 +87,7 @@ internal class AnyPattern : TerminalPattern
     /// <summary>
     /// Creates an ANY pattern with an expression that evaluates to a character set
     /// </summary>
-    /// <param name="functionName">Expression that produces the character set at match time</param>
+    /// <param name="functionName">Method that produces the character set at match time</param>
     internal AnyPattern(Executive.DeferredCode functionName)
     {
         _charList = "";

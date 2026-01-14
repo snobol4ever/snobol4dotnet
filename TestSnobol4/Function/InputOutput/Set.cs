@@ -127,7 +127,7 @@ end
         output = read
         output = read
         output = read
-        set('2',4,0)
+        set('55',4,0)
         output = ''
         a = output = read
         endfile('2')
@@ -136,7 +136,7 @@ end
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(295, build.ErrorCodeHistory[1]);
+        Assert.AreEqual(295, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]

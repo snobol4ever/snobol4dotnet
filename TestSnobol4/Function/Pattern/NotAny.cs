@@ -89,4 +89,66 @@ end";
         Assert.AreEqual("fail", ((StringVar)build.Execute!.IdentifierTable["RESULT"]).Data);
     }
 
+    [TestMethod]
+    public void TEST_NotAny_006()
+    {
+        var s = @" 
+        A = NOTANY(*B)
+        B = '123'
+        '123ABC' A . R1
+        B = 'ABC'
+        'ABC123' A . R2
+END";
+
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s);
+        Assert.AreEqual("A", ((StringVar)build.Execute!.IdentifierTable["R1"]).Data);
+        Assert.AreEqual("1", ((StringVar)build.Execute!.IdentifierTable["R2"]).Data);
+    }
+
+    [TestMethod]
+    public void TEST_NotAny_007()
+    {
+        var s = @" 
+        A = NOTANY(*B)
+        B = '123' | 'ABC'
+        'ABCD3FG' A . R1
+END";
+
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s);
+        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(49, build.ErrorCodeHistory[0]);
+    }
+
+    [TestMethod]
+    public void TEST_NotAny_008()
+    {
+        var s = @" 
+        A = NOTANY('')
+        '123456' A . R1
+END";
+
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s);
+        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(151, build.ErrorCodeHistory[0]);
+    }
+
+    [TestMethod]
+    public void TEST_NotAny_009()
+    {
+        var s = @" 
+        A = NOTANY('123456') 
+        '' A . R1 :S(END)F(N)
+N       R1 = 'FAIL'
+END";
+
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("FAIL", ((StringVar)build.Execute!.IdentifierTable["R1"]).Data);
+    }
+
+
 }

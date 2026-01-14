@@ -72,19 +72,23 @@ namespace Snobol4.Common;
 [DebuggerDisplay("{DebugPattern()}")]
 internal class SpanPattern : TerminalPattern
 {
-    #region Members
+  #region Members
 
-    /// <summary>
-    /// The set of characters to span (match consecutively).
-    /// </summary>
-    private readonly string _charList;
+    private string _charList;
+    public Executive.DeferredCode? _functionName;
 
     /// <summary>
     /// Optimized character search values using hardware acceleration when available.
     /// SearchValues provides vectorized character matching for significantly improved performance.
-    /// Nullable for small character set optimization.
+    /// Nullable to support dynamic expression evaluation.
     /// </summary>
-    private readonly SearchValues<char>? _searchValues;
+    private SearchValues<char>? _searchValues;
+
+    /// <summary>
+    /// Cached character list from last expression evaluation to avoid recreating SearchValues.
+    /// Only used when _expression is not null.
+    /// </summary>
+    private string _lastEvaluatedCharList = "";
 
     /// <summary>
     /// Threshold for using SearchValues. For very small character sets (1-3 chars),
@@ -93,6 +97,7 @@ internal class SpanPattern : TerminalPattern
     private const int SearchValuesThreshold = 4;
 
     #endregion
+
 
     #region Constructors
 
@@ -108,10 +113,22 @@ internal class SpanPattern : TerminalPattern
     internal SpanPattern(string charList)
     {
         _charList = charList;
+        _functionName = null;
         // Create SearchValues only for larger character sets
         _searchValues = charList.Length >= SearchValuesThreshold
             ? SearchValues.Create(charList)
             : null;
+    }
+
+    /// <summary>
+    /// Creates a SPAN pattern with an expression that evaluates to a character set
+    /// </summary>
+    /// <param name="functionName">Method that produces the character set at match time</param>
+    internal SpanPattern(Executive.DeferredCode functionName)
+    {
+        _charList = "";
+        _functionName = functionName;
+        _searchValues = null; // Will be created after expression evaluation
     }
 
     #endregion
@@ -124,7 +141,9 @@ internal class SpanPattern : TerminalPattern
     /// <returns>A new SpanPattern with the same character set</returns>
     internal override Pattern Clone()
     {
-        return new SpanPattern(_charList);
+        return _functionName != null
+            ? new SpanPattern(_functionName)
+            : new SpanPattern(_charList);
     }
 
     /// <summary>
@@ -167,6 +186,41 @@ internal class SpanPattern : TerminalPattern
 
         var startPosition = scan.CursorPosition;
         var subject = scan.Subject.AsSpan(scan.CursorPosition);
+
+        // Check if at end of subject
+        if (scan.CursorPosition >= scan.Subject.Length)
+            return MatchResult.Failure(scan);
+
+        // If using expression, evaluate it to get the excluded character set
+        if (_functionName != null)
+        {
+            _functionName(scan.Exec);
+            var result = scan.Exec.SystemStack.Pop();
+
+            if (!result.Succeeded || !result.Convert(Executive.VarType.STRING, out _, out var value, scan.Exec))
+            {
+                scan.Exec.LogRuntimeException(56);
+                return MatchResult.Failure(scan);
+            }
+
+            _charList = (string)value;
+
+            // Handle empty string - SPAN with empty exclusion list matches any character
+            if (string.IsNullOrEmpty(_charList))
+            {
+                scan.CursorPosition++;
+                return MatchResult.Success(scan);
+            }
+
+            // Only recreate SearchValues if charset has changed
+            if (_charList != _lastEvaluatedCharList)
+            {
+                _lastEvaluatedCharList = _charList;
+                _searchValues = _charList.Length >= SearchValuesThreshold
+                    ? SearchValues.Create(_charList)
+                    : null;
+            }
+        }
 
         // Fast path for single-character sets (common case: span('x'), span(','), span(' '))
         // This optimization eliminates SearchValues overhead and array operations
@@ -245,6 +299,7 @@ internal class SpanPattern : TerminalPattern
         }
 
         return MatchResult.Success(scan);
+
     }
 
     #endregion

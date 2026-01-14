@@ -187,5 +187,67 @@ end";
         Assert.AreEqual("-43", ((StringVar)build.Execute!.IdentifierTable["INTEGER2"]).Data);
     }
 
+    [TestMethod]
+    public void TEST_Span_010()
+    {
+        var s = @" 
+        A = SPAN(*B)
+        B = '123'
+        '333' A
+        '333' A . R1
+        B = 'ABC'
+        'CCC' A . R2
+END";
+
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s);
+        Assert.AreEqual("333", ((StringVar)build.Execute!.IdentifierTable["R1"]).Data);
+        Assert.AreEqual("CCC", ((StringVar)build.Execute!.IdentifierTable["R2"]).Data);
+    }
+
+    [TestMethod]
+    public void TEST_Span_011()
+    {
+        var s = @" 
+        A = SPAN(*B)
+        B = '123' | 'ABC'
+        'ABCD3FG' A . R1
+END";
+
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s);
+        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(56, build.ErrorCodeHistory[0]);
+    }
+
+    [TestMethod]
+    public void TEST_Span_012()
+    {
+        var s = @"
+        A = SPAN('123456')
+        '' A . R1 :S(END)
+        R1 = 'fail'
+END
+";
+
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s);
+        Assert.AreEqual("fail", ((StringVar)build.Execute!.IdentifierTable["R1"]).Data);
+    }
+
+    [TestMethod]
+    public void TEST_Span_013()
+    {
+        var s = @"
+        A = SPAN('')
+        '123456' A.R1
+END
+";
+
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s);
+        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(188, build.ErrorCodeHistory[0]);
+    }
 
 }

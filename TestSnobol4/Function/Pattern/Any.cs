@@ -139,12 +139,13 @@ END";
     {
         var s = @" 
         A = ANY('123456')
-        '' A . R1
+        '' A . R1  :S(END)F(N)
+N       R1 = 'FAIL'
 END";
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable["R1"]).Data);
+        Assert.AreEqual("FAIL", ((StringVar)build.Execute!.IdentifierTable["R1"]).Data);
     }
 }

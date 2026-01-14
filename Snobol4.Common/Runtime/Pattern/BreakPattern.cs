@@ -53,7 +53,7 @@ internal class BreakPattern : TerminalPattern
     #region Members
 
     private string _charList;
-    private readonly Executive.DeferredCode _functionName;
+    private Executive.DeferredCode? _functionName;
 
     /// <summary>
     /// Optimized character search values using hardware acceleration when available.
@@ -103,21 +103,6 @@ internal class BreakPattern : TerminalPattern
         _searchValues = null; // Will be created after expression evaluation
     }
 
-    /// <summary>
-    /// Creates a BREAK pattern with both literal and expression
-    /// </summary>
-    /// <param name="charList">Literal break characters</param>
-    /// <param name="functionName">Expression for additional break characters</param>
-    internal BreakPattern(string charList, Executive.DeferredCode? functionName)
-    {
-        _charList = charList;
-        _functionName = functionName;
-        // Create SearchValues only for larger character sets
-        _searchValues = !string.IsNullOrEmpty(charList) && charList.Length >= SearchValuesThreshold
-            ? SearchValues.Create(charList)
-            : null;
-    }
-
     #endregion
 
     #region Methods
@@ -128,7 +113,9 @@ internal class BreakPattern : TerminalPattern
     /// <returns>A new BreakPattern with the same break characters</returns>
     internal override Pattern Clone()
     {
-        return new BreakPattern(_charList, _functionName);
+        return _functionName != null
+            ? new BreakPattern(_functionName)
+            : new BreakPattern(_charList);
     }
 
     /// <summary>

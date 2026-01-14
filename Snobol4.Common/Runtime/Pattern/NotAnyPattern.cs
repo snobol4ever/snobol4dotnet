@@ -57,7 +57,7 @@ internal class NotAnyPattern : TerminalPattern
     #region Members
 
     private string _charList;
-    private readonly ExpressionVar? _expression;
+    private Executive.DeferredCode? _functionName;
 
     /// <summary>
     /// Optimized character search values using hardware acceleration when available.
@@ -89,7 +89,7 @@ internal class NotAnyPattern : TerminalPattern
     internal NotAnyPattern(string charList)
     {
         _charList = charList;
-        _expression = null;
+        _functionName = null;
         // Create SearchValues only for larger character sets
         _searchValues = charList.Length >= SearchValuesThreshold
             ? SearchValues.Create(charList)
@@ -99,11 +99,11 @@ internal class NotAnyPattern : TerminalPattern
     /// <summary>
     /// Creates a NOTANY pattern with an expression that evaluates to a character set
     /// </summary>
-    /// <param name="expression">Expression that produces the excluded character set at match time</param>
-    internal NotAnyPattern(ExpressionVar expression)
+    /// <param name="functionName">Method that produces the excluded character set at match time</param>
+    internal NotAnyPattern(Executive.DeferredCode functionName)
     {
         _charList = "";
-        _expression = expression;
+        _functionName = functionName;
         _searchValues = null; // Will be created after expression evaluation
     }
 
@@ -117,8 +117,8 @@ internal class NotAnyPattern : TerminalPattern
     /// <returns>A new NotAnyPattern with the same excluded character set</returns>
     internal override Pattern Clone()
     {
-        return _expression != null
-            ? new NotAnyPattern(_expression)
+        return _functionName != null
+            ? new NotAnyPattern(_functionName)
             : new NotAnyPattern(_charList);
     }
 
@@ -144,14 +144,14 @@ internal class NotAnyPattern : TerminalPattern
             return MatchResult.Failure(scan);
 
         // If using expression, evaluate it to get the excluded character set
-        if (_expression != null)
+        if (_functionName != null)
         {
-            _expression.FunctionName(scan.Exec);
+            _functionName(scan.Exec);
             var result = scan.Exec.SystemStack.Pop();
 
             if (!result.Succeeded || !result.Convert(Executive.VarType.STRING, out _, out var value, scan.Exec))
             {
-                scan.Exec.LogRuntimeException(151);
+                scan.Exec.LogRuntimeException(49);
                 return MatchResult.Failure(scan);
             }
 

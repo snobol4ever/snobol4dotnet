@@ -39,11 +39,9 @@ internal class AnyPattern : TerminalPattern
 
     internal override MatchResult Scan(int node, Scanner scan)
     {
-        // Check if at end of subject
         if (scan.CursorPosition >= scan.Subject.Length)
             return MatchResult.Failure(scan);
 
-        // If using expression, evaluate it to get the character set
         if (_functionName == null)
         {
             return _charList.Contains(scan.Subject[scan.CursorPosition++])
@@ -54,14 +52,16 @@ internal class AnyPattern : TerminalPattern
         _functionName(scan.Exec);
         var result = scan.Exec.SystemStack.Pop();
 
-        if (!result.Succeeded || !result.Convert(Executive.VarType.STRING, out _, out var value, scan.Exec))
+        if (!result.Succeeded || !result.Convert(Executive.VarType.STRING, out _, out var str, scan.Exec))
         {
             scan.Exec.LogRuntimeException(43);
             return MatchResult.Failure(scan);
         }
 
-        _charList = (string)value;
-        return _charList.Contains(scan.Subject[scan.CursorPosition++]) ? MatchResult.Success(scan) : MatchResult.Failure(scan);
+        _charList = (string)str;
+        return _charList.Contains(scan.Subject[scan.CursorPosition++]) 
+            ? MatchResult.Success(scan) 
+            : MatchResult.Failure(scan);
     }
 
     #endregion

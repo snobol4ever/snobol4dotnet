@@ -6,16 +6,16 @@ using Test.TestLexer;
 namespace Test.Pattern;
 
 [TestClass]
-public class Break
+public class BreakX
 {
 
     [TestMethod]
-    public void TEST_Break_001()
+    public void TEST_BreakX_001()
     {
         var s = @"
         &anchor = 0
         letters = 'abcdefghijklmnopqrstuvwxyz'
-        gap = break(letters) 
+        gap = breakx(letters) 
         subject = ':= one,,, two,..  three';
         subject gap . temp1  :s(y)f(n)
 y       result = 'success'   :(end)
@@ -29,12 +29,12 @@ end";
     }
 
     [TestMethod]
-    public void TEST_Break_002()
+    public void TEST_BreakX_002()
     {
         var s = @"
         &anchor = 0
         letters = 'abcdefghijklmnopqrstuvwxyz'
-        gap = notany(letters) break(letters) 
+        gap = notany(letters) breakx(letters) 
         subject = 'one,,, two,..  three';
         subject gap . temp1  :s(y)f(n)
 y       result = 'success'   :(end)
@@ -48,12 +48,12 @@ end";
     }
 
     [TestMethod]
-    public void TEST_Break_003()
+    public void TEST_BreakX_003()
     {
         var s = @"
         &anchor = 0
         letters = 'abcdefghijklmnopqrstuvwxyz'
-        gap = break(letters) 
+        gap = breakx(letters) 
         subject = 'one,,, two,..  three';
         subject gap . temp1  :s(y)f(n)
 y       result = 'success'   :(end)
@@ -67,12 +67,12 @@ end";
     }
 
     [TestMethod]
-    public void TEST_Break_004()
+    public void TEST_BreakX_004()
     {
         var s = @"
         &anchor = 0
         letters = ''
-        gap = break(letters) 
+        gap = breakx(letters) 
         subject = 'one,,, two,..  three';
         subject gap . temp1  :s(y)f(n)
 y       result = 'success'   :(end)
@@ -82,16 +82,16 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(69, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(45, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
-    public void TEST_Break_005()
+    public void TEST_BreakX_005()
     {
         var s = @"
         &anchor = 0
         subject = 'c'
-        pattern = break('c')
+        pattern = breakx('c')
         subject pattern = '****'   :f(n)
         temp1 = '[' subject ']'   
 y       result = 'success'   :(end)
@@ -105,12 +105,12 @@ end";
     }
 
     [TestMethod]
-    public void TEST_Break_006()
+    public void TEST_BreakX_006()
     {
         var s = @"
         &anchor = 0
         letters = 'abcdefghijklmnopqrstuvwxyz'
-        gap = break(letters) 
+        gap = breakx(letters) 
         subject = '5675765()*)(*)';
         subject gap . temp1  :s(y)f(n)
 y       result = 'success'   :(end)
@@ -123,13 +123,13 @@ end";
     }
 
     [TestMethod]
-    public void TEST_Break_007()
+    public void TEST_BreakX_007()
     {
         var s = @"
         &anchor = 0
         subject = '12345'
         char = '3'
-        gap = break(char)
+        gap = breakx(char)
         subject gap . temp1  :s(y)f(n)
 y       result = 'success'   :(end)
 n       result = 'fail' 
@@ -143,13 +143,13 @@ end";
 
 
     [TestMethod]
-    public void TEST_Break_008()
+    public void TEST_BreakX_008()
     {
         var s = @"
         &anchor = 0
         subject = '12345'
         char = ''
-        gap = break(char)
+        gap = breakx(char)
         subject gap . temp1  :s(y)f(n)
 y       result = 'success'   :(end)
 n       result = 'fail' 
@@ -158,17 +158,17 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(69, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(45, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
-    public void TEST_Break_009()
+    public void TEST_BreakX_009()
     {
         var s = @"
         &anchor = 0
         subject = '12345'
         char = '8'
-        gap = break(char)
+        gap = breakx(char)
         subject gap . temp1  :s(y)f(n)
 y       result = 'success'   :(end)
 n       result = 'fail' 
@@ -180,10 +180,10 @@ end";
     }
 
     [TestMethod]
-    public void TEST_Break_010()
+    public void TEST_BreakX_010()
     {
         var s = @" 
-        A = BREAK(*B)
+        A = BREAKX(*B)
         B = '123'
         'ABCD3FG' A . R1
         B = 'ABC'
@@ -197,10 +197,10 @@ END";
     }
 
     [TestMethod]
-    public void TEST_Break_011()
+    public void TEST_BreakX_011()
     {
         var s = @" 
-        A = BREAK(*B)
+        A = BREAKX(*B)
         B = '123' | 'ABC'
         'ABCD3FG' A . R1
 END";
@@ -208,14 +208,14 @@ END";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(69, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(45, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
-    public void TEST_Break_012()
+    public void TEST_BreakX_012()
     {
         var s = @"
-        A = BREAK('123456')
+        A = BREAKX('123456')
         '' A.R1
 END
 ";
@@ -226,10 +226,10 @@ END
     }
 
     [TestMethod]
-    public void TEST_Break_013()
+    public void TEST_BreakX_013()
     {
         var s = @"
-        A = BREAK('')
+        A = BREAKX('')
         '123456' A.R1
 END
 ";
@@ -237,15 +237,15 @@ END
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(69, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(45, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
-    public void TEST_Break_014()
+    public void TEST_BreakX_014()
     {
         var s = @"
 	SUB = 'EXCEPTIONS-ARE-AS-TRUE-AS-RULES'
-	P1 = POS(0) BREAK('A') . R2 'AS'
+	P1 = POS(0) BREAKX('A') . R2 'AS'
 	SUB P1    :S(Y)F(N)
 Y	R1 = 'SUCCESS' :(END)
 N	R1 = 'FAILURE'
@@ -254,9 +254,8 @@ END
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("FAILURE", ((StringVar)build.Execute!.IdentifierTable["R1"]).Data);
-        Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable["R2"]).Data);
+        Assert.AreEqual("SUCCESS", ((StringVar)build.Execute!.IdentifierTable["R1"]).Data);
+        Assert.AreEqual("EXCEPTIONS-ARE-", ((StringVar)build.Execute!.IdentifierTable["R2"]).Data);
     }
-
 
 }

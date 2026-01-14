@@ -7,8 +7,11 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Function\Pattern\BreakX\**" />
     <Compile Remove="OutputFiles\**" />
+    <EmbeddedResource Remove="Function\Pattern\BreakX\**" />
     <EmbeddedResource Remove="OutputFiles\**" />
+    <None Remove="Function\Pattern\BreakX\**" />
     <None Remove="OutputFiles\**" />
   </ItemGroup>
   <ItemGroup>
@@ -36,10 +39,9 @@
     <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Function\ProgramControl\" />
     <Folder Include="Function\ObjectCreation\" />
-    <Folder Include="Function\ProgramDefinedDataType\" />
     <Folder Include="Function\Pattern\Fence\" />
-    <Folder Include="Function\Pattern\BreakX\" />
+    <Folder Include="Function\ProgramControl\" />
+    <Folder Include="Function\ProgramDefinedDataType\" />
   </ItemGroup>
 </Project>

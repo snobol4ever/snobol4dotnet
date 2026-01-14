@@ -1,7 +1,6 @@
-﻿        A = ANY(*B)
-        OUTPUT = DATATYPE(A)
-        B = '123'
-        'ABCD3FG' A . OUTPUT
-        B = 'ABC'
-        '1234C56' A . OUTPUT
+﻿	SUB = 'EXCEPTIONS-ARE-AS-TRUE-AS-RULES'
+	P1 = POS(0) BREAKX('A') . OUTPUT 'AS'
+	SUB P1    :S(Y)F(N)
+Y	OUTPUT = 'SUCCESS' :(END)
+N	OUTPUT = 'FAILURE'
 END

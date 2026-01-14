@@ -93,6 +93,6 @@ public sealed class TableConversionStrategy : IConversionStrategy
     public object GetTableKey(Var self)
     {
         // Tables use their unique ID as table key
-        return self.UniqueId;
+        return self.Uid;
     }
 }

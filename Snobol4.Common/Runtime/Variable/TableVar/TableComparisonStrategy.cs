@@ -45,6 +45,6 @@ public sealed class TableComparisonStrategy : IComparisonStrategy
         ArgumentNullException.ThrowIfNull(other);
 
         // Tables are identical only if they have the same unique ID (same instance)
-        return other.UniqueId == self.UniqueId;
+        return other.Uid == self.Uid;
     }
 }

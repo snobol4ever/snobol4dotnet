@@ -37,6 +37,6 @@ public class ArrayComparisonStrategy : IComparisonStrategy
     public bool IsIdentical(Var self, Var other)
     {
         // Arrays are identical only if they have the same unique ID
-        return other is not null && other.UniqueId == self.UniqueId;
+        return other is not null && other.Uid == self.Uid;
     }
 }

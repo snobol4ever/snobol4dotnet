@@ -33,6 +33,6 @@ public sealed class ExpressionConversionStrategy : IConversionStrategy
     public object GetTableKey(Var self)
     {
         // Expressions use their unique ID as table key
-        return self.UniqueId;
+        return self.Uid;
     }
 }

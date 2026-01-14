@@ -26,13 +26,13 @@ public sealed class ExpressionComparisonStrategy : IComparisonStrategy
     public bool Equals(Var self, Var other)
     {
         // Expressions are only equal if they're the same instance
-        return other.UniqueId == self.UniqueId;
+        return other.Uid == self.Uid;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsIdentical(Var self, Var other)
     {
         // Expressions are identical only if they have the same unique ID
-        return other.UniqueId == self.UniqueId;
+        return other.Uid == self.Uid;
     }
 }

@@ -25,7 +25,7 @@ end";
         Assert.AreEqual("test", ((StringVar)build.Execute!.IdentifierTable["A"]).Data);
         Assert.AreEqual("test", ((StringVar)build.Execute!.IdentifierTable["B"]).Data);
         Assert.AreEqual("string", ((StringVar)build.Execute!.IdentifierTable["C"]).Data);
-        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].UniqueId, build.Execute!.IdentifierTable["B"].UniqueId);
+        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].Uid, build.Execute!.IdentifierTable["B"].Uid);
         Assert.AreEqual("success", ((StringVar)build.Execute!.IdentifierTable["D"]).Data);
     }
 
@@ -46,7 +46,7 @@ end";
         Assert.AreEqual("32767", ((StringVar)build.Execute!.IdentifierTable["A"]).Data);
         Assert.AreEqual(32767, ((IntegerVar)build.Execute!.IdentifierTable["B"]).Data);
         Assert.AreEqual("integer", ((StringVar)build.Execute!.IdentifierTable["C"]).Data);
-        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].UniqueId, build.Execute!.IdentifierTable["B"].UniqueId);
+        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].Uid, build.Execute!.IdentifierTable["B"].Uid);
         Assert.AreEqual("success", ((StringVar)build.Execute!.IdentifierTable["D"]).Data);
     }
 
@@ -84,7 +84,7 @@ end";
         Assert.AreEqual("3.14159", ((StringVar)build.Execute!.IdentifierTable["A"]).Data);
         Assert.AreEqual(3.14159, ((RealVar)build.Execute!.IdentifierTable["B"]).Data);
         Assert.AreEqual("real", ((StringVar)build.Execute!.IdentifierTable["C"]).Data);
-        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].UniqueId, build.Execute!.IdentifierTable["B"].UniqueId);
+        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].Uid, build.Execute!.IdentifierTable["B"].Uid);
         Assert.AreEqual("success", ((StringVar)build.Execute!.IdentifierTable["D"]).Data);
     }
 
@@ -154,7 +154,7 @@ end";
         Assert.AreEqual("3.14159", ((StringVar)build.Execute!.IdentifierTable["A"]).Data);
         Assert.AreEqual("3.14159", ((LiteralPattern)((PatternVar)build.Execute!.IdentifierTable["B"]).Data).Literal);
         Assert.AreEqual("pattern", ((StringVar)build.Execute!.IdentifierTable["C"]).Data);
-        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].UniqueId, build.Execute!.IdentifierTable["B"].UniqueId);
+        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].Uid, build.Execute!.IdentifierTable["B"].Uid);
         Assert.AreEqual("success", ((StringVar)build.Execute!.IdentifierTable["D"]).Data);
     }
 
@@ -235,7 +235,7 @@ end";
         Assert.AreEqual(32767, ((IntegerVar)build.Execute!.IdentifierTable["A"]).Data);
         Assert.AreEqual("32767", ((StringVar)build.Execute!.IdentifierTable["B"]).Data);
         Assert.AreEqual("string", ((StringVar)build.Execute!.IdentifierTable["C"]).Data);
-        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].UniqueId, build.Execute!.IdentifierTable["B"].UniqueId);
+        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].Uid, build.Execute!.IdentifierTable["B"].Uid);
         Assert.AreEqual("success", ((StringVar)build.Execute!.IdentifierTable["D"]).Data);
     }
 
@@ -257,7 +257,7 @@ end";
         Assert.AreEqual(32767, ((IntegerVar)build.Execute!.IdentifierTable["B"]).Data);
         Assert.AreEqual("integer", ((StringVar)build.Execute!.IdentifierTable["C"]).Data);
         Assert.AreEqual("integer", ((StringVar)build.Execute!.IdentifierTable["C"]).Data);
-        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].UniqueId, build.Execute!.IdentifierTable["B"].UniqueId);
+        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].Uid, build.Execute!.IdentifierTable["B"].Uid);
         Assert.AreEqual("success", ((StringVar)build.Execute!.IdentifierTable["D"]).Data);
     }
 
@@ -278,7 +278,7 @@ end";
         Assert.AreEqual(32767, ((IntegerVar)build.Execute!.IdentifierTable["A"]).Data);
         Assert.AreEqual(32767.0, ((RealVar)build.Execute!.IdentifierTable["B"]).Data);
         Assert.AreEqual("real", ((StringVar)build.Execute!.IdentifierTable["C"]).Data);
-        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].UniqueId, build.Execute!.IdentifierTable["B"].UniqueId);
+        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].Uid, build.Execute!.IdentifierTable["B"].Uid);
         Assert.AreEqual("success", ((StringVar)build.Execute!.IdentifierTable["D"]).Data);
     }
 
@@ -332,7 +332,7 @@ end";
         var p = ((LiteralPattern)((PatternVar)build.Execute!.IdentifierTable["B"]).Data).Literal;
         Assert.AreEqual("32767", p);
         Assert.AreEqual("pattern", ((StringVar)build.Execute!.IdentifierTable["C"]).Data);
-        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].UniqueId, build.Execute!.IdentifierTable["B"].UniqueId);
+        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].Uid, build.Execute!.IdentifierTable["B"].Uid);
         Assert.AreEqual("success", ((StringVar)build.Execute!.IdentifierTable["D"]).Data);
     }
 
@@ -390,7 +390,7 @@ end";
         Assert.AreEqual(3.14159, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
         Assert.AreEqual("3.14159", ((StringVar)build.Execute!.IdentifierTable["B"]).Data);
         Assert.AreEqual("string", ((StringVar)build.Execute!.IdentifierTable["C"]).Data);
-        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].UniqueId, build.Execute!.IdentifierTable["B"].UniqueId);
+        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].Uid, build.Execute!.IdentifierTable["B"].Uid);
         Assert.AreEqual("success", ((StringVar)build.Execute!.IdentifierTable["D"]).Data);
     }
 
@@ -411,7 +411,7 @@ end";
         Assert.AreEqual(3.14159, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
         Assert.AreEqual(3, ((IntegerVar)build.Execute!.IdentifierTable["B"]).Data);
         Assert.AreEqual("integer", ((StringVar)build.Execute!.IdentifierTable["C"]).Data);
-        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].UniqueId, build.Execute!.IdentifierTable["B"].UniqueId);
+        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].Uid, build.Execute!.IdentifierTable["B"].Uid);
         Assert.AreEqual("success", ((StringVar)build.Execute!.IdentifierTable["D"]).Data);
     }
 
@@ -450,7 +450,7 @@ end";
         Assert.AreEqual(3.14159, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
         Assert.AreEqual(3.14159, ((RealVar)build.Execute!.IdentifierTable["B"]).Data);
         Assert.AreEqual("real", ((StringVar)build.Execute!.IdentifierTable["C"]).Data);
-        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].UniqueId, build.Execute!.IdentifierTable["B"].UniqueId);
+        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].Uid, build.Execute!.IdentifierTable["B"].Uid);
         Assert.AreEqual("success", ((StringVar)build.Execute!.IdentifierTable["D"]).Data);
     }
 
@@ -503,7 +503,7 @@ end";
         Assert.AreEqual("3.14159", ((StringVar)build.Execute!.IdentifierTable["A"]).Data);
         Assert.AreEqual("3.14159", ((LiteralPattern)((PatternVar)build.Execute!.IdentifierTable["B"]).Data).Literal);
         Assert.AreEqual("pattern", ((StringVar)build.Execute!.IdentifierTable["C"]).Data);
-        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].UniqueId, build.Execute!.IdentifierTable["B"].UniqueId);
+        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].Uid, build.Execute!.IdentifierTable["B"].Uid);
         Assert.AreEqual("success", ((StringVar)build.Execute!.IdentifierTable["D"]).Data);
     }
 

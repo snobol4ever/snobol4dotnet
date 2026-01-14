@@ -28,13 +28,13 @@ public sealed class CodeComparisonStrategy : IComparisonStrategy
     public bool Equals(Var self, Var other)
     {
         // Code is only equal if it's the same instance
-        return self.UniqueId == other.UniqueId;
+        return self.Uid == other.Uid;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsIdentical(Var self, Var other)
     {
         // Code is identical only if they have the same unique ID
-        return self.UniqueId == other.UniqueId;
+        return self.Uid == other.Uid;
     }
 }

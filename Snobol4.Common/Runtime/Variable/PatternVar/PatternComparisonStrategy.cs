@@ -43,6 +43,6 @@ public class PatternComparisonStrategy : IComparisonStrategy
 
         // Patterns are identical only if they have the same unique ID
         // (Pattern structure equality would be complex and is not needed)
-        return other.UniqueId == self.UniqueId;
+        return other.Uid == self.Uid;
     }
 }

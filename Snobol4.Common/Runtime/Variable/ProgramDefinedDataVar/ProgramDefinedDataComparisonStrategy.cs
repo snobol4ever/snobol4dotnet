@@ -35,13 +35,13 @@ public sealed class ProgramDefinedDataComparisonStrategy : IComparisonStrategy
     public bool Equals(Var self, Var other)
     {
         // User-defined data is only equal if it's the same instance
-        return self.UniqueId == other.UniqueId;
+        return self.Uid == other.Uid;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsIdentical(Var self, Var other)
     {
         // User-defined data is identical only if they have the same unique ID
-        return self.UniqueId == other.UniqueId;
+        return self.Uid == other.Uid;
     }
 }

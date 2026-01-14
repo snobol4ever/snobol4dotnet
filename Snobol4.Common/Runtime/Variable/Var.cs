@@ -33,7 +33,7 @@ public abstract class Var : IEquatable<Var>
     /// <summary>
     /// Gets the unique identifier for this variable instance.
     /// </summary>
-    public Guid UniqueId { get; } = Guid.NewGuid();
+    public Guid Uid  = Guid.NewGuid();
 
     /// <summary>
     /// Gets or sets the input channel associated with this variable.
@@ -338,7 +338,7 @@ public abstract class Var : IEquatable<Var>
     /// Gets the hash code for this variable
     /// </summary>
     /// <returns>A hash code for this variable</returns>
-    public override int GetHashCode() => UniqueId.GetHashCode();
+    public override int GetHashCode() => Uid.GetHashCode();
 
     /// <summary>
     /// Determines whether two variables are identical (reference equality)

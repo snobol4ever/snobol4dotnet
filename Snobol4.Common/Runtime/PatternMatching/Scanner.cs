@@ -26,7 +26,6 @@ public class Scanner
 
     internal string Subject => _state?.Subject ?? "";
     internal Executive Exec { get; }
-    //internal Guid UniqueId { get; } = Guid.NewGuid();
 
     private ScannerState? _state;
     private AbstractSyntaxTree? _ast;

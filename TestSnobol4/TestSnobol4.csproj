@@ -42,7 +42,6 @@
     <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Function\ObjectCreation\" />
     <Folder Include="Function\ProgramControl\" />
     <Folder Include="Function\ProgramDefinedDataType\" />
   </ItemGroup>

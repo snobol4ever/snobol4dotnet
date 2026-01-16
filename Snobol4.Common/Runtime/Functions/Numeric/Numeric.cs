@@ -242,7 +242,7 @@ public partial class Executive
     // ReSharper disable once UnusedMember.Global
     internal void Tan(List<Var> arguments)
     {
-        UnaryNumericOperation(arguments, Tan0, 312, 313, 0);
+        UnaryNumericOperation(arguments, Tan0, 313, 312, 0);
     }
 
     internal double Tan0(double dOperand)

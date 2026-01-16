@@ -15,6 +15,7 @@ public partial class Executive
 
     internal void Set(List<Var> arguments)
     {
+        // DIFFERENCE
         // Unicode support provided by StreamReader/StreamWriter classes does not support seeking by bytes.
         // Therefore, to seek to a positions requires getting the current byte position, rewinding to the beginning
         // of the stream, and then reading forward to the desired position. An alternative is to modify the
@@ -25,7 +26,7 @@ public partial class Executive
         // record length which is not possible with UNICODE files.
         //
         // whence = 2 is not supported
-        
+
         // arguments[0]: string channel
         // arguments[1]: integer offset
         // arguments[2]: integer origin (0 = offset applies to beginning of file; 1 = offset is from current position

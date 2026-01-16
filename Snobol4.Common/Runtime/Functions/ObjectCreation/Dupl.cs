@@ -29,9 +29,9 @@ public partial class Executive
             return;
         }
 
-        Pattern patternOut = new LiteralPattern("");
+        Pattern patternOut = (Pattern)patternDupl;
 
-        for (long i = 0; i < (long)numberDupl; ++i)
+        for (long i = 1; i < (long)numberDupl; ++i)
             patternOut = new ConcatenatePattern(patternOut, (Pattern)patternDupl);
         SystemStack.Push(new PatternVar(patternOut));
     }

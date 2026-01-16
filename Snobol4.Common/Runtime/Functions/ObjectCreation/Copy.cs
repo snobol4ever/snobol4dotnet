@@ -2,8 +2,5 @@
 
 public partial class Executive
 {
-    internal void Copy(List<Var> arguments)
-    {
-        throw new NotImplementedException("COPY not implemented");
-    }
+    internal void Copy(List<Var> arguments) => SystemStack.Push(arguments[0].Clone());
 }

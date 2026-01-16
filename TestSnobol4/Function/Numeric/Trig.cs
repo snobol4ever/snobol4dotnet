@@ -85,6 +85,53 @@ public class Trig
 
     #endregion
 
+    #region CHOP
+
+    [TestMethod]
+    public void TEST_Chop_1()
+    {
+        var s = " a = chop(2.7)";
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s + ";end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+
+        Assert.AreEqual(2.0, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+    }
+
+    [TestMethod]
+    public void TEST_Chop_2()
+    {
+        var s = " a = chop('-1.7')";
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s + ";end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+
+        Assert.AreEqual(-1.0, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+    }
+
+    [TestMethod]
+    public void TEST_Chop_3()
+    {
+        var s = " a = chop(1)";
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s + ";end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+
+        Assert.AreEqual(1.0, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+    }
+
+    [TestMethod]
+    public void TEST_302_Chop()
+    {
+        var s = " a = chop('test')";
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s + ";end");
+        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(302, build.ErrorCodeHistory[0]);
+    }
+
+    #endregion
+
     #region COS
 
     [TestMethod]
@@ -189,53 +236,6 @@ public class Trig
 
     #endregion
 
-    #region CHOP
-
-    [TestMethod]
-    public void TEST_Chop_1()
-    {
-        var s = " a = chop(2.7)";
-        var directives = "-b";
-        var build = SetupTests.SetupScript(directives, s + ";end");
-        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        
-        Assert.AreEqual(2.0, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
-    }
-
-    [TestMethod]
-    public void TEST_Chop_2()
-    {
-        var s = " a = chop('-1.7')";
-        var directives = "-b";
-        var build = SetupTests.SetupScript(directives, s + ";end");
-        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        
-        Assert.AreEqual(-1.0, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
-    }
-
-    [TestMethod]
-    public void TEST_Chop_3()
-    {
-        var s = " a = chop(1)";
-        var directives = "-b";
-        var build = SetupTests.SetupScript(directives, s + ";end");
-        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        
-        Assert.AreEqual(1.0, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
-    }
-
-    [TestMethod]
-    public void TEST_302_Chop()
-    {
-        var s = " a = chop('test')";
-        var directives = "-b";
-        var build = SetupTests.SetupScript(directives, s + ";end");
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(302, build.ErrorCodeHistory[0]);
-    }
-
-    #endregion
-
     #region LN
 
     [TestMethod]
@@ -303,6 +303,79 @@ public class Trig
 
     #endregion
 
+    #region REMDR
+
+    [TestMethod]
+    public void TEST_Remdr_0011()
+    {
+        var s = " a = remdr(100,31)";
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s + ";end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+
+        Assert.AreEqual(100 % 31, ((IntegerVar)build.Execute!.IdentifierTable["A"]).Data);
+    }
+
+    [TestMethod]
+    public void TEST_Remdr_002()
+    {
+        var s = " a = remdr(100.5,31.2)";
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s + ";end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+
+        Assert.AreEqual(100.5 % 31.2, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+    }
+
+    #endregion
+
+    #region SIN
+
+    [TestMethod]
+    public void TEST_Sin_1()
+    {
+        var s = " a = sin(0.7)";
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s + ";end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+
+        Assert.AreEqual(Math.Sin(0.7), ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+    }
+
+    [TestMethod]
+    public void TEST_Sin_2()
+    {
+        var s = " a = sin('0.7')";
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s + ";end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+
+        Assert.AreEqual(Math.Sin(0.7), ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+    }
+
+    [TestMethod]
+    public void TEST_Sin_3()
+    {
+        var s = " a = sin(1)";
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s + ";end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+
+        Assert.AreEqual(Math.Sin(1), ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+    }
+
+    [TestMethod]
+    public void TEST_303_Sin()
+    {
+        var s = " a = sin('test')";
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s + ";end");
+        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(308, build.ErrorCodeHistory[0]);
+    }
+
+    #endregion
+
     #region SQRT
 
     [TestMethod]
@@ -358,6 +431,54 @@ public class Trig
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(314, build.ErrorCodeHistory[0]);
     }
+
+    #endregion
+
+    #region TAN
+
+    [TestMethod]
+    public void TEST_Tan_1()
+    {
+        var s = " a = tan(0.7)";
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s + ";end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+
+        Assert.AreEqual(Math.Tan(0.7), ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+    }
+
+    [TestMethod]
+    public void TEST_Tan_2()
+    {
+        var s = " a = tan('0.7')";
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s + ";end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+
+        Assert.AreEqual(Math.Tan(0.7), ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+    }
+
+    [TestMethod]
+    public void TEST_Tan_3()
+    {
+        var s = " a = tan(1)";
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s + ";end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+
+        Assert.AreEqual(Math.Tan(1), ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+    }
+
+    [TestMethod]
+    public void TEST_Tan()
+    {
+        var s = " a = tan('test')";
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s + ";end");
+        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(313, build.ErrorCodeHistory[0]);
+    }
+
 
     #endregion
 

@@ -141,7 +141,6 @@ public partial class Executive
                 break;
         }
 
-        // TODO when retrieving a Var from symbol table, change symbol to match the symbol searched for.
     }
 
     #endregion

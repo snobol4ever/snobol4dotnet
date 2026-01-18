@@ -1,5 +1,7 @@
 ﻿namespace Snobol4.Common;
 
+//"detach argument is not appropriate name" /* 87 */,
+
 public partial class Executive
 {
     internal void Detach(List<Var> arguments)

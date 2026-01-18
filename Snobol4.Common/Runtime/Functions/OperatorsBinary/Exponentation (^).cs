@@ -1,5 +1,11 @@
 ﻿namespace Snobol4.Common;
 
+//"exponentiation right operand is not numeric" /* 15 */,
+//"exponentiation left operand is not numeric" /* 16 */,
+//"exponentiation caused integer overflow" /* 17 */,
+//"exponentiation result is undefined" /* 18 */,
+//"exponentiation caused real overflow" /* 266 */,
+
 public partial class Executive
 {
     internal void Power(List<Var> arguments)

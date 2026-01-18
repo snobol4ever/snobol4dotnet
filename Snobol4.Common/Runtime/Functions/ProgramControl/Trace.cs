@@ -3,15 +3,15 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Snobol4.Common;
 
+//"trace fourth arg is not function name or null" /* 197 */,
+//"trace first argument is not appropriate name" /* 198 */,
+//"trace second argument is not trace type" /* 199 */,
+
 public partial class Executive
 {
     // TODO implement TRACE function
     internal void Trace(List<Var> arguments)
     {
-
-        //"trace fourth arg is not function name or null" /* 197 */,
-        //"trace first argument is not appropriate name" /* 198 */,
-        //"trace second argument is not trace type" /* 199 */,
 
         if (!arguments[0].Convert(VarType.STRING, out _, out var traceName, this) || FunctionTable.ContainsKey((string)traceName))
         {

@@ -1,10 +1,10 @@
 ﻿namespace Snobol4.Common;
 
+//"char argument not integer" /* 281 */,
+//"char argument not in range" /* 282 */,
+
 public partial class Executive
 {
-    //"char argument not integer" /* 281 */,
-    //"char argument not in range" /* 282 */,
-
     internal void Char(List<Var> arguments)
     {
         if (!arguments[0].Convert(VarType.INTEGER, out _, out var c, this))

@@ -1,10 +1,10 @@
 ﻿namespace Snobol4.Common;
 
+//"dupl second argument is not integer" /* 90 */,
+//"dupl first argument is not a string or pattern" /* 91 */,
+
 public partial class Executive
 {
-    //"dupl second argument is not integer" /* 90 */,
-    //"dupl first argument is not a string or pattern" /* 91 */,
-
     internal void Duplicate(List<Var> arguments)
     {
         if (!arguments[1].Convert(VarType.INTEGER, out _, out var numberDupl, this))

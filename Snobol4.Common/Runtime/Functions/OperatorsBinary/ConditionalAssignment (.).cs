@@ -1,5 +1,7 @@
 ﻿namespace Snobol4.Common;
 
+//"pattern assignment left operand is not pattern" /* 30 */,
+
 public partial class Executive
 {
     private void CreateConditionalVariableAssociationPattern(List<Var> arguments)
@@ -12,11 +14,10 @@ public partial class Executive
             expressionVar.Evaluate(this);
             arguments[0] = SystemStack.Pop();
         }
-            //arguments[0] = new PatternVar(expressionVar.Evaluate(this));
 
         if (!arguments[0].Convert(VarType.PATTERN, out _, out var pattern, this))
         {
-            LogRuntimeException(25);
+            LogRuntimeException(30);
             return;
         }
 

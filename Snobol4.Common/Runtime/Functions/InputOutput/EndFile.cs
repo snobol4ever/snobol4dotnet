@@ -1,13 +1,13 @@
 ﻿namespace Snobol4.Common;
 
+//"endfile argument is not a suitable name" /* 96 */,
+//"endfile argument is null" /* 97 */,
+//"endfile file does not exist" /* 98 */,
+//"endfile file does not permit endfile" /* 99 */,
+//"endfile caused non-recoverable output error" /* 100 */,
+
 public partial class Executive
 {
-    //"endfile argument is not a suitable name" /* 96 */,
-    //"endfile argument is null" /* 97 */,
-    //"endfile file does not exist" /* 98 */,
-    //"endfile file does not permit endfile" /* 99 */,
-    //"endfile caused non-recoverable output error" /* 100 */,
-
     internal void EndFile(List<Var> arguments)
     {
         if (!arguments[0].Convert(VarType.STRING, out _, out var channelStr, this))

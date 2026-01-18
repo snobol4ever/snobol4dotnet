@@ -1,5 +1,10 @@
 ﻿namespace Snobol4.Common;
 
+//"multiplication left operand is not numeric" /* 26 */,
+//"multiplication right operand is not numeric" /* 27 */,
+//"multiplication caused integer overflow" /* 28 */,
+//"multiplication caused real overflow" /* 263 */,
+
 public partial class Executive
 {
     // Lock object for thread synchronization

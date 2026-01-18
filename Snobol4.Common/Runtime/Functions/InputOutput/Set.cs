@@ -3,16 +3,16 @@ using System.Reflection;
 
 namespace Snobol4.Common;
 
+//"set first argument is not a suitable name" /* 291 */,
+//"set first argument is null" /* 292 */,
+//"inappropriate second argument to set" /* 293 */,
+//"inappropriate third argument to set" /* 294 */,
+//"set file does not exist" /* 295 */,
+//"set file does not permit setting file pointer" /* 296 */,
+//"set caused non-recoverable I/O error" /* 297 */,
+
 public partial class Executive
 {
-    //"set first argument is not a suitable name" /* 291 */,
-    //"set first argument is null" /* 292 */,
-    //"inappropriate second argument to set" /* 293 */,
-    //"inappropriate third argument to set" /* 294 */,
-    //"set file does not exist" /* 295 */,
-    //"set file does not permit setting file pointer" /* 296 */,
-    //"set caused non-recoverable I/O error" /* 297 */,
-
     internal void Set(List<Var> arguments)
     {
         // DIFFERENCE

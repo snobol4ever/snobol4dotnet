@@ -1,5 +1,8 @@
 ﻿namespace Snobol4.Common;
 
+//"alternation right operand is not pattern" /* 5 */,
+//"alternation left operand is not pattern" /* 6 */,
+
 public partial class Executive
 {
     private void CreateAlternatePattern(List<Var> arguments)

@@ -1,5 +1,15 @@
 ﻿namespace Snobol4.Common;
 
+//"output third argument is not a string" /* 157 */
+//"inappropriate second argument for output" /* 158 */
+//"inappropriate first argument for output" /* 159 */
+//"inappropriate file specification for output" /*
+//"output file cannot be written to" /* 161 */
+//"output caused file overflow" /* 206 */
+//"output caused non-recoverable error" /* 207 */
+//"print limit exceeded on standard output channel" /* 253 */
+//"output channel currently in use" /* 290 */
+
 public partial class Executive
 {
     /// <summary>

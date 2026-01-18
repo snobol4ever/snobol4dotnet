@@ -1,5 +1,8 @@
 ﻿namespace Snobol4.Common;
 
+
+// TODO Implement for functions
+
 public partial class Executive
 {
     public void CreateAtPattern(List<Var> arguments)

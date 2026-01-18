@@ -1,5 +1,7 @@
 ﻿namespace Snobol4.Common;
 
+//"affirmation operand is not numeric" /* 4 */,
+
 public partial class Executive
 {
     internal void UnaryPlus(List<Var> arguments)

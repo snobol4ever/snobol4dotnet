@@ -2,8 +2,6 @@
 
 public partial class Executive
 {
-    #region Ident
-
     internal void Ident(List<Var> arguments)
     {
         if (arguments[0].IsIdentical(arguments[1]))
@@ -14,6 +12,4 @@ public partial class Executive
 
         NonExceptionFailure();
     }
-
-    #endregion
 }

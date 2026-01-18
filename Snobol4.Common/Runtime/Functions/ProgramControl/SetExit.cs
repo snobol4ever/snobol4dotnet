@@ -1,5 +1,7 @@
 ﻿namespace Snobol4.Common;
 
+//"setexit argument is not label name or null" /* 187 */,
+
 public partial class Executive
 {
     // TODO implement SETEXIT function

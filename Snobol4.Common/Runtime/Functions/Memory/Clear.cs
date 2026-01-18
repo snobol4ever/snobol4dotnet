@@ -1,5 +1,8 @@
 ﻿namespace Snobol4.Common;
 
+//"clear argument is not a string" /* 71 */,
+//"clear argument has null variable name" /* 72 */,
+
 public partial class Executive
 {
     internal void ReinitializeVariables(List<Var> arguments)

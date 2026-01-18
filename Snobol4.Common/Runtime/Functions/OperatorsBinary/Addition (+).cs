@@ -1,5 +1,10 @@
 ﻿namespace Snobol4.Common;
 
+//"addition left operand is not numeric" /* 1 */,
+//"addition right operand is not numeric" /* 2 */,
+//"addition caused integer overflow" /* 3 */,
+//"addition caused real overflow" /* 261 */,
+
 public partial class Executive
 {
     // Lock object for thread synchronization

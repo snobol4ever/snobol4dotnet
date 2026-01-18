@@ -1,5 +1,7 @@
 ﻿namespace Snobol4.Common;
 
+//"size argument is not a string" /* 189 */,
+
 public partial class Executive
 {
     public void Size(List<Var> arguments)

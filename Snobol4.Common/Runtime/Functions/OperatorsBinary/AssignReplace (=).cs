@@ -3,14 +3,10 @@ using System.Text;
 
 namespace Snobol4.Common;
 
-
-// TODO: Can Assign and ReplaceMatch be separated in CSharp code?
+//"pattern replacement right operand is not a string" /* 31 */,
 
 public partial class Executive
 {
-    #region Assign or Replace (=)
-
-    // ReSharper disable once UnusedMember.Global
     public void _BinaryEquals()
     {
         if (Builder.TraceStatements)
@@ -140,8 +136,5 @@ public partial class Executive
                 StreamOutputs[outputVar.OutputChannel].Write(Encoding.UTF8.GetBytes(outputVar + Environment.NewLine));
                 break;
         }
-
     }
-
-    #endregion
 }

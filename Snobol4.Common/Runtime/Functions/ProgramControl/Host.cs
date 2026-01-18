@@ -1,11 +1,10 @@
 ﻿//namespace Snobol4.Common;
 
-//public partial class Executive
-//{
-
 //    //"erroneous argument for host" /* 254 */,
 //    //"error during execution of host" /* 255 */,
 
+//public partial class Executive
+//{
 //    internal void Host(List<Var> arguments)
 //    {
 //        if (arguments[0].Convert(VarType.STRING, out _, out var valueStr, this) && (string)valueStr == "")

@@ -1,5 +1,7 @@
 ﻿namespace Snobol4.Common;
 
+//"convert second argument is not a string" /* 74 */,
+
 public partial class Executive
 {
     public static Dictionary<string, VarType> TranslateType = new(StringComparer.OrdinalIgnoreCase) // Always case-insensitive

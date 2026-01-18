@@ -1,5 +1,8 @@
 ﻿namespace Snobol4.Common;
 
+
+// TODO: Determine error codes
+
 public partial class Executive
 {
     internal void Name(List<Var> arguments)

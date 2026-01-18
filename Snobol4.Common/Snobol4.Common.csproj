@@ -32,7 +32,7 @@
     <Folder Include="Resources\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Runtime\Functions\Operators\Binary\ImmediateAssignment %28%24%29.cs" />
-    <None Include="Runtime\Functions\Operators\Unary\NegativeNumeric %28-%29.cs" />
+    <None Include="Runtime\Functions\OperatorsBinary\ImmediateAssignment %28%24%29.cs" />
+    <None Include="Runtime\Functions\OperatorsUnary\NegativeNumeric %28-%29.cs" />
   </ItemGroup>
 </Project>

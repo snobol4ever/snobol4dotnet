@@ -1,5 +1,8 @@
 ﻿namespace Snobol4.Common;
 
+//"negation operand is not numeric" /* 10 */,
+//"negation caused integer overflow" /* 11 */,
+
 public partial class Executive
 {
     internal void UnaryMinus(List<Var> arguments)

@@ -1,5 +1,10 @@
 ﻿namespace Snobol4.Common;
 
+//"division left operand is not numeric" /* 12 */,
+//"division right operand is not numeric" /* 13 */,
+//"division caused integer overflow" /* 14 */,
+//"division caused real overflow" /* 262 */,
+
 public partial class Executive
 {
     internal void Divide(List<Var> arguments)

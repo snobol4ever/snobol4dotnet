@@ -1,12 +1,12 @@
 ﻿namespace Snobol4.Common;
 
+//"backspace argument is not a suitable name" /* 316 */,
+//"backspace file does not exist" /* 317 */,
+//"backspace file does not permit backspace" /* 318 */,
+//"backspace caused non-recoverable error" /* 319 */,
+
 public partial class Executive
 {
-    //"backspace argument is not a suitable name" /* 316 */,
-    //"backspace file does not exist" /* 317 */,
-    //"backspace file does not permit backspace" /* 318 */,
-    //"backspace caused non-recoverable error" /* 319 */,
-
     internal void BackspaceFile(List<Var> arguments)
     {
         // DIFFERENCE

@@ -1,13 +1,13 @@
 ﻿namespace Snobol4.Common;
 
+//"rewind argument is not a suitable name" /* 172 */,
+//"rewind argument is null" /* 173 */,
+//"rewind file does not exist" /* 174 */,
+//"rewind file does not permit rewind" /* 175 */,
+//"rewind caused non-recoverable error" /* 176 */,
+
 public partial class Executive
 {
-    //172 REWIND argument is not a suitable name
-    //173 REWIND argument is null
-    //174 REWIND file does not exist
-    //175 REWIND file does not permit rewind
-    //176 REWIND caused non-recoverable error
-
     internal void Rewind(List<Var> arguments)
     {
         if (!arguments[0].Convert(VarType.STRING, out _, out var channelStr, this))

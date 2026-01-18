@@ -1,5 +1,7 @@
 ﻿namespace Snobol4.Common;
 
+//"immediate assignment left operand is not pattern" /* 25 */,
+
 public partial class Executive
 {
     public void CreateImmediateVariableAssociationPattern(List<Var> arguments)

@@ -1,5 +1,8 @@
 ﻿namespace Snobol4.Common;
 
+//"pattern match right operand is not pattern" /* 240 */,
+//"pattern match left operand is not a string" /* 241 */,
+
 public partial class Executive
 {
     /// <summary>
@@ -14,9 +17,6 @@ public partial class Executive
 
         // arguments[0]: Subject and left operand
         // arguments[1]: Pattern and right operand
-
-        //while (arguments[0] is ExpressionVar expressionVar1)
-        //    arguments[0] = new PatternVar(new UnevaluatedPattern(expressionVar1.FunctionName));
 
         while (arguments[1] is ExpressionVar expressionVar1)
         {

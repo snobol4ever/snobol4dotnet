@@ -1,10 +1,10 @@
 ﻿namespace Snobol4.Common;
 
+//"dump argument is not integer" /* 88 */,
+//"dump argument is negative or too large" /* 89 */,
+
 public partial class Executive
 {
-
-    //"dump argument is not integer" /* 88 */,
-    //"dump argument is negative or too large" /* 89 */,
 
     internal void DisplayVariableValues(List<Var> arguments)
     {

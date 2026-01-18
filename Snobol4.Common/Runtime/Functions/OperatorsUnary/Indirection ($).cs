@@ -3,6 +3,8 @@ using System.Globalization;
 
 namespace Snobol4.Common;
 
+//"indirection operand is not name" /* 239 */,
+
 public partial class Executive
 {
     internal void Indirection(List<Var> arguments)
@@ -24,7 +26,7 @@ public partial class Executive
 
                 if (symbol3 == "")
                 {
-                    LogRuntimeException(212);
+                    LogRuntimeException(239);
                     return;
                 }
 

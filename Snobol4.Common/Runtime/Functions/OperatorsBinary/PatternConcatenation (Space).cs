@@ -2,6 +2,9 @@
 
 namespace Snobol4.Common;
 
+//"concatenation left operand is not a string or pattern" /* 8 */,
+//"concatenation right operand is not a string or pattern" /* 9 */,
+
 public partial class Executive
 {
     public void CreateConcatenatePattern(List<Var> arguments)
@@ -26,9 +29,15 @@ public partial class Executive
             arguments[1] = new PatternVar(UnevaluatedPattern.Structure(expressionVar1.FunctionName));
         }
 
-        if (!arguments[0].Convert(VarType.PATTERN, out _, out var leftPattern, this) || !arguments[1].Convert(VarType.PATTERN, out _, out var rightPattern, this))
+        if (!arguments[0].Convert(VarType.PATTERN, out _, out var leftPattern, this))
         {
             LogRuntimeException(8);
+            return;
+        }
+
+        if (!arguments[1].Convert(VarType.PATTERN, out _, out var rightPattern, this))
+        {
+            LogRuntimeException(9);
             return;
         }
 

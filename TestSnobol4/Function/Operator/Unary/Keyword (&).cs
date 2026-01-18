@@ -67,7 +67,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(212, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(251, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]

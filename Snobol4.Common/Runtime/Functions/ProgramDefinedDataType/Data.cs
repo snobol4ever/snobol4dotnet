@@ -64,7 +64,10 @@ public partial class Executive
 
         // Field references cannot overwrite system variables
         foreach (var field in fields)
+        {
             FunctionTable[field] = new FunctionTableEntry(field, GetProgramDefinedDataField, 1, false);
+
+        }
 
         PredicateSuccess();
     }

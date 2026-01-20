@@ -10,6 +10,7 @@ public sealed class StringVar : Var
     #region Data
 
     public string Data;
+    private char _v;
 
     #endregion
 
@@ -74,6 +75,11 @@ public sealed class StringVar : Var
     {
         Symbol = template.Symbol;
         Data = template.Data;
+    }
+
+    public StringVar(char v)
+    {
+        _v = v;
     }
 
     #endregion

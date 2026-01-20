@@ -1,15 +1,12 @@
 ﻿namespace Snobol4.Common;
 
 //"field function argument is wrong datatype" /* 41 */
-//"data argument has null field name" /* 80 */
 //"data argument is not a string" /* 75 */
-//"data argument is null" /* 76 */
-//"data argument is missing a left paren" /* 77 */
-//"data argument has null datatype name" /* 78 */
-//"data argument is missing a right paren" /* 79 */
-//"data argument has null field name" /* 80 */
-//"field second argument is not integer" /* 107 */
-//"field first argument is not datatype name" /* 108 */
+//"data argument is null" /* 76 */ (NOT USED - COMBINED WITH 164 in a single Regex of prototype)
+//"data argument is missing a left paren" /* 77 */ (NOT USED - COMBINED WITH 164 in a single Regex of prototype)
+//"data argument has null datatype name" /* 78 */ (NOT USED - COMBINED WITH 164 in a single Regex of prototype)
+//"data argument is missing a right paren" /* 79 */ (NOT USED - COMBINED WITH 164 in a single Regex of prototype)
+//"data argument has null field name" /* 80 */ (NOT USED - COMBINED WITH 164 in Regex of field name)
 //"prototype argument is not valid object" /* 164 */,
 
 public partial class Executive
@@ -17,11 +14,11 @@ public partial class Executive
     internal void ProgramDefinedData(List<Var> arguments)
     {
         // data argument cannot be null
-        if (arguments.Count == 0)
-        {
-            LogRuntimeException(76);
-            return;
-        }
+        //if (arguments.Count == 0)
+        //{
+        //    LogRuntimeException(76);
+        //    return;
+        //}
 
         // data argument must be a string
         if (!arguments[0].Convert(VarType.STRING, out _, out var value, this))
@@ -35,7 +32,7 @@ public partial class Executive
         var match = CompiledRegex.ProgramDefinedDataPrototypePattern().Match(prototype);
         if (!match.Success)
         {
-            LogRuntimeException(78);
+            LogRuntimeException(164);
             return;
         }
 
@@ -44,18 +41,18 @@ public partial class Executive
 
         foreach (var str in fields)
         {
-            // data argument argument must be non-null
-            if (str.Length == 0)
-            {
-                LogRuntimeException(76);
-                return;
-            }
+            // field must be non-null
+            //if (str.Length == 0)
+            //{
+            //    LogRuntimeException(80);
+            //    return;
+            //}
 
             if (CompiledRegex.IdentifierPattern().Match(str).Success)
                 continue;
 
-            // data argument must have a non-null name
-            LogRuntimeException(78);
+            // field name must be a valid identifier
+            LogRuntimeException(168);
             return;
         }
 
@@ -66,7 +63,6 @@ public partial class Executive
         foreach (var field in fields)
         {
             FunctionTable[field] = new FunctionTableEntry(field, GetProgramDefinedDataField, 1, false);
-
         }
 
         PredicateSuccess();

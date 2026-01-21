@@ -11,7 +11,7 @@ namespace Snobol4.Common;
 /// </summary>
 public sealed class TableCloningStrategy : ICloningStrategy
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public Var Clone(Var self)
     {
         var tableSelf = (TableVar)self;

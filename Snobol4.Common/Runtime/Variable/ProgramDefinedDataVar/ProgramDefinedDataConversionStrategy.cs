@@ -7,7 +7,7 @@ namespace Snobol4.Common;
 /// </summary>
 public sealed class ProgramDefinedDataConversionStrategy : IConversionStrategy
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public bool TryConvert(Var self, Executive.VarType targetType, out Var varOut, out object valueOut, Executive exec)
     {
         if (targetType == Executive.VarType.STRING)
@@ -25,7 +25,7 @@ public sealed class ProgramDefinedDataConversionStrategy : IConversionStrategy
         return false;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public string GetDataType(Var self)
     {
         var dataSelf = (ProgramDefinedDataVar)self;
@@ -33,7 +33,7 @@ public sealed class ProgramDefinedDataConversionStrategy : IConversionStrategy
         return dataSelf.UserDefinedDataName;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public object GetTableKey(Var self)
     {
         // User-defined data uses its unique ID as table key

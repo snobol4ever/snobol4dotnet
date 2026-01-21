@@ -94,7 +94,7 @@ public sealed class ArrayVar : Var
     /// <summary>
     /// Parse dimension bounds from regex match
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     private static bool TryParseDimensionBounds(System.Text.RegularExpressions.Match match, out long lower, out long upper, out int errorCode)
     {
         lower = 1;
@@ -195,7 +195,7 @@ public sealed class ArrayVar : Var
     /// </summary>
     /// <param name="indices">List of dimension indices</param>
     /// <returns>Linear index into Data array</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     internal long Index(List<long> indices)
     {
         ArgumentNullException.ThrowIfNull(indices);
@@ -231,7 +231,7 @@ public sealed class ArrayVar : Var
     /// <summary>
     /// Get the element at the specified indices
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     internal Var GetElement(List<long> indices)
     {
         var index = Index(indices);
@@ -244,7 +244,7 @@ public sealed class ArrayVar : Var
     /// <summary>
     /// Set the element at the specified indices
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     internal void SetElement(List<long> indices, Var value)
     {
         ArgumentNullException.ThrowIfNull(value);
@@ -262,35 +262,35 @@ public sealed class ArrayVar : Var
 
     // Arrays don't support arithmetic operations with other types
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var AddInteger(IntegerVar left, Executive executive)
         => LogArithmeticTypeError(executive, 2); // RightPattern operand of + is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var AddReal(RealVar left, Executive executive)
         => LogArithmeticTypeError(executive, 2); // RightPattern operand of + is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var SubtractInteger(IntegerVar left, Executive executive)
         => LogArithmeticTypeError(executive, 33); // RightPattern operand of - is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var SubtractReal(RealVar left, Executive executive)
         => LogArithmeticTypeError(executive, 33); // RightPattern operand of - is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var MultiplyInteger(IntegerVar left, Executive executive)
         => LogArithmeticTypeError(executive, 27); // RightPattern operand of * is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var MultiplyReal(RealVar left, Executive executive)
         => LogArithmeticTypeError(executive, 27); // RightPattern operand of * is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var DivideInteger(IntegerVar left, Executive executive)
         => LogArithmeticTypeError(executive, 13); // RightPattern operand of / is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var DivideReal(RealVar left, Executive executive)
         => LogArithmeticTypeError(executive, 13); // RightPattern operand of / is not numeric
 

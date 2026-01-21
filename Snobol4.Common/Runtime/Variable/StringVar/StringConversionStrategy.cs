@@ -7,7 +7,7 @@ namespace Snobol4.Common;
 /// </summary>
 public class StringConversionStrategy : IConversionStrategy
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public bool TryConvert(Var self, Executive.VarType targetType, out Var varOut, out object valueOut, Executive exec)
     {
         var stringSelf = (StringVar)self;
@@ -103,13 +103,13 @@ public class StringConversionStrategy : IConversionStrategy
         return true;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public string GetDataType(Var self)
     {
         return "string";
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public object GetTableKey(Var self)
     {
         var stringSelf = (StringVar)self;

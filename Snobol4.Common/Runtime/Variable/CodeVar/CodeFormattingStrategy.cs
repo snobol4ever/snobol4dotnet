@@ -9,13 +9,13 @@ public sealed class CodeFormattingStrategy : IFormattingStrategy
 {
     private const string _codeTypeString = "code";
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public string ToString(Var self)
     {
         return _codeTypeString;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public string DumpString(Var self)
     {
         var codeSelf = (CodeVar)self;

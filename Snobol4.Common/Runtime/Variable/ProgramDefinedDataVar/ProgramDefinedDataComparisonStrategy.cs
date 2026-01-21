@@ -8,7 +8,7 @@ namespace Snobol4.Common;
 /// </summary>
 public sealed class ProgramDefinedDataComparisonStrategy : IComparisonStrategy
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public int CompareTo(Var self, Var other)
     {
         var dataSelf = (ProgramDefinedDataVar)self;
@@ -31,14 +31,14 @@ public sealed class ProgramDefinedDataComparisonStrategy : IComparisonStrategy
         return string.CompareOrdinal(dataSelf.DataType(), other.DataType());
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public bool Equals(Var self, Var other)
     {
         // User-defined data is only equal if it's the same instance
         return self.Uid == other.Uid;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public bool IsIdentical(Var self, Var other)
     {
         // User-defined data is identical only if they have the same unique ID

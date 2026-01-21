@@ -9,7 +9,7 @@ namespace Snobol4.Common;
 /// </summary>
 public sealed class CodeComparisonStrategy : IComparisonStrategy
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public int CompareTo(Var self, Var other)
     {
         var codeSelf = (CodeVar)self;
@@ -24,14 +24,14 @@ public sealed class CodeComparisonStrategy : IComparisonStrategy
         return string.Compare(codeSelf.DataType(), other.DataType(), StringComparison.InvariantCulture);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public bool Equals(Var self, Var other)
     {
         // Code is only equal if it's the same instance
         return self.Uid == other.Uid;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public bool IsIdentical(Var self, Var other)
     {
         // Code is identical only if they have the same unique ID

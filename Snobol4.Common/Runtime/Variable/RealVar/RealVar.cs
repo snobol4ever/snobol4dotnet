@@ -31,7 +31,7 @@ public sealed class RealVar : Var
 
     #region Constructors
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public RealVar(double data)
     {
         InputChannel = string.Empty;
@@ -40,7 +40,7 @@ public sealed class RealVar : Var
         Data = data;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public RealVar(RealVar template)
     {
         Symbol = template.Symbol;
@@ -49,7 +49,7 @@ public sealed class RealVar : Var
         OutputChannel = template.OutputChannel;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public RealVar(string symbol, double data, string inputChannel, string outputChannel)
     {
         Symbol = symbol;
@@ -64,13 +64,13 @@ public sealed class RealVar : Var
 
     // These methods handle type-specific arithmetic with real numbers
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var AddInteger(IntegerVar left, Executive executive)
     {
         return new RealVar(left.Data + Data);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var AddReal(RealVar left, Executive executive)
     {
         var result = left.Data + Data;
@@ -84,13 +84,13 @@ public sealed class RealVar : Var
         return new RealVar(result);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var SubtractInteger(IntegerVar left, Executive executive)
     {
         return new RealVar(left.Data - Data);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var SubtractReal(RealVar left, Executive executive)
     {
         var result = left.Data - Data;
@@ -104,13 +104,13 @@ public sealed class RealVar : Var
         return new RealVar(result);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var MultiplyInteger(IntegerVar left, Executive executive)
     {
         return new RealVar(left.Data * Data);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var MultiplyReal(RealVar left, Executive executive)
     {
         var result = left.Data * Data;
@@ -124,7 +124,7 @@ public sealed class RealVar : Var
         return new RealVar(result);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var DivideInteger(IntegerVar left, Executive executive)
     {
         if (Data == 0.0)
@@ -136,7 +136,7 @@ public sealed class RealVar : Var
         return new RealVar(left.Data / Data);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var DivideReal(RealVar left, Executive executive)
     {
         if (Data == 0.0)

@@ -7,7 +7,7 @@ namespace Snobol4.Common;
 /// </summary>
 public sealed class RealCloningStrategy : ICloningStrategy
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public Var Clone(Var self)
     {
         var realSelf = (RealVar)self;

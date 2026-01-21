@@ -31,13 +31,13 @@ public class PatternVar : Var
 
     #region Constructors
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public PatternVar(Pattern data)
     {
         Data = data;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public PatternVar(
         Pattern data,
         string symbol = "",
@@ -56,7 +56,7 @@ public class PatternVar : Var
         Validation = validation;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public PatternVar(PatternVar template)
     {
         OutputChannel = template.OutputChannel;
@@ -75,7 +75,7 @@ public class PatternVar : Var
     /// <summary>
     /// Match this pattern against a subject string
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public MatchResult Match(string subject, Executive executive, int startPosition = 0, bool anchor = false)
     {
         var scanner = new Scanner(executive);
@@ -85,7 +85,7 @@ public class PatternVar : Var
     /// <summary>
     /// Concatenate this pattern with another pattern
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public PatternVar Concatenate(PatternVar other)
     {
         return new PatternVar(new ConcatenatePattern(Data, other.Data));
@@ -94,7 +94,7 @@ public class PatternVar : Var
     /// <summary>
     /// Create an alternation between this pattern and another pattern
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public PatternVar Alternate(PatternVar other)
     {
         return new PatternVar(new AlternatePattern(Data, other.Data));
@@ -103,7 +103,7 @@ public class PatternVar : Var
     /// <summary>
     /// Create a pattern that matches zero or more occurrences of this pattern
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public PatternVar ArbNo()
     {
         return new PatternVar(ArbNoPattern.Structure(Data));
@@ -132,35 +132,35 @@ public class PatternVar : Var
 
     // Patterns don't support arithmetic operations with other types
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var AddInteger(IntegerVar left, Executive executive)
         => LogArithmeticTypeError(executive, 2); // RightPattern operand of + is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var AddReal(RealVar left, Executive executive)
         => LogArithmeticTypeError(executive, 2); // RightPattern operand of + is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var SubtractInteger(IntegerVar left, Executive executive)
         => LogArithmeticTypeError(executive, 33); // RightPattern operand of - is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var SubtractReal(RealVar left, Executive executive)
         => LogArithmeticTypeError(executive, 33); // RightPattern operand of - is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var MultiplyInteger(IntegerVar left, Executive executive)
         => LogArithmeticTypeError(executive, 27); // RightPattern operand of * is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var MultiplyReal(RealVar left, Executive executive)
         => LogArithmeticTypeError(executive, 27); // RightPattern operand of * is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var DivideInteger(IntegerVar left, Executive executive)
         => LogArithmeticTypeError(executive, 13); // RightPattern operand of / is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var DivideReal(RealVar left, Executive executive)
         => LogArithmeticTypeError(executive, 13); // RightPattern operand of / is not numeric
 

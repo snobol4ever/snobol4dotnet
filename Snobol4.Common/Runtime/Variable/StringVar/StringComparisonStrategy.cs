@@ -8,7 +8,7 @@ namespace Snobol4.Common;
 /// </summary>
 public class StringComparisonStrategy : IComparisonStrategy
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public int CompareTo(Var self, Var other)
     {
         var stringSelf = (StringVar)self;
@@ -22,7 +22,7 @@ public class StringComparisonStrategy : IComparisonStrategy
         return string.Compare(stringSelf.DataType(), other.DataType(), StringComparison.Ordinal);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public bool Equals(Var self, Var other)
     {
         if (other is not StringVar stringOther)
@@ -32,7 +32,7 @@ public class StringComparisonStrategy : IComparisonStrategy
         return stringSelf.Data == stringOther.Data;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public bool IsIdentical(Var self, Var other)
     {
         if (other is not StringVar stringOther)

@@ -9,7 +9,7 @@ namespace Snobol4.Common;
 /// </summary>
 public sealed class IntegerComparisonStrategy : IComparisonStrategy
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public int CompareTo(Var self, Var other)
     {
         var intSelf = (IntegerVar)self;
@@ -22,7 +22,7 @@ public sealed class IntegerComparisonStrategy : IComparisonStrategy
         };
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public bool Equals(Var self, Var other)
     {
         if (other is not IntegerVar intOther)
@@ -34,7 +34,7 @@ public sealed class IntegerComparisonStrategy : IComparisonStrategy
         return intSelf.Data == intOther.Data;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public bool IsIdentical(Var self, Var other)
     {
         return Equals(self, other);

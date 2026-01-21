@@ -8,7 +8,7 @@ namespace Snobol4.Common;
 /// </summary>
 public class NameArithmeticStrategy : IArithmeticStrategy
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public Var Add(Var self, Var other, Executive executive)
     {
         var nameSelf = (NameVar)self;
@@ -20,7 +20,7 @@ public class NameArithmeticStrategy : IArithmeticStrategy
         return target.Add(other, executive);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public Var Subtract(Var self, Var other, Executive executive)
     {
         var nameSelf = (NameVar)self;
@@ -28,7 +28,7 @@ public class NameArithmeticStrategy : IArithmeticStrategy
         return target.Subtract(other, executive);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public Var Multiply(Var self, Var other, Executive executive)
     {
         var nameSelf = (NameVar)self;
@@ -36,7 +36,7 @@ public class NameArithmeticStrategy : IArithmeticStrategy
         return target.Multiply(other, executive);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public Var Divide(Var self, Var other, Executive executive)
     {
         var nameSelf = (NameVar)self;
@@ -44,7 +44,7 @@ public class NameArithmeticStrategy : IArithmeticStrategy
         return target.Divide(other, executive);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public Var Power(Var self, Var other, Executive executive)
     {
         var nameSelf = (NameVar)self;
@@ -52,7 +52,7 @@ public class NameArithmeticStrategy : IArithmeticStrategy
         return target.Power(other, executive);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public Var Negate(Var self, Executive executive)
     {
         var nameSelf = (NameVar)self;
@@ -60,7 +60,7 @@ public class NameArithmeticStrategy : IArithmeticStrategy
         return target.Negate(executive);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     private static Var GetDereferencedValue(NameVar nameVar, Executive executive)
     {
         // Fast path: pointer dereference (most common case)

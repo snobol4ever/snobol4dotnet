@@ -32,13 +32,13 @@ public sealed class ExpressionVar : Var
 
     #region Constructors
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     internal ExpressionVar(Executive.DeferredCode functionName)
     {
         FunctionName = functionName;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     internal ExpressionVar(ExpressionVar template)
     {
         OutputChannel = template.OutputChannel;
@@ -54,7 +54,7 @@ public sealed class ExpressionVar : Var
     /// <summary>
     /// Evaluate this expression in the context of the executive
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public void Evaluate(Executive executive)
     {
         FunctionName(executive);
@@ -63,7 +63,7 @@ public sealed class ExpressionVar : Var
     /// <summary>
     /// Get the delegate representing this expression
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public Executive.DeferredCode GetDelegate()
     {
         return FunctionName;
@@ -75,35 +75,35 @@ public sealed class ExpressionVar : Var
 
     // Expressions don't support arithmetic operations with other types
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var AddInteger(IntegerVar left, Executive executive)
         => LogArithmeticTypeError(executive, 2); // RightPattern operand of + is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var AddReal(RealVar left, Executive executive)
         => LogArithmeticTypeError(executive, 2); // RightPattern operand of + is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var SubtractInteger(IntegerVar left, Executive executive)
         => LogArithmeticTypeError(executive, 33); // RightPattern operand of - is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var SubtractReal(RealVar left, Executive executive)
         => LogArithmeticTypeError(executive, 33); // RightPattern operand of - is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var MultiplyInteger(IntegerVar left, Executive executive)
         => LogArithmeticTypeError(executive, 27); // RightPattern operand of * is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var MultiplyReal(RealVar left, Executive executive)
         => LogArithmeticTypeError(executive, 27); // RightPattern operand of * is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var DivideInteger(IntegerVar left, Executive executive)
         => LogArithmeticTypeError(executive, 13); // RightPattern operand of / is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var DivideReal(RealVar left, Executive executive)
         => LogArithmeticTypeError(executive, 13); // RightPattern operand of / is not numeric
 

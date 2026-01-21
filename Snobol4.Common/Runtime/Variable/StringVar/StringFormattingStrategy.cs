@@ -7,14 +7,14 @@ namespace Snobol4.Common;
 /// </summary>
 public class StringFormattingStrategy : IFormattingStrategy
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public string ToString(Var self)
     {
         var stringSelf = (StringVar)self;
         return stringSelf.Data;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public string DumpString(Var self)
     {
         var stringSelf = (StringVar)self;

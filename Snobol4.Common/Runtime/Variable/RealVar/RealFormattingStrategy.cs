@@ -8,14 +8,14 @@ namespace Snobol4.Common;
 /// </summary>
 public sealed class RealFormattingStrategy : IFormattingStrategy
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public string ToString(Var self)
     {
         var realSelf = (RealVar)self;
         return realSelf.Data.ToString(CultureInfo.CurrentCulture);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public string DumpString(Var self)
     {
         var realSelf = (RealVar)self;

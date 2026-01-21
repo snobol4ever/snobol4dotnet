@@ -11,7 +11,7 @@ public sealed class TableFormattingStrategy : IFormattingStrategy
     /// <summary>
     /// Returns the type name for standard output
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public string ToString(Var self)
     {
         return "table";
@@ -21,7 +21,7 @@ public sealed class TableFormattingStrategy : IFormattingStrategy
     /// Returns a concise representation including entry count
     /// Used for dump operations and diagnostics
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public string DumpString(Var self)
     {
         var tableSelf = (TableVar)self;

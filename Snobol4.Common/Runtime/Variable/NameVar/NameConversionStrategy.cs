@@ -49,7 +49,7 @@ public class NameConversionStrategy : IConversionStrategy
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     private static bool ConvertToString(NameVar nameSelf, out Var varOut, out object valueOut)
     {
         if (nameSelf.Pointer.Length == 0)
@@ -68,7 +68,7 @@ public class NameConversionStrategy : IConversionStrategy
         return true;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     private static bool ConvertToInteger(NameVar nameSelf, out Var varOut, out object valueOut, Executive exec)
     {
         var stringVar = new StringVar(nameSelf.Pointer);
@@ -81,7 +81,7 @@ public class NameConversionStrategy : IConversionStrategy
         return true;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     private static bool ConvertToReal(NameVar nameSelf, out Var varOut, out object valueOut, Executive exec)
     {
         var stringVar = new StringVar(nameSelf.Pointer);
@@ -150,13 +150,13 @@ public class NameConversionStrategy : IConversionStrategy
         return true;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public string GetDataType(Var self)
     {
         return "name";
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public object GetTableKey(Var self)
     {
         var nameSelf = (NameVar)self;

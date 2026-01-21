@@ -8,7 +8,7 @@ namespace Snobol4.Common;
 /// </summary>
 public class PatternComparisonStrategy : IComparisonStrategy
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public int CompareTo(Var self, Var other)
     {
         // Fast path: if comparing to same instance, return 0
@@ -27,14 +27,14 @@ public class PatternComparisonStrategy : IComparisonStrategy
         return string.Compare(patternSelf.DataType(), other.DataType(), StringComparison.Ordinal);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public bool Equals(Var self, Var other)
     {
         // Patterns are only equal if they're the same instance
         return IsIdentical(self, other);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public bool IsIdentical(Var self, Var other)
     {
         // Fast path: reference equality check

@@ -12,7 +12,7 @@ public sealed class IntegerFormattingStrategy : IFormattingStrategy
     /// <summary>
     /// Returns the integer value as a string using current culture formatting
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public string ToString(Var self)
     {
         var intSelf = (IntegerVar)self;
@@ -23,7 +23,7 @@ public sealed class IntegerFormattingStrategy : IFormattingStrategy
     /// Returns a concise representation of the integer value
     /// Used for dump operations and diagnostics
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public string DumpString(Var self)
     {
         var intSelf = (IntegerVar)self;

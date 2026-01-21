@@ -35,7 +35,7 @@ public sealed class IntegerVar : Var
     /// <summary>
     /// Creates an IntegerVar
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public static IntegerVar Create(long value)
     {
         return new IntegerVar(value);
@@ -78,7 +78,7 @@ public sealed class IntegerVar : Var
 
     // These methods handle type-specific arithmetic with integers
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var AddInteger(IntegerVar left, Executive executive)
     {
         var leftData = left.Data;
@@ -97,13 +97,13 @@ public sealed class IntegerVar : Var
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var AddReal(RealVar left, Executive executive)
     {
         return new RealVar(left.Data + Data);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var SubtractInteger(IntegerVar left, Executive executive)
     {
         var leftData = left.Data;
@@ -122,13 +122,13 @@ public sealed class IntegerVar : Var
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var SubtractReal(RealVar left, Executive executive)
     {
         return new RealVar(left.Data - Data);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var MultiplyInteger(IntegerVar left, Executive executive)
     {
         var leftData = left.Data;
@@ -162,13 +162,13 @@ public sealed class IntegerVar : Var
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var MultiplyReal(RealVar left, Executive executive)
     {
         return new RealVar(left.Data * Data);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var DivideInteger(IntegerVar left, Executive executive)
     {
         var divisor = Data;
@@ -191,7 +191,7 @@ public sealed class IntegerVar : Var
         return Create(dividend / divisor);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var DivideReal(RealVar left, Executive executive)
     {
         if (Data == 0)

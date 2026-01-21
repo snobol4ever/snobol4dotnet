@@ -9,7 +9,7 @@ namespace Snobol4.Common;
 /// </summary>
 public sealed class ExpressionComparisonStrategy : IComparisonStrategy
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public int CompareTo(Var self, Var other)
     {
         // Different types compare by type name
@@ -22,14 +22,14 @@ public sealed class ExpressionComparisonStrategy : IComparisonStrategy
         return DateTime.Compare(self.CreationDateTime, other.CreationDateTime);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public bool Equals(Var self, Var other)
     {
         // Expressions are only equal if they're the same instance
         return other.Uid == self.Uid;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public bool IsIdentical(Var self, Var other)
     {
         // Expressions are identical only if they have the same unique ID

@@ -86,13 +86,13 @@ public sealed class IntegerConversionStrategy : IConversionStrategy
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public string GetDataType(Var self)
     {
         return "integer";
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public object GetTableKey(Var self)
     {
         var intSelf = (IntegerVar)self;

@@ -8,7 +8,7 @@ namespace Snobol4.Common;
 /// </summary>
 public class PatternCloningStrategy : ICloningStrategy
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public Var Clone(Var self)
     {
         var patternSelf = (PatternVar)self;

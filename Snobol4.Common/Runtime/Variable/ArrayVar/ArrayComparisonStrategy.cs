@@ -10,8 +10,8 @@ namespace Snobol4.Common;
 /// </summary>
 public class ArrayComparisonStrategy : IComparisonStrategy
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int CompareTo(Var self, Var other)
+
+    public int CompareTo(Var self, Var? other)
     {
         if (other is null)
             return 1; // Non-null is always greater than null
@@ -26,14 +26,14 @@ public class ArrayComparisonStrategy : IComparisonStrategy
         return string.Compare(self.DataType(), other.DataType(), StringComparison.InvariantCulture);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public bool Equals(Var self, Var other)
     {
         // Arrays are only equal if they're the same instance
         return IsIdentical(self, other);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public bool IsIdentical(Var self, Var other)
     {
         // Arrays are identical only if they have the same unique ID

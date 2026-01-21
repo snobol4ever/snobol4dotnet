@@ -11,14 +11,14 @@ public class ArrayFormattingStrategy : IFormattingStrategy
     private const string _arrayTypeName = "array";
     private const string _anonymousSymbol = "<anonymous>";
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public string ToString(Var self)
     {
         // Simple representation for general use
         return _arrayTypeName;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public string DumpString(Var self)
     {
         // Detailed representation showing prototype

@@ -10,7 +10,7 @@ public sealed class RealComparisonStrategy : IComparisonStrategy
 {
     private const double _epsilon = double.Epsilon;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public int CompareTo(Var self, Var other)
     {
         var realSelf = (RealVar)self;
@@ -23,7 +23,7 @@ public sealed class RealComparisonStrategy : IComparisonStrategy
         };
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public bool Equals(Var self, Var other)
     {
         var realSelf = (RealVar)self;
@@ -36,7 +36,7 @@ public sealed class RealComparisonStrategy : IComparisonStrategy
         };
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public bool IsIdentical(Var self, Var other)
     {
         if (other is not RealVar realOther)

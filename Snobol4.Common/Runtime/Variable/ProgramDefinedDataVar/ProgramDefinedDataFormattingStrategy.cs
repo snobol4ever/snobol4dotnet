@@ -7,7 +7,7 @@ namespace Snobol4.Common;
 /// </summary>
 public sealed class ProgramDefinedDataFormattingStrategy : IFormattingStrategy
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public string ToString(Var self)
     {
         var dataSelf = (ProgramDefinedDataVar)self;

@@ -28,7 +28,7 @@ public class ArrayConversionStrategy : IConversionStrategy
     /// <summary>
     /// Convert array to itself (identity conversion)
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     private static bool ConvertToSelf(ArrayVar array, out Var varOut, out object valueOut)
     {
         varOut = array;
@@ -80,7 +80,7 @@ public class ArrayConversionStrategy : IConversionStrategy
         return true;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     private static bool InitializeFailure(out Var varOut, out object valueOut)
     {
         varOut = StringVar.Null();

@@ -80,7 +80,7 @@ public sealed class TableVar : Var
     /// <param name="key">The key to look up</param>
     /// <returns>The value associated with the key, or a clone of the fill value</returns>
     /// <exception cref="ArgumentNullException">Thrown when key is null</exception>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     internal Var GetOrDefault(object key)
     {
         ArgumentNullException.ThrowIfNull(key);
@@ -105,7 +105,7 @@ public sealed class TableVar : Var
     /// <param name="key">The key to set</param>
     /// <param name="value">The value to associate with the key</param>
     /// <exception cref="ArgumentNullException">Thrown when key or value is null</exception>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     internal void Set(object key, Var value)
     {
         ArgumentNullException.ThrowIfNull(key);
@@ -122,7 +122,7 @@ public sealed class TableVar : Var
     /// <param name="key">The key to check</param>
     /// <returns>True if the key exists, false otherwise</returns>
     /// <exception cref="ArgumentNullException">Thrown when key is null</exception>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     internal bool ContainsKey(object key)
     {
         ArgumentNullException.ThrowIfNull(key);
@@ -135,7 +135,7 @@ public sealed class TableVar : Var
     /// <param name="key">The key to remove</param>
     /// <returns>True if the key was found and removed, false otherwise</returns>
     /// <exception cref="ArgumentNullException">Thrown when key is null</exception>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     internal bool Remove(object key)
     {
         ArgumentNullException.ThrowIfNull(key);
@@ -145,7 +145,7 @@ public sealed class TableVar : Var
     /// <summary>
     /// Clears all entries from the table
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     internal void Clear()
     {
         Data.Clear();
@@ -158,7 +158,7 @@ public sealed class TableVar : Var
     /// <param name="value">The value if found</param>
     /// <returns>True if the key exists, false otherwise</returns>
     /// <exception cref="ArgumentNullException">Thrown when key is null</exception>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     internal bool TryGetValue(object key, out Var value)
     {
         ArgumentNullException.ThrowIfNull(key);
@@ -169,7 +169,7 @@ public sealed class TableVar : Var
     /// Gets all keys in the table
     /// </summary>
     /// <returns>Collection of all keys</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     internal IEnumerable<object> GetKeys()
     {
         return Data.Keys;
@@ -179,7 +179,7 @@ public sealed class TableVar : Var
     /// Gets all values in the table
     /// </summary>
     /// <returns>Collection of all values</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     internal IEnumerable<Var> GetValues()
     {
         return Data.Values;
@@ -191,35 +191,35 @@ public sealed class TableVar : Var
 
     // Tables don't support arithmetic operations with other types
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var AddInteger(IntegerVar left, Executive executive)
         => LogArithmeticTypeError(executive, 2); // RightPattern operand of + is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var AddReal(RealVar left, Executive executive)
         => LogArithmeticTypeError(executive, 2); // RightPattern operand of + is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var SubtractInteger(IntegerVar left, Executive executive)
         => LogArithmeticTypeError(executive, 33); // RightPattern operand of - is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var SubtractReal(RealVar left, Executive executive)
         => LogArithmeticTypeError(executive, 33); // RightPattern operand of - is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var MultiplyInteger(IntegerVar left, Executive executive)
         => LogArithmeticTypeError(executive, 27); // RightPattern operand of * is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var MultiplyReal(RealVar left, Executive executive)
         => LogArithmeticTypeError(executive, 27); // RightPattern operand of * is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var DivideInteger(IntegerVar left, Executive executive)
         => LogArithmeticTypeError(executive, 13); // RightPattern operand of / is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var DivideReal(RealVar left, Executive executive)
         => LogArithmeticTypeError(executive, 13); // RightPattern operand of / is not numeric
 

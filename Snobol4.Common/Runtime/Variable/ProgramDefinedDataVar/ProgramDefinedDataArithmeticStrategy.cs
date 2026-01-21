@@ -8,7 +8,7 @@ namespace Snobol4.Common;
 /// </summary>
 public sealed class ProgramDefinedDataArithmeticStrategy : IArithmeticStrategy
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public Var Add(Var self, Var other, Executive executive)
     {
         // User-defined data doesn't support addition
@@ -16,7 +16,7 @@ public sealed class ProgramDefinedDataArithmeticStrategy : IArithmeticStrategy
         return StringVar.Null();
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public Var Subtract(Var self, Var other, Executive executive)
     {
         // User-defined data doesn't support subtraction
@@ -24,7 +24,7 @@ public sealed class ProgramDefinedDataArithmeticStrategy : IArithmeticStrategy
         return StringVar.Null();
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public Var Multiply(Var self, Var other, Executive executive)
     {
         // User-defined data doesn't support multiplication
@@ -32,7 +32,7 @@ public sealed class ProgramDefinedDataArithmeticStrategy : IArithmeticStrategy
         return StringVar.Null();
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public Var Divide(Var self, Var other, Executive executive)
     {
         // User-defined data doesn't support division
@@ -40,7 +40,7 @@ public sealed class ProgramDefinedDataArithmeticStrategy : IArithmeticStrategy
         return StringVar.Null();
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public Var Power(Var self, Var other, Executive executive)
     {
         // User-defined data doesn't support exponentiation
@@ -48,7 +48,7 @@ public sealed class ProgramDefinedDataArithmeticStrategy : IArithmeticStrategy
         return StringVar.Null();
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public Var Negate(Var self, Executive executive)
     {
         // User-defined data doesn't support negation

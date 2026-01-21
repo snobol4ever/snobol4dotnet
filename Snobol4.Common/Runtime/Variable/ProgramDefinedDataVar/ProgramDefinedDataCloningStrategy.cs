@@ -8,7 +8,7 @@ namespace Snobol4.Common;
 /// </summary>
 public sealed class ProgramDefinedDataCloningStrategy : ICloningStrategy
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public Var Clone(Var self)
     {
         var dataSelf = (ProgramDefinedDataVar)self;

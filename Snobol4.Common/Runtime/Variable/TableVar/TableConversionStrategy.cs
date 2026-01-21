@@ -7,7 +7,7 @@ namespace Snobol4.Common;
 /// </summary>
 public sealed class TableConversionStrategy : IConversionStrategy
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public bool TryConvert(Var self, Executive.VarType targetType, out Var varOut, out object valueOut, Executive exec)
     {
         var tableSelf = (TableVar)self;
@@ -32,7 +32,7 @@ public sealed class TableConversionStrategy : IConversionStrategy
     /// <summary>
     /// Converts a table to a 2D array where first column contains keys and second column contains values
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     private static bool ConvertToArray(TableVar tableSelf, out Var varOut, out object valueOut)
     {
         // Cannot convert empty table to array
@@ -69,7 +69,7 @@ public sealed class TableConversionStrategy : IConversionStrategy
     /// <summary>
     /// Converts a table key object to its appropriate Var type
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     private static Var ConvertKeyToVar(object key, TableVar tableSelf)
     {
         return key switch
@@ -83,13 +83,13 @@ public sealed class TableConversionStrategy : IConversionStrategy
         };
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public string GetDataType(Var self)
     {
         return "table";
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public object GetTableKey(Var self)
     {
         // Tables use their unique ID as table key

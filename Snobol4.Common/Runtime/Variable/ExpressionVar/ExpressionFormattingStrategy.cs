@@ -7,13 +7,13 @@ namespace Snobol4.Common;
 /// </summary>
 public sealed class ExpressionFormattingStrategy : IFormattingStrategy
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public string ToString(Var self)
     {
         return "expression";
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public string DumpString(Var self)
     {
         return "<expression>";

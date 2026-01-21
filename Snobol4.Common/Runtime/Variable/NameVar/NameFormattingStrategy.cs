@@ -7,7 +7,7 @@ namespace Snobol4.Common;
 /// </summary>
 public class NameFormattingStrategy : IFormattingStrategy
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public string ToString(Var self)
     {
         var nameSelf = (NameVar)self;

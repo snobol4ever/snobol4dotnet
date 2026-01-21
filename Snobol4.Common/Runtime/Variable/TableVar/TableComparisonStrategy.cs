@@ -10,7 +10,7 @@ namespace Snobol4.Common;
 /// </summary>
 public sealed class TableComparisonStrategy : IComparisonStrategy
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public int CompareTo(Var self, Var other)
     {
         ArgumentNullException.ThrowIfNull(other);
@@ -32,14 +32,14 @@ public sealed class TableComparisonStrategy : IComparisonStrategy
         );
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public bool Equals(Var self, Var other)
     {
         // Tables use reference equality - only equal if same instance
         return IsIdentical(self, other);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public bool IsIdentical(Var self, Var other)
     {
         ArgumentNullException.ThrowIfNull(other);

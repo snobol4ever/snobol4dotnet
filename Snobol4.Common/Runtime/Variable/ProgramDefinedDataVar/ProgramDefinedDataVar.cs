@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Runtime.CompilerServices;
 
 namespace Snobol4.Common;
 
@@ -53,7 +52,7 @@ public sealed class ProgramDefinedDataVar : Var
     /// <summary>
     /// Get the value of a field by name
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public Var GetField(string fieldName)
     {
         return ProgramDefinedData.TryGetValue(fieldName, out var value)
@@ -64,7 +63,7 @@ public sealed class ProgramDefinedDataVar : Var
     /// <summary>
     /// Set the value of a field by name
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public void SetField(string fieldName, Var value)
     {
         ProgramDefinedData[fieldName] = value;
@@ -73,7 +72,7 @@ public sealed class ProgramDefinedDataVar : Var
     /// <summary>
     /// Check if a field exists
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public bool HasField(string fieldName)
     {
         return ProgramDefinedData.ContainsKey(fieldName);
@@ -82,7 +81,7 @@ public sealed class ProgramDefinedDataVar : Var
     /// <summary>
     /// Get all field names
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public IEnumerable<string> GetFieldNames()
     {
         return ProgramDefinedData.Keys;
@@ -93,7 +92,7 @@ public sealed class ProgramDefinedDataVar : Var
     /// </summary>
     public int FieldCount
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    
         get => ProgramDefinedData.Count;
     }
 
@@ -102,7 +101,7 @@ public sealed class ProgramDefinedDataVar : Var
     /// </summary>
     public string TypeName
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    
         get => UserDefinedDataName;
     }
 
@@ -112,35 +111,34 @@ public sealed class ProgramDefinedDataVar : Var
 
     // User-defined data doesn't support arithmetic operations with other types
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected internal override Var AddInteger(IntegerVar left, Executive executive)
         => LogArithmeticTypeError(executive, 2); // RightPattern operand of + is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var AddReal(RealVar left, Executive executive)
         => LogArithmeticTypeError(executive, 2); // RightPattern operand of + is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var SubtractInteger(IntegerVar left, Executive executive)
         => LogArithmeticTypeError(executive, 33); // RightPattern operand of - is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var SubtractReal(RealVar left, Executive executive)
         => LogArithmeticTypeError(executive, 33); // RightPattern operand of - is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var MultiplyInteger(IntegerVar left, Executive executive)
         => LogArithmeticTypeError(executive, 27); // RightPattern operand of * is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var MultiplyReal(RealVar left, Executive executive)
         => LogArithmeticTypeError(executive, 27); // RightPattern operand of * is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var DivideInteger(IntegerVar left, Executive executive)
         => LogArithmeticTypeError(executive, 13); // RightPattern operand of / is not numeric
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     protected internal override Var DivideReal(RealVar left, Executive executive)
         => LogArithmeticTypeError(executive, 13); // RightPattern operand of / is not numeric
 

@@ -9,7 +9,7 @@ namespace Snobol4.Common;
 /// </summary>
 public class NameComparisonStrategy : IComparisonStrategy
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public int CompareTo(Var self, Var other)
     {
         var nameSelf = (NameVar)self;
@@ -43,7 +43,7 @@ public class NameComparisonStrategy : IComparisonStrategy
         return Equals(nameSelf.Key, nameOther.Key);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public bool IsIdentical(Var self, Var other)
     {
         // From original: always returns true

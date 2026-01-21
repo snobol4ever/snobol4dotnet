@@ -87,7 +87,7 @@ public sealed class IntegerArithmeticStrategy : IArithmeticStrategy
         return PowerBySquaring(baseValue, exponent, executive);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     private static Var PowerBySquaring(long baseValue, long exponent, Executive executive)
     {
         long result = 1;
@@ -124,7 +124,7 @@ public sealed class IntegerArithmeticStrategy : IArithmeticStrategy
         return IntegerVar.Create(result);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     private static bool TryMultiplySafe(long left, long right, out long result)
     {
         // Fast path for small values

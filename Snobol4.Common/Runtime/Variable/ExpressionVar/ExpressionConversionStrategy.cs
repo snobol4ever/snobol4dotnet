@@ -7,7 +7,7 @@ namespace Snobol4.Common;
 /// </summary>
 public sealed class ExpressionConversionStrategy : IConversionStrategy
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public bool TryConvert(Var self, Executive.VarType targetType, out Var varOut, out object valueOut, Executive exec)
     {
         if (targetType == Executive.VarType.EXPRESSION)
@@ -23,13 +23,13 @@ public sealed class ExpressionConversionStrategy : IConversionStrategy
         return false;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public string GetDataType(Var self)
     {
         return "expression";
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public object GetTableKey(Var self)
     {
         // Expressions use their unique ID as table key

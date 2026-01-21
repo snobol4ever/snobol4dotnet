@@ -7,7 +7,7 @@ namespace Snobol4.Common;
 /// </summary>
 public sealed class RealArithmeticStrategy : IArithmeticStrategy
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public Var Add(Var self, Var other, Executive executive)
     {
         var realSelf = (RealVar)self;
@@ -16,21 +16,21 @@ public sealed class RealArithmeticStrategy : IArithmeticStrategy
         return other.AddReal(realSelf, executive);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public Var Subtract(Var self, Var other, Executive executive)
     {
         var realSelf = (RealVar)self;
         return other.SubtractReal(realSelf, executive);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public Var Multiply(Var self, Var other, Executive executive)
     {
         var realSelf = (RealVar)self;
         return other.MultiplyReal(realSelf, executive);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public Var Divide(Var self, Var other, Executive executive)
     {
         var realSelf = (RealVar)self;
@@ -69,7 +69,7 @@ public sealed class RealArithmeticStrategy : IArithmeticStrategy
         return new RealVar(result);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public Var Negate(Var self, Executive executive)
     {
         var realSelf = (RealVar)self;

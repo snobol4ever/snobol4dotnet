@@ -8,7 +8,7 @@ namespace Snobol4.Common;
 /// </summary>
 public sealed class StatementSeparatorCloningStrategy : ICloningStrategy
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public Var Clone(Var self)
     {
         // Return the singleton instance - statement separators are immutable markers

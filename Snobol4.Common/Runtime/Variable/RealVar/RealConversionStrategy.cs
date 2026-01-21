@@ -26,7 +26,7 @@ public sealed class RealConversionStrategy : IConversionStrategy
         };
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     private static bool ConvertToString(RealVar realSelf, out Var varOut, out object valueOut)
     {
         valueOut = realSelf.Data.ToString(CultureInfo.CurrentCulture);
@@ -34,7 +34,7 @@ public sealed class RealConversionStrategy : IConversionStrategy
         return true;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     private static bool ConvertToInteger(RealVar realSelf, out Var varOut, out object valueOut)
     {
         // Round towards zero (truncate)
@@ -55,7 +55,7 @@ public sealed class RealConversionStrategy : IConversionStrategy
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     private static bool ConvertToReal(RealVar realSelf, out Var varOut, out object valueOut)
     {
         varOut = realSelf;
@@ -63,7 +63,7 @@ public sealed class RealConversionStrategy : IConversionStrategy
         return true;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     private static bool ConvertToPattern(RealVar realSelf, out Var varOut, out object valueOut)
     {
         valueOut = realSelf.Data.ToString(CultureInfo.CurrentCulture);
@@ -106,13 +106,13 @@ public sealed class RealConversionStrategy : IConversionStrategy
         return true;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public string GetDataType(Var self)
     {
         return "real";
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public object GetTableKey(Var self)
     {
         var realSelf = (RealVar)self;

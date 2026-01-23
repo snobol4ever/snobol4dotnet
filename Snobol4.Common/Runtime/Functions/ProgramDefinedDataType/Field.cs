@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace Snobol4.Common;
+﻿namespace Snobol4.Common;
 
 //"field function argument is wrong datatype" /* 41 */
 //"field second argument is not integer" /* 107 */
@@ -24,6 +22,13 @@ public partial class Executive
             return;
         }
 
+        if (!FunctionTable.TryGetValue(dataObj.TypeName, out var function))
+        {
+            LogRuntimeException(108);
+            return;
+        }
+
+        var functionEntry = (FunctionTableEntry)function;
         var index = (int)(long)indexObj! - 1;
         if (index < 0 || index >= dataObj.FieldCount)
         {
@@ -32,6 +37,6 @@ public partial class Executive
             return;
         }
 
-        SystemStack.Push(new StringVar(FunctionTable[dataObj.TypeName].Locals[index]));
+        SystemStack.Push(new StringVar(functionEntry.Locals[index]));
     }
 }

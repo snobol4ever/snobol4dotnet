@@ -1,24 +1,27 @@
-﻿namespace Snobol4.Common;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace Snobol4.Common;
 
 //"field function argument is wrong datatype" /* 41 */
 //"data argument is not a string" /* 75 */
-//"data argument is null" /* 76 */ (NOT USED - COMBINED WITH 164 in a single Regex of prototype)
-//"data argument is missing a left paren" /* 77 */ (NOT USED - COMBINED WITH 164 in a single Regex of prototype)
-//"data argument has null datatype name" /* 78 */ (NOT USED - COMBINED WITH 164 in a single Regex of prototype)
-//"data argument is missing a right paren" /* 79 */ (NOT USED - COMBINED WITH 164 in a single Regex of prototype)
-//"data argument has null field name" /* 80 */ (NOT USED - COMBINED WITH 164 in Regex of field name)
+//"data argument is null" /* 76 */
+//"data argument is missing a left paren" /* 77 */
+//"data argument has null datatype name" /* 78 */
+//"data argument is missing a right paren" /* 79 */
+//"data argument has null field name" /* 80 */
 //"prototype argument is not valid object" /* 164 */,
+//"attempted redefinition of system function" /* 248 */
 
 public partial class Executive
 {
     internal void ProgramDefinedData(List<Var> arguments)
     {
         // data argument cannot be null
-        //if (arguments.Count == 0)
-        //{
-        //    LogRuntimeException(76);
-        //    return;
-        //}
+        if (arguments.Count == 0)
+        {
+            LogRuntimeException(76);
+            return;
+        }
 
         // data argument must be a string
         if (!arguments[0].Convert(VarType.STRING, out _, out var value, this))
@@ -27,39 +30,76 @@ public partial class Executive
             return;
         }
 
+        // data argument cannot be null
+        var prototype = ((string)value).Trim();
+        if (prototype == "")
+        {
+            LogRuntimeException(76);
+            return;
+        }
+
         // data argument must not have a null datatype name
-        var prototype = (string)value;
         var match = CompiledRegex.ProgramDefinedDataPrototypePattern().Match(prototype);
         if (!match.Success)
         {
+            Assert.IsTrue(true, "prototype argument is not valid object in ProgramDefinedData()");
             LogRuntimeException(164);
             return;
         }
 
-        var dataName = match.Groups[1].Value;
-        var fields = new List<string>(match.Groups[2].Value.Split(','));
-
-        foreach (var str in fields)
+        // datatype name cannot be null
+        var dataName = match.Groups[1].Value.Trim();
+        if (dataName == "")
         {
-            // field must be non-null
-            //if (str.Length == 0)
-            //{
-            //    LogRuntimeException(80);
-            //    return;
-            //}
-
-            if (CompiledRegex.IdentifierPattern().Match(str).Success)
-                continue;
-
-            // field name must be a valid identifier
-            LogRuntimeException(168);
+            LogRuntimeException(78);
             return;
         }
 
-        var newEntry = new FunctionTableEntry(dataName, CreateProgramDefinedDataInstance, fields.Count, fields, prototype);
-        FunctionTable[dataName] = newEntry;
+        // datatype name cannot be an existing function
+        if (FunctionTable.ContainsKey(dataName))
+        {
+            LogRuntimeException(248);
+            return;
+        }
 
-        // Field references cannot overwrite system variables
+        // must have a left paren
+        var lParen = match.Groups[2].Value;
+        if (lParen == "")
+        {
+            LogRuntimeException(77);
+            return;
+        }
+
+        // must have a left paren
+        var rParen = match.Groups[4].Value;
+        if (rParen == "")
+        {
+            LogRuntimeException(79);
+            return;
+        }
+
+        var fields = new List<string>(match.Groups[3].Value.Split(','));
+        for (var i = 0; i < fields.Count; i++)
+        {
+            fields[i] = fields[i].Trim();
+
+            // field name cannot be null
+            if (fields[i] == "")
+            {
+                LogRuntimeException(80);
+                return;
+            }
+
+            // field name cannot be an existing function
+            if (FunctionTable.ContainsKey(fields[i]))
+            {
+                LogRuntimeException(248);
+                return;
+            }
+        }
+
+        FunctionTable[dataName] = new FunctionTableEntry(dataName, CreateProgramDefinedDataInstance, fields.Count, fields, prototype);
+
         foreach (var field in fields)
         {
             FunctionTable[field] = new FunctionTableEntry(field, GetProgramDefinedDataField, 1, false);
@@ -79,9 +119,8 @@ public partial class Executive
         var dataName = ((StringVar)arguments[^1]).Data;
         var fields = FunctionTable[functionName.Data].Locals;
         arguments = arguments[..^1];
-        Dictionary<string, Var> userDefinedFields = new();
+        Dictionary<string, Var> userDefinedFields = [];
 
-        // Field names must be a non-empty string
         for (var i = 0; i < arguments.Count; ++i)
         {
             userDefinedFields[fields[i]] = arguments[i];

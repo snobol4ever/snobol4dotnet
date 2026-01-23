@@ -15,7 +15,8 @@ internal partial class CompiledRegex
     [GeneratedRegex(@"^([~?$.!^%*/#+@|&=-]|\*\*)[ \t]+[~?$.!^%*/#+@|&=-]*[A-Za-z0-9\""\'\(]")]
     internal static partial Regex BinaryOperatorPattern();
 
-    [GeneratedRegex(@"^([a-zA-Z][a-zA-Z0-9_]*)\(([^) \t]*)\)$")]
+    //[GeneratedRegex(@"^([a-zA-Z][a-zA-Z0-9_]*)\(([^) \t]*)\)$")]
+    [GeneratedRegex(@"^([^(]+)(\(?)([^)]+)(\)?)$")]
     internal static partial Regex ProgramDefinedDataPrototypePattern();
 
     [GeneratedRegex(@"^(\=[ \t]*)([),:>\]]?)")]

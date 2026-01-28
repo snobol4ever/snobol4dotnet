@@ -1,9 +1,13 @@
-﻿using System.Diagnostics;
-using System.Text;
+﻿using System.Text;
 
 namespace Snobol4.Common;
 
 //"pattern replacement right operand is not a string" /* 31 */,
+//"keyword value assigned is not integer" /* 208 */,
+//"keyword in assignment is protected" /* 209 */,
+//"keyword value assigned is negative or too large" /* 210 */,
+//"value assigned to keyword errtext not a string" /* 211 */,
+//"syntax error: value used where name is required" /* 212 */,
 
 public partial class Executive
 {
@@ -15,18 +19,20 @@ public partial class Executive
 
         // Get all arguments and check for prior failure
         List<Var> arguments = [];
+
         if (SystemStack.ExtractArguments(2, arguments, this, 1))
+        {
             return;
+        }
 
-        Equals(arguments);
-    }
-
-    internal void Equals(List<Var> arguments)
-    {
         if (arguments[0] is SubjectVar)
+        {
             ReplaceMatch(arguments);
+        }
         else
+        {
             Assign(arguments);
+        }
     }
 
     internal void ReplaceMatch(List<Var> arguments)
@@ -54,7 +60,7 @@ public partial class Executive
             arguments[0] = SystemStack.Pop();
         }
 
-        var leftVar = arguments[0]; // Destination Var
+        var leftVar = arguments[0];  // Destination Var
         var rightVar = arguments[1]; // Source Var
 
         // If source has input channels, get input now
@@ -97,16 +103,14 @@ public partial class Executive
             case ArrayVar arrayVar:
                 rightVar.Key = leftVar.Key;
                 rightVar.Collection = leftVar.Collection;
-                Debug.Assert(leftVar.Key != null);
-                arrayVar.Data[(int)(long)leftVar.Key] = rightVar;
+                arrayVar.Data[(int)(long)leftVar.Key!] = rightVar;
                 SystemStack.Push(rightVar);
                 break;
 
             case TableVar tableVar:
                 rightVar.Key = leftVar.Key;
                 rightVar.Collection = leftVar.Collection;
-                Debug.Assert(leftVar.Key != null);
-                tableVar.Data[leftVar.Key] = rightVar;
+                tableVar.Data[leftVar.Key!] = rightVar;
                 SystemStack.Push(rightVar);
                 break;
 

@@ -1,4 +1,6 @@
-﻿namespace Snobol4.Common;
+﻿using System.Runtime.InteropServices.JavaScript;
+
+namespace Snobol4.Common;
 
 //"local second argument is not integer" /* 134 */,
 //"local first arg is not a program function name" /* 135 */,
@@ -9,7 +11,7 @@ public partial class Executive
     {
         //Debug.WriteLine("Local()");
         if (!arguments[0].Convert(VarType.STRING, out _, out var str, this) || (string)str == "")
-        {   
+        {
             LogRuntimeException(60);
             return;
         }
@@ -27,12 +29,13 @@ public partial class Executive
         }
 
         // Fail if index is out of range
-        if ((long)i > entry.Locals.Count - FunctionTable[(string)str].ArgumentCount - 1 || (long)i <= 0)
+        var j = (int)(long)i - 1;
+        if (j >= entry.Locals.Count || j < 0)
         {
             NonExceptionFailure();
             return;
         }
 
-        SystemStack.Push(new StringVar(entry.Locals[(int)(long)i + FunctionTable[(string)str].ArgumentCount - 1]));
+        SystemStack.Push(new StringVar(entry.Locals[j]));
     }
 }

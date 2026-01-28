@@ -27,12 +27,12 @@ public partial class Executive
         }
 
         // Fail if index is out of range
-        if ((long)i > FunctionTable[(string)str].ArgumentCount || (long)i <= 0)
+        if ((long)i > entry.Parameters.Count || (long)i <= 0)
         {
             NonExceptionFailure();
             return;
         }
 
-        SystemStack.Push(new StringVar(entry.Locals[(int)(long)i - 1]));
+        SystemStack.Push(new StringVar(entry.Parameters[(int)(long)i - 1]));
     }
 }

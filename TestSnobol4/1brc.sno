@@ -1,14 +1,18 @@
       &trim = 1
       &stlimit = 0
 
-      define('fmt(v)x,d')
+      define('fmt(w)x,d')
       data('tempdata(min,max,mean,total)')
 
-      stations = table(10000)
       input(.in,10, 'measurements.txt')
 
 * Pattern to parse the input
       stationpat = breakx(';') . station ';' rem . temp
+      mean = table()
+      min = table()
+      max = table()
+      total = table()
+      stations = table()
 
 loop  line = in                                           :f(done)
       line stationpat                                     :f(error)
@@ -17,15 +21,18 @@ loop  line = in                                           :f(done)
       temp = convert(convert(temp,'real') * 10, 'integer') 
 
 * First time seeing this station.. set initial values
-      stations[station] = ident(stations[station])
-+                         tempdata(temp, temp, 1, temp)   :s(loop)
+      differ(mean[station])                               :s(skip)
+      stations[station] = station
+      mean[station] = 1
+      min[station] = temp
+      max[station] = temp
+      total[station] = temp                               :(loop)
 
 * Otherwise update the existing entry
-      v = stations[station]
-      mean(v) = mean(v) + 1
-      min(v) = lt(temp, min(v)) temp
-      max(v) = gt(temp, max(v)) temp
-      total(v) = total(v) + temp                          :(loop)
+skip  mean[station] = mean[station] + 1
+debug min[station] = lt(temp, min[station]) temp
+      max[station] = gt(temp, max[station]) temp
+      total[station] = total[station] + temp              :(loop)
 
 done  stations = sort(stations)
       i = 0
@@ -34,15 +41,17 @@ report
       station = stations[i = i + 1,1]                     :f(finish)
       v = stations[i,2]
       outstr = outstr ',' station '=' 
-+              fmt(min(v)) '/' 
-+              fmt(total(v) / mean(v)) '/' 
-+              fmt(max(v))                                :(report)
++              fmt(min[v]) '/' 
++              fmt((total[v] / mean[v])) '/' 
++              fmt(max[v])                                :(report)
    
 finish output = '{' substr(outstr,2,size(outstr) - 1) '}' :(end)
 
 error output = 'error reading line:' line
 
 * A little cheat to format a value as a real with a single digit decimal.
+* A little cheat to format a value as a real with a single digit decimal.
 fmt   fmt = convert(v,'string')
-      fmt len(size(v) - 1) . x rem . d = x '.' d          :(return) 
+      fmt len(size(v) - 1) . x rem . d
+      fmt = = x '.' d          :(return) 
 end

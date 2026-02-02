@@ -39,7 +39,7 @@ public partial class Builder
     public List<string> MessageHistory = [];
 
     // Source code
-    //internal List<string> PathList = [];           // List of source paths
+    //internal List<string> PathList = [];          // List of source paths
     internal List<string> IncludeList = [];         // List of include paths
     internal int StatementCount;
 
@@ -47,7 +47,7 @@ public partial class Builder
     internal bool SuppressSignOnMessage;            // -b
     internal bool ShowCompilerStatistics;           // -c
     internal bool WriteCSharpCode;                  // -cs
-    public bool CaseFolding = true;                 // -F and -f
+    public bool CaseFolding = true;                // -F and -f
     public bool SuppressListingHeader;              // -h
     public bool StopOnRuntimeError;                 // -k
     public bool ShowListing;                        // -l

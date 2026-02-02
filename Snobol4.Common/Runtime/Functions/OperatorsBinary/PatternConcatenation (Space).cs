@@ -10,14 +10,14 @@ public partial class Executive
     public void CreateConcatenatePattern(List<Var> arguments)
     {
         // If left argument is null, return the right argument unchanged
-        if (arguments[0] is StringVar arg0 && arg0.Data == "")
+        if (arguments[0] is StringVar { Data: "" })
         {
             SystemStack.Push(arguments[1]);
             return;
         }
 
         // If right argument is null, return the left argument unchanged
-        if (arguments[0] is StringVar arg1 && arg1.Data == "")
+        if (arguments[1] is StringVar { Data: "" })
         {
             SystemStack.Push(arguments[0]);
             return;

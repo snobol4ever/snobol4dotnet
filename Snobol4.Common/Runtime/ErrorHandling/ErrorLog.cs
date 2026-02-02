@@ -2,6 +2,7 @@
 
 public partial class Executive
 {
+
     public StringVar LogRuntimeException(int code, Exception? e = null)
     {
         ((IntegerVar)IdentifierTable["&errtype"]).Data = code;

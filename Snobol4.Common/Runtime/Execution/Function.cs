@@ -1,4 +1,6 @@
-﻿namespace Snobol4.Common;
+﻿using System.Diagnostics;
+
+namespace Snobol4.Common;
 
 public partial class Executive
 {
@@ -17,6 +19,8 @@ public partial class Executive
     /// <param name="argumentCount">Number of supplied arguments</param>
     public void Function(int argumentCount)
     {
+        Stopwatch timer = Stopwatch.StartNew();
+
         if (Builder.TraceStatements)
             Console.Error.WriteLine($@"Function {argumentCount}");
 
@@ -27,15 +31,7 @@ public partial class Executive
             return;
         }
 
-        var functionVar = SystemStack.Pop();
-
-        // Function name must be a string
-        if (functionVar is not StringVar functionStringVar)
-        {
-            // 22 undefined function called
-            LogRuntimeException(22);
-            return;
-        }
+        var functionStringVar = (StringVar)SystemStack.Pop();
 
         // Function name must be in the symbol table
         if (!FunctionTable.TryGetValue(functionStringVar.Data, out var functionEntry))
@@ -49,18 +45,12 @@ public partial class Executive
         for (var i = arguments.Count; i < functionEntry.ArgumentCount; ++i)
             arguments.Add(StringVar.Null());
 
-        foreach(var argument in arguments)
-        {
-            if(!argument.Succeeded)
-                return;
-        }
-
         // If any arguments have input channels, get input now
         InputArguments(arguments);
 
         // Add argument for name of function
         arguments.Add(functionStringVar);
-        
+
         // Invoke the function obtained from the Function Table
         functionEntry.Handler(arguments);
     }

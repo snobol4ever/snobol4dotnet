@@ -49,6 +49,19 @@ public partial class Executive
             return;
         }
 
+        // Perform conditional assignments
+        foreach (var nameListEntry in BetaStack.Reverse())
+        {
+            List<Var> assignment =
+            [
+                nameListEntry.Assignee,
+                new StringVar(nameListEntry.Scan.Subject[nameListEntry.PreCursor..nameListEntry.PostCursor])
+            ];
+
+            Assign(assignment);
+            SystemStack.Pop();
+        }
+        
         // Store object reference to save SubjectVar in a symbol table
         var subjectVar = new SubjectVar((string)subjectValue, mr)
         {

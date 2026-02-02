@@ -130,20 +130,16 @@ public partial class Executive
 
     internal void CreateProgramDefinedDataInstance(List<Var> arguments)
     {
-        if (arguments[^1] is not StringVar functionName)
-        {
-            LogRuntimeException(22);
-            return;
-        }
-
-        var dataName = functionName.Data;
+        var dataName = ((StringVar)arguments[^1]).Data;
         var dataDefinition = UserDataDefinitions[dataName];
         arguments = arguments[..^1];
         var userDefinedDataVar = new ProgramDefinedDataVar(dataName, dataDefinition.Prototype, dataDefinition.FieldNames);
+        var fieldsCount = dataDefinition.FieldNames.Count;
+        var fieldValues = userDefinedDataVar.FieldValues.Data;
 
-        for (var i = 0; i < dataDefinition.FieldNames.Count; i++)
+        for (var i = 0; i < fieldsCount; i++)
         {
-            userDefinedDataVar.FieldValues.Data[i] = arguments[i];
+            fieldValues[i] = arguments[i];
         }
 
         SystemStack.Push(userDefinedDataVar);
@@ -157,6 +153,6 @@ public partial class Executive
         var v = programDefinedDataVar.FieldValues.Data[(int)(long)index];
         v.Key = index;
         v.Collection = programDefinedDataVar.FieldValues;
-        SystemStack.Push(programDefinedDataVar.FieldValues.Data[(int)(long)index]);
+        SystemStack.Push(v);
     }
 }

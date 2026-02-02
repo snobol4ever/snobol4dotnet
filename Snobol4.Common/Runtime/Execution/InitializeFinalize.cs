@@ -31,7 +31,7 @@ public partial class Executive
 
                               """);
 
-        PerformConditionalVariableAssociations();
+        //PerformConditionalVariableAssociations();
 
         while (SystemStack.Peek() is not StatementSeparator)
             SystemStack.Pop();
@@ -43,21 +43,21 @@ public partial class Executive
         ((IntegerVar)IdentifierTable["&lastline"]).Data = ((IntegerVar)IdentifierTable["&line"]).Data;
     }
 
-    public void PerformConditionalVariableAssociations()
-    {
-        if (Failure)
-            return;
+    //public void PerformConditionalVariableAssociations()
+    //{
+    //    if (Failure)
+    //        return;
 
-        foreach (var nameListEntry in BetaStack.Reverse())
-        {
-            List<Var> arguments =
-            [
-                nameListEntry.Assignee,
-                new StringVar(nameListEntry.Scan.Subject[nameListEntry.PreCursor..nameListEntry.PostCursor])
-            ];
+    //    foreach (var nameListEntry in BetaStack.Reverse())
+    //    {
+    //        List<Var> arguments =
+    //        [
+    //            nameListEntry.Assignee,
+    //            new StringVar(nameListEntry.Scan.Subject[nameListEntry.PreCursor..nameListEntry.PostCursor])
+    //        ];
 
-            Assign(arguments);
-            SystemStack.Pop();
-        }
-    }
+    //        Assign(arguments);
+    //        SystemStack.Pop();
+    //    }
+    //}
 }

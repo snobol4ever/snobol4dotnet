@@ -138,7 +138,6 @@ public partial class Executive
     internal Dictionary<string, StreamReader> StreamReadersBySymbol;
     internal Dictionary<string, StreamReader> StreamReadersByChannel;
 
-
     internal Dictionary<string, string> TraceTableIdentifierAccess;
     internal Dictionary<string, string> TraceTableIdentifierValue;
     internal Dictionary<string, string> TraceTableIdentifierKeyword;

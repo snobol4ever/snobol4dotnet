@@ -13,7 +13,7 @@ public partial class Executive
     // ReSharper disable once UnusedMember.Global
     public void Operator(string functionName, int argumentCount)
     {
-        if (Builder.TraceStatements)
+        if (Parent.TraceStatements)
             Console.Error.WriteLine($@"Operator {functionName} {argumentCount}");
 
         // Get all arguments and check for prior failure

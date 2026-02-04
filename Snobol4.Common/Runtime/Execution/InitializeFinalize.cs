@@ -5,7 +5,7 @@ public partial class Executive
     // ReSharper disable once UnusedMember.Global
     public void InitializeStatement(int lineNumber)
     {
-        if (Builder.TraceStatements)
+        if (Parent.TraceStatements)
             Console.Error.WriteLine($"""
 
                                InitializeStatement {lineNumber}
@@ -24,7 +24,7 @@ public partial class Executive
     // ReSharper disable once UnusedMember.Global
     public void FinalizeStatement()
     {
-        if (Builder.TraceStatements)
+        if (Parent.TraceStatements)
             Console.Error.WriteLine("""
 
                               FinalizeStatement

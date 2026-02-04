@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace Snobol4.Common;
+﻿namespace Snobol4.Common;
 
 public partial class Executive
 {
@@ -19,11 +17,6 @@ public partial class Executive
     /// <param name="argumentCount">Number of supplied arguments</param>
     public void Function(int argumentCount)
     {
-        var timer = Stopwatch.StartNew();
-
-        if (Builder.TraceStatements)
-            Console.Error.WriteLine($@"Function {argumentCount}");
-
         // Get all arguments and check for prior failure
         List<Var> arguments = [];
         if (SystemStack.ExtractArguments(argumentCount, arguments, this))

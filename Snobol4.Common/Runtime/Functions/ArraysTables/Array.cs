@@ -41,7 +41,7 @@ public partial class Executive
         // Do not delete. Used by DLL
         if (Failure)
             return;
-        if (Builder.TraceStatements)
+        if (Parent.TraceStatements)
             Console.Error.WriteLine(@"IndexCollection");
 
         List<Var> varIndices = [];

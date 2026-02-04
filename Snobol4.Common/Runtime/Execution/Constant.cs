@@ -2,40 +2,31 @@
 
 public partial class Executive
 {
-    #region Constants
-
     // ReSharper disable once UnusedMember.Global
     public void Constant(string value)
     {
-        if (Builder.TraceStatements)
-            Console.Error.WriteLine($@"Constant {value}");
+        using var profiler = new Profiler("Constant", ProfileStatements);
         SystemStack.Push(new StringVar(value));
     }
 
     // ReSharper disable once UnusedMember.Global
     public void Constant(long value)
     {
-        if (Builder.TraceStatements)
-            Console.Error.WriteLine($@"Constant {value}");
+        Profiler profiler = new Profiler("Constant", ProfileStatements);
         SystemStack.Push(new IntegerVar(value));
     }
 
     // ReSharper disable once UnusedMember.Global
     public void Constant(double value)
     {
-        if (Builder.TraceStatements)
-            Console.Error.WriteLine($@"Constant {value}");
-        // Do not delete. Used by DLL
+        using var profiler = new Profiler("Constant", ProfileStatements);
         SystemStack.Push(new RealVar(value));
     }
 
     // ReSharper disable once UnusedMember.Global
     public void Constant(DeferredCode value)
     {
-        if (Builder.TraceStatements)
-            Console.Error.WriteLine($@"Constant {value}");
+        using var profiler = new Profiler("Constant", ProfileStatements);
         SystemStack.Push(new ExpressionVar(value));
     }
-
-    #endregion
 }

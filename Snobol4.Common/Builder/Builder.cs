@@ -28,7 +28,7 @@ public partial class Builder
 {
     #region Members
 
-    public static bool TraceStatements = false;
+    public bool TraceStatements = false;
 
     // Timers for statistics
     private readonly Stopwatch _timerBuild = new();   // Timer for statistics

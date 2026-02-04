@@ -6,7 +6,7 @@ public partial class Executive
     {
         while (i >= 0)
         {
-            if (Builder.TraceStatements)
+            if (Parent.TraceStatements)
                 Console.Error.WriteLine(@$"{i} {SourceCode[i]}");
 
             i = Statements[i](this);

@@ -1,7 +1,7 @@
 using Snobol4.Common;
 using Test.TestLexer;
 
-namespace TestGimpel;
+namespace Test.Gimpel;
 
 [TestClass]
 public class ROMAN

@@ -193,8 +193,6 @@ public partial class Executive
 
         // Run function by transferring to the entry label
         var nextIndex = ExecuteLoop(Labels[definition.EntryLabel]);
-        Console.WriteLine($@"nextIndex: {nextIndex}");
-
         var returnVar = IdentifierTable[functionName];
 
         if (nextIndex == -2) // RETURN

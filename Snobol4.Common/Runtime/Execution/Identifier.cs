@@ -8,7 +8,7 @@ public partial class Executive
 
     public void Identifier(string symbol)
     {
-        if (Builder.TraceStatements)
+        if (Parent.TraceStatements)
             Console.Error.WriteLine($@"Identifier {symbol}");
 
         // Identifiers cannot be null strings

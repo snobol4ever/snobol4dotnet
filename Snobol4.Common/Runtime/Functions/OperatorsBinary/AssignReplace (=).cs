@@ -13,7 +13,7 @@ public partial class Executive
 {
     public void _BinaryEquals()
     {
-        if (Builder.TraceStatements)
+        if (Parent.TraceStatements)
             Console.Error.WriteLine(@"_BinaryEquals");
         // Do not delete. Used by DLL
 

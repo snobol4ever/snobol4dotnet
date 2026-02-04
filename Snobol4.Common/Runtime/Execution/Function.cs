@@ -17,6 +17,8 @@ public partial class Executive
     /// <param name="argumentCount">Number of supplied arguments</param>
     public void Function(int argumentCount)
     {
+        using var profiler1 = Profiler.Start($"Function", ProfileStatements);
+
         // Get all arguments and check for prior failure
         List<Var> arguments = [];
         if (SystemStack.ExtractArguments(argumentCount, arguments, this))
@@ -25,7 +27,6 @@ public partial class Executive
         }
 
         var functionStringVar = (StringVar)SystemStack.Pop();
-
         // Function name must be in the symbol table
         if (!FunctionTable.TryGetValue(functionStringVar.Data, out var functionEntry))
         {
@@ -43,6 +44,9 @@ public partial class Executive
 
         // Add argument for name of function
         arguments.Add(functionStringVar);
+
+        profiler1?.Dispose();
+        using var profiler2 = Profiler.Start($"F_{functionStringVar.Data}", ProfileStatements);
 
         // Invoke the function obtained from the Function Table
         functionEntry.Handler(arguments);

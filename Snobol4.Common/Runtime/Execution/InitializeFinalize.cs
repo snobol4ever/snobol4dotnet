@@ -5,6 +5,8 @@ public partial class Executive
     // ReSharper disable once UnusedMember.Global
     public void InitializeStatement(int lineNumber)
     {
+        using var profiler1 = Profiler.Start($"InitializeStatement", ProfileStatements);
+
         if (Parent.TraceStatements)
             Console.Error.WriteLine($"""
 
@@ -24,14 +26,14 @@ public partial class Executive
     // ReSharper disable once UnusedMember.Global
     public void FinalizeStatement()
     {
+        using var profiler1 = Profiler.Start($"FinalizeStatement", ProfileStatements);
+
         if (Parent.TraceStatements)
             Console.Error.WriteLine("""
 
                               FinalizeStatement
 
                               """);
-
-        //PerformConditionalVariableAssociations();
 
         while (SystemStack.Peek() is not StatementSeparator)
             SystemStack.Pop();

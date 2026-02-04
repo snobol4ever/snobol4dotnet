@@ -2,7 +2,7 @@
   "profiles": {
     "Snobol4": {
       "commandName": "Project",
-      "commandLineArgs": "-x -f \"C:\\Users\\jcooper\\Documents\\Visual Studio 2022\\Snobol4.Net\\TestSnobol4\\1brc.sno\""
+      "commandLineArgs": "-x -f -c \"C:\\Users\\jcooper\\Documents\\Visual Studio 2022\\Snobol4.Net\\TestSnobol4\\1brc.sno\""
     }
   }
 }

@@ -6,7 +6,7 @@ namespace Snobol4.Common;
 
 public partial class Executive
 {
-    public bool ProfileStatements = true;
+    public bool ProfileStatements = false;
 
     // ReSharper disable once UnusedMember.Global
     public void SaveStatus(bool bSaveStatus)
@@ -92,6 +92,16 @@ public class Profiler : IDisposable
         _timer = Stopwatch.StartNew();
     }
 
+    public static Profiler? Start(string statement, bool enable)
+    {
+        if (enable)
+        {
+            return new Profiler(statement, enable);
+        }
+
+        return null;
+    }
+
     public void Dispose()
     {
         if (!_enable)
@@ -100,6 +110,6 @@ public class Profiler : IDisposable
         }
 
         _timer.Stop();
-        Console.Error.WriteLine($@"{_statement} {_timer.Elapsed.ToString()[6..^1]}");
+        Console.WriteLine($@"{_statement},{_timer.Elapsed.ToString()[6..^1]}");
     }
 }

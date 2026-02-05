@@ -16,7 +16,8 @@ public partial class Executive
         ((StringVar)IdentifierTable["&file"]).Data = SourceFiles[lineNumber - 1];
         ((IntegerVar)IdentifierTable["&stno"]).Data = lineNumber;
         ((IntegerVar)IdentifierTable["&line"]).Data = SourceLineNumbers[lineNumber - 1] - 1;
-        ((IntegerVar)IdentifierTable["&stcount"]).Data++;
+        //((IntegerVar)IdentifierTable["&stcount"]).Data++;
+        Amp_StatementCount++;
         Failure = false;
         AlphaStack.Clear(); // Used for conditional variable association
         BetaStack.Clear();  // Used for conditional variable association

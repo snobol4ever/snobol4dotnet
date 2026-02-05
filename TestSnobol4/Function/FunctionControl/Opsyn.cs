@@ -121,6 +121,7 @@ public class Opsyn
                 	    opsyn('!','UCASE',1)	:(ucase_end)
                 ucase   ucase = replace(s,&lcase, &ucase) :(return)
                 ucase_end
+                        output = datatype(&lcase)
                 	    r = ucase('spitbol is very fast.')
                 end
                 """;

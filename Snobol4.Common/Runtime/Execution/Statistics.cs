@@ -48,7 +48,8 @@ public partial class Executive
         Console.Error.WriteLine(@$"in file              {((StringVar)IdentifierTable["&file"]).Data}");
         Console.Error.WriteLine(@$"in line              {((IntegerVar)IdentifierTable["&line"]).Data}");
         Console.Error.WriteLine(@$"in statement         {((IntegerVar)IdentifierTable["&stno"]).Data}");
-        Console.Error.WriteLine(@$"stmts executed       {((IntegerVar)IdentifierTable["&stcount"]).Data}");
+        //Console.Error.WriteLine(@$"stmts executed       {((IntegerVar)IdentifierTable["&stcount"]).Data}");
+        Console.Error.WriteLine(@$"stmts executed       {Amp_StatementCount}");
         Console.Error.WriteLine(@$"execution time sec   {_timerExecute.Elapsed}");
         Console.Error.WriteLine(@$"regenerations        {GC.CollectionCount(memInfo.Generation)}");
         Console.Error.WriteLine(@$"memory used (bytes)  {memoryUsed}");

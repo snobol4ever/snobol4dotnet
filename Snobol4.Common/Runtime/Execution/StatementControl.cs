@@ -11,11 +11,15 @@ public partial class Executive
 
             i = Statements[i](this);
 
-            if (((IntegerVar)IdentifierTable["&stlimit"]).Data <= 0)
+            //if (((IntegerVar)IdentifierTable["&stlimit"]).Data <= 0)
+            //    continue;
+            if (Amp_StatementLimit <= 0)
                 continue;
 
-            if (((IntegerVar)IdentifierTable["&stcount"]).Data <=
-                ((IntegerVar)IdentifierTable["&stlimit"]).Data) continue;
+            //if (((IntegerVar)IdentifierTable["&stcount"]).Data <= ((IntegerVar)IdentifierTable["&stlimit"]).Data) 
+            //    continue;
+            if (Amp_StatementCount <= Amp_StatementLimit)
+                continue;
 
             LogRuntimeException(244);
             Failure = true;

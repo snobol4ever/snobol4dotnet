@@ -85,6 +85,8 @@ public partial class Executive
                 return;
             }
 
+            // Eventually, the next two checks should be moved into each keyword handler
+
             // If leftVar side is &errtext, rightVar side must be a string
             if (leftVar.Symbol == "&errtext" && leftVar is not StringVar)
             {
@@ -96,6 +98,12 @@ public partial class Executive
             if (rightVar is not IntegerVar)
             {
                 LogRuntimeException(208);
+                return;
+            }
+
+            if (KeywordTable.TryGetValue(leftVar.Symbol, out var handler))
+            {
+                handler(rightVar, true);
                 return;
             }
         }
@@ -119,7 +127,6 @@ public partial class Executive
             default:
                 var newVar = rightVar is ArrayVar or TableVar ? rightVar : rightVar.Clone();
                 newVar.Symbol = leftVar.Symbol;
-                //newVar.Collection = rightVar.Collection;
                 newVar.OutputChannel = leftVar.OutputChannel;
                 IdentifierTable[newVar.Symbol] = newVar;
                 SystemStack.Push(newVar);

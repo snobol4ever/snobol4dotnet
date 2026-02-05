@@ -57,10 +57,6 @@ public class IdentifierTable(Executive exec) : Dictionary<string, Var>
     // [DIFFERS FROM ORIGINAL SPITBOL]
     private readonly Dictionary<string, string> _specialKeyWords = new()
     {
-        { "&ABEND", "" },
-        { "&abend", "" },
-        { "&ANCHOR", "" },
-        { "&anchor", "" },
         { "&CASE", "" },
         { "&case", "" },
         { "&CODE", "" },
@@ -87,8 +83,6 @@ public class IdentifierTable(Executive exec) : Dictionary<string, Var>
         { "&output", "" },
         { "&PROFILE", "" },
         { "&profile", "" },
-        { "&STLIMIT", "" },
-        { "&stlimit", "" },
         { "&TRACE", "" },
         { "&trace", "" },
         { "&TRIM", "" },
@@ -378,18 +372,16 @@ public partial class Executive
             { "UNLOAD", new FunctionTableEntry("unload", UnloadExternalFunction, 1,  true) }
         };
 
-        var alphabet = Enumerable.Range(0, 255)
-            .Select(i => (char)i)
-            .ToArray();
-
-        var lowerCase = "";
-        var upperCase = "";
+        var alphabet = Enumerable.Range(0, 255).Select(i => (char)i).ToArray();
+        Amp_LowerCase = "";
+        Amp_UpperCase = "";
         foreach (var letter in alphabet)
         {
             // Use the culture-specific method for case conversion
+            Amp_Alphabet += letter;
             if (!char.IsLower(letter)) continue;
-            lowerCase += letter;
-            upperCase += char.ToUpper(letter, CultureInfo.CurrentCulture);
+            Amp_LowerCase += letter;
+            Amp_UpperCase += char.ToUpper(letter, CultureInfo.CurrentCulture);
         }
 
         IdentifierTable = new IdentifierTable(this)
@@ -398,10 +390,10 @@ public partial class Executive
             // See Emmer MB, Quillen EK, and Dewar RBK. pp 187-193
             // SPITBOL: Tutorial and Program Reference Manual. 2000.
             
-            {"&abend", new IntegerVar(0, "&abend", true)},
-            {"&abort", new PatternVar(new AbortPattern(), "&abort", true , true)},
-            {"&alphabet", new StringVar(new string(alphabet), "&alphabet", true , true)},
-            {"&anchor", new IntegerVar(0, "&anchor", true)},
+            //{"&abend", new IntegerVar(0, "&abend", true)},
+            //{"&abort", new PatternVar(new AbortPattern(), "&abort", true , true)},
+            //{"&alphabet", new StringVar(new string(alphabet), "&alphabet", true , true)},
+            //{"&anchor", new IntegerVar(0, "&anchor", true)},
             {"&arb", new PatternVar(ArbPattern.Structure(), "&arb", true , true)},
             {"&bal", new PatternVar(BalPattern.Structure(), "&bal", true, true)},
             {"&case", new IntegerVar(1, "&case", true)},
@@ -421,20 +413,20 @@ public partial class Executive
             {"&lastfile", new StringVar("", "&lastfile", true , true)},
             {"&lastline", new IntegerVar(0, "&lastline", true , true)},
             {"&lastno", new IntegerVar(0, "&lastno", true , true)},
-            {"&lcase", new StringVar(lowerCase, "&lcase", true , true)},
+            //{"&lcase", new StringVar(lowerCase, "&lcase", true , true)},
             {"&line", new IntegerVar(0, "&line", true , true)},
             {"&maxlength", new IntegerVar(1073741791, "&maxlength", true)},  // 1,073,741,791
             {"&output", new StringVar("", "&output", true)},
             {"&profile", new IntegerVar(0, "&profile", true)},
             {"&rem", new PatternVar(new RemPattern(), "&rem", true , true)},
             {"&rtntype", new StringVar("", "&rtntype", true, true)},
-            {"&stcount", new IntegerVar(0, "&stcount",true , true)},
-            {"&stlimit", new IntegerVar(9223372036854775807, "&stlimit", true)},
+            //{"&stcount", new IntegerVar(0, "&stcount",true , true)},
+            //{"&stlimit", new IntegerVar(9223372036854775807, "&stlimit", true)},
             {"&stno", new IntegerVar(0, "&stno", true , true)},
             {"&succeed", new PatternVar(new SucceedPattern(), "&succeed", true , true)},
             {"&trace", new IntegerVar(0, "&trace", true)},
             {"&trim", new IntegerVar(0, "&trim", true)},
-            {"&ucase", new StringVar(upperCase, "&ucase", true , true)},
+            //{"&ucase", new StringVar(upperCase, "&ucase", true , true)},
             {"abort", new PatternVar(new AbortPattern(), "abort", true, true)},
             {"arb", new PatternVar(ArbPattern.Structure(), "arb", true , true)},
             {"bal", new PatternVar(BalPattern.Structure(), "bal", true, true)},
@@ -447,10 +439,10 @@ public partial class Executive
             {"succeed", new PatternVar(new SucceedPattern(), "&succeed", true , true)},
             {"terminal", new StringVar("", "terminal")},
 
-            {"&ABEND", new IntegerVar(0, "&abend", true)},
-            {"&ABORT", new PatternVar(new AbortPattern(), "&abort", true , true)},
-            {"&ALPHABET", new StringVar(new string(alphabet), "&alphabet", true , true)},
-            {"&ANCHOR", new IntegerVar(0, "&anchor", true)},
+            //{"&ABEND", new IntegerVar(0, "&abend", true)},
+            //{"&ABORT", new PatternVar(new AbortPattern(), "&abort", true , true)},
+            //{"&ALPHABET", new StringVar(new string(alphabet), "&alphabet", true , true)},
+            //{"&ANCHOR", new IntegerVar(0, "&anchor", true)},
             {"&ARB", new PatternVar(ArbPattern.Structure(), "&arb", true , true)},
             {"&BAL", new PatternVar(BalPattern.Structure(), "&bal", true, true)},
             {"&CASE", new IntegerVar(1, "&case", true)},
@@ -470,20 +462,20 @@ public partial class Executive
             {"&LASTFILE", new StringVar("", "&lastfile", true , true)},
             {"&LASTLINE", new IntegerVar(0, "&lastline", true , true)},
             {"&LASTNO", new IntegerVar(0, "&lastno", true , true)},
-            {"&LCASE", new StringVar(lowerCase, "&lcase", true , true)},
+            //{"&LCASE", new StringVar(lowerCase, "&lcase", true , true)},
             {"&LINE", new IntegerVar(0, "&line", true , true)},
             {"&MAXLENGTH", new IntegerVar(1073741791, "&maxlength", true)},  // 1,073,741,791
             {"&OUTPUT", new StringVar("", "&output", true)},
             {"&PROFILE", new IntegerVar(0, "&profile", true)},
             {"&REM", new PatternVar(new RemPattern(), "&rem", true , true)},
             {"&RTNTYPE", new StringVar("", "&rtntype", true, true)},
-            {"&STCOUNT", new IntegerVar(0, "&stcount",true , true)},
-            {"&STLIMIT", new IntegerVar(9223372036854775807, "&stlimit", true)},
+            //{"&STCOUNT", new IntegerVar(0, "&stcount",true , true)},
+            //{"&STLIMIT", new IntegerVar(9223372036854775807, "&stlimit", true)},
             {"&STNO", new IntegerVar(0, "&stno", true , true)},
             {"&SUCCEED", new PatternVar(new SucceedPattern(), "&succeed", true , true)},
             {"&TRACE", new IntegerVar(0, "&trace", true)},
             {"&TRIM", new IntegerVar(0, "&trim", true)},
-            {"&UCASE", new StringVar(upperCase, "&ucase", true , true)},
+            //{"&UCASE", new StringVar(upperCase, "&ucase", true , true)},
             {"ABORT", new PatternVar(new AbortPattern(), "abort", true, true)},
             {"ARB", new PatternVar(ArbPattern.Structure(), "arb", true , true)},
             {"BAL", new PatternVar(BalPattern.Structure(), "bal", true, true)},
@@ -495,9 +487,37 @@ public partial class Executive
             {"REM", new PatternVar(new RemPattern(), "rem", true, true)},
             {"SUCCEED", new PatternVar(new SucceedPattern(), "&succeed", true , true)},
             {"TERMINAL", new StringVar("", "terminal")}
-
         };
 
+        KeywordTable = new()
+        {
+            { "&ABEND", HandleAbend },
+            { "&abend", HandleAbend },
+
+            { "&ABORT", HandleAbort },
+            { "&abort", HandleAbort },
+
+            { "&ALPHABET", HandleAlphabet },
+            { "&alphabet", HandleAlphabet },
+
+            { "&ANCHOR", HandleAnchor },
+            { "&anchor", HandleAnchor },
+
+            { "&LCASE", HandleLowerCase },
+            { "&lcase", HandleLowerCase },
+
+            { "&STCOUNT", HandleStatementCount },
+            { "&stcount", HandleStatementCount },
+
+            { "&STLIMIT", HandleStatementLimit },
+            { "&stlimit", HandleStatementLimit },
+
+            { "&UCASE", HandleUpperCase },
+            { "&ucase", HandleUpperCase },
+
+
+        };
+        
         IdentifierTable["output"].OutputChannel = "+console-output";
         IdentifierTable["terminal"].OutputChannel = "+terminal-output";
         IdentifierTable["input"].InputChannel = "+console-input";

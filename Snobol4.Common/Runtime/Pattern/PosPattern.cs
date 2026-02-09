@@ -42,6 +42,8 @@ internal class PosPattern : TerminalPattern
 
     internal override MatchResult Scan(int node, Scanner scan)
     {
+        using var profile1 = Profiler.Start4("Pos", scan.Exec);
+
         if (_functionName != null)
         {
             _functionName(scan.Exec);

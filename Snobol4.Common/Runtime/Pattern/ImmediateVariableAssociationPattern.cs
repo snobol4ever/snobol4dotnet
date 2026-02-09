@@ -110,6 +110,9 @@ internal class ImmediateVariableAssociation1 : NullPattern
     /// </remarks>
     internal override MatchResult Scan(int node, Scanner scan)
     {
+        using var profile1 = Profiler.Start4("$1", scan.Exec);
+
+
         _va2.PreCursor = scan.CursorPosition;
         return MatchResult.Success(scan);
     }
@@ -245,6 +248,8 @@ internal class ImmediateVariableAssociation2 : NullPattern
     /// </example>
     internal override MatchResult Scan(int node, Scanner scan)
     {
+        using var profile1 = Profiler.Start4("$2", scan.Exec);
+
         // Extract the matched substring using range syntax
         List<Var> arguments =
         [

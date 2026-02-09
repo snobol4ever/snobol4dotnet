@@ -16,20 +16,20 @@ public sealed class ExpressionComparisonStrategy : IComparisonStrategy
         }
 
         // Expressions of the same type compare by creation time
-        return DateTime.Compare(self.CreationDateTime, other.CreationDateTime);
+        return self.CreationOrder.CompareTo(other.CreationOrder);;
     }
 
 
     public bool Equals(Var self, Var other)
     {
         // Expressions are only equal if they're the same instance
-        return other.Uid == self.Uid;
+        return other.CreationOrder == self.CreationOrder;
     }
 
 
     public bool IsIdentical(Var self, Var other)
     {
         // Expressions are identical only if they have the same unique ID
-        return other.Uid == self.Uid;
+        return other.CreationOrder == self.CreationOrder;
     }
 }

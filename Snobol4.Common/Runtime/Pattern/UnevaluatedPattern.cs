@@ -94,6 +94,8 @@ internal class UnevaluatedPattern : TerminalPattern
     /// </returns>
     internal override MatchResult Scan(int node, Scanner scan)
     {
+        using var profile1 = Profiler.Start4("*", scan.Exec);
+
         // Evaluate the function to get the actual pattern
         _functionName(scan.Exec);
 

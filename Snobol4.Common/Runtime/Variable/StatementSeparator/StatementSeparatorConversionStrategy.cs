@@ -26,6 +26,6 @@ public sealed class StatementSeparatorConversionStrategy : IConversionStrategy
     public object GetTableKey(Var self)
     {
         // Statement separators use their unique ID as table key (though this should never be used)
-        return self.Uid;
+        return self.CreationOrder;
     }
 }

@@ -58,6 +58,8 @@ internal class NullPattern : LiteralPattern
     /// <returns>Always returns Success without advancing the cursor</returns>
     internal override MatchResult Scan(int node, Scanner scan)
     {
+        using var profile1 = Profiler.Start4("Null", scan.Exec);
+
         return MatchResult.Success(scan);
     }
 

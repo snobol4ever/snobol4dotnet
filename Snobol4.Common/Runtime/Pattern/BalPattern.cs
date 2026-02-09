@@ -101,6 +101,7 @@ internal class BalPattern : Pattern
     {
         internal override MatchResult Scan(int node, Scanner scan)
         {
+            using var profile1 = Profiler.Start4("GBal1", scan.Exec);
             return MatchResult.Success(scan);
         }
 
@@ -143,6 +144,8 @@ internal class BalPattern : Pattern
         /// </remarks>
         internal override MatchResult Scan(int node, Scanner scan)
         {
+            using var profile1 = Profiler.Start4("GBal", scan.Exec);
+
             // Fail if there are no more characters to scan or
             // the next character is a closing parenthesis
             if (scan.CursorPosition == scan.Subject.Length ||

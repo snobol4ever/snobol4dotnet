@@ -33,6 +33,6 @@ public sealed class CodeConversionStrategy : IConversionStrategy
     public object GetTableKey(Var self)
     {
         // Code uses its unique ID as table key
-        return self.Uid;
+        return self.CreationOrder;
     }
 }

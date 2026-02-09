@@ -47,7 +47,7 @@ public class Scanner
         {
             _state.PreviousCursorPosition = _state.CursorPosition = cursorPosition;
             Debug.Assert(_ast.StartNode != null);
-            
+
             var mr = Match(_ast.StartNode);
             if (mr.IsSuccess || mr.IsAbort)
                 return mr;

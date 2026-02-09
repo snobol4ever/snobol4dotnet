@@ -44,6 +44,8 @@ internal class BreakPattern : TerminalPattern
     {
         if (_functionName != null)
         {
+            using var profile1 = Profiler.Start4("Break", scan.Exec);
+            
             _functionName(scan.Exec);
             var result = scan.Exec.SystemStack.Pop();
 

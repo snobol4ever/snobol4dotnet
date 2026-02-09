@@ -28,6 +28,8 @@ public partial class Builder
 {
     #region Members
 
+    public static long CreationOrder;
+
     public bool TraceStatements = false;
 
     // Timers for statistics

@@ -16,7 +16,7 @@ public class ArrayComparisonStrategy : IComparisonStrategy
         // Arrays of the same type compare by creation time
         if (other is ArrayVar)
         {
-            return DateTime.Compare(self.CreationDateTime, other.CreationDateTime);
+            return self.CreationOrder.CompareTo(other.CreationOrder);
         }
 
         // Different types compare by type name (lexicographically)
@@ -34,6 +34,6 @@ public class ArrayComparisonStrategy : IComparisonStrategy
     public bool IsIdentical(Var self, Var other)
     {
         // Arrays are identical only if they have the same unique ID
-        return other is not null && other.Uid == self.Uid;
+        return other is not null && other.CreationOrder == self.CreationOrder;
     }
 }

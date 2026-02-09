@@ -79,6 +79,8 @@ internal class LiteralPattern : TerminalPattern
     /// </remarks>
     internal override MatchResult Scan(int node, Scanner scan)
     {
+        using var profile1 = Profiler.Start4("Literal", scan.Exec);
+
         var remainingLength = scan.Subject.Length - scan.CursorPosition;
 
         // Early exit if not enough characters remain

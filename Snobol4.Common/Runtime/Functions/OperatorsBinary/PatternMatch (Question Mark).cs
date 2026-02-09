@@ -21,14 +21,14 @@ public partial class Executive
             arguments[1] = SystemStack.Pop();
         }
 
-        // Pattern must be a pattern
+        // Right argument must resolve to a pattern
         if (!arguments[1].Convert(VarType.PATTERN, out _, out var patternValue, this))
         {
             LogRuntimeException(240);
             return;
         }
 
-        // Subject must resolve to a string
+        // Left argument must resolve to a string
         if (!arguments[0].Convert(VarType.STRING, out var subject, out var subjectValue, this))
         {
             LogRuntimeException(241);
@@ -42,6 +42,7 @@ public partial class Executive
         // Try the match
         var anchor = AmpAnchor;
         Scanner scanner = new(this);
+
         var mr = scanner.PatternMatch((string)subjectValue, (Pattern)patternValue, 0, anchor != 0);
 
         if (mr.Outcome != MatchResult.Status.SUCCESS)

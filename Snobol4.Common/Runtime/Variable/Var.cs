@@ -32,7 +32,7 @@ public abstract class Var : IEquatable<Var>
     /// <summary>
     /// Gets the unique identifier for this variable instance.
     /// </summary>
-    public Guid Uid  = Guid.NewGuid();
+    ///public long CreationOrder  = Builder.CreationOrder++;
 
     /// <summary>
     /// Gets or sets the input channel associated with this variable.
@@ -57,7 +57,7 @@ public abstract class Var : IEquatable<Var>
     /// <summary>
     /// Gets the date and time when this variable was created (in UTC).
     /// </summary>
-    public DateTime CreationDateTime { get; } = DateTime.UtcNow;
+    public long CreationOrder { get; } = ++Builder.CreationOrder;
 
     /// <summary>
     /// Gets or sets the key if this variable is an element of a collection.
@@ -332,12 +332,6 @@ public abstract class Var : IEquatable<Var>
     /// <param name="obj">The object to compare</param>
     /// <returns>True if equal, false otherwise</returns>
     public override bool Equals(object? obj) => obj is Var other && Equals(other);
-
-    /// <summary>
-    /// Gets the hash code for this variable
-    /// </summary>
-    /// <returns>A hash code for this variable</returns>
-    public override int GetHashCode() => Uid.GetHashCode();
 
     /// <summary>
     /// Determines whether two variables are identical (reference equality)

@@ -119,6 +119,8 @@ internal class ConditionalVariableAssociation1 : NullPattern
     /// </remarks>
     internal override MatchResult Scan(int node, Scanner scan)
     {
+        using var profile1 = Profiler.Start4(".1", scan.Exec);
+        
         Exec.AlphaStack.Push(new NameListEntry(Assignee, scan.CursorPosition, -1, scan));
         return MatchResult.Success(scan);
     }
@@ -192,6 +194,7 @@ internal class ConditionalVariableAssociationBackup1 : NullPattern
     /// </remarks>
     internal override MatchResult Scan(int node, Scanner scan)
     {
+        using var profile1 = Profiler.Start4(".2", scan.Exec);
         Exec.AlphaStack.Pop();
         return MatchResult.Failure(scan);
     }
@@ -278,6 +281,8 @@ internal class ConditionalVariableAssociation2 : NullPattern
     /// </remarks>
     internal override MatchResult Scan(int node, Scanner scan)
     {
+        using var profile1 = Profiler.Start4(".3", scan.Exec);
+   
         if (Exec.AlphaStack.Count == 0)
         {
             return MatchResult.Failure(scan);
@@ -358,6 +363,8 @@ internal class ConditionalVariableAssociationBackup2 : NullPattern
     /// </remarks>
     internal override MatchResult Scan(int node, Scanner scan)
     {
+        using var profile1 = Profiler.Start4(".4", scan.Exec);
+
         if (Exec.BetaStack.Count == 0)
         {
             return MatchResult.Failure(scan);

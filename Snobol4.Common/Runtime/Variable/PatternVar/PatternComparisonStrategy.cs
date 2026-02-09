@@ -18,7 +18,7 @@ public class PatternComparisonStrategy : IComparisonStrategy
         // Patterns of the same type compare by creation time
         if (other is PatternVar)
         {
-            return DateTime.Compare(patternSelf.CreationDateTime, other.CreationDateTime);
+            return patternSelf.CreationOrder.CompareTo(other.CreationOrder);
         }
 
         // Different types compare by type name
@@ -41,6 +41,6 @@ public class PatternComparisonStrategy : IComparisonStrategy
 
         // Patterns are identical only if they have the same unique ID
         // (Pattern structure equality would be complex and is not needed)
-        return other.Uid == self.Uid;
+        return other.CreationOrder == self.CreationOrder;
     }
 }

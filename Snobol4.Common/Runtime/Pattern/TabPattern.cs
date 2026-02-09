@@ -39,6 +39,8 @@ internal class TabPattern : TerminalPattern
 
     internal override MatchResult Scan(int node, Scanner scan)
     {
+        using var profile1 = Profiler.Start4("Tab", scan.Exec);
+
         if (_functionName != null)
         {
             _functionName(scan.Exec);

@@ -40,6 +40,8 @@ internal class SpanPattern : TerminalPattern
 
     internal override MatchResult Scan(int node, Scanner scan)
     {
+        using var profile1 = Profiler.Start4("Span", scan.Exec);
+
         if (scan.CursorPosition >= scan.Subject.Length)
             return MatchResult.Failure(scan);
 

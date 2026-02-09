@@ -35,6 +35,6 @@ public sealed class ProgramDefinedDataConversionStrategy : IConversionStrategy
     public object GetTableKey(Var self)
     {
         // User-defined data uses its unique ID as table key
-        return self.Uid;
+        return self.CreationOrder;
     }
 }

@@ -62,6 +62,8 @@ internal class RemPattern : TerminalPattern
     /// <returns>Always returns Success after advancing cursor to end of subject</returns>
     internal override MatchResult Scan(int node, Scanner scan)
     {
+        using var profile1 = Profiler.Start4("Rem", scan.Exec);
+
         // Advance cursor to end of subject
         scan.CursorPosition = scan.Subject.Length;
         return MatchResult.Success(scan);

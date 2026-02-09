@@ -55,6 +55,8 @@ internal class SucceedPattern : TerminalPattern
     /// <returns>Always returns Success without advancing cursor</returns>
     internal override MatchResult Scan(int node, Scanner scan)
     {
+        using var profile1 = Profiler.Start4("Success", scan.Exec);
+
         return MatchResult.Success(scan);
     }
 

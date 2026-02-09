@@ -34,6 +34,6 @@ public class SubjectComparisonStrategy : IComparisonStrategy
     public bool IsIdentical(Var self, Var other)
     {
         // Optimized: Direct comparison without property access
-        return ReferenceEquals(self, other) || other.Uid == self.Uid;
+        return ReferenceEquals(self, other) || other.CreationOrder == self.CreationOrder;
     }
 }

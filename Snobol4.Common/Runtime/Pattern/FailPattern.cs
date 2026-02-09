@@ -57,6 +57,8 @@ internal class FailPattern : TerminalPattern
     /// <returns>Always returns Failure</returns>
     internal override MatchResult Scan(int node, Scanner scan)
     {
+        using var profile1 = Profiler.Start4("Failure", scan.Exec);
+
         return MatchResult.Failure(scan);
     }
 

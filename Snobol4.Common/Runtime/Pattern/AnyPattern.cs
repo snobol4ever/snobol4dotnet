@@ -39,6 +39,8 @@ internal class AnyPattern : TerminalPattern
 
     internal override MatchResult Scan(int node, Scanner scan)
     {
+        using var profile1 = Profiler.Start4("Any", scan.Exec);
+
         if (scan.CursorPosition >= scan.Subject.Length)
             return MatchResult.Failure(scan);
 

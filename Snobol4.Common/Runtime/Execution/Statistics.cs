@@ -52,7 +52,7 @@ public partial class Executive
         Console.Error.WriteLine("");
 
 
-        if (AmpProfile != 1 && AmpProfile != 3)
+        if (AmpProfile != 1 && AmpProfile != 3 && AmpProfile != 4)
             return;
 
         foreach (var entry in ProfileCount)
@@ -105,6 +105,16 @@ public class Profiler : IDisposable
     public static Profiler? Start3(string statement, Executive exec)
     {
         if (exec.AmpProfile == 3)
+        {
+            return new Profiler(statement, exec);
+        }
+
+        return null;
+    }
+
+    public static Profiler? Start4(string statement, Executive exec)
+    {
+        if (exec.AmpProfile == 4)
         {
             return new Profiler(statement, exec);
         }

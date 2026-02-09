@@ -14,7 +14,7 @@ public sealed class CodeComparisonStrategy : IComparisonStrategy
         // Code of the same type compares by creation time
         if (other is CodeVar)
         {
-            return codeSelf.CreationDateTime.CompareTo(other.CreationDateTime);
+            return codeSelf.CreationOrder.CompareTo(other.CreationOrder);
         }
 
         // Different types compare by type name
@@ -25,13 +25,13 @@ public sealed class CodeComparisonStrategy : IComparisonStrategy
     public bool Equals(Var self, Var other)
     {
         // Code is only equal if it's the same instance
-        return self.Uid == other.Uid;
+        return self.CreationOrder == other.CreationOrder;
     }
 
 
     public bool IsIdentical(Var self, Var other)
     {
         // Code is identical only if they have the same unique ID
-        return self.Uid == other.Uid;
+        return self.CreationOrder == other.CreationOrder;
     }
 }

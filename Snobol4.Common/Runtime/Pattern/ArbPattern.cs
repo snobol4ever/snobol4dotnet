@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 
 namespace Snobol4.Common;
 
@@ -73,6 +74,8 @@ internal class ArbPattern : TerminalPattern
     /// </remarks>
     internal override MatchResult Scan(int node, Scanner scan)
     {
+        using var profile1 = Profiler.Start4("Arb", scan.Exec);
+
         // Can't match beyond end of subject
         if (scan.CursorPosition == scan.Subject.Length)
             return MatchResult.Failure(scan);

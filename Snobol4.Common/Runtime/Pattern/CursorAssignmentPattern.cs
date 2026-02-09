@@ -162,6 +162,8 @@ internal class AtSign : TerminalPattern
     /// </example>
     internal override MatchResult Scan(int node, Scanner scan)
     {
+        using var profile1 = Profiler.Start4("@", scan.Exec);
+
         // Create arguments for assignment: [variable, cursor_position]
         List<Var> arguments =
         [

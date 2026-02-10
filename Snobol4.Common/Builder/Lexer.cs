@@ -94,7 +94,7 @@ public partial class Lexer
 
     #region Private Methods
 
-                                                        internal bool Lex()
+    internal bool Lex()
     {
         foreach (var sourceLine in _parent.Code.SourceLines.Where(line => !line.Compiled))
         {
@@ -109,7 +109,7 @@ public partial class Lexer
     }
 
 
-                                                            private void LexLine(SourceLine sourceLine)
+    private void LexLine(SourceLine sourceLine)
     {
         _bracketStack.Clear();
         _colonFound = false;
@@ -158,7 +158,7 @@ public partial class Lexer
         CheckForUnbalancedBrackets(sourceLine);
     }
 
-                                            private bool FindLexeme(SourceLine sourceLine, ref int state)
+    private bool FindLexeme(SourceLine sourceLine, ref int state)
     {
         Match m;
         switch (state)
@@ -520,7 +520,7 @@ public partial class Lexer
         return true;
     }
 
-                                                                private bool ProcessClosingBracket(SourceLine sourceLine)
+    private bool ProcessClosingBracket(SourceLine sourceLine)
     {
         Match m;
         var entry = _bracketStack.Pop();
@@ -556,7 +556,7 @@ public partial class Lexer
                 sourceLine.LexBody.Add(new Token(Token.Type.R_PAREN_UNCONDITIONAL, ")", _bracketStack.Count + 1));
                 _unconditionalGotoEnd = sourceLine.LexBody.Count;
                 _state = 10; //L_PAREN
-                
+
                 // If the remaining text is whitespace, then nothing else to do
                 // ReSharper disable once ExtractCommonBranchingCode
                 if (CompiledRegex.AfterGoToPattern().Match(remainder).Success)
@@ -649,7 +649,7 @@ public partial class Lexer
         return false;
     }
 
-                                            private bool ProcessClosingConditionalGotoBracket(SourceLine sourceLine, BracketStackEntry entry, string remainder)
+    private bool ProcessClosingConditionalGotoBracket(SourceLine sourceLine, BracketStackEntry entry, string remainder)
     {
         sourceLine.LexBody.Add(new Token(entry.Context, entry.Bracket, _bracketStack.Count + 1));
         var altToken = GetMirrorGotoBracketToken(entry.Context);
@@ -689,7 +689,7 @@ public partial class Lexer
         return true;
     }
 
-                                                    private void ProcessImplicitOperators(SourceLine sourceLine)
+    private void ProcessImplicitOperators(SourceLine sourceLine)
     {
         switch (sourceLine.LexBody[^2].TokenType)
         {
@@ -763,7 +763,7 @@ public partial class Lexer
             return;
         }
 
-        if (_startState != 1) 
+        if (_startState != 1)
             return;
 
         sourceLine.LexBody.Add(new Token(Token.Type.BINARY_QUESTION, " ", _bracketStack.Count));
@@ -771,7 +771,7 @@ public partial class Lexer
         _patternMatchFound = true;
     }
 
-                                            private void ProcessGoto(SourceLine sourceLine, Match m)
+    private void ProcessGoto(SourceLine sourceLine, Match m)
     {
         sourceLine.LexBody.Add(new Token(Token.Type.COLON, ":", _bracketStack.Count));
 
@@ -825,7 +825,7 @@ public partial class Lexer
         _cursorCurrent += m.Length - 1;
     }
 
-                private void SaveGotoEnd(Token.Type t, int pos)
+    private void SaveGotoEnd(Token.Type t, int pos)
     {
         if (t is Token.Type.L_PAREN_FAILURE or Token.Type.L_ANGLE_FAILURE)
             _failureGotoEnd = pos;
@@ -833,7 +833,7 @@ public partial class Lexer
             _successGotoEnd = pos;
     }
 
-                private void SaveGotoStart(Token.Type t, int pos)
+    private void SaveGotoStart(Token.Type t, int pos)
     {
         if (t is Token.Type.L_PAREN_FAILURE or Token.Type.L_ANGLE_FAILURE)
             _successGotoStart = pos;
@@ -841,7 +841,7 @@ public partial class Lexer
             _failureGotoStart = pos;
     }
 
-                                                    private void ExtractGotoLexemes(SourceLine sourceLine)
+    private void ExtractGotoLexemes(SourceLine sourceLine)
     {
         if (_bracketStack.Count > 0)
             return;
@@ -862,7 +862,7 @@ public partial class Lexer
         sourceLine.LexBody.RemoveRange(_colonPosition, sourceLine.LexBody.Count - _colonPosition);
     }
 
-                                        private void CheckForUnbalancedBrackets(SourceLine sourceLine)
+    private void CheckForUnbalancedBrackets(SourceLine sourceLine)
     {
         if (_bracketStack.Count == 0)
             return;
@@ -884,7 +884,7 @@ public partial class Lexer
 
     #region Static Helper Functiona
 
-                                                private static void ProcessImplicitNulls(SourceLine sourceLine)
+    private static void ProcessImplicitNulls(SourceLine sourceLine)
     {
         var index = sourceLine.LexBody[^1].Index;
 
@@ -895,7 +895,7 @@ public partial class Lexer
             sourceLine.LexBody.Insert(sourceLine.LexBody.Count - 1, new Token(Token.Type.NULL, "", index));
     }
 
-                                            private static bool IsImplicitNull(SourceLine sourceLine)
+    private static bool IsImplicitNull(SourceLine sourceLine)
     {
         return sourceLine.LexBody[^1].TokenType switch
         {
@@ -971,7 +971,7 @@ public partial class Lexer
         };
     }
 
-                                                    private static Token.Type GetOpenBracketToken(string s)
+    private static Token.Type GetOpenBracketToken(string s)
     {
         return s switch
         {
@@ -983,7 +983,7 @@ public partial class Lexer
         };
     }
 
-                                                    private static Token.Type GetMirrorGotoBracketToken(Token.Type t)
+    private static Token.Type GetMirrorGotoBracketToken(Token.Type t)
     {
         // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
         return t switch
@@ -996,7 +996,7 @@ public partial class Lexer
         };
     }
 
-                                            private static Token.Type GetMirrorGotoToken(Token.Type t)
+    private static Token.Type GetMirrorGotoToken(Token.Type t)
     {
         // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
         return t switch
@@ -1009,7 +1009,7 @@ public partial class Lexer
         };
     }
 
-                                                    private static string GetSfPair(Token.Type t)
+    private static string GetSfPair(Token.Type t)
     {
         // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
         return t switch
@@ -1022,7 +1022,7 @@ public partial class Lexer
         };
     }
 
-                                                        private static Token.Type GetOpenParenToken(List<Token> lexBody)
+    private static Token.Type GetOpenParenToken(List<Token> lexBody)
     {
         if (lexBody.Count == 0)
             return Token.Type.L_PAREN_CHOICE;
@@ -1039,7 +1039,7 @@ public partial class Lexer
         };
     }
 
-                                        private void ConvertUnaryStarOperatorsToDeferredExpressions(List<Token> lexLine)
+    private void ConvertUnaryStarOperatorsToDeferredExpressions(List<Token> lexLine)
     {
         if (lexLine.Count == 0)
             return;
@@ -1059,7 +1059,7 @@ public partial class Lexer
             ExtractStarExpressions(lexLine, starPos);
     }
 
-                                                            private void ExtractStarExpressions(List<Token> lexLine, int starPos)
+    private void ExtractStarExpressions(List<Token> lexLine, int starPos)
     {
         var rArg = starPos + 1;
 

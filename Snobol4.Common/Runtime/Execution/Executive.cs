@@ -3,76 +3,13 @@ using System.Globalization;
 
 namespace Snobol4.Common;
 
-public class SymbolTable<TKey, TValue> : Dictionary<TKey, TValue>
-    where TKey : notnull
-{
-    // Indexer implementation
-    public new TValue this[TKey key]
-    {
-        get => base[key];
-        set => base[key] = value;
-    }
-}
-
-public class IdentifierTable(Executive exec) : Dictionary<string, Var>
-{
-    public Executive Exec { get; } = exec;
-
-    public new Var this[string symbol]
-    {
-        get
-        {
-            if (!ContainsKey(symbol))
-                base[symbol] = StringVar.Null(symbol);
-
-            Exec.TraceIdentifierAccess(symbol);
-            Exec.TraceIdentifierValue(symbol);
-            return base[symbol];
-        }
-        set
-        {
-            if (_specialKeyWords.ContainsKey(symbol))
-            {
-                value.Symbol = symbol.ToUpper();
-                base[value.Symbol] = value;
-                value.Symbol = symbol.ToLower();
-                base[value.Symbol] = value;
-                Exec.TraceIdentifierValue(symbol);
-                return;
-            }
-
-            value.Symbol = symbol;
-            base[value.Symbol] = value;
-            Exec.TraceIdentifierValue(symbol);
-        }
-    }
-
-    public Var GetValueSafe(string symbol)
-    {
-        return base[symbol];
-    }
-
-    // Special keywords that have equivalent upper and lower case forms 
-    // regardless of the case folding setting
-    // [DIFFERS FROM ORIGINAL SPITBOL]
-    private readonly Dictionary<string, string> _specialKeyWords = new()
-    {
-        { "INPUT", "" },
-        { "input", "" },
-        { "OUTPUT", "" },
-        { "output", "" },
-        { "TERMINAL", "" },
-        { "terminal", "" }
-    };
-}
-
 public partial class Executive
 {
     public bool Failure;
     public Builder Parent;
-    public SymbolTable<string, int> Labels;
+    public Dictionary<string, int> Labels;
     public IdentifierTable IdentifierTable;
-    public SymbolTable<string, FunctionTableEntry> FunctionTable;
+    public Dictionary<string,FunctionTableEntry> FunctionTable;
     public List<long> SourceLineNumbers;
     public List<long> SourceStatementNumbers;
     public List<string> SourceCode;
@@ -86,10 +23,9 @@ public partial class Executive
     internal Stack<string> ProgramDefinedFunctionStack = [];
 
     internal Stack<bool> FailureStack;
-    //internal int PreviousLineIndex;
     internal string ReturnType;
     internal Stack<NameListEntry> AlphaStack;     // Stack for conditional variable assignment
-    internal Stack<NameListEntry> BetaStack;    // Stack for conditional variable assignment
+    internal Stack<NameListEntry> BetaStack;      // Stack for conditional variable assignment
     internal List<ArrayVar> IndexedArrays;
     internal List<TableVar> IndexedTables;
 
@@ -122,9 +58,9 @@ public partial class Executive
         IndexedTables = [];
         _timerExecute = new Stopwatch();
         FailureStack = [];
-        StreamInputs = new Dictionary<string, Stream>();
-        Labels = new SymbolTable<string, int>();
-        StreamOutputs = new Dictionary<string, Stream>();
+        StreamInputs = [];
+        Labels = [];
+        StreamOutputs = [];
         ReturnType = "";
         SourceCode = [];
         SourceFiles = [];
@@ -132,23 +68,23 @@ public partial class Executive
         SourceStatementNumbers = [];
         SystemStack = [];
         StarFunctionList = [];
-        StreamReadersBySymbol = new Dictionary<string, StreamReader>();  // Dictionary associating labels to line numbers
-        StreamReadersByChannel = new Dictionary<string, StreamReader>();  // Dictionary associating labels to line numbers;
+        StreamReadersBySymbol = [];  // Dictionary associating labels to line numbers
+        StreamReadersByChannel = [];  // Dictionary associating labels to line numbers;
 
         AmpReturnType = "";
         AmpOutput = "";
 
-        TraceTableIdentifierAccess = new Dictionary<string, string>();
-        TraceTableIdentifierKeyword = new Dictionary<string, string>();
-        TraceTableIdentifierValue = new Dictionary<string, string>();
-        TraceTableLabel = new Dictionary<string, string>();
-        TraceTableFunctionCall = new Dictionary<string, string>();
-        TraceTableFunctionReturn = new Dictionary<string, string>();
+        TraceTableIdentifierAccess = [];
+        TraceTableIdentifierKeyword = [];
+        TraceTableIdentifierValue = [];
+        TraceTableLabel = [];
+        TraceTableFunctionCall = [];
+        TraceTableFunctionReturn = [];
 
-        ProfileCount = new Dictionary<string, long>();
-        ProfileTotal = new Dictionary<string, long>();
+        ProfileCount = [];
+        ProfileTotal = [];
 
-        FunctionTable = new SymbolTable<string, FunctionTableEntry>
+        FunctionTable = new Dictionary<string, FunctionTableEntry>
         {
             { "binary-", new FunctionTableEntry("binary-", Subtract, 2,  true) },
             { "binary#", new FunctionTableEntry("binary#", Undefined, 2,  false) },
@@ -366,10 +302,6 @@ public partial class Executive
 
         IdentifierTable = new IdentifierTable(this)
         {
-            // Keywords
-            // See Emmer MB, Quillen EK, and Dewar RBK. pp 187-193
-            // SPITBOL: Tutorial and Program Reference Manual. 2000.
-            
             {"abort", new PatternVar(new AbortPattern(), "abort", true, true)},
             {"arb", new PatternVar(ArbPattern.Structure(), "arb", true , true)},
             {"bal", new PatternVar(BalPattern.Structure(), "bal", true, true)},
@@ -397,7 +329,7 @@ public partial class Executive
 
         KeywordTable = new()
         {
-            // Unprotected keywords
+            // Protected keywords
 
             { "&ABORT", HandleAbort },
             { "&abort", HandleAbort },
@@ -483,5 +415,4 @@ public partial class Executive
         IdentifierTable["INPUT"].InputChannel = "+console-input";
         IdentifierTable["TERMINAL"].InputChannel = "+terminal-input";
     }
-
 }

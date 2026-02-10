@@ -2,9 +2,6 @@
 
 namespace Snobol4.Common;
 
-/// <summary>
-/// Comparison strategy for string variables
-/// </summary>
 public class StringComparisonStrategy : IComparisonStrategy
 {
 

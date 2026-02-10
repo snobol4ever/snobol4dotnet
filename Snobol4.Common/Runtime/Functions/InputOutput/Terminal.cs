@@ -2,11 +2,7 @@
 
 public partial class Executive
 {
-    /// <summary>
-    /// Implements the TERMINAL variable input. Similar to INPUT but always
-    /// reads from the keyboard
-    /// </summary>
-    // ReSharper disable once UnusedMember.Global
+                    // ReSharper disable once UnusedMember.Global
     internal Var TerminalIn(Var? v, string _)
     {
         var s = Console.ReadLine();
@@ -21,11 +17,7 @@ public partial class Executive
 
     }
 
-    /// <summary>
-    /// Implementation of TERMINAL variable for output. Similar to OUTPUT but always
-    /// write to the display console.
-    ///</summary>
-    // ReSharper disable once UnusedMember.Global
+                    // ReSharper disable once UnusedMember.Global
     internal Var TerminalOut(Var v, string symbol)
     {
         var s = v.ToString() ?? "";

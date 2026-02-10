@@ -1,8 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Conversion strategy for code variables
-/// </summary>
 public sealed class CodeConversionStrategy : IConversionStrategy
 {
     private const string _codeTypeString = "code";

@@ -2,9 +2,6 @@
 
 namespace Snobol4.Common;
 
-/// <summary>
-/// Conversion strategy for string variables
-/// </summary>
 public class StringConversionStrategy : IConversionStrategy
 {
 

@@ -1,8 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Conversion strategy for pattern variables
-/// </summary>
 public class PatternConversionStrategy : IConversionStrategy
 {
 

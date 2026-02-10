@@ -383,8 +383,7 @@ end";
         Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////
-
+    
     [TestMethod]
     public void TEST_Ident_Real_Array()
     {
@@ -504,8 +503,7 @@ end";
         Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////
-
+    
     [TestMethod]
     public void TEST_Ident_String_Array()
     {

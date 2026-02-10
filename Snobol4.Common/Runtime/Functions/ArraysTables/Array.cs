@@ -8,11 +8,7 @@ public partial class Executive
     //"array dimension is zero negative or out of range" /* 67 */,
     //"array size exceeds maximum permitted" /* 68 UNUSED*/,
 
-    /// <summary>
-    /// Factory to create an array (Thread-Safe)
-    /// </summary>
-    /// <param name="arguments">List of arguments</param>
-    public void CreateArray(List<Var> arguments)
+                    public void CreateArray(List<Var> arguments)
     {
         if (!arguments[0].Convert(VarType.STRING, out _, out var prototypeString, this))
         {
@@ -32,11 +28,7 @@ public partial class Executive
         LogRuntimeException(result);
     }
 
-    /// <summary>
-    /// Convert list of indices on the stack to a single index (key)
-    /// for a table or array (Thread-Safe)
-    /// </summary>
-    public void IndexCollection()
+                    public void IndexCollection()
     {
         // Do not delete. Used by DLL
         if (Failure)

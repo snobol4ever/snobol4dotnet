@@ -1,8 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Formatting strategy for subject variables
-/// </summary>
 public class SubjectFormattingStrategy : IFormattingStrategy
 {
     public string ToString(Var self)

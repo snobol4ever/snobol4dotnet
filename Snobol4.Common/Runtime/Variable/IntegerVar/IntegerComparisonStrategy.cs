@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Comparison strategy for integer variables
-/// Supports comparison with integers, reals, and type-based fallback
-/// </summary>
 public sealed class IntegerComparisonStrategy : IComparisonStrategy
 {
 

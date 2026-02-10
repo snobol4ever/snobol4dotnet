@@ -7,10 +7,7 @@ internal class RPosPattern : TerminalPattern
 {
     #region Members
 
-    /// <summary>
-    /// The required number of characters from the end of the subject.
-    /// </summary>
-    private long _position;
+                private long _position;
     private readonly Executive.DeferredCode? _functionName;
 
     #endregion
@@ -63,15 +60,7 @@ internal class RPosPattern : TerminalPattern
 
     #region Debugging
 
-    /// <summary>
-    /// Returns a debug string representation of this pattern for diagnostic purposes.
-    /// </summary>
-    /// <returns>A string in the format "rpos(&lt;n&gt;)" where &lt;n&gt; is the required position from the end.</returns>
-    /// <remarks>
-    /// This method is used by the debugger display attribute and diagnostic tools
-    /// to provide a concise, human-readable representation of the pattern.
-    /// </remarks>
-    public override string DebugPattern() => "rpos";
+                                    public override string DebugPattern() => "rpos";
 
     #endregion
 }

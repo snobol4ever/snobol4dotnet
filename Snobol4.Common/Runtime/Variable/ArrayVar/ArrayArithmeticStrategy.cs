@@ -1,10 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Arithmetic strategy for array variables.
-/// Arrays do not support traditional arithmetic operations.
-/// All operations log appropriate errors and return null.
-/// </summary>
 public class ArrayArithmeticStrategy : IArithmeticStrategy
 {
     public Var Add(Var self, Var other, Executive executive)

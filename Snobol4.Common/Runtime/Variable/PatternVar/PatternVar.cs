@@ -71,47 +71,32 @@ public class PatternVar : Var
 
     #region Pattern-Specific Methods
 
-    /// <summary>
-    /// Match this pattern against a subject string
-    /// </summary>
-
+            
     public MatchResult Match(string subject, Executive executive, int startPosition = 0, bool anchor = false)
     {
         var scanner = new Scanner(executive);
         return scanner.PatternMatch(subject, Data, startPosition, anchor);
     }
 
-    /// <summary>
-    /// Concatenate this pattern with another pattern
-    /// </summary>
-
+            
     public PatternVar Concatenate(PatternVar other)
     {
         return new PatternVar(new ConcatenatePattern(Data, other.Data));
     }
 
-    /// <summary>
-    /// Create an alternation between this pattern and another pattern
-    /// </summary>
-
+            
     public PatternVar Alternate(PatternVar other)
     {
         return new PatternVar(new AlternatePattern(Data, other.Data));
     }
 
-    /// <summary>
-    /// Create a pattern that matches zero or more occurrences of this pattern
-    /// </summary>
-
+            
     public PatternVar ArbNo()
     {
         return new PatternVar(ArbNoPattern.Structure(Data));
     }
 
-    /// <summary>
-    /// Get information about the pattern structure
-    /// </summary>
-    public string GetPatternInfo()
+                public string GetPatternInfo()
     {
         return Data switch
         {

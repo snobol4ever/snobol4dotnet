@@ -1,8 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Formatting strategy for pattern variables
-/// </summary>
 public class PatternFormattingStrategy : IFormattingStrategy
 {
     public string ToString(Var self)

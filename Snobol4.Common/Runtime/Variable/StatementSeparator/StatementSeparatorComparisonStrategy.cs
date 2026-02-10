@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Comparison strategy for statement separator
-/// Statement separators are internal markers and don't participate in comparisons
-/// </summary>
 public sealed class StatementSeparatorComparisonStrategy : IComparisonStrategy
 {
 

@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Comparison strategy for code variables
-/// Code compares by creation time and data type
-/// </summary>
 public sealed class CodeComparisonStrategy : IComparisonStrategy
 {
 

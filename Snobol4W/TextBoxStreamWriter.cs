@@ -1,9 +1,5 @@
 ﻿namespace Snobol4W;
 
-/// <summary>
-/// CLass to allow Console.Error.WriteLine to update a text box
-/// https://nmarkou.blogspot.com/2011/12/redirect-console-output-to-textbox.html
-/// </summary>
 internal class TextBoxStreamWriter : StringWriter
 {
     private readonly RichTextBox _textBoxOutput;

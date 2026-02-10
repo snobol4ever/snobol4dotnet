@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Arithmetic strategy for subject variables
-/// Subject variables (pattern match results) don't support arithmetic operations
-/// </summary>
 public class SubjectArithmeticStrategy : IArithmeticStrategy
 {
     public Var Add(Var self, Var other, Executive executive)

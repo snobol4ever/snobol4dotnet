@@ -1,12 +1,5 @@
 ﻿    namespace Snobol4.Common;
 
-/// <summary>
-/// Cloning strategy for table variables
-/// Creates a deep copy of the table including:
-/// - Fill value (cloned)
-/// - All key-value pairs (values cloned, keys copied by reference)
-/// - Symbol, input/output channels
-/// </summary>
 public sealed class TableCloningStrategy : ICloningStrategy
 {
 

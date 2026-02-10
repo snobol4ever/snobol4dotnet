@@ -1,22 +1,10 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// This class implements the "Shunting Yard Algorithm" to follow the
-/// precedence and associativity of  SNOBOL's operators. For more
-/// information see:
-/// https://aquarchitect.github.io/swift-algorithm-club/Shunting%20Yard/
-/// https://literateprograms.org/shunting_yard_algorithm__c_.html
-/// https://blog.kallisti.net.nz/2008/02/extension-to-the-shunting-yard-algorithm-to-allow-variable-numbers-of-arguments-to-functions/
-/// </summary>
 public class Parser
 {
     #region Embedded class
 
-    /// <summary>
-    /// Class to specify precedence of binary operators
-    /// and left or right associativity
-    /// </summary>
-    internal class Order
+                    internal class Order
     {
         internal Association Associativity { get; }
         internal int Precedence { get; }
@@ -88,11 +76,7 @@ public class Parser
 
     #region Private Methods
 
-    /// <summary>
-    /// 
-    /// Parse source file
-    /// </summary>
-    internal bool Parse()
+                    internal bool Parse()
     {
         foreach (var sourceLine in _parent.Code.SourceLines.Where(sourceLine => !sourceLine.Compiled))
             ParseLine(sourceLine);
@@ -106,12 +90,7 @@ public class Parser
         return true;
     }
 
-    /// <summary>
-    /// Parse the components of a source line:
-    /// Body, unconditional goto, success goto, and failure goto
-    /// </summary>
-    /// <param name="sourceLine">line of source code</param>
-    private void ParseLine(SourceLine sourceLine)
+                        private void ParseLine(SourceLine sourceLine)
     {
         _operatorStack.Clear();
         sourceLine.ParseBody = ShuntYardAlgorithm(sourceLine.LexBody);
@@ -120,11 +99,7 @@ public class Parser
         sourceLine.ParseFailureGoto = ShuntYardAlgorithm(sourceLine.LexFailureGoto);
     }
 
-    /// <summary>
-    /// Parse source code line to account for precedence and associativity.
-    /// </summary>
-    /// <param name="lexTokenList">List of lexemes</param>
-    private List<Token> ShuntYardAlgorithm(List<Token> lexTokenList)
+                    private List<Token> ShuntYardAlgorithm(List<Token> lexTokenList)
     {
         List<Token> outputTokenList = [];
         foreach (var token in lexTokenList)

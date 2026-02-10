@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Comparison strategy for expression variables
-/// Expressions compare by creation time and data type
-/// </summary>
 public sealed class ExpressionComparisonStrategy : IComparisonStrategy
 {
 

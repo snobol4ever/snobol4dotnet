@@ -4,40 +4,7 @@ public partial class Executive
 {
     #region Integer argument pattern helper
 
-    /// <summary>
-    /// Converts and validates a variable argument as a non-negative integer for pattern functions.
-    /// </summary>
-    /// <param name="argument">The variable to convert to an integer</param>
-    /// <param name="notNumeric">Error code to log if argument is not numeric</param>
-    /// <param name="outOfRange">Error code to log if integer is negative or too large</param>
-    /// <returns>
-    /// The integer value if valid (0 to int.MaxValue),
-    /// or 0 if conversion fails or value is out of range
-    /// </returns>
-    /// <remarks>
-    /// <para>
-    /// This helper method is used by pattern functions that require integer arguments
-    /// (LEN, POS, RPOS, TAB, RTAB). It ensures the argument is:
-    /// - Convertible to an integer type
-    /// - Non-negative (>= 0)
-    /// - Within int.MaxValue range
-    /// </para>
-    /// <para>
-    /// If validation fails, a runtime exception is logged and 0 is returned.
-    /// The calling pattern factory will typically continue with the value 0,
-    /// which may result in a valid but potentially unexpected pattern behavior.
-    /// </para>
-    /// </remarks>
-    /// <example>
-    /// <code>
-    /// // Valid usage
-    /// var length = GetInteger(arguments[0], 120, 121);
-    /// // If arguments[0] = 10, returns 10
-    /// // If arguments[0] = -5, logs error 121, returns 0
-    /// // If arguments[0] = "test", logs error 120, returns 0
-    /// </code>
-    /// </example>
-    internal int GetInteger(Var argument, int notNumeric, int outOfRange)
+                                                                                                                                        internal int GetInteger(Var argument, int notNumeric, int outOfRange)
     {
         if (!argument.Convert(VarType.INTEGER, out _, out var n, this))
         {

@@ -79,35 +79,19 @@ internal class Token
 
     #region Constructors
 
-    /// <summary>
-    /// Construct empty token
-    /// </summary>
-    internal Token()
+                internal Token()
     {
         MatchedString = "";
     }
 
-    /// <summary>
-    /// Construct token without a value
-    /// </summary>
-    /// <param name="type">Enumerated Token type</param>
-    /// <param name="match">Matched string</param>
-    /// <param name="index">Index of token in source line</param>
-    internal Token(Type type, string match, int index)
+                            internal Token(Type type, string match, int index)
     {
         TokenType = type;
         MatchedString = match;
         Index = index;
     }
 
-    /// <summary>
-    /// Construct token with an integer value
-    /// </summary>
-    /// <param name="type">Enumerated Token type</param>
-    /// <param name="match">Matched string</param>
-    /// <param name="index">Index of token in source line</param>
-    /// <param name="value">Integer value of token</param>
-    internal Token(Type type, string match, int index, long value)
+                                internal Token(Type type, string match, int index, long value)
     {
         TokenType = type;
         MatchedString = match;
@@ -115,14 +99,7 @@ internal class Token
         IntegerValue = value;
     }
 
-    /// <summary>
-    /// Construct token with a real value
-    /// </summary>
-    /// <param name="type">Enumerated Token type</param>
-    /// <param name="match">Matched string</param>
-    /// <param name="index">Index of token in source line</param>
-    /// <param name="value">Real value of token</param>
-    internal Token(Type type, string match, int index, double value)
+                                internal Token(Type type, string match, int index, double value)
     {
         TokenType = type;
         MatchedString = match;

@@ -2,9 +2,6 @@
 
 namespace Snobol4;
 
-/// <summary>
-/// Class for Main console window
-/// </summary>
 internal class MainConsole
 {
     private static int Main(string[] args)

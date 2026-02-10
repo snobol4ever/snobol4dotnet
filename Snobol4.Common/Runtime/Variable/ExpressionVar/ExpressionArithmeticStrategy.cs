@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Arithmetic strategy for expression variables
-/// Expressions don't support traditional arithmetic operations
-/// </summary>
 public sealed class ExpressionArithmeticStrategy : IArithmeticStrategy
 {
 

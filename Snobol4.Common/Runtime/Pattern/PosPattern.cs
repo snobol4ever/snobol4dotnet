@@ -7,10 +7,7 @@ internal class PosPattern : TerminalPattern
 {
     #region Internal Members
 
-    /// <summary>
-    /// The required cursor position (0-based index from start of subject).
-    /// </summary>
-    private long _position;
+                private long _position;
     private readonly Executive.DeferredCode? _functionName;
 
     #endregion
@@ -65,15 +62,7 @@ internal class PosPattern : TerminalPattern
 
     #region Debugging
 
-    /// <summary>
-    /// Returns a debug string representation of this pattern for diagnostic purposes.
-    /// </summary>
-    /// <returns>A string in the format "pos(&lt;n&gt;)" where &lt;n&gt; is the required cursor position.</returns>
-    /// <remarks>
-    /// This method is used by the debugger display attribute and diagnostic tools
-    /// to provide a concise, human-readable representation of the pattern.
-    /// </remarks>
-    public override string DebugPattern() => "pos";
+                                    public override string DebugPattern() => "pos";
 
     #endregion
 }

@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Cloning strategy for integer variables
-/// Creates independent copies of integer values
-/// </summary>
 public sealed class IntegerCloningStrategy : ICloningStrategy
 {
 

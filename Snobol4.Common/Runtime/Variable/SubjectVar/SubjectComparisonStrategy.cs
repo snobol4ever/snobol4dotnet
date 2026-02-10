@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Comparison strategy for subject variables
-/// Subject variables compare by their string content
-/// </summary>
 public class SubjectComparisonStrategy : IComparisonStrategy
 {
     public int CompareTo(Var self, Var other)

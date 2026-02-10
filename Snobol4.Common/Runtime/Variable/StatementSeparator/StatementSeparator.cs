@@ -3,9 +3,6 @@ using System.Diagnostics;
 
 namespace Snobol4.Common;
 
-/// <summary>
-/// Special marker variable used to delineate statement boundaries on the system stack
-/// </summary>
 [DebuggerDisplay("{FormattingStrategy.DebugVar(this)}")]
 public sealed class StatementSeparator : Var
 {
@@ -27,10 +24,7 @@ public sealed class StatementSeparator : Var
 
     #region Singleton Instance
 
-    /// <summary>
-    /// Singleton instance - statement separators are immutable markers so one instance suffices
-    /// </summary>
-    public static readonly StatementSeparator Instance = new();
+                public static readonly StatementSeparator Instance = new();
 
     #endregion
 
@@ -46,10 +40,7 @@ public sealed class StatementSeparator : Var
 
     #region StatementSeparator-Specific Methods
 
-    /// <summary>
-    /// Check if this is a statement separator (always true for this type)
-    /// </summary>
-
+            
     public static bool IsStatementSeparator(Var var)
     {
         return var is StatementSeparator;

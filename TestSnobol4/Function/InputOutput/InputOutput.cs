@@ -141,10 +141,7 @@ end";
         Assert.AreEqual(116, build.ErrorCodeHistory[0]);
     }
 
-    /// <summary>
-    /// ////////////////////////////////////
-    /// </summary>
-    [TestMethod]
+                [TestMethod]
     public void TEST_157_001()
     {
         var s = @"

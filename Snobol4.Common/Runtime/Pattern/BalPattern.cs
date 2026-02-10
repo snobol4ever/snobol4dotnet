@@ -2,47 +2,6 @@
 
 namespace Snobol4.Common;
 
-/// <summary>
-/// Represents a pattern that matches balanced parentheses.
-/// In SNOBOL4, this is the BAL or &BAL keyword.
-/// </summary>
-/// <remarks>
-/// <para>
-/// BAL matches strings where parentheses are properly balanced, or strings
-/// without parentheses. It uses a complex three-part structure internally to
-/// handle backtracking and finding progressively longer balanced strings.
-/// </para>
-/// <para>
-/// BAL matches:
-/// 1. The shortest possible string without any parentheses
-/// 2. Any string starting with '(' and ending with ')', where parentheses are balanced
-/// 3. Any combination of the above
-/// </para>
-/// <para>
-/// BAL is implemented as: NULL GBal1 GBal, where:
-/// - NULL: Stores initial cursor position
-/// - GBal1: NULL pattern for storing state
-/// - GBal: The actual balancing logic with backtracking
-/// </para>
-/// </remarks>
-/// <example>
-/// <code>
-/// // Extract all balanced substrings
-/// subject = '((A+(B*C))+D)'
-/// pattern = bal . result fail
-/// subject pattern                 // Matches progressively:
-///                                 // "((A+(B*C))+D)", "(A+(B*C))", "A", etc.
-///
-/// // Match function calls
-/// subject = 'func(arg1, arg2)'
-/// pattern = span(letters) . name '(' bal . args ')'
-/// // name = "func", args = "arg1, arg2"
-///
-/// // Parse nested expressions
-/// subject = '(x*(y+z))'
-/// pattern = '(' bal . expr ')'    // expr = "x*(y+z)"
-/// </code>
-/// </example>
 internal class BalPattern : Pattern
 {
     #region Members
@@ -55,10 +14,7 @@ internal class BalPattern : Pattern
 
     #region Constructors
 
-    /// <summary>
-    /// Creates a new BAL pattern with its three-part structure
-    /// </summary>
-    internal BalPattern()
+                internal BalPattern()
     {
         GBal0 = new NullPattern();
         GBal1 = new GBal1Pattern();
@@ -69,21 +25,13 @@ internal class BalPattern : Pattern
 
     #region Methods
 
-    /// <summary>
-    /// Creates the composite pattern structure for BAL
-    /// </summary>
-    /// <returns>A concatenation of NULL GBal1 GBal</returns>
-    public static Pattern Structure()
+                    public static Pattern Structure()
     {
         var bal = new BalPattern();
         return new ConcatenatePattern(bal.GBal0, new ConcatenatePattern(bal.GBal1, bal.GBal));
     }
 
-    /// <summary>
-    /// Creates a deep copy of this BAL pattern
-    /// </summary>
-    /// <returns>A new BalPattern instance</returns>
-    internal override Pattern Clone()
+                    internal override Pattern Clone()
     {
         return new BalPattern();
     }
@@ -92,11 +40,7 @@ internal class BalPattern : Pattern
 
     #region Embedded Classes
 
-    /// <summary>
-    /// First pattern is a NULL pattern augmented to store the cursor position for
-    /// failure of BAL.
-    /// </summary>
-    [DebuggerDisplay("{DebugPattern()}")]
+                    [DebuggerDisplay("{DebugPattern()}")]
     internal class GBal1Pattern : TerminalPattern
     {
         internal override MatchResult Scan(int node, Scanner scan)
@@ -114,14 +58,7 @@ internal class BalPattern : Pattern
         
     }
 
-    /// <summary>
-    /// GBal pattern matches:
-    ///      (1) the shortest possible string without any parentheses,
-    ///      (2) any string that starts with a left parenthesis and
-    ///          ends with a right parenthesis, where parentheses are matched.
-    ///      (3) any combination of 1 and 2.
-    /// </summary>
-    [DebuggerDisplay("{DebugPattern()}")]
+                                [DebuggerDisplay("{DebugPattern()}")]
     internal class GBalPattern : TerminalPattern
     {
         internal override Pattern Clone()
@@ -129,20 +66,7 @@ internal class BalPattern : Pattern
             return new GBalPattern();
         }
 
-        /// <summary>
-        /// Matches balanced parentheses or strings without parentheses
-        /// </summary>
-        /// <param name="node">The AST node index for this pattern</param>
-        /// <param name="scan">The scanner containing the subject string and cursor state</param>
-        /// <returns>
-        /// Success if a balanced string is found (with backtracking support),
-        /// Failure if at end of subject or next character is ')'
-        /// </returns>
-        /// <remarks>
-        /// Uses ReadOnlySpan to avoid substring allocations during parenthesis matching,
-        /// improving performance for balanced expression parsing.
-        /// </remarks>
-        internal override MatchResult Scan(int node, Scanner scan)
+                                                                                                                internal override MatchResult Scan(int node, Scanner scan)
         {
             using var profile1 = Profiler.Start4("GBal", scan.Exec);
 
@@ -198,11 +122,7 @@ internal class BalPattern : Pattern
 
         #region Debugging
 
-        /// <summary>
-        /// Returns a debug string representation of this pattern
-        /// </summary>
-        /// <returns>A string showing this pattern</returns>
-        public override string DebugPattern() => "gbal";
+                                        public override string DebugPattern() => "gbal";
 
         #endregion
     }
@@ -211,11 +131,7 @@ internal class BalPattern : Pattern
 
     #region Debugging
 
-    /// <summary>
-    /// Returns a debug string representation of this pattern
-    /// </summary>
-    /// <returns>A string showing this pattern</returns>
-    public override string DebugPattern() => "bal";
+                    public override string DebugPattern() => "bal";
 
     #endregion
 

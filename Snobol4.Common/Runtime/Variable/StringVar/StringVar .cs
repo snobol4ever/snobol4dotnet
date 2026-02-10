@@ -115,10 +115,7 @@ public sealed class StringVar : Var
 
     #region String-Specific Operations
 
-    /// <summary>
-    /// Concatenate this string with another (space operator in SNOBOL4)
-    /// </summary>
-
+            
     public Var Concatenate(Var other, Executive executive)
     {
         // Convert other to string if possible

@@ -12,11 +12,7 @@
 
 public partial class Executive
 {
-    /// <summary>
-    /// Implementation of OUTPUT function
-    /// </summary>
-    /// <param name="arguments">List of identifier name, channel, and file name</param>
-    internal void OutputFileOpen(List<Var> arguments)
+                    internal void OutputFileOpen(List<Var> arguments)
     {
         // arguments[0] Identifier name
         // arguments[1] Channel name (If blank, use STDIN or STDOUT

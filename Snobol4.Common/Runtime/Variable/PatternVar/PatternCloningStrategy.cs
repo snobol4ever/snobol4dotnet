@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Cloning strategy for pattern variables
-/// Creates a deep copy of the pattern
-/// </summary>
 public class PatternCloningStrategy : ICloningStrategy
 {
 

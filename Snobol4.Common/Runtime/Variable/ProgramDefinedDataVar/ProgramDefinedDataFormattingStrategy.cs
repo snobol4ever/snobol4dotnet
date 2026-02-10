@@ -1,8 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Formatting strategy for program-defined data variables
-/// </summary>
 public sealed class ProgramDefinedDataFormattingStrategy : IFormattingStrategy
 {
 

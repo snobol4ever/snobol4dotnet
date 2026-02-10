@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Cloning strategy for expression variables
-/// Creates a copy of the expression variable
-/// </summary>
 public sealed class ExpressionCloningStrategy : ICloningStrategy
 {
 

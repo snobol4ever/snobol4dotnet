@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Cloning strategy for program-defined data variables
-/// Creates a shallow copy of the data structure
-/// </summary>
 public sealed class ProgramDefinedDataCloningStrategy : ICloningStrategy
 {
 

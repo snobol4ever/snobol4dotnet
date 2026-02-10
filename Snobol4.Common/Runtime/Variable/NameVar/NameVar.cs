@@ -53,10 +53,7 @@ public sealed class NameVar : Var
 
     #region Name-Specific Methods
 
-    /// <summary>
-    /// Dereference this name to get the actual variable it points to
-    /// </summary>
-
+            
     public Var Dereference(Executive executive)
     {
         // Fast path: pointer dereference (most common case)
@@ -74,19 +71,13 @@ public sealed class NameVar : Var
         };
     }
 
-    /// <summary>
-    /// Check if this name points to a collection element
-    /// </summary>
-
+            
     public bool IsCollectionReference()
     {
         return Collection is not null;
     }
 
-    /// <summary>
-    /// Get the target symbol name
-    /// </summary>
-
+            
     public string GetTargetName()
     {
         return Pointer;

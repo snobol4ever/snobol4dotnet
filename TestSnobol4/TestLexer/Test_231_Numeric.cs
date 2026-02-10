@@ -182,8 +182,7 @@ public partial class TestLexer
         Assert.AreEqual(8, build.ColumnHistory[0]);
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////
-
+    
 
     [TestMethod]
     public void TEST_231_101()
@@ -365,8 +364,7 @@ public partial class TestLexer
         Assert.AreEqual(8, build.ColumnHistory[0]);
     }
 
-    ///////////////////////////////////////////////////////////////////////
-
+    
     [TestMethod]
     public void TEST_231_201()
     {
@@ -547,8 +545,7 @@ public partial class TestLexer
         Assert.AreEqual(8, build.ColumnHistory[0]);
     }
 
-    ////////////////////////////////////////////////////////////////////////
-
+    
     [TestMethod]
     public void TEST_231_312()
     {

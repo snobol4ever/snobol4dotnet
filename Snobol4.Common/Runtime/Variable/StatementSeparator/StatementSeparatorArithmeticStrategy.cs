@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Arithmetic strategy for statement separator
-/// Statement separators don't support any arithmetic operations
-/// </summary>
 public sealed class StatementSeparatorArithmeticStrategy : IArithmeticStrategy
 {
 

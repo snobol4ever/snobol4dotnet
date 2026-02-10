@@ -2,9 +2,6 @@
 
 namespace Snobol4.Common;
 
-/// <summary>
-/// Formatting strategy for real (floating-point) variables
-/// </summary>
 public sealed class RealFormattingStrategy : IFormattingStrategy
 {
 

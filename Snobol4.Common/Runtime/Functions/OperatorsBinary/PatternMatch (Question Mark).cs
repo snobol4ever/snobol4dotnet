@@ -5,12 +5,7 @@
 
 public partial class Executive
 {
-    /// <summary>
-    /// Match a string to a pattern. Successful matches are stored
-    /// in a SubjectVar object with information about how to do a
-    /// replacement.
-    /// </summary>
-    public void PatternMatch(List<Var> arguments)
+                        public void PatternMatch(List<Var> arguments)
     {
         // arguments[0]: Subject and left operand
         // arguments[1]: Pattern and right operand

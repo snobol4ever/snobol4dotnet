@@ -2,20 +2,7 @@
 
 public partial class Executive
 {
-    /// <summary>
-    /// Function call for named functions (e.g, remdr(), pos(), any())
-    /// These are delegates that are called by the matching string reference
-    /// stored in the FunctionTable. This method appears unused because
-    /// it is called solely by the compiled assembly.
-    ///
-    /// For these functions, the stack is popped according to the number
-    /// of arguments entered by the programmer. If too few arguments were entered,
-    /// they are filled with empty strings. If too many arguments were entered,
-    /// the extras are truncated. The method pushes arguments back onto the stack
-    /// in right to left order.
-    /// </summary>
-    /// <param name="argumentCount">Number of supplied arguments</param>
-    public void Function(int argumentCount)
+                                                        public void Function(int argumentCount)
     {
         using var profiler1 = Profiler.Start3($"Function", this);
 

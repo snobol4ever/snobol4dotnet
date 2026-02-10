@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Cloning strategy for array variables.
-/// Creates a deep copy of the array including all elements and metadata.
-/// </summary>
 public class ArrayCloningStrategy : ICloningStrategy
 {
     public Var Clone(Var self)
@@ -29,10 +25,7 @@ public class ArrayCloningStrategy : ICloningStrategy
         return clonedArray;
     }
 
-    /// <summary>
-    /// Clone dimension metadata lists
-    /// </summary>
-    private static void CloneDimensionMetadata(ArrayVar source, ArrayVar target, int dimensions)
+                private static void CloneDimensionMetadata(ArrayVar source, ArrayVar target, int dimensions)
     {
         // Pre-allocate with exact capacity to avoid resizing
         target.Sizes.Capacity = dimensions;
@@ -46,10 +39,7 @@ public class ArrayCloningStrategy : ICloningStrategy
         target.Multipliers.AddRange(source.Multipliers);
     }
 
-    /// <summary>
-    /// Clone data elements
-    /// </summary>
-    private static void CloneDataElements(ArrayVar source, ArrayVar target, int totalSize)
+                private static void CloneDataElements(ArrayVar source, ArrayVar target, int totalSize)
     {
         target.Data.Capacity = totalSize;
         

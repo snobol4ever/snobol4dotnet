@@ -3,10 +3,6 @@ using System.Diagnostics;
 
 namespace Snobol4.Common;
 
-/// <summary>
-/// Represents a string subject with a successful pattern match result.
-/// Used for pattern replacement operations.
-/// </summary>
 [DebuggerDisplay("{FormattingStrategy.DebugVar(this)}")]
 public sealed class SubjectVar : Var
 {
@@ -54,10 +50,7 @@ public sealed class SubjectVar : Var
 
     #region SubjectVar-Specific Methods
 
-    /// <summary>
-    /// Replace the matched portion of the subject with a replacement string
-    /// </summary>
-    internal StringVar MatchReplace(string replacement)
+                internal StringVar MatchReplace(string replacement)
     {
         // Optimized: Use string.Create for zero-allocation string building when possible,
         // or use span-based operations to minimize allocations
@@ -99,28 +92,19 @@ public sealed class SubjectVar : Var
         };
     }
 
-    /// <summary>
-    /// Get the matched portion of the subject string
-    /// </summary>
-    public string GetMatchedString()
+                public string GetMatchedString()
     {
         // Optimized: Direct length calculation and substring
         var length = MatchResult.PostCursor - MatchResult.PreCursor;
         return Subject.Substring(MatchResult.PreCursor, length);
     }
 
-    /// <summary>
-    /// Get the portion before the match
-    /// </summary>
-    public string GetBeforeMatch()
+                public string GetBeforeMatch()
     {
         return Subject[..MatchResult.PreCursor];
     }
 
-    /// <summary>
-    /// Get the portion after the match
-    /// </summary>
-    public string GetAfterMatch()
+                public string GetAfterMatch()
     {
         return Subject[MatchResult.PostCursor..];
     }

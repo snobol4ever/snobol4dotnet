@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Conversion strategy for array variables.
-/// Supports conversion to table (2-column arrays) and self-conversion.
-/// </summary>
 public class ArrayConversionStrategy : IConversionStrategy
 {
     private const int _requiredTableDimensions = 2;
@@ -22,10 +18,7 @@ public class ArrayConversionStrategy : IConversionStrategy
         };
     }
 
-    /// <summary>
-    /// Convert array to itself (identity conversion)
-    /// </summary>
-
+            
     private static bool ConvertToSelf(ArrayVar array, out Var varOut, out object valueOut)
     {
         varOut = array;
@@ -33,11 +26,7 @@ public class ArrayConversionStrategy : IConversionStrategy
         return true;
     }
 
-    /// <summary>
-    /// Attempt to convert a 2-dimensional, 2-column array to a table.
-    /// The array must be in format [key1, value1, key2, value2, ...]
-    /// </summary>
-    private static bool TryConvertToTable(ArrayVar array, out Var varOut, out object valueOut)
+                    private static bool TryConvertToTable(ArrayVar array, out Var varOut, out object valueOut)
     {
         // Fast validation checks first (fail fast)
         if (array.Dimensions != _requiredTableDimensions)

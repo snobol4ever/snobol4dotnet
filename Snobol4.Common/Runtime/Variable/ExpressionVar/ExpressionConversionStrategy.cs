@@ -1,8 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Conversion strategy for expression variables
-/// </summary>
 public sealed class ExpressionConversionStrategy : IConversionStrategy
 {
 

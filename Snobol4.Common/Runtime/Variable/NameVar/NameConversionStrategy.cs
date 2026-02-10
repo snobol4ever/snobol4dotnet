@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Conversion strategy for name variables
-/// Names can convert by dereferencing or converting the pointer string
-/// </summary>
 public class NameConversionStrategy : IConversionStrategy
 {
     public bool TryConvert(Var self, Executive.VarType targetType, out Var varOut, out object valueOut, Executive exec)

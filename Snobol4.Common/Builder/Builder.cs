@@ -19,11 +19,6 @@ public class DeferredExpression
     }
 }
 
-/// <summary> 
-/// Class for build operation in aggregate. Includes command
-/// line processing, source file reading and preprocessing,
-/// lexical analysis, parsing, compilation, and execution.
-/// </summary>
 public partial class Builder
 {
     #region Members

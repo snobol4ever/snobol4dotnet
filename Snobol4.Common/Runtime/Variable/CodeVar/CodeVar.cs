@@ -59,19 +59,13 @@ public sealed class CodeVar : Var
 
     #region Code-Specific Methods
 
-    /// <summary>
-    /// Execute this code block in the context of the executive
-    /// </summary>
-
+            
     public int Execute(Executive executive)
     {
         return executive.ExecuteLoop(StatementNumber);
     }
 
-    /// <summary>
-    /// Get the statement number for direct goto
-    /// </summary>
-
+            
     public int GetStatementNumber()
     {
         return StatementNumber;

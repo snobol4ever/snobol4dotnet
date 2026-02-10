@@ -1,9 +1,5 @@
 ﻿    namespace Snobol4.Common;
 
-/// <summary>
-/// Cloning strategy for subject variables
-/// Creates a copy of the subject variable with the same match result
-/// </summary>
 public class SubjectCloningStrategy : ICloningStrategy
 {
     public Var Clone(Var self)

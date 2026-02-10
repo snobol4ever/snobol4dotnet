@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Arithmetic strategy for integer variables
-/// Handles binary operations with overflow checking and type promotion
-/// </summary>
 public sealed class IntegerArithmeticStrategy : IArithmeticStrategy
 {
     public Var Add(Var self, Var other, Executive executive)

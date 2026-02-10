@@ -5,10 +5,6 @@ using System.Diagnostics;
 namespace Snobol4.Common;
 #pragma warning restore IDE0130
 
-/// <summary>
-/// Represents a multidimensional array variable in SNOBOL4.
-/// Supports arbitrary lower and upper bounds per dimension.
-/// </summary>
 [DebuggerDisplay("{FormattingStrategy.DebugVar(this)}")]
 public sealed class ArrayVar : Var
 {
@@ -44,13 +40,7 @@ public sealed class ArrayVar : Var
 
     #region Array-Specific Methods
 
-    /// <summary>
-    /// Configure array dimensions and bounds from prototype string
-    /// </summary>
-    /// <param name="prototype">Prototype string (e.g., "1:10,1:20" or "10,20")</param>
-    /// <param name="fill">Fill value for array elements</param>
-    /// <returns>0 on success, error code otherwise</returns>
-    internal int ConfigurePrototype(string prototype, Var fill)
+                            internal int ConfigurePrototype(string prototype, Var fill)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(prototype);
         ArgumentNullException.ThrowIfNull(fill);
@@ -90,10 +80,7 @@ public sealed class ArrayVar : Var
         return InitializeArrayData();
     }
 
-    /// <summary>
-    /// Parse dimension bounds from regex match
-    /// </summary>
-
+            
     private static bool TryParseDimensionBounds(System.Text.RegularExpressions.Match match, out long lower, out long upper, out int errorCode)
     {
         lower = 1;
@@ -128,10 +115,7 @@ public sealed class ArrayVar : Var
         return true;
     }
 
-    /// <summary>
-    /// Initialize array multipliers, total size, and data
-    /// </summary>
-    private int InitializeArrayData()
+                private int InitializeArrayData()
     {
         var dimensions = (int)Dimensions;
 
@@ -167,10 +151,7 @@ public sealed class ArrayVar : Var
         return 0;
     }
 
-    /// <summary>
-    /// Build human-readable prototype string from bounds
-    /// </summary>
-    private void BuildPrototypeString()
+                private void BuildPrototypeString()
     {
         var dimensions = (int)Dimensions;
 
@@ -189,12 +170,7 @@ public sealed class ArrayVar : Var
         Prototype = string.Join(',', parts);
     }
 
-    /// <summary>
-    /// Convert multi-dimensional indices to linear index
-    /// </summary>
-    /// <param name="indices">List of dimension indices</param>
-    /// <returns>Linear index into Data array</returns>
-
+                    
     internal long Index(List<long> indices)
     {
         ArgumentNullException.ThrowIfNull(indices);
@@ -227,10 +203,7 @@ public sealed class ArrayVar : Var
         }
     }
 
-    /// <summary>
-    /// Get the element at the specified indices
-    /// </summary>
-
+            
     internal Var GetElement(List<long> indices)
     {
         var index = Index(indices);
@@ -240,10 +213,7 @@ public sealed class ArrayVar : Var
         return Data[(int)index];
     }
 
-    /// <summary>
-    /// Set the element at the specified indices
-    /// </summary>
-
+            
     internal void SetElement(List<long> indices, Var value)
     {
         ArgumentNullException.ThrowIfNull(value);

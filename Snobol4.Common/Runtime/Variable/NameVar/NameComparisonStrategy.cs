@@ -2,10 +2,6 @@
 
 namespace Snobol4.Common;
 
-/// <summary>
-/// Comparison strategy for name variables
-/// Names compare by dereferencing to the target variable
-/// </summary>
 public class NameComparisonStrategy : IComparisonStrategy
 {
 

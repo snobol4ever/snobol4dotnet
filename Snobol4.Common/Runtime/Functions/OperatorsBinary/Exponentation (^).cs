@@ -14,14 +14,7 @@ public partial class Executive
             15, 16, 17, 266);
     }
 
-    /// <summary>
-    /// Calculate x^y where x and y are integers. There is no built-in .NET
-    /// version for integers, so this has to be simulated.
-    /// </summary>
-    /// <param name="left">LeftPattern operand</param>
-    /// <param name="right">RightPattern operand</param>
-    /// <returns></returns>
-    internal long IntegerPower(long left, long right)
+                                internal long IntegerPower(long left, long right)
     {
         long result = 1;
         if (left == 0 && right <= 0)

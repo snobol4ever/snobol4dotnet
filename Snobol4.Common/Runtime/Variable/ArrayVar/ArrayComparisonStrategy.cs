@@ -1,10 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Comparison strategy for array variables.
-/// Arrays compare by creation time when same type, otherwise by type name.
-/// Identity comparison uses unique ID.
-/// </summary>
 public class ArrayComparisonStrategy : IComparisonStrategy
 {
 

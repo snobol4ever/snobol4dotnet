@@ -64,11 +64,7 @@ internal class LenPattern : TerminalPattern
 
     #region Debugging
 
-    /// <summary>
-    /// Returns a debug string representation of this alternation
-    /// </summary>
-    /// <returns>A string showing this pattern</returns>
-    public override string DebugPattern() => "len";
+                    public override string DebugPattern() => "len";
 
     #endregion
 }

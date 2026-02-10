@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Comparison strategy for program-defined data variables
-/// User-defined data types compare by type name then creation time
-/// </summary>
 public sealed class ProgramDefinedDataComparisonStrategy : IComparisonStrategy
 {
 

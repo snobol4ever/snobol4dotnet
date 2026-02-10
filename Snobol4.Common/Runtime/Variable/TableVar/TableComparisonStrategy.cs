@@ -2,11 +2,6 @@
 
 namespace Snobol4.Common;
 
-/// <summary>
-/// Comparison strategy for table variables
-/// Tables compare by creation time (for same type) or data type name (for different types)
-/// Tables are only equal/identical if they reference the same instance
-/// </summary>
 public sealed class TableComparisonStrategy : IComparisonStrategy
 {
 

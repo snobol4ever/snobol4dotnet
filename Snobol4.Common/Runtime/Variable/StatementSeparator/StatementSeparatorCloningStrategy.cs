@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Cloning strategy for statement separator
-/// Returns the singleton instance since statement separators are immutable
-/// </summary>
 public sealed class StatementSeparatorCloningStrategy : ICloningStrategy
 {
 

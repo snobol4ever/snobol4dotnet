@@ -3,10 +3,6 @@ using System.Diagnostics;
 
 namespace Snobol4.Common;
 
-/// <summary>
-/// Represents a SNOBOL4 table variable - a hash table with dynamic key-value pairs
-/// Tables can use any data type as keys and values, with a fill value for missing keys
-/// </summary>
 [DebuggerDisplay("{FormattingStrategy.DebugVar(this)}")]
 public sealed class TableVar : Var
 {
@@ -19,10 +15,7 @@ public sealed class TableVar : Var
 
     #region Properties
 
-    /// <summary>
-    /// Gets the number of elements in the table
-    /// </summary>
-    public int Count => Data.Count;
+                public int Count => Data.Count;
 
     #endregion
 
@@ -44,25 +37,14 @@ public sealed class TableVar : Var
 
     #region Constructors
 
-    /// <summary>
-    /// Creates a new table with the specified fill value
-    /// </summary>
-    /// <param name="fill">The default value returned for non-existent keys</param>
-    /// <exception cref="ArgumentNullException">Thrown when fill is null</exception>
-    internal TableVar(Var fill)
+                        internal TableVar(Var fill)
     {
         ArgumentNullException.ThrowIfNull(fill);
         Data = [];
         Fill = fill;
     }
 
-    /// <summary>
-    /// Creates a new table with the specified fill value and initial capacity
-    /// </summary>
-    /// <param name="fill">The default value returned for non-existent keys</param>
-    /// <param name="capacity">Initial capacity for the dictionary to avoid resizing</param>
-    /// <exception cref="ArgumentNullException">Thrown when fill is null</exception>
-    internal TableVar(Var fill, int capacity)
+                            internal TableVar(Var fill, int capacity)
     {
         ArgumentNullException.ThrowIfNull(fill);
         Data = new Dictionary<object, Var>(capacity);
@@ -73,13 +55,7 @@ public sealed class TableVar : Var
 
     #region Table-Specific Methods
 
-    /// <summary>
-    /// Gets value by key, returning a clone of the fill value if key doesn't exist
-    /// </summary>
-    /// <param name="key">The key to look up</param>
-    /// <returns>The value associated with the key, or a clone of the fill value</returns>
-    /// <exception cref="ArgumentNullException">Thrown when key is null</exception>
-
+                        
     internal Var GetOrDefault(object key)
     {
         ArgumentNullException.ThrowIfNull(key);
@@ -98,13 +74,7 @@ public sealed class TableVar : Var
         return fillClone;
     }
 
-    /// <summary>
-    /// Sets value by key, creating a new entry or updating an existing one
-    /// </summary>
-    /// <param name="key">The key to set</param>
-    /// <param name="value">The value to associate with the key</param>
-    /// <exception cref="ArgumentNullException">Thrown when key or value is null</exception>
-
+                        
     internal void Set(object key, Var value)
     {
         ArgumentNullException.ThrowIfNull(key);
@@ -115,70 +85,40 @@ public sealed class TableVar : Var
         Data[key] = value;
     }
 
-    /// <summary>
-    /// Checks if table contains a specific key
-    /// </summary>
-    /// <param name="key">The key to check</param>
-    /// <returns>True if the key exists, false otherwise</returns>
-    /// <exception cref="ArgumentNullException">Thrown when key is null</exception>
-
+                        
     internal bool ContainsKey(object key)
     {
         ArgumentNullException.ThrowIfNull(key);
         return Data.ContainsKey(key);
     }
 
-    /// <summary>
-    /// Removes a key-value pair from the table
-    /// </summary>
-    /// <param name="key">The key to remove</param>
-    /// <returns>True if the key was found and removed, false otherwise</returns>
-    /// <exception cref="ArgumentNullException">Thrown when key is null</exception>
-
+                        
     internal bool Remove(object key)
     {
         ArgumentNullException.ThrowIfNull(key);
         return Data.Remove(key);
     }
 
-    /// <summary>
-    /// Clears all entries from the table
-    /// </summary>
-
+            
     internal void Clear()
     {
         Data.Clear();
     }
 
-    /// <summary>
-    /// Attempts to get a value from the table
-    /// </summary>
-    /// <param name="key">The key to look up</param>
-    /// <param name="value">The value if found</param>
-    /// <returns>True if the key exists, false otherwise</returns>
-    /// <exception cref="ArgumentNullException">Thrown when key is null</exception>
-
+                            
     internal bool TryGetValue(object key, out Var value)
     {
         ArgumentNullException.ThrowIfNull(key);
         return Data.TryGetValue(key, out value!);
     }
 
-    /// <summary>
-    /// Gets all keys in the table
-    /// </summary>
-    /// <returns>Collection of all keys</returns>
-
+                
     internal IEnumerable<object> GetKeys()
     {
         return Data.Keys;
     }
 
-    /// <summary>
-    /// Gets all values in the table
-    /// </summary>
-    /// <returns>Collection of all values</returns>
-
+                
     internal IEnumerable<Var> GetValues()
     {
         return Data.Values;

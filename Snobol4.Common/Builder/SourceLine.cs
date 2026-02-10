@@ -29,10 +29,7 @@ public class SourceLine
 
     #region Constructor
 
-    /// Constructs a line of source code with
-    /// placeholders for results of lexing, parsing
-    /// and code generation.
-    internal SourceLine(string pathName, int includeDepth, string text, SourceCode code, bool errorOnUnhandledFail)
+                internal SourceLine(string pathName, int includeDepth, string text, SourceCode code, bool errorOnUnhandledFail)
     {
         ErrorOnUnhandledFail = errorOnUnhandledFail;
         IncludeDepth = includeDepth;

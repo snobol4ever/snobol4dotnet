@@ -12,20 +12,14 @@ public class CompilerException : Exception
 
     #region Constructors
 
-    /// <summary>
-    /// Constructor when column number in source file is known.
-    /// </summary>
-    public CompilerException(int error, int column)
+                public CompilerException(int error, int column)
     {
         Code = error;
         Column = column;
         Message = "";
     }
 
-    /// <summary>
-    /// Constructor for error code and message
-    /// </summary>
-    public CompilerException(int error)
+                public CompilerException(int error)
     {
         Code = error;
         Column = 0;
@@ -36,13 +30,7 @@ public class CompilerException : Exception
 
     #region Error Messages
 
-    /// <summary>
-    /// Error messages
-    /// See Emmer MB, Quillen EK, and Dewar RBK.
-    /// SPITBOL: Tutorial and Program Reference Manual. 2000.
-    /// Per modifications by Cheyenne Wills for x64 SPITBOL
-    /// </summary>
-    internal static readonly string[] ErrorMessage =
+                            internal static readonly string[] ErrorMessage =
     [
         "no error" /* 0 */,
         "addition left operand is not numeric" /* 1 */,

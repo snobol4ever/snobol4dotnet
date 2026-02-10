@@ -29,10 +29,7 @@ public partial class Executive
         return i;
     }
 
-    /// <summary>
-    /// Set a breakpoint here to step into compiled Snobol4 program
-    /// </summary>
-    // ReSharper disable once UnusedMember.Global
+                // ReSharper disable once UnusedMember.Global
     public static void BreakPoint()
     {
     }

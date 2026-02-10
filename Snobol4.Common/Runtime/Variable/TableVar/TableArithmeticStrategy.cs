@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Arithmetic strategy for table variables
-/// Tables don't support traditional arithmetic operations
-/// </summary>
 public sealed class TableArithmeticStrategy : IArithmeticStrategy
 {
 

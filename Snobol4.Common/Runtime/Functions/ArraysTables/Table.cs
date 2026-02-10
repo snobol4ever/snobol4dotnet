@@ -5,12 +5,7 @@
 
 public partial class Executive
 {
-    /// <summary>
-    /// Factory to create a table (Thread-Safe)
-    /// </summary>
-    /// <param name="arguments">List of arguments
-    /// The first argument is used. All others are ignored for tables</param>
-    public void CreateTable(List<Var> arguments)
+                        public void CreateTable(List<Var> arguments)
     {
         var fill = arguments[2];
         TableVar newTable = new(fill);

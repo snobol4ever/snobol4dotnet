@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Cloning strategy for code variables
-/// Creates a copy of the code variable
-/// </summary>
 public sealed class CodeCloningStrategy : ICloningStrategy
 {
 

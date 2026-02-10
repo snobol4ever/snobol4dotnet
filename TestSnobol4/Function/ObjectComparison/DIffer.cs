@@ -383,8 +383,7 @@ end";
         Assert.AreEqual("not differ", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////
-
+    
     [TestMethod]
     public void TEST_Differ_Real_Array()
     {
@@ -504,8 +503,7 @@ end";
         Assert.AreEqual("not differ", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////
-
+    
     [TestMethod]
     public void TEST_Differ_String_Array()
     {

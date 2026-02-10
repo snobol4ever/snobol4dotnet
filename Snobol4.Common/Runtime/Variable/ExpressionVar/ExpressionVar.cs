@@ -49,19 +49,13 @@ public sealed class ExpressionVar : Var
 
     #region Expression-Specific Methods
 
-    /// <summary>
-    /// Evaluate this expression in the context of the executive
-    /// </summary>
-
+            
     public void Evaluate(Executive executive)
     {
         FunctionName(executive);
     }
 
-    /// <summary>
-    /// Get the delegate representing this expression
-    /// </summary>
-
+            
     public Executive.DeferredCode GetDelegate()
     {
         return FunctionName;

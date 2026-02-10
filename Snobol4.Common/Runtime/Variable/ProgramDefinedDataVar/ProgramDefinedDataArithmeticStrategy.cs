@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Arithmetic strategy for program-defined data variables
-/// User-defined data types don't support arithmetic operations
-/// </summary>
 public sealed class ProgramDefinedDataArithmeticStrategy : IArithmeticStrategy
 {
 

@@ -1,11 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Class for source files in aggregate
-/// Includes command line processing,
-/// preprocessing, statistics, and general
-/// execution
-/// </summary>
 public partial class Builder
 {
     public void DisplaySignOnBanner()

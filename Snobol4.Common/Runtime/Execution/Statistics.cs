@@ -12,12 +12,7 @@ public partial class Executive
         Failure = bSaveStatus;
     }
 
-    /// <summary>
-    /// Load and execute the assembly (DLL) from the compilation of a Snobol4 program.
-    ///  https://stackoverflow.com/questions/14479074/c-sharp-reflection-load-assembly-and-invoke-a-method-if-it-exists
-    ///  https://github.com/munibrbutt/articles-code/blob/main/Dynamically%20loading%20and%20running%20CSharp%20code/ConsoleAppReadCode/Program.cs
-    /// </summary>
-    internal void Execute(Assembly dll, AssemblyLoadContext _, string fullClassName)
+                        internal void Execute(Assembly dll, AssemblyLoadContext _, string fullClassName)
     {
         _timerExecute.Restart();
         dynamic? instance = dll.CreateInstance(fullClassName);

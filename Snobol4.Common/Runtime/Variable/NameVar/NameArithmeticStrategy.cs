@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Arithmetic strategy for name variables
-/// Names support arithmetic by dereferencing to the target variable
-/// </summary>
 public class NameArithmeticStrategy : IArithmeticStrategy
 {
 

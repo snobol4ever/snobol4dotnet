@@ -94,20 +94,7 @@ public partial class Lexer
 
     #region Private Methods
 
-    /// <summary>
-    /// Perform lexical syntactical analysis of SNOBOL4 code.
-    /// The lexer uses regular expressions with a 15 state DFA table to
-    /// detect the main  lexemes of labels, identifiers, white space,
-    /// strings, numbers, operators, colons, commas and brackets. For
-    /// speed, the lexer also performs parsing when a one character look
-    /// ahead to refine the lexeme based on context. For example,
-    /// distinguishing between unary and binary operators,
-    /// distinguishing among parentheses that are part of a function
-    /// call, a choice operation, or goto, and identification of
-    /// implicit operations, e.g., concatenation, pattern matching,
-    /// and null replacements. The lexer identifies almost all syntax errors.
-    /// </summary>
-    internal bool Lex()
+                                                        internal bool Lex()
     {
         foreach (var sourceLine in _parent.Code.SourceLines.Where(line => !line.Compiled))
         {
@@ -122,21 +109,7 @@ public partial class Lexer
     }
 
 
-    /// <summary>
-    /// Converts a line of SNOBOL4 code into a list of lexeme tokens.
-    /// </summary>
-    /// <param name="sourceLine">
-    /// An instance of <see cref="SourceLine"/> that contains information about the line of code to be processed.
-    /// </param>
-    /// <remarks>
-    /// This method processes the provided line of SNOBOL4 code, identifies lexemes, and populates the relevant
-    /// properties of the <paramref name="sourceLine"/> object. It also handles state transitions, checks for
-    /// unbalanced brackets, and extracts GOTO-related lexemes.
-    /// </remarks>
-    /// <exception cref="CompilerException">
-    /// Thrown if an invalid state is encountered or if the line contains invalid characters.
-    /// </exception>
-    private void LexLine(SourceLine sourceLine)
+                                                            private void LexLine(SourceLine sourceLine)
     {
         _bracketStack.Clear();
         _colonFound = false;
@@ -185,17 +158,7 @@ public partial class Lexer
         CheckForUnbalancedBrackets(sourceLine);
     }
 
-    /// <summary>
-    /// Attempts to find a lexeme in the provided source line based on the current state.
-    /// </summary>
-    /// <param name="sourceLine">The source line to search for a lexeme.</param>
-    /// <param name="state">
-    /// A reference to the current state of the lexer. This value may be updated during the method execution.
-    /// </param>
-    /// <returns>
-    /// <c>true</c> if a lexeme is successfully found; otherwise, <c>false</c>.
-    /// </returns>
-    private bool FindLexeme(SourceLine sourceLine, ref int state)
+                                            private bool FindLexeme(SourceLine sourceLine, ref int state)
     {
         Match m;
         switch (state)
@@ -557,22 +520,7 @@ public partial class Lexer
         return true;
     }
 
-    /// <summary>
-    /// Processes a closing bracket in the source line and performs the necessary
-    /// actions based on the context of the corresponding opening bracket.
-    /// </summary>
-    /// <param name="sourceLine">
-    /// The <see cref="SourceLine"/> instance representing the current line of source code being processed.
-    /// </param>
-    /// <returns>
-    /// <c>true</c> if the closing bracket was successfully processed; otherwise, <c>false</c>.
-    /// </returns>
-    /// <remarks>
-    /// This method handles various types of closing brackets, including parentheses, angle brackets, 
-    /// and square brackets, based on their lexical context. It updates the state of the lexer, 
-    /// processes implicit nulls, and logs compiler exceptions for invalid syntax when necessary.
-    /// </remarks>
-    private bool ProcessClosingBracket(SourceLine sourceLine)
+                                                                private bool ProcessClosingBracket(SourceLine sourceLine)
     {
         Match m;
         var entry = _bracketStack.Pop();
@@ -701,17 +649,7 @@ public partial class Lexer
         return false;
     }
 
-    /// <summary>
-    /// Processes the closing of a conditional GOTO bracket, ensuring proper handling of S and F tokens
-    /// in the GOTO fields and updating the lexer state accordingly.
-    /// </summary>
-    /// <param name="sourceLine">The source line containing the code and tokens being processed.</param>
-    /// <param name="entry">The entry representing the type and context of the bracket being closed.</param>
-    /// <param name="remainder">The remaining portion of the source line to be lexed after the closing bracket.</param>
-    /// <returns>
-    /// <c>true</c> if the closing conditional GOTO bracket was processed successfully; otherwise, <c>false</c>.
-    /// </returns>
-    private bool ProcessClosingConditionalGotoBracket(SourceLine sourceLine, BracketStackEntry entry, string remainder)
+                                            private bool ProcessClosingConditionalGotoBracket(SourceLine sourceLine, BracketStackEntry entry, string remainder)
     {
         sourceLine.LexBody.Add(new Token(entry.Context, entry.Bracket, _bracketStack.Count + 1));
         var altToken = GetMirrorGotoBracketToken(entry.Context);
@@ -751,19 +689,7 @@ public partial class Lexer
         return true;
     }
 
-    /// <summary>
-    /// Processes implicit operators in the given <see cref="SourceLine"/>.
-    /// </summary>
-    /// <param name="sourceLine">
-    /// The <see cref="SourceLine"/> to process. This method modifies the <paramref name="sourceLine"/> 
-    /// to explicitly represent implicit concatenation and pattern matching operators.
-    /// </param>
-    /// <remarks>
-    /// This method converts implicit concatenation (e.g., <c>a b</c>) into an explicit concatenation 
-    /// operator (<c>a ┴ b</c>). Additionally, it transforms implicit pattern matching (e.g., 
-    /// <c>a b = c</c>) into an explicit pattern matching operator (<c>a ? b</c>).
-    /// </remarks>
-    private void ProcessImplicitOperators(SourceLine sourceLine)
+                                                    private void ProcessImplicitOperators(SourceLine sourceLine)
     {
         switch (sourceLine.LexBody[^2].TokenType)
         {
@@ -845,17 +771,7 @@ public partial class Lexer
         _patternMatchFound = true;
     }
 
-    /// <summary>
-    /// Processes a "goto" statement within the source code.
-    /// </summary>
-    /// <param name="sourceLine">
-    /// The <see cref="SourceLine"/> object representing the current line of code being lexed.
-    /// </param>
-    /// <param name="m">
-    /// A <see cref="Match"/> object containing the results of the regular expression match
-    /// for the "goto" statement.
-    /// </param>
-    private void ProcessGoto(SourceLine sourceLine, Match m)
+                                            private void ProcessGoto(SourceLine sourceLine, Match m)
     {
         sourceLine.LexBody.Add(new Token(Token.Type.COLON, ":", _bracketStack.Count));
 
@@ -909,10 +825,7 @@ public partial class Lexer
         _cursorCurrent += m.Length - 1;
     }
 
-    /// <summary>
-    /// Get ending indices for tokenized GOTO fields
-    /// </summary>
-    private void SaveGotoEnd(Token.Type t, int pos)
+                private void SaveGotoEnd(Token.Type t, int pos)
     {
         if (t is Token.Type.L_PAREN_FAILURE or Token.Type.L_ANGLE_FAILURE)
             _failureGotoEnd = pos;
@@ -920,10 +833,7 @@ public partial class Lexer
             _successGotoEnd = pos;
     }
 
-    /// <summary>
-    /// Get starting indices for tokenized GOTO fields
-    /// </summary>
-    private void SaveGotoStart(Token.Type t, int pos)
+                private void SaveGotoStart(Token.Type t, int pos)
     {
         if (t is Token.Type.L_PAREN_FAILURE or Token.Type.L_ANGLE_FAILURE)
             _successGotoStart = pos;
@@ -931,19 +841,7 @@ public partial class Lexer
             _failureGotoStart = pos;
     }
 
-    /// <summary>
-    /// Extracts and separates lexemes from the provided <see cref="SourceLine"/> into those
-    /// associated with the statement body and the various types of "goto" statements.
-    /// </summary>
-    /// <param name="sourceLine">
-    /// The <see cref="SourceLine"/> instance containing the lexemes to be processed.
-    /// </param>
-    /// <remarks>
-    /// This method processes the lexemes in the statement body, identifying and categorizing
-    /// them into success, failure, and unconditional "goto" statements. It also ensures that
-    /// the remaining lexemes in the statement body are adjusted accordingly.
-    /// </remarks>
-    private void ExtractGotoLexemes(SourceLine sourceLine)
+                                                    private void ExtractGotoLexemes(SourceLine sourceLine)
     {
         if (_bracketStack.Count > 0)
             return;
@@ -964,16 +862,7 @@ public partial class Lexer
         sourceLine.LexBody.RemoveRange(_colonPosition, sourceLine.LexBody.Count - _colonPosition);
     }
 
-    /// <summary>
-    /// Checks for unbalanced parentheses, angle brackets, and square brackets
-    /// in the provided source line. If unbalanced brackets are detected,
-    /// logs a compiler exception with the appropriate error code.
-    /// </summary>
-    /// <param name="sourceLine">
-    /// The <see cref="SourceLine"/> instance representing the line of source code
-    /// to be analyzed for unbalanced brackets.
-    /// </param>
-    private void CheckForUnbalancedBrackets(SourceLine sourceLine)
+                                        private void CheckForUnbalancedBrackets(SourceLine sourceLine)
     {
         if (_bracketStack.Count == 0)
             return;
@@ -995,18 +884,7 @@ public partial class Lexer
 
     #region Static Helper Functiona
 
-    /// <summary>
-    /// Processes the given <see cref="SourceLine"/> to convert implicit nulls into explicit nulls.
-    /// </summary>
-    /// <param name="sourceLine">
-    /// The <see cref="SourceLine"/> instance to process. This method modifies the 
-    /// <see cref="SourceLine.LexBody"/> by inserting explicit null tokens where implicit nulls are detected.
-    /// </param>
-    /// <remarks>
-    /// This method ensures that constructs like 'A B =' are transformed into 'A B = NULL',
-    /// making null values explicit in the lexical representation.
-    /// </remarks>
-    private static void ProcessImplicitNulls(SourceLine sourceLine)
+                                                private static void ProcessImplicitNulls(SourceLine sourceLine)
     {
         var index = sourceLine.LexBody[^1].Index;
 
@@ -1017,17 +895,7 @@ public partial class Lexer
             sourceLine.LexBody.Insert(sourceLine.LexBody.Count - 1, new Token(Token.Type.NULL, "", index));
     }
 
-    /// <summary>
-    /// Determines whether the last lexeme in the provided <see cref="SourceLine"/> 
-    /// requires an implicit null token to be added.
-    /// </summary>
-    /// <param name="sourceLine">
-    /// The <see cref="SourceLine"/> object containing the lexemes to evaluate.
-    /// </param>
-    /// <returns>
-    /// <c>true</c> if the last lexeme requires an implicit null token; otherwise, <c>false</c>.
-    /// </returns>
-    private static bool IsImplicitNull(SourceLine sourceLine)
+                                            private static bool IsImplicitNull(SourceLine sourceLine)
     {
         return sourceLine.LexBody[^1].TokenType switch
         {
@@ -1103,19 +971,7 @@ public partial class Lexer
         };
     }
 
-    /// <summary>
-    /// Determines the token type for an open bracket based on the provided string input.
-    /// </summary>
-    /// <param name="s">The input string representing the open bracket character.</param>
-    /// <returns>
-    /// A <see cref="Token.Type"/> value representing the type of identifier associated with the open bracket:
-    /// <list type="bullet">
-    /// <item><description><see cref="Token.Type.IDENTIFIER_FUNCTION"/> for a parenthesis <c>(</c>.</description></item>
-    /// <item><description><see cref="Token.Type.IDENTIFIER_ARRAY_OR_TABLE"/> for a less-than sign <c>&lt;</c> or square bracket <c>[</c>.</description></item>
-    /// <item><description><see cref="Token.Type.IDENTIFIER"/> for any other input.</description></item>
-    /// </list>
-    /// </returns>
-    private static Token.Type GetOpenBracketToken(string s)
+                                                    private static Token.Type GetOpenBracketToken(string s)
     {
         return s switch
         {
@@ -1127,19 +983,7 @@ public partial class Lexer
         };
     }
 
-    /// <summary>
-    /// Retrieves the corresponding mirror token type for a given GOTO bracket token type.
-    /// </summary>
-    /// <param name="t">The token type representing a GOTO bracket.</param>
-    /// <returns>
-    /// The mirror token type corresponding to the input token type. For example, 
-    /// if the input token type represents a failure bracket, the returned token type 
-    /// will represent the corresponding success bracket, and vice versa.
-    /// </returns>
-    /// <exception cref="ApplicationException">
-    /// Thrown when the input token type does not have a valid mirror counterpart.
-    /// </exception>
-    private static Token.Type GetMirrorGotoBracketToken(Token.Type t)
+                                                    private static Token.Type GetMirrorGotoBracketToken(Token.Type t)
     {
         // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
         return t switch
@@ -1152,17 +996,7 @@ public partial class Lexer
         };
     }
 
-    /// <summary>
-    /// Retrieves the corresponding GOTO token that balances the SUCCESS and FAILURE states.
-    /// </summary>
-    /// <param name="t">The token type representing the current state.</param>
-    /// <returns>
-    /// A <see cref="Token.Type"/> that represents the matching GOTO token for the provided state.
-    /// </returns>
-    /// <exception cref="ApplicationException">
-    /// Thrown when the provided token type does not have a corresponding GOTO token.
-    /// </exception>
-    private static Token.Type GetMirrorGotoToken(Token.Type t)
+                                            private static Token.Type GetMirrorGotoToken(Token.Type t)
     {
         // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
         return t switch
@@ -1175,19 +1009,7 @@ public partial class Lexer
         };
     }
 
-    /// <summary>
-    /// Retrieves the corresponding "S" or "F" value for a GOTO field to ensure that "S" and "F" remain balanced.
-    /// </summary>
-    /// <param name="t">The token type representing the context of the GOTO field.</param>
-    /// <returns>
-    /// A string representing the matching "S" or "F" value:
-    /// - Returns "s" for failure-related token types.
-    /// - Returns "f" for success-related token types.
-    /// </returns>
-    /// <exception cref="ApplicationException">
-    /// Thrown when the provided token type does not match any expected GOTO-related types.
-    /// </exception>
-    private static string GetSfPair(Token.Type t)
+                                                    private static string GetSfPair(Token.Type t)
     {
         // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
         return t switch
@@ -1200,20 +1022,7 @@ public partial class Lexer
         };
     }
 
-    /// <summary>
-    /// Determines the type of open parenthesis token based on the context provided
-    /// by a one-token lookahead in the lexer body.
-    /// </summary>
-    /// <param name="lexBody">
-    /// A list of tokens representing the current state of the lexer body. The method
-    /// uses the last token in this list to decide the type of the open parenthesis token.
-    /// </param>
-    /// <returns>
-    /// The type of the open parenthesis token, which can be either 
-    /// <see cref="Token.Type.L_PAREN_CHOICE"/> or <see cref="Token.Type.L_PAREN_FUNCTION"/>,
-    /// depending on the context.
-    /// </returns>
-    private static Token.Type GetOpenParenToken(List<Token> lexBody)
+                                                        private static Token.Type GetOpenParenToken(List<Token> lexBody)
     {
         if (lexBody.Count == 0)
             return Token.Type.L_PAREN_CHOICE;
@@ -1230,16 +1039,7 @@ public partial class Lexer
         };
     }
 
-    /// <summary>
-    /// Converts unary star operators in the provided list of tokens into deferred expressions.
-    /// This transformation simplifies code generation by treating the deferred expression
-    /// like a function, allowing it to be passed an argument rather than being processed
-    /// by the expression itself.
-    /// </summary>
-    /// <param name="lexLine">
-    /// A list of tokens representing a line of lexical elements to be processed.
-    /// </param>
-    private void ConvertUnaryStarOperatorsToDeferredExpressions(List<Token> lexLine)
+                                        private void ConvertUnaryStarOperatorsToDeferredExpressions(List<Token> lexLine)
     {
         if (lexLine.Count == 0)
             return;
@@ -1259,21 +1059,7 @@ public partial class Lexer
             ExtractStarExpressions(lexLine, starPos);
     }
 
-    /// <summary>
-    /// Extracts and processes expressions involving unary star operators from the specified list of tokens.
-    /// </summary>
-    /// <param name="lexLine">
-    /// A list of <see cref="Token"/> objects representing the lexical line to process.
-    /// </param>
-    /// <param name="starPos">
-    /// The position of the unary star operator within the <paramref name="lexLine"/>.
-    /// </param>
-    /// <remarks>
-    /// This method identifies and processes expressions following a unary star operator.
-    /// Depending on the type of tokens following the operator, it creates a new expression token,
-    /// updates the token list, and stores the extracted expression in the parent expression list.
-    /// </remarks>
-    private void ExtractStarExpressions(List<Token> lexLine, int starPos)
+                                                            private void ExtractStarExpressions(List<Token> lexLine, int starPos)
     {
         var rArg = starPos + 1;
 

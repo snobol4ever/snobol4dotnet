@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Conversion strategy for statement separator
-/// Statement separators cannot be converted to other types
-/// </summary>
 public sealed class StatementSeparatorConversionStrategy : IConversionStrategy
 {
 

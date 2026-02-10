@@ -1,8 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Formatting strategy for string variables
-/// </summary>
 public class StringFormattingStrategy : IFormattingStrategy
 {
 

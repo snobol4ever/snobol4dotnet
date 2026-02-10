@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Arithmetic strategy for code variables
-/// Code doesn't support traditional arithmetic operations
-/// </summary>
 public sealed class CodeArithmeticStrategy : IArithmeticStrategy
 {
 

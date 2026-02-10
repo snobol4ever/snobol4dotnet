@@ -2,9 +2,6 @@
 
 namespace Snobol4.Common;
 
-/// <summary>
-/// Conversion strategy for real (floating-point) variables
-/// </summary>
 public sealed class RealConversionStrategy : IConversionStrategy
 {
     public bool TryConvert(Var self, Executive.VarType targetType, out Var varOut, out object valueOut, Executive exec)

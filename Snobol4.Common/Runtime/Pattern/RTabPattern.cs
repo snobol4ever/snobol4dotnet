@@ -66,15 +66,7 @@ internal class RTabPattern : TerminalPattern
 
     #region Debugging
 
-    /// <summary>
-    /// Returns a debug string representation of this pattern for diagnostic purposes.
-    /// </summary>
-    /// <returns>A string in the format "rtab(&lt;n&gt;)" where &lt;n&gt; is the target position from the end.</returns>
-    /// <remarks>
-    /// This method is used by the debugger display attribute and diagnostic tools
-    /// to provide a concise, human-readable representation of the pattern.
-    /// </remarks>
-    public override string DebugPattern() => "rtab";
+                                    public override string DebugPattern() => "rtab";
 
     #endregion
 }

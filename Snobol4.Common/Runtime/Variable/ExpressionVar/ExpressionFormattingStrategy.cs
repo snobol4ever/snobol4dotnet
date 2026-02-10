@@ -1,8 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Formatting strategy for expression variables
-/// </summary>
 public sealed class ExpressionFormattingStrategy : IFormattingStrategy
 {
 

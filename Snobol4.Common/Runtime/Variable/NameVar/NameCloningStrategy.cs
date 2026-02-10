@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Cloning strategy for name variables
-/// Creates a copy that points to the same target
-/// </summary>
 public class NameCloningStrategy : ICloningStrategy
 {
 

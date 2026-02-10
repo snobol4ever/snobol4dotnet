@@ -1,8 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Comparison strategy for real (floating-point) variables
-/// </summary>
 public sealed class RealComparisonStrategy : IComparisonStrategy
 {
     private const double _epsilon = double.Epsilon;

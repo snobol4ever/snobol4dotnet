@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Arithmetic strategy for pattern variables
-/// Patterns don't support traditional arithmetic operations
-/// </summary>
 public class PatternArithmeticStrategy : IArithmeticStrategy
 {
 

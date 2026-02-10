@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Comparison strategy for pattern variables
-/// Patterns compare by creation time and data type
-/// </summary>
 public class PatternComparisonStrategy : IComparisonStrategy
 {
 

@@ -1,8 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Conversion strategy for program-defined data variables
-/// </summary>
 public sealed class ProgramDefinedDataConversionStrategy : IConversionStrategy
 {
 

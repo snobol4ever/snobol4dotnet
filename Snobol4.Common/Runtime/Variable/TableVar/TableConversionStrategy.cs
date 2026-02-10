@@ -1,8 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Conversion strategy for table variables
-/// </summary>
 public sealed class TableConversionStrategy : IConversionStrategy
 {
 
@@ -27,10 +24,7 @@ public sealed class TableConversionStrategy : IConversionStrategy
         }
     }
 
-    /// <summary>
-    /// Converts a table to a 2D array where first column contains keys and second column contains values
-    /// </summary>
-
+            
     private static bool ConvertToArray(TableVar tableSelf, out Var varOut, out object valueOut)
     {
         // Cannot convert empty table to array
@@ -64,10 +58,7 @@ public sealed class TableConversionStrategy : IConversionStrategy
         return true;
     }
 
-    /// <summary>
-    /// Converts a table key object to its appropriate Var type
-    /// </summary>
-
+            
     private static Var ConvertKeyToVar(object key, TableVar tableSelf)
     {
         return key switch

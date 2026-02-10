@@ -30,10 +30,7 @@ public sealed class IntegerVar : Var
 
     #region Constructors
 
-    /// <summary>
-    /// Creates an IntegerVar
-    /// </summary>
-
+            
     public static IntegerVar Create(long value)
     {
         return new IntegerVar(value);

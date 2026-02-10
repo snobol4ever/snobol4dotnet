@@ -158,11 +158,7 @@ public class SourceCode
         ".spx"
     ];
 
-    /// <summary>
-    /// Check for valid extension or if none, add one
-    /// </summary>
-    /// <param name="file">File name to check extension</param>
-    private static string AdjustFileExtension(string file)
+                    private static string AdjustFileExtension(string file)
     {
         var extension = Path.GetExtension(file);
 

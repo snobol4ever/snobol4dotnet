@@ -2,15 +2,7 @@
 
 public partial class Executive
 {
-    /// <summary>
-    /// Function call for symbolic operators
-    /// These are delegates that are called by the matching string reference
-    /// stored in the FunctionTable. This method appears unused because
-    /// it is called solely by the compiled assembly. 
-    /// </summary>
-    /// <param name="functionName">string name of operator</param>
-    /// <param name="argumentCount">number of operands</param>
-    // ReSharper disable once UnusedMember.Global
+                                    // ReSharper disable once UnusedMember.Global
     public void Operator(string functionName, int argumentCount)
     {
         using var profiler = Profiler.Start3($"Op_{functionName}", this);

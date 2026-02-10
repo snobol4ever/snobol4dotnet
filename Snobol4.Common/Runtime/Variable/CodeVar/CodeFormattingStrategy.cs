@@ -1,8 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Formatting strategy for code variables
-/// </summary>
 public sealed class CodeFormattingStrategy : IFormattingStrategy
 {
     private const string _codeTypeString = "code";

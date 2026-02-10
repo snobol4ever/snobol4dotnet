@@ -2,13 +2,7 @@
 
 public partial class Lexer
 {
-    /// <summary>
-    /// DFA state transition table
-    /// startState = 1
-    /// nextState = Delta[currentState,nextChar]
-    /// nextState == 0 indicates system error
-    /// </summary>
-    internal int[,] Delta =
+                            internal int[,] Delta =
     {
         { // State 0 ERROR
               0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,

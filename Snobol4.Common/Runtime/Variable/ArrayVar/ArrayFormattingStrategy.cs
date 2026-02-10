@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Formatting strategy for array variables.
-/// Provides string representations for different contexts.
-/// </summary>
 public class ArrayFormattingStrategy : IFormattingStrategy
 {
     private const string _arrayTypeName = "array";

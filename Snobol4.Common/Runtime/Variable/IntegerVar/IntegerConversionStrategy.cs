@@ -2,10 +2,6 @@
 
 namespace Snobol4.Common;
 
-/// <summary>
-/// Conversion strategy for integer variables
-/// Supports conversion to string, real, pattern, name, expression, and more
-/// </summary>
 public sealed class IntegerConversionStrategy : IConversionStrategy
 {
     public bool TryConvert(Var self, Executive.VarType targetType, out Var varOut, out object valueOut, Executive exec)

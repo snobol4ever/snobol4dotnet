@@ -1,9 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Arithmetic strategy for string variables
-/// Strings support concatenation but not traditional arithmetic
-/// </summary>
 public class StringArithmeticStrategy : IArithmeticStrategy
 {
 

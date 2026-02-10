@@ -10,11 +10,6 @@ using System.Text;
 
 namespace Snobol4.Common;
 
-/// <summary>
-/// https://stackoverflow.com/questions/14479074/c-sharp-reflection-load-assembly-and-invoke-a-method-if-it-exists
-/// https://github.com/munibrbutt/articles-code/blob/main/Dynamically%20loading%20and%20running%20CSharp%20code/ConsoleAppReadCode/Program.cs
-/// https://stackoverflow.com/questions/50649795/how-to-debug-dll-generated-from-roslyn-compilation
-/// </summary>
 public partial class Builder
 {
     #region Members

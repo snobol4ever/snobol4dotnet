@@ -1,8 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-/// <summary>
-/// Formatting strategy for statement separator
-/// </summary>
 public sealed class StatementSeparatorFormattingStrategy : IFormattingStrategy
 {
     private const string _toStringValue = "<statement-separator>";

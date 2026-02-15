@@ -7,18 +7,6 @@ using System.Runtime.Loader;
 
 namespace Snobol4.Common;
 
-public class DeferredExpression
-{
-    internal List<Token> ExpressionList;
-    public bool Parsed;
-
-    internal DeferredExpression(List<Token> tokens)
-    {
-        ExpressionList = tokens;
-        Parsed = false;
-    }
-}
-
 public partial class Builder
 {
     #region Members
@@ -142,7 +130,6 @@ public partial class Builder
             if (MessageHistory.Count > 0 || SuppressExecution)
                 return;
 
-            //Execute = new Executive(this);
             Execute.Execute(dll, loadContext, _fullClassName);
         }
         catch (CompilerException)
@@ -314,6 +301,14 @@ public partial class Builder
                 WriteException(e.InnerException);
             }
         }
+    }
+
+    public string FoldCase(string location, string input)
+    {
+        var result = CaseFolding ? input.ToUpper() : input;
+        if (location!="Lexer" && input != result)
+            Console.WriteLine(@$"{location}: {input} ==> {result}");
+        return result;
     }
 
     #region Display Statistics

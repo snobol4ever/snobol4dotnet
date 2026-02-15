@@ -15,7 +15,7 @@ public class Addition
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(5L, ((IntegerVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(5L, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -26,7 +26,7 @@ public class Addition
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(5L, ((IntegerVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(5L, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -37,7 +37,7 @@ public class Addition
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(5L, ((IntegerVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(5L, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -48,7 +48,7 @@ public class Addition
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(5L, ((IntegerVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(5L, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -59,7 +59,7 @@ public class Addition
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
 
-        Assert.AreEqual(5.2, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(5.2, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -70,7 +70,7 @@ public class Addition
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(5.2, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(5.2, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -81,7 +81,7 @@ public class Addition
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(5.2, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(5.2, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -92,7 +92,7 @@ public class Addition
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(5.2, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(5.2, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -103,7 +103,7 @@ public class Addition
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(5.1, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(5.1, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
 
@@ -115,7 +115,7 @@ public class Addition
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(5.1, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(5.1, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]

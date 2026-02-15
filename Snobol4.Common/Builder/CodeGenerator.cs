@@ -132,7 +132,8 @@ public class GenerateCSharpCode(Builder parent)
         foreach (var line in _parent.Code.SourceLines)
         {
             if (line.Label != "END" && line.Label != "end" && line.Label.Length > 0 && !line.Compiled)
-                _csharpCode.AppendLine($"        x.Labels.Add(\"{line.Label}\", {statementNumber});");
+                //_csharpCode.AppendLine($"        x.LabelTable.Add(\"{line.Label}\", {statementNumber});");
+                _csharpCode.AppendLine($"        x.LabelTable[\"{line.Label}\"] = {statementNumber};");
             statementNumber++;
         }
 
@@ -146,20 +147,20 @@ public class GenerateCSharpCode(Builder parent)
         // TODO: Implement return, sreturn, and freturn
         if (firstInit)
         {
-            _csharpCode.AppendLine("        x.Labels.Add(\"end\",-1);");
-            _csharpCode.AppendLine("        x.Labels.Add(\"return\", -2);");
-            _csharpCode.AppendLine("        x.Labels.Add(\"freturn\", -3);");
-            _csharpCode.AppendLine("        x.Labels.Add(\"nreturn\", -4);");
-            _csharpCode.AppendLine("        x.Labels.Add(\"abort\", -5);");
-            _csharpCode.AppendLine("        x.Labels.Add(\"continue\", -6);");
-            _csharpCode.AppendLine("        x.Labels.Add(\"scontinue\", -7);");
-            _csharpCode.AppendLine("        x.Labels.Add(\"END\",-1);");
-            _csharpCode.AppendLine("        x.Labels.Add(\"RETURN\", -2);");
-            _csharpCode.AppendLine("        x.Labels.Add(\"FRETURN\", -3);");
-            _csharpCode.AppendLine("        x.Labels.Add(\"NRETURN\", -4);");
-            _csharpCode.AppendLine("        x.Labels.Add(\"ABORT\", -5);");
-            _csharpCode.AppendLine("        x.Labels.Add(\"CONTINUE\", -6);");
-            _csharpCode.AppendLine("        x.Labels.Add(\"SCONTINUE\", -7);");
+            _csharpCode.AppendLine("        x.LabelTable.Add(\"end\",-1);");
+            _csharpCode.AppendLine("        x.LabelTable.Add(\"return\", -2);");
+            _csharpCode.AppendLine("        x.LabelTable.Add(\"freturn\", -3);");
+            _csharpCode.AppendLine("        x.LabelTable.Add(\"nreturn\", -4);");
+            _csharpCode.AppendLine("        x.LabelTable.Add(\"abort\", -5);");
+            _csharpCode.AppendLine("        x.LabelTable.Add(\"continue\", -6);");
+            _csharpCode.AppendLine("        x.LabelTable.Add(\"scontinue\", -7);");
+            _csharpCode.AppendLine("        x.LabelTable.Add(\"END\",-1);");
+            _csharpCode.AppendLine("        x.LabelTable.Add(\"RETURN\", -2);");
+            _csharpCode.AppendLine("        x.LabelTable.Add(\"FRETURN\", -3);");
+            _csharpCode.AppendLine("        x.LabelTable.Add(\"NRETURN\", -4);");
+            _csharpCode.AppendLine("        x.LabelTable.Add(\"ABORT\", -5);");
+            _csharpCode.AppendLine("        x.LabelTable.Add(\"CONTINUE\", -6);");
+            _csharpCode.AppendLine("        x.LabelTable.Add(\"SCONTINUE\", -7);");
             _csharpCode.AppendLine();
             _csharpCode.AppendLine("        x.ExecuteLoop(0);");
         }
@@ -333,23 +334,23 @@ public class GenerateCSharpCode(Builder parent)
             switch (t.TokenType)
             {
                 case Token.Type.BINARY_AMPERSAND:
-                    code.AppendLine("        x.Operator(\"binary&\", 2);");
+                    code.AppendLine("        x.Operator(\"__&\", 2);");
                     break;
 
                 case Token.Type.BINARY_AT:
-                    code.AppendLine("        x.Operator(\"binary@\", 2);");
+                    code.AppendLine("        x.Operator(\"__@\", 2);");
                     break;
 
                 case Token.Type.BINARY_CARET:
-                    code.AppendLine("        x.Operator(\"binary^\", 2);");
+                    code.AppendLine("        x.Operator(\"__^\", 2);");
                     break;
 
                 case Token.Type.BINARY_CONCAT:
-                    code.AppendLine("        x.Operator(\"concat\", 2);");
+                    code.AppendLine("        x.Operator(\"___\", 2);");
                     break;
 
                 case Token.Type.BINARY_DOLLAR:
-                    code.AppendLine("        x.Operator(\"binary$\", 2);");
+                    code.AppendLine("        x.Operator(\"__$\", 2);");
                     break;
 
                 case Token.Type.BINARY_EQUAL:
@@ -357,35 +358,35 @@ public class GenerateCSharpCode(Builder parent)
                     break;
 
                 case Token.Type.BINARY_MINUS:
-                    code.AppendLine("        x.Operator(\"binary-\", 2);");
+                    code.AppendLine("        x.Operator(\"__-\", 2);");
                     break;
 
                 case Token.Type.BINARY_PERCENT:
-                    code.AppendLine("        x.Operator(\"binary%\", 2);");
+                    code.AppendLine("        x.Operator(\"__%\", 2);");
                     break;
 
                 case Token.Type.BINARY_PERIOD:
-                    code.AppendLine("        x.Operator(\"binary.\", 2);");
+                    code.AppendLine("        x.Operator(\"__.\", 2);");
                     break;
 
                 case Token.Type.BINARY_PIPE:
-                    code.AppendLine("        x.Operator(\"binary|\", 2);");
+                    code.AppendLine("        x.Operator(\"__|\", 2);");
                     break;
 
                 case Token.Type.BINARY_PLUS:
-                    code.AppendLine("        x.Operator(\"binary+\", 2);");
+                    code.AppendLine("        x.Operator(\"__+\", 2);");
                     break;
 
                 case Token.Type.BINARY_QUESTION:
-                    code.AppendLine("        x.Operator(\"binary?\", 2);");
+                    code.AppendLine("        x.Operator(\"__?\", 2);");
                     break;
 
                 case Token.Type.BINARY_SLASH:
-                    code.AppendLine("        x.Operator(\"binary/\", 2);");
+                    code.AppendLine("        x.Operator(\"__/\", 2);");
                     break;
 
                 case Token.Type.BINARY_STAR:
-                    code.AppendLine("        x.Operator(\"binary*\", 2);");
+                    code.AppendLine("        x.Operator(\"__*\", 2);");
                     break;
 
                 case Token.Type.COMMA_CHOICE:
@@ -444,11 +445,11 @@ public class GenerateCSharpCode(Builder parent)
                         case "~":
                         case "?":
                             // Special handling to omit failure check
-                            code.AppendLine($"        x.Operator(\"unary{t.MatchedString}\", 0);");
+                            code.AppendLine($"        x.Operator(\"_{t.MatchedString}\", 0);");
                             break;
 
                         default:
-                            code.AppendLine($"        x.Operator(\"unary{t.MatchedString}\", 1);");
+                            code.AppendLine($"        x.Operator(\"_{t.MatchedString}\", 1);");
                             break;
                     }
 
@@ -530,8 +531,9 @@ public class GenerateCSharpCode(Builder parent)
 
     private void LabelGoto()
     {
-        _csharpCode.AppendLine("        if (x.Labels.ContainsKey(x.SystemStack.Peek().Symbol))");
-        _csharpCode.AppendLine("            return x.Labels[x.SystemStack.Pop().Symbol];");
+        //_csharpCode.AppendLine("        if (x.LabelTable.ContainsKey(x.SystemStack.Peek().Symbol))");
+        _csharpCode.AppendLine("        if (x.LabelTable[x.SystemStack.Peek().Symbol] != Executive.GotoNotFound)");
+        _csharpCode.AppendLine("            return x.LabelTable[x.SystemStack.Pop().Symbol];");
         _csharpCode.AppendLine("        x.LogRuntimeException(23);");
     }
 

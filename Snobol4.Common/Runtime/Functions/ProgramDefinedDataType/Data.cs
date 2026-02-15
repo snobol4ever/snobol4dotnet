@@ -17,7 +17,7 @@ public class UserDataDefinition
 {
     internal string Prototype;
     internal List<string> FieldNames;
-    
+
     internal UserDataDefinition(string prototype, List<string> fieldNames)
     {
         Prototype = prototype;
@@ -27,7 +27,7 @@ public class UserDataDefinition
 
 public partial class Executive
 {
-    internal Dictionary<string,UserDataDefinition> UserDataDefinitions = new();
+    internal Dictionary<string, UserDataDefinition> UserDataDefinitions = new();
 
     internal void ProgramDefinedData(List<Var> arguments)
     {
@@ -46,7 +46,7 @@ public partial class Executive
         }
 
         // data argument cannot be null
-        var prototype = ((string)value).Trim();
+        var prototype = Parent.FoldCase("Prototype", (string)value).Trim();
         if (prototype == "")
         {
             LogRuntimeException(76);
@@ -71,7 +71,8 @@ public partial class Executive
         }
 
         // datatype name cannot be an existing function
-        if (FunctionTable.ContainsKey(dataName))
+        //if (FunctionTable.ContainsKey(dataName))
+        if (FunctionTable[dataName] != null)
         {
             LogRuntimeException(248);
             return;
@@ -97,7 +98,7 @@ public partial class Executive
         var fields = new List<string>(match.Groups[3].Value.Split(','));
         for (var i = 0; i < fields.Count; i++)
         {
-            fields[i] = fields[i].Trim();
+            fields[i] = Parent.FoldCase("Fields", fields[i].Trim());
 
             // field name cannot be null
             if (fields[i] == "")
@@ -107,7 +108,8 @@ public partial class Executive
             }
 
             // field name cannot be an existing function
-            if (FunctionTable.ContainsKey(fields[i]))
+            //if (FunctionTable.ContainsKey(fields[i]))
+            if (FunctionTable[fields[i]] != null)
             {
                 LogRuntimeException(248);
                 return;
@@ -115,13 +117,13 @@ public partial class Executive
         }
 
 
-        FunctionTable[dataName] = new FunctionTableEntry(dataName, CreateProgramDefinedDataInstance, fields.Count, false);
+        FunctionTable[dataName] = new FunctionTableEntry(this, dataName, CreateProgramDefinedDataInstance, fields.Count, false);
         var userDataDefinition = new UserDataDefinition(prototype, fields);
         UserDataDefinitions[dataName] = userDataDefinition;
 
         foreach (var fieldName in fields)
         {
-            FunctionTable[fieldName] = new FunctionTableEntry(fieldName, GetProgramDefinedDataField, 1, false);
+            FunctionTable[fieldName] = new FunctionTableEntry(this, fieldName, GetProgramDefinedDataField, 1, false);
         }
 
         PredicateSuccess();

@@ -15,6 +15,7 @@ public partial class Executive
             return;
         }
 
+        data = Parent.FoldCase("ReinitializeVariables", (string)data);
         var valuesArray = ((string)data).Split(',');
 
         // Skip list cannot have null entries

@@ -20,7 +20,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -37,7 +37,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -54,7 +54,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -71,7 +71,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -88,7 +88,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -105,7 +105,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -122,7 +122,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -139,7 +139,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -156,7 +156,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
 
@@ -174,7 +174,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -191,7 +191,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -208,7 +208,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -225,7 +225,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -242,7 +242,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
 
@@ -260,7 +260,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -277,7 +277,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -294,7 +294,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -311,7 +311,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
 
@@ -329,7 +329,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -346,7 +346,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -363,7 +363,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -380,7 +380,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     
@@ -398,7 +398,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -415,7 +415,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -432,7 +432,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -449,7 +449,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -466,7 +466,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -483,7 +483,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -500,7 +500,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     
@@ -518,7 +518,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -535,7 +535,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -552,7 +552,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -569,7 +569,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -586,7 +586,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -603,7 +603,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
     [TestMethod]
@@ -620,7 +620,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable["OUT"]).Data);
+        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","out")]).Data);
     }
 
 

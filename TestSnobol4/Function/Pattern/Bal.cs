@@ -23,17 +23,16 @@ public class Bal
                          subject pattern
                          endfile('2')
 
-                         input('read',3,'{testFile}')
+                         input('READ',3,'{testFile}')
                  loop    line = read ';'      :f(close)
                          lines = lines line   :(loop)
                  close   endfile(3)
                  end
                  """;
-        var directives = "-b -f";
+        var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("((A+(B*C))+D);(A+(B*C));(A+(B*C))+;(A+(B*C))+D;A;A+;A+(B*C);+;+(B*C);(B*C);B;B*;B*C;*;*C;C;+;+D;D;", ((StringVar)build.Execute!.IdentifierTable["lines"]).Data);
+        Assert.AreEqual("((A+(B*C))+D);(A+(B*C));(A+(B*C))+;(A+(B*C))+D;A;A+;A+(B*C);+;+(B*C);(B*C);B;B*;B*C;*;*C;C;+;+D;D;", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","lines")]).Data);
     }
-
 
     [TestMethod]
     public void TEST_Bal_002()
@@ -43,7 +42,7 @@ public class Bal
             testFile = Path.Combine(SetupTests.LinuxOutput, "BalTest2.txt");
 
         var s = $"""
-                         OUTPUT('PRINT', '2', '{testFile}', 2, 3, 1)
+                         OUTPUT('print', '2', '{testFile}', 2, 3, 1)
                          &ANCHOR = 0
                          SUBJECT = '((A+(B*C))+D)'
                          PATTERN = BAL $ PRINT FAIL
@@ -51,13 +50,13 @@ public class Bal
                          ENDFILE('2')
 
                          INPUT('READ',3,'{testFile}')
-                 LOOP    LINE = READ ';'      :F(CLOSE)
+                 LOOP    LINE = OUTPUT = READ ';'      :F(CLOSE)
                          LINES = LINES LINE   :(LOOP)
                  CLOSE   ENDFILE(3)
                  END
                  """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("((A+(B*C))+D);(A+(B*C));(A+(B*C))+;(A+(B*C))+D;A;A+;A+(B*C);+;+(B*C);(B*C);B;B*;B*C;*;*C;C;+;+D;D;", ((StringVar)build.Execute!.IdentifierTable["LINES"]).Data);
+        Assert.AreEqual("((A+(B*C))+D);(A+(B*C));(A+(B*C))+;(A+(B*C))+D;A;A+;A+(B*C);+;+(B*C);(B*C);B;B*;B*C;*;*C;C;+;+D;D;", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","LINES")]).Data);
     }
 }

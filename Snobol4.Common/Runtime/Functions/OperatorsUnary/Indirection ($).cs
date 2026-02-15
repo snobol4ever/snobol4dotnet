@@ -12,17 +12,19 @@ public partial class Executive
         switch (arguments[0])
         {
             case RealVar:
-                var symbol1 = ((RealVar)arguments[0]).Data.ToString(CultureInfo.CurrentCulture);
+                var symbol1 = Parent.FoldCase("", ((RealVar)arguments[0]).Data.ToString(CultureInfo.InvariantCulture));
+                //var symbol1 = ((RealVar)arguments[0]).Data.ToString(CultureInfo.CurrentCulture);
                 SystemStack.Push(IdentifierTable[symbol1]);
                 return;
 
             case IntegerVar:
-                var symbol2 = ((IntegerVar)arguments[0]).Data.ToString();
+                var symbol2 = Parent.FoldCase("", ((IntegerVar)arguments[0]).Data.ToString(CultureInfo.InvariantCulture));
+                //var symbol2 = ((IntegerVar)arguments[0]).Data.ToString();
                 SystemStack.Push(IdentifierTable[symbol2]);
                 return;
 
             case StringVar:
-                var symbol3 = ((StringVar)arguments[0]).Data;
+                var symbol3 = Parent.FoldCase("", ((StringVar)arguments[0]).Data);
 
                 if (symbol3 == "")
                 {

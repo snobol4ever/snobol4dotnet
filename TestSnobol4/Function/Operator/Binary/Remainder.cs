@@ -13,7 +13,7 @@ public class NumericFunction
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(1L, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(1L, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -24,7 +24,7 @@ public class NumericFunction
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(1L, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(1L, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -35,7 +35,7 @@ public class NumericFunction
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(1L, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(1L, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -46,7 +46,7 @@ public class NumericFunction
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(1L, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(1L, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -57,7 +57,7 @@ public class NumericFunction
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(7.1 % 3.1, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(7.1 % 3.1, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -68,7 +68,7 @@ public class NumericFunction
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(7.1 % 3.1, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(7.1 % 3.1, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -79,7 +79,7 @@ public class NumericFunction
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(7.1 % 3.1, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(7.1 % 3.1, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -90,7 +90,7 @@ public class NumericFunction
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(7.1 % 3.1, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(7.1 % 3.1, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -101,7 +101,7 @@ public class NumericFunction
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(7 % 3.1, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(7 % 3.1, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -112,7 +112,7 @@ public class NumericFunction
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(7.1 % 3, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(7.1 % 3, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -123,7 +123,7 @@ public class NumericFunction
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(7 % 3.1, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(7 % 3.1, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -134,7 +134,7 @@ public class NumericFunction
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(7.1 % 3, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(7.1 % 3, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -189,8 +189,8 @@ public class NumericFunction
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("", build.Execute!.IdentifierTable["remdr"].ToString());
-        Assert.AreEqual("", build.Execute!.IdentifierTable["A"].ToString());
+        Assert.AreEqual("", build.Execute!.IdentifierTable[build.FoldCase("","remdr")].ToString());
+        Assert.AreEqual("", build.Execute!.IdentifierTable[build.FoldCase("","a")].ToString());
     }
 
     [TestMethod]
@@ -200,8 +200,8 @@ public class NumericFunction
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("test", build.Execute!.IdentifierTable["remdr"].ToString());
-        Assert.AreEqual("test", build.Execute!.IdentifierTable["A"].ToString());
+        Assert.AreEqual("test", build.Execute!.IdentifierTable[build.FoldCase("","remdr")].ToString());
+        Assert.AreEqual("test", build.Execute!.IdentifierTable[build.FoldCase("","a")].ToString());
     }
 
 }

@@ -74,6 +74,6 @@ public class Endfile
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("", build.Execute!.IdentifierTable["A"].OutputChannel);
+        Assert.AreEqual("", build.Execute!.IdentifierTable[build.FoldCase("","a")].OutputChannel);
     }
 }

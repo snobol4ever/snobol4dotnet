@@ -16,7 +16,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(Math.Atan(1), ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(Math.Atan(1), ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -27,7 +27,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(Math.Atan(1), ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(Math.Atan(1), ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -38,7 +38,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(Math.Atan(0.0), ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(Math.Atan(0.0), ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -49,7 +49,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(Math.Atan(0.7), ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(Math.Atan(0.7), ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -60,7 +60,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
 
-        Assert.AreEqual("", build.Execute!.IdentifierTable["A"].ToString());
+        Assert.AreEqual("", build.Execute!.IdentifierTable[build.FoldCase("","a")].ToString());
     }
 
     [TestMethod]
@@ -70,7 +70,7 @@ public class Trig
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("test", build.Execute!.IdentifierTable["ATAN"].ToString());
+        Assert.AreEqual("test", build.Execute!.IdentifierTable[build.FoldCase("","atan")].ToString());
     }
 
     [TestMethod]
@@ -95,7 +95,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
 
-        Assert.AreEqual(2.0, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(2.0, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -106,7 +106,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
 
-        Assert.AreEqual(-1.0, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(-1.0, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -117,7 +117,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
 
-        Assert.AreEqual(1.0, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(1.0, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -142,7 +142,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(Math.Cos(0.7), ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(Math.Cos(0.7), ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -153,7 +153,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(Math.Cos(0.7), ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(Math.Cos(0.7), ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -164,7 +164,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(Math.Cos(1), ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(Math.Cos(1), ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -189,7 +189,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(Math.Exp(0.7), ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(Math.Exp(0.7), ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -200,7 +200,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(Math.Exp(0.7), ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(Math.Exp(0.7), ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -211,7 +211,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(Math.Exp(1), ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(Math.Exp(1), ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -246,7 +246,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(Math.Log(2.75), ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(Math.Log(2.75), ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -257,7 +257,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(Math.Log(0.5), ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(Math.Log(0.5), ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -268,7 +268,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(0, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(0, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -313,7 +313,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
 
-        Assert.AreEqual(100 % 31, ((IntegerVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(100 % 31, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -324,7 +324,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
 
-        Assert.AreEqual(100.5 % 31.2, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(100.5 % 31.2, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     #endregion
@@ -339,7 +339,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
 
-        Assert.AreEqual(Math.Sin(0.7), ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(Math.Sin(0.7), ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -350,7 +350,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
 
-        Assert.AreEqual(Math.Sin(0.7), ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(Math.Sin(0.7), ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -361,7 +361,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
 
-        Assert.AreEqual(Math.Sin(1), ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(Math.Sin(1), ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -386,7 +386,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(Math.Sqrt(2.75), ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(Math.Sqrt(2.75), ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -397,7 +397,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(Math.Sqrt(0.5), ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(Math.Sqrt(0.5), ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -408,7 +408,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(1, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(1, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -444,7 +444,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
 
-        Assert.AreEqual(Math.Tan(0.7), ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(Math.Tan(0.7), ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -455,7 +455,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
 
-        Assert.AreEqual(Math.Tan(0.7), ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(Math.Tan(0.7), ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -466,7 +466,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
 
-        Assert.AreEqual(Math.Tan(1), ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(Math.Tan(1), ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]

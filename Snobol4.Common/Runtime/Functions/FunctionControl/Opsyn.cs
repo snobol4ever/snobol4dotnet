@@ -1,4 +1,6 @@
-﻿namespace Snobol4.Common;
+﻿using System.ComponentModel;
+
+namespace Snobol4.Common;
 
 //"opsyn third argument is not integer" /* 152 */,
 //"opsyn third argument is negative or too large" /* 153 */,
@@ -58,7 +60,9 @@ public partial class Executive
         {
             case 0:
                 // If first argument is defined, it must not be a protected function
-                if (FunctionTable.ContainsKey(newFunction) && FunctionTable[newFunction].IsProtected)
+                var entry = FunctionTable[newFunction];
+                //if (FunctionTable.ContainsKey(newFunction) && FunctionTable[newFunction].IsProtected)
+                if(entry!=null && entry.IsProtected)
                 {
                     LogRuntimeException(155);
                     return;
@@ -73,7 +77,7 @@ public partial class Executive
 
                 FunctionTable.Remove(newFunction);
                 var existingFunctionEntry = FunctionTable[existingFunction];
-                FunctionTable.Add(newFunction, new FunctionTableEntry(newFunction, existingFunctionEntry.Handler, existingFunctionEntry.ArgumentCount, false));
+                FunctionTable.Add(newFunction, new FunctionTableEntry(this, newFunction, existingFunctionEntry.Handler, existingFunctionEntry.ArgumentCount, false));
                 break;
 
             case 1:
@@ -84,10 +88,10 @@ public partial class Executive
                     return;
                 }
 
-                newFunction = "unary" + newFunction;
+                newFunction = "_" + newFunction;
                 FunctionTable.Remove(newFunction);
                 var unusedUnaryOperator = FunctionTable[existingFunction];
-                FunctionTable.Add(newFunction, new FunctionTableEntry(newFunction, unusedUnaryOperator.Handler, unusedUnaryOperator.ArgumentCount, false));
+                FunctionTable.Add(newFunction, new FunctionTableEntry(this, newFunction, unusedUnaryOperator.Handler, unusedUnaryOperator.ArgumentCount, false));
                 break;
 
             case 2:
@@ -98,10 +102,10 @@ public partial class Executive
                     return;
                 }
 
-                newFunction = "binary" + newFunction;
+                newFunction = "__" + newFunction;
                 FunctionTable.Remove(newFunction);
                 var unusedBinaryOperator = FunctionTable[existingFunction];
-                FunctionTable.Add(newFunction, new FunctionTableEntry(newFunction, unusedBinaryOperator.Handler, unusedBinaryOperator.ArgumentCount, false));
+                FunctionTable.Add(newFunction, new FunctionTableEntry(this, newFunction, unusedBinaryOperator.Handler, unusedBinaryOperator.ArgumentCount, false));
                 break;
         }
 

@@ -43,7 +43,7 @@ public class Rewind
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(((StringVar)build.Execute!.IdentifierTable["A"]).Data, ((StringVar)build.Execute!.IdentifierTable["B"]).Data);
+        Assert.AreEqual(((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data, ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","b")]).Data);
 
     }
 
@@ -74,11 +74,11 @@ public class Rewind
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(((StringVar)build.Execute!.IdentifierTable["A"]).Data, "I am far north of London, and as I walk in the streets of");
+        Assert.AreEqual(((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data, "I am far north of London, and as I walk in the streets of");
         if (SetupTests.IsLinux)
-            Assert.AreEqual("eets of", ((StringVar)build.Execute!.IdentifierTable["B"]).Data);
+            Assert.AreEqual("eets of", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","b")]).Data);
         else
-            Assert.AreEqual("ets of", ((StringVar)build.Execute!.IdentifierTable["B"]).Data);
+            Assert.AreEqual("ets of", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","b")]).Data);
     }
 
     [TestMethod]

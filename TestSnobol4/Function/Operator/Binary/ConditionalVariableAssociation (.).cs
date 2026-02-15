@@ -23,8 +23,8 @@ end";
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("success", ((StringVar)build.Execute!.IdentifierTable["RESULT"]).Data);
-        Assert.AreEqual("is  si", ((StringVar)build.Execute!.IdentifierTable["TEMP4"]).Data);
+        Assert.AreEqual("success", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","result")]).Data);
+        Assert.AreEqual("is  si", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","temp4")]).Data);
     }
 
     [TestMethod]
@@ -42,10 +42,10 @@ end";
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("BEAR", ((StringVar)build.Execute!.IdentifierTable["TEMP1"]).Data);
-        Assert.AreEqual("ROOS", ((StringVar)build.Execute!.IdentifierTable["TEMP2"]).Data);
-        Assert.AreEqual("DS", ((StringVar)build.Execute!.IdentifierTable["TEMP3"]).Data);
-        Assert.AreEqual("ITS", ((StringVar)build.Execute!.IdentifierTable["TEMP4"]).Data);
+        Assert.AreEqual("BEAR", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","temp1")]).Data);
+        Assert.AreEqual("ROOS", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","temp2")]).Data);
+        Assert.AreEqual("DS", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","temp3")]).Data);
+        Assert.AreEqual("ITS", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","temp4")]).Data);
     }
 
     [TestMethod]
@@ -63,10 +63,10 @@ end";
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable["TEMP1"]).Data);
-        Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable["TEMP2"]).Data);
-        Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable["TEMP3"]).Data);
-        Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable["TEMP4"]).Data);
+        Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","temp1")]).Data);
+        Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","temp2")]).Data);
+        Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","temp3")]).Data);
+        Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","temp4")]).Data);
     }
 
 }

@@ -177,7 +177,7 @@ public partial class Lexer
                     return false;
                 }
 
-                var label = FoldCase(m.Value);
+                var label = _parent.FoldCase("Lexer", m.Value);
 
                 if (_parent.Code.Labels.ContainsKey(label))
                 {
@@ -188,7 +188,7 @@ public partial class Lexer
                 sourceLine.Label = label;
 
                 // Stop when the end label is found
-                if (string.Equals(label, FoldCase("end")))
+                if (string.Equals(label, "end"))
                 {
                     _cursorCurrent = sourceLine.Text.Length; // Ignore the rest of the line
                     return true;
@@ -210,7 +210,7 @@ public partial class Lexer
             case 3: // IDENTIFIER
                 m = CompiledRegex.IdentifierPattern().Match(sourceLine.Text[_cursorCurrent..]);
                 _cursorCurrent += m.Groups[1].Length;
-                var identifier = FoldCase(m.Groups[1].Value);
+                var identifier = _parent.FoldCase("Lexer", m.Groups[1].Value);
 
                 sourceLine.LexBody.Add(new Token(GetOpenBracketToken(m.Groups[2].Value), identifier, _bracketStack.Count));
                 break;
@@ -1148,11 +1148,6 @@ public partial class Lexer
             default:
                 throw new ArgumentOutOfRangeException();
         }
-    }
-
-    private string FoldCase(string input)
-    {
-        return _parent.CaseFolding ? input.ToUpper() : input;
     }
 
     #endregion`

@@ -22,7 +22,7 @@ public partial class Executive
         {
             var label = ((NameVar)name).Pointer;
 
-            if (Labels.TryGetValue(label, out var setExitLabel))
+            if (LabelTable.TryGetValue(label, out var setExitLabel))
             {
                 SetExitLabel = label;
                 SystemStack.Push(new StringVar(previousSetExitLabel));

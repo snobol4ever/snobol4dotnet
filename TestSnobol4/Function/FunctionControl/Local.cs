@@ -20,11 +20,11 @@ double_end      b = pythagoras(4,12)
 
 end
 ";
-        var directives = "-b -f";
+        var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("c", ((StringVar)build.Execute!.IdentifierTable["r1"]).Data);
-        Assert.AreEqual("d", ((StringVar)build.Execute!.IdentifierTable["r2"]).Data);
+        Assert.AreEqual(build.FoldCase("","c"), ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r1")]).Data);
+        Assert.AreEqual(build.FoldCase("","d"), ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r2")]).Data);
     }
 
     [TestMethod]
@@ -39,11 +39,11 @@ double_end      b = pythagoras(4,12)
 n               r2 = 'failure'
 end
 ";
-        var directives = "-b -f";
+        var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable["r1"]).Data);
-        Assert.AreEqual("failure", ((StringVar)build.Execute!.IdentifierTable["r2"]).Data);
+        Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r1")]).Data);
+        Assert.AreEqual("failure", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r2")]).Data);
     }
 
     [TestMethod]
@@ -58,11 +58,11 @@ double_end      b = pythagoras(4,12)
 n               r2 = 'failure'
 end
 ";
-        var directives = "-b -f";
+        var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable["r1"]).Data);
-        Assert.AreEqual("failure", ((StringVar)build.Execute!.IdentifierTable["r2"]).Data);
+        Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r1")]).Data);
+        Assert.AreEqual("failure", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r2")]).Data);
     }
 
     [TestMethod]
@@ -77,7 +77,7 @@ double_end      b = pythagoras(4,12)
 n               r2 = 'failure'
 end
 ";
-        var directives = "-b -f";
+        var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(135, build.ErrorCodeHistory[0]);
@@ -95,7 +95,7 @@ double_end      b = pythagoras(4,12)
 n               r2 = 'failure'
 end
 ";
-        var directives = "-b -f";
+        var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(134, build.ErrorCodeHistory[0]);

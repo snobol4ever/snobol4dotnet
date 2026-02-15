@@ -1,5 +1,6 @@
       &trim = 1
       &stlimit = 0
+      &profile = 0
 
       define('fmt(w)x,d')
       data('tempdata(min,max,mean,total)')

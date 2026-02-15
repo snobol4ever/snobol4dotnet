@@ -6,18 +6,18 @@ public partial class TestLexer
     [TestMethod]
     public void TEST_LABEL_001()
     {
-        var s = "abc1223   'test';end";
+        var s = "ABC1223   'test';end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(1, build.Code.SourceLines[0].LexBody.Count);
-        Assert.AreEqual(s[..7].ToUpper(), build.Code.SourceLines[0].Label);
+        Assert.AreEqual(s[..7], build.Code.SourceLines[0].Label);
     }
 
     [TestMethod]
     public void TEST_LABEL_001f()
     {
-        var s = "abc1223   'test';end";
-        var directives = "-b -f";
+        var s = "ABC1223   'test';end";
+        var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(1, build.Code.SourceLines[0].LexBody.Count);
         Assert.AreEqual(s[..7], build.Code.SourceLines[0].Label);
@@ -37,10 +37,10 @@ public partial class TestLexer
     public void TEST_LABEL_002f()
     {
         var s = "123abc   'test';end";
-        var directives = "-b -f";
+        var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(1, build.Code.SourceLines[0].LexBody.Count);
-        Assert.AreEqual(s[..6], build.Code.SourceLines[0].Label);
+        Assert.AreEqual("123ABC", build.Code.SourceLines[0].Label);
     }
 
     [TestMethod]
@@ -50,17 +50,17 @@ public partial class TestLexer
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(1, build.Code.SourceLines[0].LexBody.Count);
-        Assert.AreEqual(s[..8].ToUpper(), build.Code.SourceLines[0].Label);
+        Assert.AreEqual("123??ABC", build.Code.SourceLines[0].Label);
     }
 
     [TestMethod]
     public void TEST_LABEL_003f()
     {
         var s = "123??abc   'test';end";
-        var directives = "-b -f";
+        var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(1, build.Code.SourceLines[0].LexBody.Count);
-        Assert.AreEqual(s[..8], build.Code.SourceLines[0].Label);
+        Assert.AreEqual("123??ABC", build.Code.SourceLines[0].Label);
     }
 
     [TestMethod]
@@ -69,8 +69,8 @@ public partial class TestLexer
         var s = "123zzabc   'test';end             123zzabc";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("123zzabc", build.Code.EntryLabel);
+        Assert.AreEqual(1, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(231, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]

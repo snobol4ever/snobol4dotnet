@@ -13,7 +13,7 @@ public class Multiplication
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(6L, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(6L, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -24,7 +24,7 @@ public class Multiplication
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(6L, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(6L, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -35,7 +35,7 @@ public class Multiplication
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(6L, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(6L, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -46,7 +46,7 @@ public class Multiplication
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(6L, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(6L, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -57,7 +57,7 @@ public class Multiplication
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(2.1 * 3.1, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(2.1 * 3.1, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -68,7 +68,7 @@ public class Multiplication
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(2.1 * 3.1, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(2.1 * 3.1, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -79,7 +79,7 @@ public class Multiplication
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(2.1 * 3.1, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(2.1 * 3.1, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -90,7 +90,7 @@ public class Multiplication
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(2.1 * 3.1, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(2.1 * 3.1, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -101,7 +101,7 @@ public class Multiplication
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(2 * 3.1, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(2 * 3.1, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
 
     [TestMethod]
@@ -112,7 +112,7 @@ public class Multiplication
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         
-        Assert.AreEqual(2.1 * 3, ((RealVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual(2.1 * 3, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
     }
     [TestMethod]
     public void TEST_026_Multiplication()

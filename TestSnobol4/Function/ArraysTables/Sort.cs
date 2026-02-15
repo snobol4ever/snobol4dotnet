@@ -157,7 +157,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(" 10 9 2 6 4 3 7 11 5 8 1 15 12 13 14", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
+        Assert.AreEqual(" 10 9 2 6 4 3 7 11 5 8 1 15 12 13 14", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r")]).Data);
 
     }
 
@@ -245,7 +245,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(" 3 14 11 1 13 2 5 12 8 9 7 6 10 4 15", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
+        Assert.AreEqual(" 3 14 11 1 13 2 5 12 8 9 7 6 10 4 15", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r")]).Data);
     }
 
     [TestMethod]
@@ -332,7 +332,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(" 14 6 7 1 3 8 12 13 10 2 11 5 4 15 9", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
+        Assert.AreEqual(" 14 6 7 1 3 8 12 13 10 2 11 5 4 15 9", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r")]).Data);
 
     }
 
@@ -370,7 +370,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("  LE1;K3 )1B!M/ 123 3.14159", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
+        Assert.AreEqual("  LE1;K3 )1B!M/ 123 3.14159", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r")]).Data);
     }
 
 }

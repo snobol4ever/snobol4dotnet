@@ -28,8 +28,8 @@ end
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("This ebook is for the use of anyone anywhere in the United States and", ((StringVar)build.Execute!.IdentifierTable["A"]).Data);
-        Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable["B"]).Data);
+        Assert.AreEqual("This ebook is for the use of anyone anywhere in the United States and", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
+        Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","b")]).Data);
     }
 
     [TestMethod]
@@ -54,8 +54,8 @@ end
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("This ebook is for the use of anyone anywhere in the United States and", ((StringVar)build.Execute!.IdentifierTable["A"]).Data);
-        Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable["B"]).Data);
+        Assert.AreEqual("This ebook is for the use of anyone anywhere in the United States and", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
+        Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","b")]).Data);
     }
 
     [TestMethod]

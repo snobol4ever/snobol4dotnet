@@ -2,24 +2,6 @@
 
 namespace Snobol4.Common;
 
-public class UserFunctionDefinition
-{
-    internal string FunctionName;
-    internal string Prototype;
-    internal List<string> Parameters;
-    internal List<string> Locals;
-    internal string EntryLabel;
-
-    internal UserFunctionDefinition(string functionName, string prototype, List<string> parameters, List<string> locals, string entryLabel)
-    {
-        FunctionName = functionName;
-        Prototype = prototype;
-        Parameters = parameters;
-        Locals = locals;
-        EntryLabel = entryLabel;
-    }
-}
-
 //"define first argument is not a string" /* 81 */,
 //"define first argument is null" /* 82 */,
 //"define first argument is missing a left paren" /* 83 */,
@@ -30,7 +12,7 @@ public class UserFunctionDefinition
 
 public partial class Executive
 {
-    internal Dictionary<string, UserFunctionDefinition> UserFunctionDefinitions = new();
+    //internal Dictionary<string, UserFunctionTableEntry> UserFunctionTable = new();
 
     internal void CreateProgramDefinedFunction(List<Var> arguments)
     {
@@ -49,8 +31,9 @@ public partial class Executive
             return;
         }
 
+        var prototype = Parent.FoldCase("CreateProgramDefinedFunction", (string)value).Trim();
+
         // define argument cannot be null string
-        var prototype = ((string)value).Trim();
         if (prototype == "")
         {
             LogRuntimeException(81);
@@ -61,8 +44,9 @@ public partial class Executive
         var match = CompiledRegex.FunctionPrototypePattern().Match(prototype);
         Debug.Assert(match.Success);  // regex should always match
 
-        // function name cannot be null
         var functionName = match.Groups[1].Value.Trim();
+
+        // function name cannot be null
         if (functionName == "")
         {
             LogRuntimeException(84);
@@ -70,7 +54,8 @@ public partial class Executive
         }
 
         // function name cannot be an existing function
-        if (FunctionTable.ContainsKey(functionName))
+        //if (FunctionTable.ContainsKey(functionName))
+        if (FunctionTable[functionName] != null)
         {
             LogRuntimeException(248);
             return;
@@ -108,11 +93,11 @@ public partial class Executive
             entryLabel = ((NameVar)entry).Pointer;
         }
 
-        if (!Labels.ContainsKey(entryLabel))
+        //if (!LabelTable.ContainsKey(entryLabel))
+        if (LabelTable[entryLabel] == GotoNotFound)
         {
             LogRuntimeException(86);
         }
-
 
         // Build table entry
         var tempParameters = new List<string>(match.Groups[3].Value.Split(','));
@@ -122,11 +107,11 @@ public partial class Executive
         List<string> locals = new();
         locals.AddRange(tempLocals.Select(t => t.Trim()).Where(local => local != ""));
         var argumentCount = locals.Count;
-        var newEntry = new FunctionTableEntry(functionName, ExecuteProgramDefinedFunction, argumentCount, false);
+        var newEntry = new FunctionTableEntry(this, functionName, ExecuteProgramDefinedFunction, argumentCount, false);
         FunctionTable[functionName] = newEntry;
 
         // Build user function definition entry
-        UserFunctionDefinitions[functionName] = new UserFunctionDefinition(functionName, prototype, parameters, locals, entryLabel);
+        UserFunctionTable[functionName] = new UserFunctionTableEntry(functionName, prototype, parameters, locals, entryLabel);
 
         PredicateSuccess();
     }
@@ -137,7 +122,7 @@ public partial class Executive
         ProgramDefinedFunctionStack.Push(functionName);
         var entry = FunctionTable[functionName];
         List<Var> saveVars = [];
-        var definition = UserFunctionDefinitions[functionName];
+        var definition = UserFunctionTable[entry.Symbol];
 
         var parametersCount = definition.Parameters.Count;
         var localsCount = definition.Locals.Count;
@@ -192,7 +177,7 @@ public partial class Executive
         }
 
         // Run function by transferring to the entry label
-        var nextIndex = ExecuteLoop(Labels[definition.EntryLabel]);
+        var nextIndex = ExecuteLoop(LabelTable[definition.EntryLabel]);
         var returnVar = IdentifierTable[functionName];
 
         switch (nextIndex)

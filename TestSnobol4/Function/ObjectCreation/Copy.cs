@@ -16,7 +16,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].CreationOrder, build.Execute!.IdentifierTable["B"].CreationOrder);
+        Assert.AreNotEqual(build.Execute!.IdentifierTable[build.FoldCase("","a")].CreationOrder, build.Execute!.IdentifierTable[build.FoldCase("","b")].CreationOrder);
     }
 
     [TestMethod]
@@ -30,7 +30,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].CreationOrder, build.Execute!.IdentifierTable["B"].CreationOrder);
+        Assert.AreNotEqual(build.Execute!.IdentifierTable[build.FoldCase("","a")].CreationOrder, build.Execute!.IdentifierTable[build.FoldCase("","b")].CreationOrder);
     }
 
     [TestMethod]
@@ -44,7 +44,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreNotEqual(build.Execute!.IdentifierTable["A"].CreationOrder, build.Execute!.IdentifierTable["B"].CreationOrder);
+        Assert.AreNotEqual(build.Execute!.IdentifierTable[build.FoldCase("","a")].CreationOrder, build.Execute!.IdentifierTable[build.FoldCase("","b")].CreationOrder);
     }
 
 }

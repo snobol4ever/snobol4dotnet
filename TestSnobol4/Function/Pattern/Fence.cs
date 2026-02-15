@@ -18,8 +18,8 @@ END
 ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("ABC", ((StringVar)build.Execute!.IdentifierTable["R1"]).Data);
-        Assert.AreEqual("123", ((StringVar)build.Execute!.IdentifierTable["R2"]).Data);
+        Assert.AreEqual("ABC", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r1")]).Data);
+        Assert.AreEqual("123", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r2")]).Data);
     }
     
     [TestMethod]
@@ -33,7 +33,7 @@ END
 ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("FAILURE", ((StringVar)build.Execute!.IdentifierTable["R1"]).Data);
+        Assert.AreEqual("FAILURE", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r1")]).Data);
     }
 
     [TestMethod]
@@ -47,7 +47,7 @@ END
 ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("FAILURE", ((StringVar)build.Execute!.IdentifierTable["R1"]).Data);
+        Assert.AreEqual("FAILURE", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r1")]).Data);
     }
 
     [TestMethod]
@@ -61,7 +61,7 @@ END
 ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("FAILURE", ((StringVar)build.Execute!.IdentifierTable["R1"]).Data);
+        Assert.AreEqual("FAILURE", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r1")]).Data);
     }
 
     [TestMethod]
@@ -75,7 +75,7 @@ END
 ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("FAILURE", ((StringVar)build.Execute!.IdentifierTable["R1"]).Data);
+        Assert.AreEqual("FAILURE", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r1")]).Data);
     }
 
     [TestMethod]
@@ -90,7 +90,7 @@ END
 ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("FAILURE", ((StringVar)build.Execute!.IdentifierTable["R1"]).Data);
+        Assert.AreEqual("FAILURE", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r1")]).Data);
     }
 
 

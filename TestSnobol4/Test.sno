@@ -1,6 +1,2 @@
-﻿* Test
-		&STLIMIT = 5
-*
-
-LOOP	OUTPUT = &FILE ' ' &LASTFILE ' ' &STNO ' ' &LINE ' ' &LASTNO ' ' &LASTLINE ' ' &STCOUNT   :(LOOP)
-END
+﻿    OUTPUT = "Hello,"  " World!"
+end

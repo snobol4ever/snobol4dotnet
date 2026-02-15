@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Snobol4.Common;
 using Test.TestLexer;
 
@@ -21,10 +22,10 @@ public class Load
                          unload('{dllName}')
                  end
                  """;
-        const string directives = "-b -f";
+        const string directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("Area of circle with radius 4.5 is 63.61725123519331", ((StringVar)build.Execute!.IdentifierTable["r1"]).Data);
-        Assert.AreEqual("Area of square with side  15.9 is 252.81", ((StringVar)build.Execute!.IdentifierTable["r2"]).Data);
+        Assert.AreEqual("Area of circle with radius 4.5 is 63.61725123519331", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r1")]).Data);
+        Assert.AreEqual("Area of square with side  15.9 is 252.81", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r2")]).Data);
     }
 }

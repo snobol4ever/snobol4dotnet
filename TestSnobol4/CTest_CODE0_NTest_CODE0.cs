@@ -43,7 +43,7 @@ public class CTest_CODE0
         x.Statements.Add(Statement0000005);
         x.Statements.Add(Statement0000006);
 
-        x.Labels.Add("L", 5);
+        x.LabelTable.Add("L", 5);
 
         x.PreviousStarFunctionCount = x.StarFunctionList.Count;
 
@@ -86,8 +86,8 @@ public class CTest_CODE0
         x.Identifier("L");
             if (x.Failure)
                 x.LogRuntimeException(20);
-        if (x.Labels.ContainsKey(x.SystemStack.Peek().Symbol))
-            return x.Labels[x.SystemStack.Pop().Symbol];
+        if (x.LabelTable.ContainsKey(x.SystemStack.Peek().Symbol))
+            return x.LabelTable[x.SystemStack.Pop().Symbol];
         x.LogRuntimeException(23);
             return -1;
         }
@@ -96,8 +96,8 @@ public class CTest_CODE0
         if (x.Failure)
             x.LogRuntimeException(20);
         x.Failure = true;
-        if (x.Labels.ContainsKey(x.SystemStack.Peek().Symbol))
-            return x.Labels[x.SystemStack.Pop().Symbol];
+        if (x.LabelTable.ContainsKey(x.SystemStack.Peek().Symbol))
+            return x.LabelTable[x.SystemStack.Pop().Symbol];
         x.LogRuntimeException(23);
         return -1;
     }

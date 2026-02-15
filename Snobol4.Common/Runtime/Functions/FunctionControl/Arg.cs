@@ -14,7 +14,7 @@ public partial class Executive
             return;
         }
 
-        if (!UserFunctionDefinitions.TryGetValue((string)str, out var entry))
+        if (!UserFunctionTable.TryGetValue((string)str, out var entry))
         {
             LogRuntimeException(63);
             return;

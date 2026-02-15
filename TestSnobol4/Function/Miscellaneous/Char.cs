@@ -55,6 +55,6 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("翿", ((StringVar)build.Execute!.IdentifierTable["B"]).Data);
+        Assert.AreEqual("翿", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","b")]).Data);
     }
 }

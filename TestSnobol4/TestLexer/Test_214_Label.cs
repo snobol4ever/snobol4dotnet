@@ -61,7 +61,7 @@ public partial class TestLexer
     [TestMethod]
     public void TEST_214_006()
     {
-        var s = $"]   'test'{Environment.NewLine}end{Environment.NewLine}";
+        var s = $")]   'test'{Environment.NewLine}end{Environment.NewLine}";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);

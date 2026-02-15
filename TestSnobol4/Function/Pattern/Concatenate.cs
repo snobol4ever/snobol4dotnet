@@ -23,7 +23,7 @@ public class Concatenate
 end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("HELPME", ((StringVar)build.Execute!.IdentifierTable["P"]).Data);
+        Assert.AreEqual("HELPME", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","p")]).Data);
     }
 
     [TestMethod]
@@ -44,8 +44,8 @@ n		r = 'fail'  :(end)
 end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("HELPME", ((StringVar)build.Execute!.IdentifierTable["P"]).Data);
-        Assert.AreEqual("success", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
+        Assert.AreEqual("HELPME", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","p")]).Data);
+        Assert.AreEqual("success", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r")]).Data);
     }
 
 }

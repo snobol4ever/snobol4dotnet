@@ -2,7 +2,7 @@
 
 public partial class Executive
 {
-                                                        public void Function(int argumentCount)
+    public void Function(int argumentCount)
     {
         using var profiler1 = Profiler.Start3($"Function", this);
 
@@ -15,7 +15,9 @@ public partial class Executive
 
         var functionStringVar = (StringVar)SystemStack.Pop();
         // Function name must be in the symbol table
-        if (!FunctionTable.TryGetValue(functionStringVar.Data, out var functionEntry))
+        var functionEntry = FunctionTable[functionStringVar.Data];
+        //if (!FunctionTable.TryGetValue(functionStringVar.Data, out var functionEntry))
+        if (functionEntry == null)
         {
             // 22 undefined function called
             LogRuntimeException(22);

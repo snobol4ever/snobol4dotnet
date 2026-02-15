@@ -14,7 +14,7 @@ public class TestCaseFolding
 test    a = b
 TEST    a = b
 end";
-        var directives = "-b -F";
+        var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(217, build.ErrorCodeHistory[0]);
@@ -55,10 +55,10 @@ end
         b = datatype(ITEM1);
 end";
 
-        var directives = "-b -f";
+        var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("PRODUCT", ((StringVar)build.Execute!.IdentifierTable["b"]).Data);
+        Assert.AreEqual("PRODUCT", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","b")]).Data);
     }
 
     [TestMethod]
@@ -71,7 +71,7 @@ end";
         var directives = "-b -f";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("lower case", ((StringVar)build.Execute!.IdentifierTable["a"]).Data);
-        Assert.AreEqual("upper case", ((StringVar)build.Execute!.IdentifierTable["A"]).Data);
+        Assert.AreEqual("lower case", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
+        Assert.AreEqual("upper case", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","A")]).Data);
     }
 }

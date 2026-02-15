@@ -9,11 +9,6 @@ public class IdentifierTable(Executive exec) : Dictionary<string, Var>
     {
         get
         {
-            if (Exec.Parent.CaseFolding)
-            {
-                symbol = symbol.ToUpper(CultureInfo.CurrentCulture);
-            }
-
             if (!TryGetValue(symbol, out Var value))
             {
                 value = StringVar.Null(symbol);
@@ -26,11 +21,6 @@ public class IdentifierTable(Executive exec) : Dictionary<string, Var>
         }
         set
         {
-            if (Exec.Parent.CaseFolding)
-            {
-                symbol = symbol.ToUpper(CultureInfo.CurrentCulture);
-            }
-
             value.Symbol = symbol;
             base[value.Symbol] = value;
             Exec.TraceIdentifierValue(symbol);

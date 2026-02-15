@@ -35,8 +35,8 @@ end
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("of the Project Gutenberg License included with this ebook or online", ((StringVar)build.Execute!.IdentifierTable["A"]).Data);
-        Assert.AreEqual("of the Project Gutenberg License included with this ebook or online", ((StringVar)build.Execute!.IdentifierTable["B"]).Data);
+        Assert.AreEqual("of the Project Gutenberg License included with this ebook or online", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","a")]).Data);
+        Assert.AreEqual("of the Project Gutenberg License included with this ebook or online", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","b")]).Data);
     }
 
     [TestMethod]

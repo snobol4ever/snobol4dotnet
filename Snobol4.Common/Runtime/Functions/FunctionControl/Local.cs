@@ -8,13 +8,15 @@ public partial class Executive
     public void Local(List<Var> arguments)
     {
         //Debug.WriteLine("Local()");
-        if (!arguments[0].Convert(VarType.STRING, out _, out var str, this) || (string)str == "")
+        if (!arguments[0].Convert(VarType.STRING, out _, out var functionName, this) || (string)functionName == "")
         {
             LogRuntimeException(60);
             return;
         }
 
-        if (!UserFunctionDefinitions.TryGetValue((string)str, out var entry))
+        functionName = Parent.FoldCase("Local", (string)functionName);
+
+        if (!UserFunctionTable.TryGetValue((string)functionName, out var entry))
         {
             LogRuntimeException(135);
             return;

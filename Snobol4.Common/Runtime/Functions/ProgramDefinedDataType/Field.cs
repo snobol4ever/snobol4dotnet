@@ -15,13 +15,15 @@ public partial class Executive
             return;
         }
 
+        datatype = (string)datatype;
+
         // table entry must be a programmer defined function
         if (!UserDataDefinitions.TryGetValue((string)datatype, out var definition))
         {
             LogRuntimeException(108);
             return;
         }
-        
+
         // field second argument must be an integer
         if (!arguments[1].Convert(VarType.INTEGER, out _, out var indexObj, this))
         {

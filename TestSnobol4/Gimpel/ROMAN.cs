@@ -32,10 +32,10 @@ END
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("MDCCLXXVI", ((StringVar)build.Execute!.IdentifierTable["R1"]).Data);
-        Assert.AreEqual("IX", ((StringVar)build.Execute!.IdentifierTable["R2"]).Data);
-        Assert.AreEqual("XLV", ((StringVar)build.Execute!.IdentifierTable["R3"]).Data);
-        Assert.AreEqual("MMXXVI", ((StringVar)build.Execute!.IdentifierTable["R4"]).Data);
+        Assert.AreEqual("MDCCLXXVI", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r1")]).Data);
+        Assert.AreEqual("IX", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r2")]).Data);
+        Assert.AreEqual("XLV", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r3")]).Data);
+        Assert.AreEqual("MMXXVI", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r4")]).Data);
     }
 
     [TestMethod]
@@ -60,8 +60,8 @@ END
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable["R1"]).Data);
-        Assert.AreEqual("Fail", ((StringVar)build.Execute!.IdentifierTable["R2"]).Data);
+        Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r1")]).Data);
+        Assert.AreEqual("Fail", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r2")]).Data);
     }
 
 }

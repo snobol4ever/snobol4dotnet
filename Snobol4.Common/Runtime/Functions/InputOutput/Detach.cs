@@ -12,7 +12,7 @@ public partial class Executive
             return;
         }
 
-        var symbol = (string)value;
+        var symbol =(string)value;
 
         if (symbol == "")
         {

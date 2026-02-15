@@ -16,7 +16,7 @@ public class FunctionTableEntry
 
     #region Constructors
 
-    public FunctionTableEntry(string symbol, FunctionHandler handler, int argumentCount,  bool isProtected)    
+    public FunctionTableEntry(Executive exec, string symbol, FunctionHandler handler, int argumentCount,  bool isProtected)    
     {
         Handler = handler;
         ArgumentCount = argumentCount;

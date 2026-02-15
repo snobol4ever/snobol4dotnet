@@ -27,8 +27,8 @@ public class Opsyn
         var directives = "-b -f";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("Area of circle with radius 4.5 is 63.61725123519331", ((StringVar)build.Execute!.IdentifierTable["r1"]).Data);
-        Assert.AreEqual("Area of square with side  15.9 is 252.81", ((StringVar)build.Execute!.IdentifierTable["r2"]).Data);
+        Assert.AreEqual("Area of circle with radius 4.5 is 63.61725123519331", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r1")]).Data);
+        Assert.AreEqual("Area of square with side  15.9 is 252.81", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r2")]).Data);
     }
 
     [TestMethod]
@@ -53,12 +53,12 @@ public class Opsyn
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(6, ((IntegerVar)build.Execute!.IdentifierTable["R1"]).Data);
-        Assert.AreEqual("string", ((StringVar)build.Execute!.IdentifierTable["R2"]).Data);
-        Assert.AreEqual(6, ((IntegerVar)build.Execute!.IdentifierTable["R3"]).Data);
-        Assert.AreEqual("string", ((StringVar)build.Execute!.IdentifierTable["R4"]).Data);
-        Assert.AreEqual(6, ((IntegerVar)build.Execute!.IdentifierTable["R5"]).Data);
-        Assert.AreEqual("string", ((StringVar)build.Execute!.IdentifierTable["R6"]).Data);
+        Assert.AreEqual(6, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("","r1")]).Data);
+        Assert.AreEqual("string", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r2")]).Data);
+        Assert.AreEqual(6, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("","r3")]).Data);
+        Assert.AreEqual("string", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r4")]).Data);
+        Assert.AreEqual(6, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("","r5")]).Data);
+        Assert.AreEqual("string", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r6")]).Data);
     }
 
     [TestMethod]
@@ -75,7 +75,7 @@ public class Opsyn
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("success", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
+        Assert.AreEqual("success", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r")]).Data);
     }
 
     [TestMethod]
@@ -92,7 +92,7 @@ public class Opsyn
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("failure", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
+        Assert.AreEqual("failure", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r")]).Data);
     }
 
     [TestMethod]
@@ -109,7 +109,7 @@ public class Opsyn
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("success", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
+        Assert.AreEqual("success", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r")]).Data);
     }
 
     [TestMethod]
@@ -128,7 +128,7 @@ public class Opsyn
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("SPITBOL IS VERY FAST.", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
+        Assert.AreEqual("SPITBOL IS VERY FAST.", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r")]).Data);
     }
 
     [TestMethod]
@@ -143,7 +143,7 @@ public class Opsyn
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("c", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
+        Assert.AreEqual("c", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("","r")]).Data);
     }
 
     [TestMethod]

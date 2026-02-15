@@ -13,11 +13,13 @@ public class Area
         if (_executive == null)
             throw new ArgumentNullException(nameof(x));
 
-        var entry1 = new FunctionTableEntry("AreaOfCircle", AreaOfCircle, 1, false);
-        _executive.FunctionTable.Add("AreaOfCircle", entry1);
+        var name1 = x.Parent.FoldCase("Init", "AreaOfCircle");
+        var entry1 = new FunctionTableEntry(_executive, name1, AreaOfCircle, 1, false);
+        _executive.FunctionTable[name1] = entry1;
 
-        var entry2 = new FunctionTableEntry("AreaOfSquare", AreaOfSquare, 1, false);
-        _executive.FunctionTable.Add("AreaOfSquare", entry2);
+        var name2 = x.Parent.FoldCase("Init", "AreaOfSquare");
+        var entry2 = new FunctionTableEntry(_executive, name2, AreaOfSquare, 1, false);
+        _executive.FunctionTable[name2] = entry2;
     }
 
     public void AreaOfCircle(List<Var> arguments)

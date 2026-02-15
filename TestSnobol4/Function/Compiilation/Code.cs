@@ -18,6 +18,6 @@ END
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("  1 2 3 4 5 6 7 8 9 10", build.Execute!.IdentifierTable["A"].ToString());
+        Assert.AreEqual("  1 2 3 4 5 6 7 8 9 10", build.Execute!.IdentifierTable[build.FoldCase("","a")].ToString());
     }
 }

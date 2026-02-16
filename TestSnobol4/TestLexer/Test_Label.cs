@@ -82,7 +82,7 @@ end
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("test", build.Code.EntryLabel);
+        Assert.AreEqual("test", build.EntryLabel);
     }
 
     [TestMethod]
@@ -92,7 +92,7 @@ end
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("", build.Code.EntryLabel);
+        Assert.AreEqual("", build.EntryLabel);
     }
 
     [TestMethod]

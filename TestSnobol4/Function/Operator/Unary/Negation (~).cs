@@ -15,7 +15,7 @@ public class Negation
 n	    result = 'failure'
 end
 ";
-        var directives = "-b -F";
+        var directives = "-b ";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("succeed", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("result")]).Data);
@@ -30,7 +30,7 @@ end
 n	    result = 'failure'
 end
 ";
-        var directives = "-b -F";
+        var directives = "-b ";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("failure", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("result")]).Data);
@@ -46,7 +46,7 @@ end
 n	    result = 'failure'
 end
 ";
-        var directives = "-b -F";
+        var directives = "-b ";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("failure", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("result")]).Data);

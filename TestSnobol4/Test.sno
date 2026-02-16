@@ -1,2 +1,3 @@
-﻿    OUTPUT = "Hello,"  " World!"
-end
+﻿		output = 3 + 5
+123abc    OUTPUT = "Hello,"  " World!"
+END 123abc

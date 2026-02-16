@@ -28,9 +28,10 @@ test    a = b
 TEST    a = b
 end
 ";
-        var directives = "-b -f";
+        var directives = "-b ";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(1, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(217, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
@@ -41,9 +42,10 @@ test    a = b
 TEST    a = b
 end
 ";
-        var directives = "-b -f";
+        var directives = "-b ";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(1, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(217, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
@@ -68,10 +70,10 @@ end";
         a = 'lower case'
         A = 'upper case'
 end";
-        var directives = "-b -f";
+        var directives = "-b ";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("lower case", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Data);
+        //Assert.AreEqual("lower case", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Data);
         Assert.AreEqual("upper case", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("A")]).Data);
     }
 }

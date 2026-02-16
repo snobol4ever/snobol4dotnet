@@ -133,7 +133,7 @@ public partial class Executive
         if (!arg.Convert(VarType.STRING, out _, out var function, exec))
             return 154;
 
-        existingFunction = (string)function;
+        existingFunction = Parent.FoldCase((string)function);
 
         // Second argument must be defined function
         return !FunctionTable.ContainsKey(existingFunction) ? 154 : 0;

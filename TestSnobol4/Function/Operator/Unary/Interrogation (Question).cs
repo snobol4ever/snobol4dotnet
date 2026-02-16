@@ -15,7 +15,7 @@ public class Interrogation
         N = 123
         N = ?(S ? P) N + 1
 END";
-        var directives = "-b -F";
+        var directives = "-b ";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(124, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("n")]).Data);
@@ -29,7 +29,7 @@ END";
 	    results = 'succeed'  :(end)
 n	    results = 'failure'
 end";
-        var directives = "-b -F";
+        var directives = "-b ";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("failure", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("results")]).Data);
@@ -44,7 +44,7 @@ end";
 	    results = 'succeed'  :(end)
 n	    results = 'failure'
 end";
-        var directives = "-b -F";
+        var directives = "-b ";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("succeed", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("results")]).Data);

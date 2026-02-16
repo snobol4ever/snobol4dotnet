@@ -188,10 +188,21 @@ public partial class Lexer
                 sourceLine.Label = label;
 
                 // Stop when the end label is found
-                if (string.Equals(label, "end"))
+                if (_parent.CaseFolding)
                 {
-                    _cursorCurrent = sourceLine.Text.Length; // Ignore the rest of the line
-                    return true;
+                    if (string.Equals(label.ToUpper(), "END"))
+                    {
+                        _cursorCurrent = sourceLine.Text.Length; // Ignore the rest of the line
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (string.Equals(label, "end"))
+                    {
+                        _cursorCurrent = sourceLine.Text.Length; // Ignore the rest of the line
+                        return true;
+                    }
                 }
 
                 _parent.Code.Labels[label] = sourceLine.LineCountTotal;

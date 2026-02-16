@@ -16,21 +16,38 @@ public class GenerateCSharpCode(Builder parent)
         EVAL = 3
     }
 
+    #region Public API
+
     public string GenerateCSharp(string nameSpace, string className, bool firstInit, CompileTarget compileTarget, Builder parent)
     {
         _compileTarget = compileTarget;
         _parent = parent;
+
         GeneratePre(nameSpace, className, firstInit);
         GenerateStatements();
         GenerateExpressions();
+
         _csharpCode.AppendLine("}");
         MarkCodeAsCompiled();
+
         if (_parent.WriteCSharpCode)
             WriteCode(className + "_" + nameSpace + ".cs");
+
         return _csharpCode.ToString();
     }
 
+    #endregion
+
+    #region Pre-Generation
+
     private void GeneratePre(string nameSpace, string className, bool firstInit)
+    {
+        GenerateFileHeader();
+        GenerateNamespaceAndClass(nameSpace, className);
+        GenerateRunMethod(firstInit);
+    }
+
+    private void GenerateFileHeader()
     {
         _csharpCode.AppendLine("// ********************************");
         _csharpCode.AppendLine("// **** MACHINE GENERATED CODE ****");
@@ -38,6 +55,10 @@ public class GenerateCSharpCode(Builder parent)
         _csharpCode.AppendLine($"// **** {DateTime.Now}   ****");
         _csharpCode.AppendLine("// ********************************");
         _csharpCode.AppendLine();
+    }
+
+    private void GenerateNamespaceAndClass(string nameSpace, string className)
+    {
         _csharpCode.AppendLine("using System;");
         _csharpCode.AppendLine("using System.Collections;");
         _csharpCode.AppendLine("using System.Collections.Generic;");
@@ -47,42 +68,74 @@ public class GenerateCSharpCode(Builder parent)
         _csharpCode.AppendLine();
         _csharpCode.AppendLine($"public class {className}");
         _csharpCode.AppendLine("{");
-
         _csharpCode.AppendLine("    delegate int StatementCode(Executive x);");
         _csharpCode.AppendLine();
+    }
+
+    private void GenerateRunMethod(bool firstInit)
+    {
         _csharpCode.AppendLine("    public int Run(Executive x)");
         _csharpCode.AppendLine("    {");
 
         if (_compileTarget == CompileTarget.EVAL)
         {
-            Debug.Assert(_parent.Execute != null, nameof(_parent.Execute) + " != null");
-
-            for (var jStar = _parent.Execute.PreviousStarFunctionCount; jStar < _parent.ExpressionList.Count; ++jStar)
-            {
-                _csharpCode.AppendLine($"// jStar: {jStar}");
-                _csharpCode.AppendLine($"        x.StarFunctionList.Add(Star{jStar:D8});");
-            }
-            _csharpCode.AppendLine();
-
-            _csharpCode.AppendLine("        x.PreviousStarFunctionCount = x.StarFunctionList.Count;");
-            _csharpCode.AppendLine("        return 0;");
-            _csharpCode.AppendLine("    }");
+            GenerateEvalMode();
             return;
         }
 
-        // Allow setting a breakpoint in the generated code
+        GenerateBreakpoint();
+        GenerateInitialSettings();
+        GenerateSourceCodeData();
+        GenerateKeywordData();
+        GenerateStatementMappings();
+        GenerateLabelMappings();
+        GenerateStarFunctions();
+
+        if (firstInit)
+        {
+            GenerateSystemLabels();
+            _csharpCode.AppendLine("        x.ExecuteLoop(0);");
+        }
+
+        _csharpCode.AppendLine();
+        _csharpCode.AppendLine("        return 0;");
+        _csharpCode.AppendLine("    }");
+    }
+
+    private void GenerateEvalMode()
+    {
+        Debug.Assert(_parent.Execute != null, nameof(_parent.Execute) + " != null");
+
+        for (var jStar = _parent.Execute.PreviousStarFunctionCount; jStar < _parent.ExpressionList.Count; ++jStar)
+        {
+            _csharpCode.AppendLine($"        // jStar: {jStar}");
+            _csharpCode.AppendLine($"        x.StarFunctionList.Add(Star{jStar:D8});");
+        }
+
+        _csharpCode.AppendLine();
+        _csharpCode.AppendLine("        x.PreviousStarFunctionCount = x.StarFunctionList.Count;");
+        _csharpCode.AppendLine("        return 0;");
+        _csharpCode.AppendLine("    }");
+    }
+
+    private void GenerateBreakpoint()
+    {
         _csharpCode.AppendLine("        Executive.BreakPoint();");
         _csharpCode.AppendLine();
+    }
 
-        // Store initial settings from Builder
-        _csharpCode.AppendLine(
-            $"        x.Parent.SuppressListingHeader = {_parent.SuppressListingHeader.ToString().ToLower()};");
+    private void GenerateInitialSettings()
+    {
+        _csharpCode.AppendLine($"        x.Parent.SuppressListingHeader = {_parent.SuppressListingHeader.ToString().ToLower()};");
         _csharpCode.AppendLine($"        x.Parent.FilesToCompile.Add(@\"{_parent.FilesToCompile[^1]}\");");
         _csharpCode.AppendLine($"        x.Parent.ListFileName = @\"{_parent.ListFileName}\";");
         _csharpCode.AppendLine($"        x.Parent.ShowExecutionStatistics = {_parent.ShowExecutionStatistics.ToString().ToLower()};");
         _csharpCode.AppendLine();
+    }
 
-        // Make source code file name is available for debugging
+    private void GenerateSourceCodeData()
+    {
+        // Make source code file name available for debugging
         foreach (var line in _parent.Code.SourceLines)
         {
             if (line.Compiled)
@@ -94,10 +147,17 @@ public class GenerateCSharpCode(Builder parent)
         }
 
         _csharpCode.AppendLine();
+    }
 
+    private void GenerateKeywordData()
+    {
         // Generate &FILE keyword data
-        foreach (var pathLine in from line in _parent.Code.SourceLines where !line.Compiled select line.PathName)
+        foreach (var pathLine in from line in _parent.Code.SourceLines
+                                 where !line.Compiled
+                                 select line.PathName)
+        {
             _csharpCode.AppendLine($"        x.SourceFiles.Add(@\"{pathLine}\");");
+        }
         _csharpCode.AppendLine();
 
         // Generate &LINE keyword data
@@ -105,40 +165,45 @@ public class GenerateCSharpCode(Builder parent)
         {
             _csharpCode.AppendLine($"        x.SourceLineNumbers.Add({line.LineCountFile});");
         }
-
         _csharpCode.AppendLine();
-
 
         // Generate &STNO keyword data
         var statementNumber = _parent.StatementCount;
-
         foreach (var _ in _parent.Code.SourceLines)
         {
             _csharpCode.AppendLine($"        x.SourceStatementNumbers.Add({++statementNumber});");
         }
-
         _csharpCode.AppendLine();
-        statementNumber = _parent.StatementCount;
+    }
 
+    private void GenerateStatementMappings()
+    {
         // Map methods to line numbers
-
+        var statementNumber = _parent.StatementCount;
         foreach (var _ in _parent.Code.SourceLines)
         {
             _csharpCode.AppendLine($"        x.Statements.Add(Statement{statementNumber++:D7});");
         }
-
         _csharpCode.AppendLine();
-        statementNumber = _parent.StatementCount;
+    }
 
+    private void GenerateLabelMappings()
+    {
         // Map labels to line numbers
+        var statementNumber = _parent.StatementCount;
         foreach (var line in _parent.Code.SourceLines)
         {
-            if (line.Label != "END" && line.Label != "end" && line.Label.Length > 0 && !line.Compiled)
-                //_csharpCode.AppendLine($"        x.LabelTable.Add(\"{line.Label}\", {statementNumber});");
+            if (line.Label.Length > 0 && !line.Compiled && ((_parent.CaseFolding && line.Label.ToUpper() is not "END") || (!_parent.CaseFolding && line.Label is not "end")))
+            {
                 _csharpCode.AppendLine($"        x.LabelTable[\"{line.Label}\"] = {statementNumber};");
+            }
             statementNumber++;
         }
+        _csharpCode.AppendLine();
+    }
 
+    private void GenerateStarFunctions()
+    {
         for (var iStar = _parent.RecordedExpressionCount; iStar < _parent.ExpressionList.Count; ++iStar)
         {
             _csharpCode.AppendLine($"        x.StarFunctionList.Add(Star{iStar++:D8});");
@@ -147,39 +212,36 @@ public class GenerateCSharpCode(Builder parent)
         _csharpCode.AppendLine();
         _csharpCode.AppendLine("        x.PreviousStarFunctionCount = x.StarFunctionList.Count;");
         _csharpCode.AppendLine();
-
-        // TODO: Implement return, sreturn, and freturn
-        if (firstInit)
-        {
-            _csharpCode.AppendLine("        x.LabelTable.Add(\"end\",-1);");
-            _csharpCode.AppendLine("        x.LabelTable.Add(\"return\", -2);");
-            _csharpCode.AppendLine("        x.LabelTable.Add(\"freturn\", -3);");
-            _csharpCode.AppendLine("        x.LabelTable.Add(\"nreturn\", -4);");
-            _csharpCode.AppendLine("        x.LabelTable.Add(\"abort\", -5);");
-            _csharpCode.AppendLine("        x.LabelTable.Add(\"continue\", -6);");
-            _csharpCode.AppendLine("        x.LabelTable.Add(\"scontinue\", -7);");
-            _csharpCode.AppendLine("        x.LabelTable.Add(\"END\",-1);");
-            _csharpCode.AppendLine("        x.LabelTable.Add(\"RETURN\", -2);");
-            _csharpCode.AppendLine("        x.LabelTable.Add(\"FRETURN\", -3);");
-            _csharpCode.AppendLine("        x.LabelTable.Add(\"NRETURN\", -4);");
-            _csharpCode.AppendLine("        x.LabelTable.Add(\"ABORT\", -5);");
-            _csharpCode.AppendLine("        x.LabelTable.Add(\"CONTINUE\", -6);");
-            _csharpCode.AppendLine("        x.LabelTable.Add(\"SCONTINUE\", -7);");
-            _csharpCode.AppendLine();
-            _csharpCode.AppendLine("        x.ExecuteLoop(0);");
-        }
-
-        _csharpCode.AppendLine();
-        _csharpCode.AppendLine("        return 0;");
-        _csharpCode.AppendLine("    }");
     }
+
+    private void GenerateSystemLabels()
+    {
+        // TODO: Implement return, sreturn, and freturn
+        _csharpCode.AppendLine("        x.LabelTable.Add(\"end\",-1);");
+        _csharpCode.AppendLine("        x.LabelTable.Add(\"return\", -2);");
+        _csharpCode.AppendLine("        x.LabelTable.Add(\"freturn\", -3);");
+        _csharpCode.AppendLine("        x.LabelTable.Add(\"nreturn\", -4);");
+        _csharpCode.AppendLine("        x.LabelTable.Add(\"abort\", -5);");
+        _csharpCode.AppendLine("        x.LabelTable.Add(\"continue\", -6);");
+        _csharpCode.AppendLine("        x.LabelTable.Add(\"scontinue\", -7);");
+        _csharpCode.AppendLine("        x.LabelTable.Add(\"END\",-1);");
+        _csharpCode.AppendLine("        x.LabelTable.Add(\"RETURN\", -2);");
+        _csharpCode.AppendLine("        x.LabelTable.Add(\"FRETURN\", -3);");
+        _csharpCode.AppendLine("        x.LabelTable.Add(\"NRETURN\", -4);");
+        _csharpCode.AppendLine("        x.LabelTable.Add(\"ABORT\", -5);");
+        _csharpCode.AppendLine("        x.LabelTable.Add(\"CONTINUE\", -6);");
+        _csharpCode.AppendLine("        x.LabelTable.Add(\"SCONTINUE\", -7);");
+        _csharpCode.AppendLine();
+    }
+
+    #endregion
+
+    #region Statement Generation
 
     private void GenerateStatements()
     {
         if (_compileTarget == CompileTarget.EVAL)
-        {
             return;
-        }
 
         var statementNumber = _parent.StatementCount;
 
@@ -191,176 +253,203 @@ public class GenerateCSharpCode(Builder parent)
                 continue;
             }
 
-            var methodName = $"Statement{statementNumber:D7}";
-            ++statementNumber;
-
-            _csharpCode.AppendLine();
-            _csharpCode.AppendLine($"    private int {methodName}(Executive x)");
-            _csharpCode.AppendLine("    {");
-
-            var pathLine = $"{Path.GetFileName(line.PathName)}({line.LineCountTotal}): ";
-
-            var escapedLine = line.Text.Replace('\t', ' ').Replace("\"", "\\\"");
-            _csharpCode.AppendLine($"        // {pathLine}{escapedLine}");
-
-            _csharpCode.AppendLine($"        x.InitializeStatement({statementNumber});");
-
-            if (line.Label is "end" or "END")
-            {
-                _csharpCode.AppendLine("        return -1;");
-                _csharpCode.AppendLine("    }");
-                return;
-            }
-
-            if (line.ParseBody.Count > 0)
-            {
-                _csharpCode.Append(ToCSharp(line.ParseBody));
-            }
-
-            _csharpCode.AppendLine("        x.FinalizeStatement();");
-
-            switch (line.ParseUnconditionalGoto.Count)
-            {
-                case 0 when line.ParseFailureGoto.Count == 0 && line.ParseSuccessGoto.Count == 0:
-                    _csharpCode.AppendLine($"        return {statementNumber};");
-                    break;
-                case > 0:
-                    {
-                        _csharpCode.AppendLine("        // Process unconditional goto");
-                        _csharpCode.AppendLine("        bool bSaveStatus = x.Failure;");
-                        _csharpCode.AppendLine("        x.Failure = false;");
-                        _csharpCode.Append(ToCSharp(line.ParseUnconditionalGoto));
-                        _csharpCode.AppendLine("        if (x.Failure)");
-                        _csharpCode.AppendLine("            x.LogRuntimeException(20);");
-                        _csharpCode.AppendLine("        x.SaveStatus(bSaveStatus);");
-
-                        if (line.DirectGotoFirst)
-                        {
-                            DirectGoto();
-                        }
-                        else
-                        {
-                            LabelGoto();
-                        }
-
-                        _csharpCode.AppendLine("        return -1;");
-                        break;
-                    }
-            }
-
-            if (line.ParseSuccessGoto.Count > 0 && line.ParseFailureGoto.Count > 0)
-            {
-                if (line.SuccessFirst)
-                {
-                    _csharpCode.AppendLine("        if (!x.Failure)");
-                    _csharpCode.AppendLine("        {");
-                    _csharpCode.Append(ToCSharp(line.ParseSuccessGoto));
-                    _csharpCode.AppendLine("            if (x.Failure)");
-                    _csharpCode.AppendLine("                x.LogRuntimeException(20);");
-
-                    if (line.DirectGotoFirst)
-                    {
-                        DirectGoto();
-                    }
-                    else
-                    {
-                        LabelGoto();
-                    }
-
-                    _csharpCode.AppendLine("            return -1;");
-                    _csharpCode.AppendLine("        }");
-                    _csharpCode.AppendLine("        x.Failure = false;");
-                    _csharpCode.Append(ToCSharp(line.ParseFailureGoto));
-                    _csharpCode.AppendLine("        if (x.Failure)");
-                    _csharpCode.AppendLine("            x.LogRuntimeException(20);");
-                    _csharpCode.AppendLine("        x.Failure = true;");
-                }
-                else
-                {
-                    _csharpCode.AppendLine("        if (x.Failure)");
-                    _csharpCode.AppendLine("        {");
-                    _csharpCode.AppendLine("        x.Failure = false;");
-                    _csharpCode.Append(ToCSharp(line.ParseFailureGoto));
-                    _csharpCode.AppendLine("            if (x.Failure)");
-                    _csharpCode.AppendLine("                x.LogRuntimeException(20);");
-                    _csharpCode.AppendLine("        x.Failure = true;");
-
-                    if (line.DirectGotoFirst)
-                    {
-                        DirectGoto();
-                    }
-                    else
-                    {
-                        LabelGoto();
-                    }
-
-                    _csharpCode.AppendLine("            return -1;");
-                    _csharpCode.AppendLine("        }");
-                    _csharpCode.Append(ToCSharp(line.ParseSuccessGoto));
-                    _csharpCode.AppendLine("        if (x.Failure)");
-                    _csharpCode.AppendLine("            x.LogRuntimeException(20);");
-                }
-
-                if (line.DirectGotoSecond)
-                {
-                    DirectGoto();
-                }
-                else
-                {
-                    LabelGoto();
-                }
-
-                _csharpCode.AppendLine("        return -1;");
-            }
-
-            if (line.ParseSuccessGoto.Count > 0 && line.ParseFailureGoto.Count == 0)
-            {
-                _csharpCode.AppendLine("        if (x.Failure)");
-                _csharpCode.AppendLine($"            return {statementNumber};");
-                _csharpCode.Append(ToCSharp(line.ParseSuccessGoto));
-                _csharpCode.AppendLine("        if (x.Failure)");
-                _csharpCode.AppendLine("            x.LogRuntimeException(20);");
-
-                if (line.DirectGotoFirst)
-                {
-                    DirectGoto();
-                }
-                else
-                {
-                    LabelGoto();
-                }
-
-                _csharpCode.AppendLine("        return -1;");
-            }
-
-            if (line.ParseFailureGoto.Count > 0 && line.ParseSuccessGoto.Count == 0)
-            {
-                _csharpCode.AppendLine("        if (!x.Failure)");
-                _csharpCode.AppendLine($"            return {statementNumber};");
-                _csharpCode.AppendLine("        x.Failure = false;");
-                _csharpCode.Append(ToCSharp(line.ParseFailureGoto));
-                _csharpCode.AppendLine("        if (x.Failure)");
-                _csharpCode.AppendLine("            x.LogRuntimeException(20);");
-                _csharpCode.AppendLine("        x.Failure = true;");
-
-                if (line.DirectGotoFirst)
-                {
-                    DirectGoto();
-                }
-                else
-                {
-                    LabelGoto();
-                }
-
-                _csharpCode.AppendLine("        return -1;");
-            }
-            _csharpCode.AppendLine("    }");
+            GenerateSingleStatement(line, statementNumber);
+            statementNumber++;
         }
     }
+
+    private void GenerateSingleStatement(SourceLine line, int statementNumber)
+    {
+        var methodName = $"Statement{statementNumber:D7}";
+
+        _csharpCode.AppendLine();
+        _csharpCode.AppendLine($"    private int {methodName}(Executive x)");
+        _csharpCode.AppendLine("    {");
+
+        GenerateStatementComment(line);
+        _csharpCode.AppendLine($"        x.InitializeStatement({statementNumber});");
+
+        if ((_parent.CaseFolding && line.Label.ToUpper() is "END") || (!_parent.CaseFolding && line.Label is "end"))
+        {
+            _csharpCode.AppendLine("        return -1;");
+            _csharpCode.AppendLine("    }");
+            return;
+        }
+
+        GenerateStatementBody(line);
+        _csharpCode.AppendLine("        x.FinalizeStatement();");
+        GenerateStatementGotos(line, statementNumber + 1);
+
+        _csharpCode.AppendLine("    }");
+    }
+
+    private void GenerateStatementComment(SourceLine line)
+    {
+        var pathLine = $"{Path.GetFileName(line.PathName)}({line.LineCountTotal}): ";
+        var escapedLine = line.Text.Replace('\t', ' ').Replace("\"", "\\\"");
+        _csharpCode.AppendLine($"        // {pathLine}{escapedLine}");
+    }
+
+    private void GenerateStatementBody(SourceLine line)
+    {
+        if (line.ParseBody.Count > 0)
+        {
+            _csharpCode.Append(ToCSharp(line.ParseBody));
+        }
+    }
+
+    private void GenerateStatementGotos(SourceLine line, int nextStatement)
+    {
+        // Unconditional goto
+        if (line.ParseUnconditionalGoto.Count > 0)
+        {
+            GenerateUnconditionalGoto(line);
+            return;
+        }
+
+        // No gotos - fall through to next statement
+        if (line.ParseFailureGoto.Count == 0 && line.ParseSuccessGoto.Count == 0)
+        {
+            _csharpCode.AppendLine($"        return {nextStatement};");
+            return;
+        }
+
+        // Both success and failure gotos
+        if (line.ParseSuccessGoto.Count > 0 && line.ParseFailureGoto.Count > 0)
+        {
+            GenerateBothGotos(line);
+            return;
+        }
+
+        // Success goto only
+        if (line.ParseSuccessGoto.Count > 0)
+        {
+            GenerateSuccessGoto(line, nextStatement);
+            return;
+        }
+
+        // Failure goto only
+        if (line.ParseFailureGoto.Count > 0)
+        {
+            GenerateFailureGoto(line, nextStatement);
+        }
+    }
+
+    private void GenerateUnconditionalGoto(SourceLine line)
+    {
+        _csharpCode.AppendLine("        // Process unconditional goto");
+        _csharpCode.AppendLine("        bool bSaveStatus = x.Failure;");
+        _csharpCode.AppendLine("        x.Failure = false;");
+        _csharpCode.Append(ToCSharp(line.ParseUnconditionalGoto));
+        _csharpCode.AppendLine("        if (x.Failure)");
+        _csharpCode.AppendLine("            x.LogRuntimeException(20);");
+        _csharpCode.AppendLine("        x.SaveStatus(bSaveStatus);");
+
+        if (line.DirectGotoFirst)
+            DirectGoto();
+        else
+            LabelGoto();
+
+        _csharpCode.AppendLine("        return -1;");
+    }
+
+    private void GenerateBothGotos(SourceLine line)
+    {
+        if (line.SuccessFirst)
+        {
+            // Success goto first, then failure
+            _csharpCode.AppendLine("        if (!x.Failure)");
+            _csharpCode.AppendLine("        {");
+            _csharpCode.Append(ToCSharp(line.ParseSuccessGoto));
+            _csharpCode.AppendLine("            if (x.Failure)");
+            _csharpCode.AppendLine("                x.LogRuntimeException(20);");
+
+            if (line.DirectGotoFirst)
+                DirectGoto();
+            else
+                LabelGoto();
+
+            _csharpCode.AppendLine("            return -1;");
+            _csharpCode.AppendLine("        }");
+            _csharpCode.AppendLine("        x.Failure = false;");
+            _csharpCode.Append(ToCSharp(line.ParseFailureGoto));
+            _csharpCode.AppendLine("        if (x.Failure)");
+            _csharpCode.AppendLine("            x.LogRuntimeException(20);");
+            _csharpCode.AppendLine("        x.Failure = true;");
+        }
+        else
+        {
+            // Failure goto first, then success
+            _csharpCode.AppendLine("        if (x.Failure)");
+            _csharpCode.AppendLine("        {");
+            _csharpCode.AppendLine("        x.Failure = false;");
+            _csharpCode.Append(ToCSharp(line.ParseFailureGoto));
+            _csharpCode.AppendLine("            if (x.Failure)");
+            _csharpCode.AppendLine("                x.LogRuntimeException(20);");
+            _csharpCode.AppendLine("        x.Failure = true;");
+
+            if (line.DirectGotoFirst)
+                DirectGoto();
+            else
+                LabelGoto();
+
+            _csharpCode.AppendLine("            return -1;");
+            _csharpCode.AppendLine("        }");
+            _csharpCode.Append(ToCSharp(line.ParseSuccessGoto));
+            _csharpCode.AppendLine("        if (x.Failure)");
+            _csharpCode.AppendLine("            x.LogRuntimeException(20);");
+        }
+
+        if (line.DirectGotoSecond)
+            DirectGoto();
+        else
+            LabelGoto();
+
+        _csharpCode.AppendLine("        return -1;");
+    }
+
+    private void GenerateSuccessGoto(SourceLine line, int nextStatement)
+    {
+        _csharpCode.AppendLine("        if (x.Failure)");
+        _csharpCode.AppendLine($"            return {nextStatement};");
+        _csharpCode.Append(ToCSharp(line.ParseSuccessGoto));
+        _csharpCode.AppendLine("        if (x.Failure)");
+        _csharpCode.AppendLine("            x.LogRuntimeException(20);");
+
+        if (line.DirectGotoFirst)
+            DirectGoto();
+        else
+            LabelGoto();
+
+        _csharpCode.AppendLine("        return -1;");
+    }
+
+    private void GenerateFailureGoto(SourceLine line, int nextStatement)
+    {
+        _csharpCode.AppendLine("        if (!x.Failure)");
+        _csharpCode.AppendLine($"            return {nextStatement};");
+        _csharpCode.AppendLine("        x.Failure = false;");
+        _csharpCode.Append(ToCSharp(line.ParseFailureGoto));
+        _csharpCode.AppendLine("        if (x.Failure)");
+        _csharpCode.AppendLine("            x.LogRuntimeException(20);");
+        _csharpCode.AppendLine("        x.Failure = true;");
+
+        if (line.DirectGotoFirst)
+            DirectGoto();
+        else
+            LabelGoto();
+
+        _csharpCode.AppendLine("        return -1;");
+    }
+
+    #endregion
+
+    #region Token to CSharp Conversion
 
     private static StringBuilder ToCSharp(List<Token> tokenList)
     {
         StringBuilder code = new();
+
         foreach (var t in tokenList)
         {
             switch (t.TokenType)
@@ -484,7 +573,6 @@ public class GenerateCSharpCode(Builder parent)
                             code.AppendLine($"        x.Operator(\"_{t.MatchedString}\", 1);");
                             break;
                     }
-
                     break;
 
                 case Token.Type.EXPRESSION:
@@ -523,9 +611,12 @@ public class GenerateCSharpCode(Builder parent)
         return code;
     }
 
+    #endregion
+
+    #region Expression Generation
+
     private void GenerateExpressions()
     {
-        //var iStar = 0;
         if (_parent.Execute != null)
         {
             _parent.RecordedExpressionCount = _parent.Execute.PreviousStarFunctionCount;
@@ -541,6 +632,33 @@ public class GenerateCSharpCode(Builder parent)
         }
     }
 
+    #endregion
+
+    #region Goto Helpers
+
+    // Runtime exception codes:
+    // 20 - Goto evaluation failure
+    // 23 - Goto operand is not a natural variable
+    // 24 - Goto operand in direct goto is not code
+
+    private void DirectGoto()
+    {
+        _csharpCode.AppendLine("        if (x.IdentifierTable.ContainsKey(x.SystemStack.Peek().Symbol))");
+        _csharpCode.AppendLine("            return ((CodeVar)(x.IdentifierTable[x.SystemStack.Pop().Symbol])).StatementNumber;");
+        _csharpCode.AppendLine("        x.LogRuntimeException(24);");
+    }
+
+    private void LabelGoto()
+    {
+        _csharpCode.AppendLine("        if (x.LabelTable[x.SystemStack.Peek().Symbol] != Executive.GotoNotFound)");
+        _csharpCode.AppendLine("            return x.LabelTable[x.SystemStack.Pop().Symbol];");
+        _csharpCode.AppendLine("        x.LogRuntimeException(23);");
+    }
+
+    #endregion
+
+    #region Utility Methods
+
     private void MarkCodeAsCompiled()
     {
         foreach (var line in _parent.Code.SourceLines)
@@ -555,23 +673,5 @@ public class GenerateCSharpCode(Builder parent)
         srText.Write(_csharpCode.ToString());
     }
 
-    // 20 Goto evaluation failure
-    // 23 Goto operand is not a natural variable
-    // 24 Goto operand in direct goto is not code
-
-    private void DirectGoto()
-    {
-        _csharpCode.AppendLine("        if (x.IdentifierTable.ContainsKey(x.SystemStack.Peek().Symbol))");
-        _csharpCode.AppendLine("            return ((CodeVar)(x.IdentifierTable[x.SystemStack.Pop().Symbol])).StatementNumber;");
-        _csharpCode.AppendLine("        x.LogRuntimeException(24);");
-    }
-
-    private void LabelGoto()
-    {
-        //_csharpCode.AppendLine("        if (x.LabelTable.ContainsKey(x.SystemStack.Peek().Symbol))");
-        _csharpCode.AppendLine("        if (x.LabelTable[x.SystemStack.Peek().Symbol] != Executive.GotoNotFound)");
-        _csharpCode.AppendLine("            return x.LabelTable[x.SystemStack.Pop().Symbol];");
-        _csharpCode.AppendLine("        x.LogRuntimeException(23);");
-    }
-
+    #endregion
 }

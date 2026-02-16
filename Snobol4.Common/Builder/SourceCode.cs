@@ -142,8 +142,8 @@ public class SourceCode
 
                 if (!IsEndStatement(subLine))
                     continue;
-
-                EntryLabel = ProcessEntry(subLine, currentLine);
+                
+                _parent.EntryLabel = ProcessEntry(subLine, currentLine);
                 return;
             }
         }
@@ -158,7 +158,7 @@ public class SourceCode
         ".spx"
     ];
 
-                    private static string AdjustFileExtension(string file)
+    private static string AdjustFileExtension(string file)
     {
         var extension = Path.GetExtension(file);
 
@@ -171,12 +171,12 @@ public class SourceCode
         return file;
     }
 
-    private static bool IsEndStatement(string line)
+    private bool IsEndStatement(string line)
     {
         var m = CompiledRegex.EndPattern().Match(line);
         if (!m.Success)
             return false;
-        return m.Value.TrimEnd() == "end" || m.Value.TrimEnd() == "END";
+        return _parent.CaseFolding ? m.Value.TrimEnd().ToUpper() == "END" : m.Value.TrimEnd() == "end";
     }
 
 
@@ -237,7 +237,7 @@ public class SourceCode
                 catch (IOException e)
                 {
                     Console.Error.WriteLine(e.Message);
-                    _parent.LogCompilerException(285,2);
+                    _parent.LogCompilerException(285, 2);
                     return;
                 }
 

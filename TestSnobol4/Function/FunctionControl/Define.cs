@@ -76,7 +76,7 @@ end
         Assert.AreEqual(Math.Sqrt(160), ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
     }
 
-    //[TestMethod]
+    [TestMethod]
     public void TEST_Function_Fibonacci()
     {
         // Not the way to do fibonacci, but a good stress test of recursion

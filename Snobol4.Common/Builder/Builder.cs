@@ -27,6 +27,7 @@ public partial class Builder
     //internal List<string> PathList = [];          // List of source paths
     internal List<string> IncludeList = [];         // List of include paths
     internal int StatementCount;
+    internal string EntryLabel;
 
     // Command line options
     internal bool SuppressSignOnMessage;            // -b

@@ -4,6 +4,9 @@ public partial class Executive
 {
     public int ExecuteLoop(int i)
     {
+        if (LabelTable[Parent.FoldCase(Parent.EntryLabel)] != GotoNotFound)
+            i = LabelTable[Parent.FoldCase(Parent.EntryLabel)];
+
         while (i >= 0)
         {
             using var profiler1 = Profiler.Start1($"Statement{AmpCurrentLineNumber:000000}", this);
@@ -29,7 +32,7 @@ public partial class Executive
         return i;
     }
 
-                // ReSharper disable once UnusedMember.Global
+    // ReSharper disable once UnusedMember.Global
     public static void BreakPoint()
     {
     }

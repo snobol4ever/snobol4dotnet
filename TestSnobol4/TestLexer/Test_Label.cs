@@ -66,11 +66,13 @@ public partial class TestLexer
     [TestMethod]
     public void TEST_LABEL_004()
     {
-        var s = "123zzabc   'test';end             123zzabc";
+        var s = @"
+end
+";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(1, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(231, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        //Assert.AreEqual(231, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]

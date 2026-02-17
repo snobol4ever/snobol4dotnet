@@ -55,7 +55,7 @@ public partial class TestLexer
     [TestMethod]
     public void TEST_216_006()
     {
-        var s = "END";
+        var s = "end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
@@ -64,7 +64,7 @@ public partial class TestLexer
     [TestMethod]
     public void TEST_216_007()
     {
-        var s = "END";
+        var s = "end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
@@ -77,6 +77,14 @@ public partial class TestLexer
         var s = "eNd";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        if (build.CaseFolding)
+        {
+            Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        }
+        else
+        {
+            Assert.AreEqual(1, build.ErrorCodeHistory.Count);
+            Assert.AreEqual(216, build.ErrorCodeHistory[0]);
+        }
     }
 }

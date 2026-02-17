@@ -320,7 +320,7 @@ end";
     {
         var s = @"
         a = 2
-        b = Any('1.0')
+        b = any('1.0')
         ident(a,b)    :s(equ)
         out = 'not identical'    :(end)
 equ     out = 'identical'
@@ -440,7 +440,7 @@ end";
     {
         var s = @"
         a = 1.0
-        b = Any('1.0')
+        b = any('1.0')
         ident(a,b)    :s(equ)
         out = 'not identical'    :(end)
 equ     out = 'identical'
@@ -560,7 +560,7 @@ end";
     {
         var s = @"
         a = '1.0'
-        b = Any('1.0')
+        b = any('1.0')
         ident(a,b)    :s(equ)
         out = 'not identical'    :(end)
 equ     out = 'identical'

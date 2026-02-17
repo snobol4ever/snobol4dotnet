@@ -23,7 +23,7 @@ public class Rewind
 
         var s = $"""
 
-                         input('READ','2','{testFile}')
+                         input('read','2','{testFile}')
                          a = read
                          a = read
                          a = read
@@ -57,14 +57,14 @@ public class Rewind
 
         var s = $"""
 
-                         output('WRITE','3','{testFile}')
+                         output('write','3','{testFile}')
                          write = 'I am already far north of London, and as I walk in the streets of'
                          write = 'Petersburgh, I feel a cold northern breeze play upon my cheeks, which'
                          write = 'braces my nerves and fills me with delight. Do you understand this'
                          rewind('3')
                          write = 'I am far north of London, and as I walk in the streets of'
                          endfile('3')
-                         input('READ','2','{testFile}')
+                         input('read','2','{testFile}')
                          a = read
                          b = read
                          endfile('2')    

@@ -14,12 +14,12 @@ public class Fence
         P = FENCE(BREAK(',') | REM) $ STR *DIFFER(STR)
         'ABC' P . R1
         '123,,456' P . R2
-END
+end
 ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("ABC", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r1")]).Data);
-        Assert.AreEqual("123", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r2")]).Data);
+        Assert.AreEqual("ABC", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
+        Assert.AreEqual("123", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R2")]).Data);
     }
     
     [TestMethod]
@@ -27,13 +27,13 @@ END
     {
         var s = @"
 	    '1AB+' ANY('AB') FENCE('+') :S(Y)F(N)
-Y	    R1 = 'SUCCESS' :(END)
+Y	    R1 = 'SUCCESS' :(end)
 N	    R1 = 'FAILURE'
-END
+end
 ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("FAILURE", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r1")]).Data);
+        Assert.AreEqual("FAILURE", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
     }
 
     [TestMethod]
@@ -41,13 +41,13 @@ END
     {
         var s = @"
         '1AB+' ANY('AB') FENCE '+' :S(Y)F(N)
-Y	    R1 = 'SUCCESS' :(END)
+Y	    R1 = 'SUCCESS' :(end)
 N	    R1 = 'FAILURE'
-END
+end
 ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("FAILURE", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r1")]).Data);
+        Assert.AreEqual("FAILURE", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
     }
 
     [TestMethod]
@@ -55,13 +55,13 @@ END
     {
         var s = @"
 	    'ABC'  FENCE('B') :S(Y)F(N)
-Y	    R1 = 'SUCCESS' :(END)
+Y	    R1 = 'SUCCESS' :(end)
 N	    R1 = 'FAILURE'
-END
+end
 ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("FAILURE", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r1")]).Data);
+        Assert.AreEqual("FAILURE", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
     }
 
     [TestMethod]
@@ -69,13 +69,13 @@ END
     {
         var s = @"
 	    'ABC'  FENCE 'B' :S(Y)F(N)
-Y	    R1 = 'SUCCESS' :(END)
+Y	    R1 = 'SUCCESS' :(end)
 N	    R1 = 'FAILURE'
-END
+end
 ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("FAILURE", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r1")]).Data);
+        Assert.AreEqual("FAILURE", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
     }
 
     [TestMethod]
@@ -84,13 +84,13 @@ END
         var s = @"
         B = *'B'
 	    'ABC' FENCE(B) :S(Y)F(N)
-Y	    R1 = 'SUCCESS' :(END)
+Y	    R1 = 'SUCCESS' :(end)
 N	    R1 = 'FAILURE'
-END
+end
 ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("FAILURE", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r1")]).Data);
+        Assert.AreEqual("FAILURE", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
     }
 
 

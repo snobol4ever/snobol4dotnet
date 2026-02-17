@@ -117,8 +117,8 @@ public class Opsyn
     {
         var s = """
 
-                	    define('UCASE(S)')
-                	    opsyn('!','UCASE',1)	:(ucase_end)
+                	    define('ucase(s)')
+                	    opsyn('!','ucase',1)	:(ucase_end)
                 ucase   ucase = replace(s,&lcase, &ucase) :(return)
                 ucase_end
                         output = datatype(&lcase)

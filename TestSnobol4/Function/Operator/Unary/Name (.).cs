@@ -22,9 +22,20 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("kharma", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("dog")]).Data);
-        Assert.AreEqual("DOG", ((NameVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Pointer);
+
+        if (build.CaseFolding)
+        {
+            Assert.AreEqual("DOG", ((NameVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Pointer);
+            Assert.AreEqual("KHARMA", ((NameVar)build.Execute!.IdentifierTable[build.FoldCase("c")]).Pointer);
+
+        }
+        else
+        {
+            Assert.AreEqual("dog", ((NameVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Pointer);
+            Assert.AreEqual("kharma", ((NameVar)build.Execute!.IdentifierTable[build.FoldCase("c")]).Pointer);
+
+        }
         Assert.AreEqual("kharma", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
-        Assert.AreEqual("KHARMA", ((NameVar)build.Execute!.IdentifierTable[build.FoldCase("c")]).Pointer);
     }
 
     [TestMethod]

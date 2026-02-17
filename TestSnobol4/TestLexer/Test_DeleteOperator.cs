@@ -9,7 +9,7 @@ public partial class TestLexer
     {
         var s = @"
         INLINE2 = 'blank'
-        INLINE2 = :(app)
+        INLINE2 = :(APP)
 APP
 end
 ";

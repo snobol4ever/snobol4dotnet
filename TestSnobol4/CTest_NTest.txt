@@ -53,7 +53,7 @@ public class Ctest
         x.Labels.Add("return", -2);
         x.Labels.Add("sreturn", -3);
         x.Labels.Add("freturn", -4);
-        x.Labels.Add("END",-1);
+        x.Labels.Add("end",-1);
         x.Labels.Add("RETURN", -2);
         x.Labels.Add("SRETURN", -3);
         x.Labels.Add("FRETURN", -4);

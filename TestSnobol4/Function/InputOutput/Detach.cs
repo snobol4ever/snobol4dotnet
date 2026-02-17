@@ -17,11 +17,11 @@ public class Detach
 
         var s = $@"
         input('READ','2','{testFile}')
-        a = output = read
-        a = output = read
-        a = output = read
+        a = output = READ
+        a = output = READ
+        a = output = READ
         detach('READ')
-        b = read
+        b = READ
         endfile('2')  
 end
 ";
@@ -43,11 +43,11 @@ end
         input('READ','2','{testFile}')
         detach('READ')
         input('READ','2')
-        a = output = read
-        a = output = read
-        a = output = read
+        a = output = READ
+        a = output = READ
+        a = output = READ
         detach('READ')
-        b = read
+        b = READ
         endfile('2')  
 end
 ";
@@ -67,7 +67,7 @@ end
 
         var s = $@"
         input('READ','2','{testFile}')
-        detach(any('read'))
+        detach(any('READ'))
         endfile('2')  
 end
 ";

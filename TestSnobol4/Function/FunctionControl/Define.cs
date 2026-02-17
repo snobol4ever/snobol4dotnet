@@ -94,7 +94,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(144L, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("F")]).Data);
+        Assert.AreEqual(144L, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("f")]).Data);
     }
 
     [TestMethod]
@@ -106,8 +106,8 @@ end";
 SHIFT   S ? SHIFT_PAT :F(FRETURN)
         SHIFT = REST FRONT :(RETURN)
 SHIFT_END
-        R = SHIFT('COTTON',4)
-END
+        r = SHIFT('COTTON',4)
+end
 ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
@@ -124,9 +124,9 @@ END
 SHIFT   S ? SHIFT_PAT :F(FRETURN)
         SHIFT = REST FRONT :(RETURN)
 SHIFT_END
-        R = SHIFT('OAK',4) :S(END)
-        S = 'FAILURE'
-END
+        r = SHIFT('OAK',4) :S(end)
+        s = 'FAILURE'
+end
 ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
@@ -138,7 +138,7 @@ END
     public void TEST_Define_006()
     {
         var s = @"
-        define('ADD(X,Y)FRONT,REST')
+        define('add(x,y)front,rest')
         front = 99
         rest = 88
         x = 77

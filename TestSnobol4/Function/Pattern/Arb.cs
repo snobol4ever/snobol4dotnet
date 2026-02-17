@@ -76,9 +76,9 @@ end
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("CATALOG FOR SEADOG", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r1")]).Data);
-        Assert.AreEqual("DOGS HATE POLECAT", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r2")]).Data);
-        Assert.AreEqual("CATDOG", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r3")]).Data);
+        Assert.AreEqual("CATALOG FOR SEADOG", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
+        Assert.AreEqual("DOGS HATE POLECAT", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R2")]).Data);
+        Assert.AreEqual("CATDOG", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R3")]).Data);
     }
 
     [TestMethod]
@@ -91,8 +91,8 @@ end
 ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("UNT", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r1")]).Data);
-        Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r2")]).Data);
+        Assert.AreEqual("UNT", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
+        Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R2")]).Data);
     }
 
     [TestMethod]

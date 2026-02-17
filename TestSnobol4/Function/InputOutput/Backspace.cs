@@ -20,7 +20,7 @@ public class Backspace
 
 
 var s = $@"
-        input('READ','2','{testFile}')
+        input('read','2','{testFile}')
         d = read
         d = read
         d = read

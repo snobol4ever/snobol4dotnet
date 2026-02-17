@@ -122,7 +122,7 @@ end
             testFile = @"/mnt/c/Users/jcooper/Documents/Visual Studio 2022/Snobol4.Net/TestSnobol4/Output/RecordTest0.txt";
 
         var s = $@"
-        input('READ','2','{testFile}')
+        input('read','2','{testFile}')
         output = read
         output = read
         output = read
@@ -148,7 +148,7 @@ end
             testFile = @"/mnt/c/Users/jcooper/Documents/Visual Studio 2022/Snobol4.Net/TestSnobol4/Output/RecordTest5.txt";
 
         var s = $@"
-        input('READ','2','{testFile}')
+        input('read','2','{testFile}')
         output = read
         output = read
         output = read
@@ -173,7 +173,7 @@ end
             testFile = @"/mnt/c/Users/jcooper/Documents/Visual Studio 2022/Snobol4.Net/TestSnobol4/Output/RecordTest6.txt";
 
         var s = $@"
-        input('READ','2','{testFile}')
+        input('read','2','{testFile}')
         output = read
         output = read
         set('2',0,0)
@@ -196,7 +196,7 @@ end
             testFile = @"/mnt/c/Users/jcooper/Documents/Visual Studio 2022/Snobol4.Net/TestSnobol4/Output/RecordTest7.txt";
 
         var s = $@"
-        input('READ','2','{testFile}')
+        input('read','2','{testFile}')
         output = read
         output = read
         set('2',4,1)
@@ -219,7 +219,7 @@ end
             testFile = @"/mnt/c/Users/jcooper/Documents/Visual Studio 2022/Snobol4.Net/TestSnobol4/RecordTest8.txt";
 
         var s = $@"
-        input('READ','2','{testFile}')
+        input('read','2','{testFile}')
         output = read
         output = read
         output = read

@@ -13,7 +13,7 @@ public class Size
     public void TEST_Size_001()
     {
         var s = @"
-        R = SIZE('123456')
+        r = size('123456')
 end";
 
         var directives = "-b";
@@ -26,7 +26,7 @@ end";
     public void TEST_Size_002()
     {
         var s = @"
-        R = SIZE(123456)
+        r = size(123456)
 end";
 
         var directives = "-b";

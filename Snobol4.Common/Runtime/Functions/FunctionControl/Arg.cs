@@ -14,6 +14,8 @@ public partial class Executive
             return;
         }
 
+        str = Parent.FoldCase((string)str);
+
         if (!UserFunctionTable.TryGetValue((string)str, out var entry))
         {
             LogRuntimeException(63);

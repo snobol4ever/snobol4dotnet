@@ -25,11 +25,11 @@ BASEB	EQ(N,0)					:S(RETURN)
         OUTPUT =  C BASEB;
 	    N  =  N / B			:(BASEB)
 BASEB_END
-        OUTPUT = R1 = BASEB(761,8)
-        OUTPUT = R2 = BASEB(761,16)
-        OUTPUT = R3 = BASEB(761,2)
+        OUTPUT = r1 = BASEB(761,8)
+        OUTPUT = r2 = BASEB(761,16)
+        OUTPUT = r3 = BASEB(761,2)
 
-END
+end
 ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);

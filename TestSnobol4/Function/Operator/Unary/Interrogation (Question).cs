@@ -14,11 +14,11 @@ public class Interrogation
         P = 'is'
         N = 123
         N = ?(S ? P) N + 1
-END";
+end";
         var directives = "-b ";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(124, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("n")]).Data);
+        Assert.AreEqual(124, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("N")]).Data);
     }
 
     [TestMethod]

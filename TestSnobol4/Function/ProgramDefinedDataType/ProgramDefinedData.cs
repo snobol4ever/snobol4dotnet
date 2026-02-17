@@ -14,7 +14,7 @@ public class Data
         x = complex(3.2, -2.0)
         i = imag(x)
         r = real(x)
-END";
+end";
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
@@ -31,13 +31,13 @@ END";
         X = COMPLEX('AAA', 'BBB')
         I = IMAG(X)
         R = REAL(X)
-END";
+end";
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("BBB", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("i")])).Data);
-        Assert.AreEqual("AAA", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("r")])).Data);
+        Assert.AreEqual("BBB", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("I")])).Data);
+        Assert.AreEqual("AAA", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("R")])).Data);
     }
 
     [TestMethod]
@@ -48,13 +48,13 @@ END";
         X = COMPLEX(ANY('ABC'),SPAN('123'))
         I = IMAG(X)
         R = REAL(X)
-END";
+end";
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("Snobol4.Common.SpanPattern", ((PatternVar)(build.Execute!.IdentifierTable[build.FoldCase("i")])).Data.ToString());
-        Assert.AreEqual("Snobol4.Common.AnyPattern", ((PatternVar)(build.Execute!.IdentifierTable[build.FoldCase("r")])).Data.ToString());
+        Assert.AreEqual("Snobol4.Common.SpanPattern", ((PatternVar)(build.Execute!.IdentifierTable[build.FoldCase("I")])).Data.ToString());
+        Assert.AreEqual("Snobol4.Common.AnyPattern", ((PatternVar)(build.Execute!.IdentifierTable[build.FoldCase("R")])).Data.ToString());
     }
 
     [TestMethod]
@@ -70,15 +70,15 @@ END";
         REAL(X2) = -5
         I2 = IMAG(X2)
         R2 = REAL(X2)
-END";
+end";
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(-2.0, ((RealVar)(build.Execute!.IdentifierTable[build.FoldCase("i1")])).Data);
-        Assert.AreEqual(3.2, ((RealVar)(build.Execute!.IdentifierTable[build.FoldCase("r1")])).Data);
-        Assert.AreEqual(45, ((IntegerVar)(build.Execute!.IdentifierTable[build.FoldCase("i2")])).Data);
-        Assert.AreEqual(-5, ((IntegerVar)(build.Execute!.IdentifierTable[build.FoldCase("r2")])).Data);
+        Assert.AreEqual(-2.0, ((RealVar)(build.Execute!.IdentifierTable[build.FoldCase("I1")])).Data);
+        Assert.AreEqual(3.2, ((RealVar)(build.Execute!.IdentifierTable[build.FoldCase("R1")])).Data);
+        Assert.AreEqual(45, ((IntegerVar)(build.Execute!.IdentifierTable[build.FoldCase("I2")])).Data);
+        Assert.AreEqual(-5, ((IntegerVar)(build.Execute!.IdentifierTable[build.FoldCase("R2")])).Data);
     }
 
 
@@ -90,17 +90,17 @@ END";
 Y       ITEM1 = APPLY(.$'PRO+DUCT', 'CAPERS', 2.39, 48, 'BRINE BROTHERS')
         R1 = DATATYPE(ITEM1)
         R2 = APPLY(.$'1PRICE', ITEM1)
-        R3 = FIELD(.$'PRO+DUCT',2)                         :(END)
+        R3 = FIELD(.$'PRO+DUCT',2)                         :(end)
 N       R4 = 'FAILURE'
-END
+end
 ";
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("PRO+DUCT", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("r1")])).Data);
-        Assert.AreEqual(2.39, ((RealVar)(build.Execute!.IdentifierTable[build.FoldCase("r2")])).Data);
-        Assert.AreEqual("1PRICE", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("r3")])).Data);
-        Assert.AreEqual("", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("r4")])).Data);
+        Assert.AreEqual("PRO+DUCT", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("R1")])).Data);
+        Assert.AreEqual(2.39, ((RealVar)(build.Execute!.IdentifierTable[build.FoldCase("R2")])).Data);
+        Assert.AreEqual("1PRICE", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("R3")])).Data);
+        Assert.AreEqual("", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("R4")])).Data);
     }
 }

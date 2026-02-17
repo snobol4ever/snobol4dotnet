@@ -188,12 +188,12 @@ end";
         'ABCD3FG' A . R1
         B = 'ABC'
         '1234C56' A . R2
-END";
+end";
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("ABCD", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r1")]).Data);
-        Assert.AreEqual("1234", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r2")]).Data);
+        Assert.AreEqual("ABCD", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
+        Assert.AreEqual("1234", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R2")]).Data);
     }
 
     [TestMethod]
@@ -203,7 +203,7 @@ END";
         A = BREAKX(*B)
         B = '123' | 'ABC'
         'ABCD3FG' A . R1
-END";
+end";
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
@@ -217,7 +217,7 @@ END";
         var s = @"
         A = BREAKX('123456')
         '' A.R1
-END
+end
 ";
 
         var directives = "-b";
@@ -231,7 +231,7 @@ END
         var s = @"
         A = BREAKX('')
         '123456' A.R1
-END
+end
 ";
 
         var directives = "-b";
@@ -247,15 +247,15 @@ END
 	SUB = 'EXCEPTIONS-ARE-AS-TRUE-AS-RULES'
 	P1 = POS(0) BREAKX('A') . R2 'AS'
 	SUB P1    :S(Y)F(N)
-Y	R1 = 'SUCCESS' :(END)
+Y	R1 = 'SUCCESS' :(end)
 N	R1 = 'FAILURE'
-END
+end
 ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("SUCCESS", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r1")]).Data);
-        Assert.AreEqual("EXCEPTIONS-ARE-", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r2")]).Data);
+        Assert.AreEqual("SUCCESS", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
+        Assert.AreEqual("EXCEPTIONS-ARE-", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R2")]).Data);
     }
 
 }

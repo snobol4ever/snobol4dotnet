@@ -1,4 +1,4 @@
 ﻿LOOP	N = INPUT
 	TEN = REPLACE(N, 'IVXLCDM', 'XLCDM**')
 	OUTPUT = TEN  :(LOOP)
-END
+end

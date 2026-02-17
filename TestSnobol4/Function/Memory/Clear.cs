@@ -158,7 +158,7 @@ end";
         aa = '1'
         bb = '2'
         cc = '3'
-        skip = 'B,BB'
+        skip = 'b,bb'
         clear(skip)
 end";
         var directives = "-b";

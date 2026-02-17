@@ -197,12 +197,12 @@ end";
         '333' A . R1
         B = 'ABC'
         'CCC' A . R2
-END";
+end";
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("333", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r1")]).Data);
-        Assert.AreEqual("CCC", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r2")]).Data);
+        Assert.AreEqual("333", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
+        Assert.AreEqual("CCC", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R2")]).Data);
     }
 
     [TestMethod]
@@ -212,7 +212,7 @@ END";
         A = SPAN(*B)
         B = '123' | 'ABC'
         'ABCD3FG' A . R1
-END";
+end";
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
@@ -225,14 +225,14 @@ END";
     {
         var s = @"
         A = SPAN('123456')
-        'ABCDEF' A . R1 :S(END)
+        'ABCDEF' A . R1 :S(end)
         R1 = 'fail'
-END
+end
 ";
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("fail", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r1")]).Data);
+        Assert.AreEqual("fail", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
     }
 
     [TestMethod]
@@ -241,7 +241,7 @@ END
         var s = @"
         A = SPAN('')
         '123456' A.R1
-END
+end
 ";
 
         var directives = "-b";

@@ -138,7 +138,7 @@ end
     {
         var s = @"
         n = 15
-        a = eval('N * 2')
+        a = eval('n * 2')
 end
 ";
         var directives = "-b";
@@ -180,7 +180,7 @@ end
     public void TEST_Eval013()
     {
         var s = @"
-        n = 15
+        N = 15
         a = eval('3 * N + 2')
 end
 ";

@@ -23,7 +23,7 @@ public class Bal
                          subject pattern
                          endfile('2')
 
-                         input('READ',3,'{testFile}')
+                         input('read',3,'{testFile}')
                  loop    line = read ';'      :f(close)
                          lines = lines line   :(loop)
                  close   endfile(3)
@@ -42,7 +42,7 @@ public class Bal
             testFile = Path.Combine(SetupTests.LinuxOutput, "BalTest2.txt");
 
         var s = $"""
-                         OUTPUT('print', '2', '{testFile}', 2, 3, 1)
+                         OUTPUT('PRINT', '2', '{testFile}', 2, 3, 1)
                          &ANCHOR = 0
                          SUBJECT = '((A+(B*C))+D)'
                          PATTERN = BAL $ PRINT FAIL
@@ -53,7 +53,7 @@ public class Bal
                  LOOP    LINE = OUTPUT = READ ';'      :F(CLOSE)
                          LINES = LINES LINE   :(LOOP)
                  CLOSE   ENDFILE(3)
-                 END
+                 end
                  """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);

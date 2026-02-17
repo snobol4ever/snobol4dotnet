@@ -88,7 +88,7 @@ end
     {
         var s = @"
         &abend = 1
-        A = &abend
+        a = &abend
         &abend = '1'
 end
 ";

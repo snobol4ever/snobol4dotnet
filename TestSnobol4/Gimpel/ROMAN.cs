@@ -26,16 +26,16 @@ ROMAN_END
         R2 = ROMAN('9')
         R3 = ROMAN('45')
         R4 = ROMAN('2026')
-END
+end
 
 ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("MDCCLXXVI", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r1")]).Data);
-        Assert.AreEqual("IX", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r2")]).Data);
-        Assert.AreEqual("XLV", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r3")]).Data);
-        Assert.AreEqual("MMXXVI", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r4")]).Data);
+        Assert.AreEqual("MDCCLXXVI", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
+        Assert.AreEqual("IX", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R2")]).Data);
+        Assert.AreEqual("XLV", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R3")]).Data);
+        Assert.AreEqual("MMXXVI", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R4")]).Data);
     }
 
     [TestMethod]
@@ -53,15 +53,15 @@ ROMAN	N   RPOS(1)  LEN(1) . T  =		:F(RETURN)
 +						:S(RETURN)F(FRETURN)
 ROMAN_END
         R1 = ROMAN('A57')   :F(N)
-        R2 = 'Succeed'     :(END)
+        R2 = 'Succeed'     :(end)
 N       R2 = 'Fail'
-END
+end
 ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r1")]).Data);
-        Assert.AreEqual("Fail", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r2")]).Data);
+        Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
+        Assert.AreEqual("Fail", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R2")]).Data);
     }
 
 }

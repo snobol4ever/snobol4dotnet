@@ -14,13 +14,13 @@ public class Field
         X = COMPLEX(3.2, -2.0)
         R = FIELD('COMPLEX',1)
         I = FIELD('COMPLEX',2)
-END";
+end";
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("IMAG", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("i")])).Data);
-        Assert.AreEqual("REAL", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("r")])).Data);
+        Assert.AreEqual("IMAG", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("I")])).Data);
+        Assert.AreEqual("REAL", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("R")])).Data);
     }
 
 }

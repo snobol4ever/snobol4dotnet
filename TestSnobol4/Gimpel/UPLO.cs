@@ -22,12 +22,12 @@ public class UPLO
 UPLO	UPLO   =  REPLACE(S, UP_LO, LO_UP)	:(RETURN)
 UPLO_END
         R = UPLO('Hello, World!')
-END
+end
 
 ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("hELLO, wORLD!", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r")]).Data);
+        Assert.AreEqual("hELLO, wORLD!", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R")]).Data);
     }
 }

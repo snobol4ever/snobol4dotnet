@@ -285,7 +285,7 @@ end";
             testFile = @"/mnt/c/Users/jcooper/Documents/Visual Studio 2022/Snobol4.Net/TestSnobol4/Output/TestInput.txt";
 
         var s = $@"
-        input('INPUT','2','{testFile}')
+        input('input','2','{testFile}')
 	    a = -input
 	    b = input - input
 	    c = atan(input)
@@ -362,7 +362,7 @@ end";
     public void TEST_Output_Real_002()
     {
         var s = @"
-        A = output = 123.456
+        a = output = 123.456
 end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);

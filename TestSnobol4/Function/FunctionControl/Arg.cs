@@ -16,8 +16,8 @@ public class Arg
                 define('pythagoras(a,b)c,d')  :(double_end)
 pythagoras      pythagoras = sqrt(a * a + b * b)  :(return)
 double_end      b = pythagoras(4,12)
-                R1 = arg('PYTHAGORAS',1);
-                R2 = arg('PYTHAGORAS',2);
+                r1 = arg('pythagoras',1);
+                r2 = arg('pythagoras',2);
 
 end
 ";
@@ -32,10 +32,10 @@ end
     public void TEST_Arg_002()
     {
         var s = @"
-                define('PYTHAGORAS(a,b)c,d')  :(double_end)
+                define('pythagoras(a,b)c,d')  :(double_end)
 pythagoras      pythagoras = sqrt(a * a + b * b)  :(return)
 double_end      b = pythagoras(4,12)
-                r1 = arg('PYTHAGORAS',0)  :f(n)
+                r1 = arg('pythagoras',0)  :f(n)
                 r2 = 'success' :(end)
 n               r2 = 'failure'
 end
@@ -51,10 +51,10 @@ end
     public void TEST_Arg_003()
     {
         var s = @"
-                define('PYTHAGORAS(a,b)c,d')  :(double_end)
+                define('pythagoras(a,b)c,d')  :(double_end)
 pythagoras      pythagoras = sqrt(a * a + b * b)  :(return)
 double_end      b = pythagoras(4,12)
-                r1 = arg('PYTHAGORAS',3)  :f(n)
+                r1 = arg('pythagoras',3)  :f(n)
                 r2 = 'success' :(end)
 n               r2 = 'failure'
 end
@@ -70,7 +70,7 @@ end
     public void TEST_Arg_004()
     {
         var s = @"
-                define('PYTHAGORAS(a,b)c,d')  :(double_end)
+                define('pythagoras(a,b)c,d')  :(double_end)
 pythagoras      pythagoras = sqrt(a * a + b * b)  :(return)
 double_end      b = pythagoras(4,12)
                 r1 = arg('pithagoras',1)  :f(n)
@@ -88,10 +88,10 @@ end
     public void TEST_Arg_005()
     {
         var s = @"
-                define('PYTHAGORAS(a,b)c,d')  :(double_end)
+                define('pythagoras(a,b)c,d')  :(double_end)
 pythagoras      pythagoras = sqrt(a * a + b * b)  :(return)
 double_end      b = pythagoras(4,12)
-                r1 = arg('PYTHAGORAS',any('123'))  :f(n)
+                r1 = arg('pythagoras',any('123'))  :f(n)
                 r2 = 'success' :(end)
 n               r2 = 'failure'
 end

@@ -30,7 +30,7 @@ public partial class TestLexer
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(1, build.Code.SourceLines[0].LexBody.Count);
-        Assert.AreEqual(s[..6].ToUpper(), build.Code.SourceLines[0].Label);
+        Assert.AreEqual(build.FoldCase(s[..6]), build.Code.SourceLines[0].Label);
     }
 
     [TestMethod]
@@ -40,7 +40,7 @@ public partial class TestLexer
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(1, build.Code.SourceLines[0].LexBody.Count);
-        Assert.AreEqual("123ABC", build.Code.SourceLines[0].Label);
+        Assert.AreEqual(build.FoldCase("123abc"), build.Code.SourceLines[0].Label);
     }
 
     [TestMethod]
@@ -50,7 +50,7 @@ public partial class TestLexer
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(1, build.Code.SourceLines[0].LexBody.Count);
-        Assert.AreEqual("123??ABC", build.Code.SourceLines[0].Label);
+        Assert.AreEqual(build.FoldCase("123??abc"), build.Code.SourceLines[0].Label);
     }
 
     [TestMethod]
@@ -60,7 +60,7 @@ public partial class TestLexer
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(1, build.Code.SourceLines[0].LexBody.Count);
-        Assert.AreEqual("123??ABC", build.Code.SourceLines[0].Label);
+        Assert.AreEqual(build.FoldCase("123??abc"), build.Code.SourceLines[0].Label);
     }
 
     [TestMethod]

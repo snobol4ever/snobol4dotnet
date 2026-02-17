@@ -97,12 +97,12 @@ end";
         'ABCD3FG' A . R1
         B = 'ABC'
         '1234C56' A . R2
-END";
+end";
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("3", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r1")]).Data);
-        Assert.AreEqual("C", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r2")]).Data);
+        Assert.AreEqual("3", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
+        Assert.AreEqual("C", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R2")]).Data);
     }
 
     [TestMethod]
@@ -112,7 +112,7 @@ END";
         A = ANY(*B)
         B = '123' | 'ABC'
         'ABCD3FG' A . R1
-END";
+end";
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
@@ -126,7 +126,7 @@ END";
         var s = @" 
         A = ANY('')
         '123456' A . R1
-END";
+end";
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
@@ -139,13 +139,13 @@ END";
     {
         var s = @" 
         A = ANY('123456')
-        '' A . R1  :S(END)F(N)
+        '' A . R1  :S(end)F(N)
 N       R1 = 'FAIL'
-END";
+end";
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("FAIL", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r1")]).Data);
+        Assert.AreEqual("FAIL", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
     }
 }

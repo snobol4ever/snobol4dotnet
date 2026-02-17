@@ -202,16 +202,16 @@ end
     public void TEST_Convert_String_Code()
     {
         var s = @"
-        s = ""L  A = A ' ' N; N = LT(N,10) N + 1 :S(L)F(DONE)""
-        X = CONVERT(S,'code') :F(END)
+        S = ""L  A = A ' ' N; N = LT(N,10) N + 1 :S(L)F(DONE)""
+        X = CONVERT(S,'code') :F(end)
                     :(L)
 DONE    A
-END
+end
 ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("  1 2 3 4 5 6 7 8 9 10", build.Execute!.IdentifierTable[build.FoldCase("a")].ToString());
+        Assert.AreEqual("  1 2 3 4 5 6 7 8 9 10", build.Execute!.IdentifierTable[build.FoldCase("A")].ToString());
     }
 
     #endregion
@@ -1298,7 +1298,14 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("ABC", build.Execute!.IdentifierTable[build.FoldCase("a")].ToString());
+        if (build.CaseFolding)
+        {
+            Assert.AreEqual("ABC", build.Execute!.IdentifierTable[build.FoldCase("a")].ToString());
+        }
+        else
+        {
+            Assert.AreEqual("abc", build.Execute!.IdentifierTable[build.FoldCase("a")].ToString());
+        }
         Assert.AreEqual("name", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
         Assert.AreEqual("pattern", build.Execute!.IdentifierTable[build.FoldCase("c")].ToString());
         Assert.AreEqual("pattern", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("d")]).Data);

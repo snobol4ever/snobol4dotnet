@@ -9,11 +9,11 @@ public class Code
     public void TEST_CODE001()
     {
         var s = @"
-        s = ""L  A = A ' ' N; N = LT(N,10) N + 1 :S(L)F(DONE)""
-        X = CONVERT(S,'code') :F(END)
+        S = ""L  a = a ' ' N; N = LT(N,10) N + 1 :S(L)F(DONE)""
+        X = CONVERT(S,'code') :F(end)
                     :(L)
-DONE    A
-END
+DONE    a
+end
 ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);

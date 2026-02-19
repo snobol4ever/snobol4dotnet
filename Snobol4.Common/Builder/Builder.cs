@@ -97,7 +97,6 @@ public partial class Builder
     private string _fileName = "";
     private string _className = "";
     private string _nameSpace = "";
-    private string _fullClassName = "";
 
     // Move into COde generator
     public int RecordedExpressionCount = 0;
@@ -153,7 +152,7 @@ public partial class Builder
                     if (MessageHistory.Count > 0 || BuildOptions.SuppressExecution)
                         return;
 
-                    Execute.Execute(dll, loadContext, _fullClassName);
+                    Execute.Execute(dll, loadContext, _nameSpace + "." + _className);
                 });
 
             if (result)
@@ -183,7 +182,7 @@ public partial class Builder
                 firstInit: false,
                 onSuccess: (dll, loadContext) =>
                 {
-                    dynamic? instance = dll.CreateInstance(_fullClassName);
+                    dynamic? instance = dll.CreateInstance(_nameSpace + "." + _className);
                     instance?.Run(Execute);
                 });
         }
@@ -206,7 +205,7 @@ public partial class Builder
                 firstInit: false,
                 onSuccess: (dll, loadContext) =>
                 {
-                    dynamic? instance = dll.CreateInstance(_fullClassName);
+                    dynamic? instance = dll.CreateInstance(_nameSpace + "." + _className);
                     if (instance == null)
                         return false;
 
@@ -271,105 +270,6 @@ public partial class Builder
         return true;
     }
 
-
-
-
-
-    //public void BuildMain()
-    //{
-    //    Execute = new Executive(this);
-    //    try
-    //    {
-    //        GetNameSpaceAndClassName(GenerateCSharpCode.CompileTarget.PROGRAM);
-    //        _timerBuild.Restart();
-    //        Lex(this);
-    //        Parse(this);
-    //        var cSharpCode = Generate(_nameSpace, _className, true, GenerateCSharpCode.CompileTarget.PROGRAM, this);
-    //        StatementCount += Code.SourceLines.Count;
-    //        var loadContext = new AssemblyLoadContext(null, true);
-    //        var dll = Compile(loadContext, _fileName, cSharpCode);
-    //        _timerBuild.Stop();
-    //        PrintCompilationStatistics();
-
-    //        if (MessageHistory.Count > 0 || BuildOptions.SuppressExecution)
-    //            return;
-
-    //        Execute.Execute(dll, loadContext, _fullClassName);
-    //    }
-    //    catch (CompilerException)
-    //    {
-    //        // Already handled
-    //    }
-    //    catch (Exception e)
-    //    {
-    //        ReportProgrammingError(e);
-    //    }
-
-    //    Execute.PrintExecutionStatistics();
-    //    Execute.DisplayVariableValues();
-    //    Execute.CloseAllStreams();
-    //    ListFileWriter?.Close();
-    //}
-
-    //public void BuildEval()
-    //{
-    //    try
-    //    {
-    //        GetNameSpaceAndClassName(GenerateCSharpCode.CompileTarget.EVAL);
-    //        Lex(this);
-    //        Parse(this);
-    //        var cSharpCode = Generate(_nameSpace, _className, false, GenerateCSharpCode.CompileTarget.EVAL, this);
-    //        StatementCount += Code.SourceLines.Count;
-    //        var loadContext = new AssemblyLoadContext(null, true);
-    //        var dll = Compile(loadContext, _fileName, cSharpCode);
-    //        dynamic? instance = dll.CreateInstance(_fullClassName);
-
-    //        if (instance == null)
-    //            return;
-
-    //        instance.Run(Execute);
-    //    }
-    //    catch (CompilerException)
-    //    {
-    //        // Already handled
-    //    }
-    //    catch (Exception e)
-    //    {
-    //        ReportProgrammingError(e);
-    //    }
-    //}
-
-    //public bool BuildCode()
-    //{
-    //    try
-    //    {
-    //        GetNameSpaceAndClassName(GenerateCSharpCode.CompileTarget.CODE);
-    //        Lex(this);
-    //        Parse(this);
-    //        var cSharpCode = Generate(_nameSpace, _className, false, GenerateCSharpCode.CompileTarget.CODE, this);
-    //        StatementCount += Code.SourceLines.Count;
-    //        var loadContext = new AssemblyLoadContext(null, true);
-    //        var dll = Compile(loadContext, _fileName, cSharpCode);
-    //        dynamic? instance = dll.CreateInstance(_fullClassName);
-
-    //        if (instance == null)
-    //            return false;
-
-    //        instance.Run(Execute);
-    //        return true;
-    //    }
-    //    catch (CompilerException)
-    //    {
-    //        // Already handled
-    //    }
-    //    catch (Exception e)
-    //    {
-    //        ReportProgrammingError(e);
-    //    }
-
-    //    return false;
-    //}
-
     private void ReportProgrammingError(Exception e)
     {
         Console.Error.WriteLine(@"***UNEXPECTED EXCEPTION");
@@ -414,7 +314,6 @@ public partial class Builder
 
         _className = $"C{_fileName}";
         _nameSpace = $"N{_fileName}";
-        _fullClassName = $"{_nameSpace}.{_className}";
         _fileName += ".cs";
         if (target != GenerateCSharpCode.CompileTarget.PROGRAM)
             FilesToCompile.Add($"{type}{FilesToCompile.Count}");

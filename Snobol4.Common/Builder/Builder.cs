@@ -29,7 +29,7 @@ public partial class Builder : IDisposable
     internal int StatementCount;
     internal string EntryLabel;
 
-    public string ListFileName = "";
+    // List file
     public StreamWriter? ListFileWriter;
 
     // Command line data

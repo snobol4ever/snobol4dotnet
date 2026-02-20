@@ -55,7 +55,7 @@ public partial class Builder : IDisposable
     // Move to specific methods
     //private string _fileName = "";
     //private string _className = "";
-    private string _nameSpace = "";
+    //private string _nameSpace = "";
 
     // Move into Code generator
     public int RecordedExpressionCount = 0;
@@ -67,6 +67,7 @@ public partial class Builder : IDisposable
     public Builder()
     {
         Code = new SourceCode(this);
+        EntryLabel = "";
     }
 
     #endregion
@@ -141,7 +142,7 @@ public partial class Builder : IDisposable
                 firstInit: false,
                 onSuccess: (dll, loadContext) =>
                 {
-                    dynamic? instance = dll.CreateInstance(_nameSpace + "." + _compilerTarget.ClassName);
+                    dynamic? instance = dll.CreateInstance(_compilerTarget.FullClassName);
                     instance?.Run(Execute);
                 });
         }
@@ -164,7 +165,7 @@ public partial class Builder : IDisposable
                 firstInit: false,
                 onSuccess: (dll, loadContext) =>
                 {
-                    dynamic? instance = dll.CreateInstance(_nameSpace + "." + _compilerTarget.ClassName);
+                    dynamic? instance = dll.CreateInstance(_compilerTarget.FullClassName);
                     if (instance == null)
                         return false;
 
@@ -197,7 +198,7 @@ public partial class Builder : IDisposable
         Lex(this);
         Parse(this);
 
-        var cSharpCode = Generate(_nameSpace, _compilerTarget.ClassName, firstInit, compileTarget, this);
+        var cSharpCode = Generate(_compilerTarget.NameSpace, _compilerTarget.ClassName, firstInit, compileTarget, this);
         StatementCount += Code.SourceLines.Count;
 
         var loadContext = new AssemblyLoadContext(null, true);
@@ -219,7 +220,7 @@ public partial class Builder : IDisposable
         Lex(this);
         Parse(this);
 
-        var cSharpCode = Generate(_nameSpace, _compilerTarget.ClassName, firstInit, compileTarget, this);
+        var cSharpCode = Generate(_compilerTarget.NameSpace, _compilerTarget.ClassName, firstInit, compileTarget, this);
         StatementCount += Code.SourceLines.Count;
 
         var loadContext = new AssemblyLoadContext(null, true);
@@ -258,7 +259,7 @@ public partial class Builder : IDisposable
         }
 
         _compilerTarget.ClassName = $"C{_compilerTarget.FileName}";
-        _nameSpace = $"N{_compilerTarget.FileName}";
+        _compilerTarget.NameSpace = $"N{_compilerTarget.FileName}";
         _compilerTarget.FullClassName = $"N{_compilerTarget.FileName}.C{_compilerTarget.FileName}";
         _compilerTarget.FileName += ".cs";
         if (target != GenerateCSharpCode.CompileTarget.PROGRAM)

@@ -258,11 +258,9 @@ public class GenerateCSharpCode(Builder parent)
     private void GenerateSingleStatement(SourceLine line, int statementNumber)
     {
         var methodName = $"Statement{statementNumber:D7}";
-
         _csharpCode.AppendLine();
         _csharpCode.AppendLine($"    private int {methodName}(Executive x)");
         _csharpCode.AppendLine("    {");
-
         GenerateStatementComment(line);
         _csharpCode.AppendLine($"        x.InitializeStatement({statementNumber});");
 
@@ -276,14 +274,7 @@ public class GenerateCSharpCode(Builder parent)
         GenerateStatementBody(line);
         _csharpCode.AppendLine("        x.FinalizeStatement();");
         _csharpCode.AppendLine("        if (x.ErrorJump > 0) x.ExecuteLoop(x.ErrorJump);");
-        //_csharpCode.AppendLine("        {");
-        //_csharpCode.AppendLine("            var jump = x.ErrorJump;");
-        //_csharpCode.AppendLine("            x.ErrorJump = 0;");
-        //_csharpCode.AppendLine("            return jump;");
-        //_csharpCode.AppendLine("        }");
-
         GenerateStatementGotos(line, statementNumber + 1);
-
         _csharpCode.AppendLine("    }");
     }
 

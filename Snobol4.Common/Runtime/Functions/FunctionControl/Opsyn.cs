@@ -59,7 +59,6 @@ public partial class Executive
             case 0:
                 // If first argument is defined, it must not be a protected function
                 var entry = FunctionTable[newFunction];
-                //if (FunctionTable.ContainsKey(newFunction) && FunctionTable[newFunction].IsProtected)
                 if(entry!=null && entry.IsProtected)
                 {
                     LogRuntimeException(155);

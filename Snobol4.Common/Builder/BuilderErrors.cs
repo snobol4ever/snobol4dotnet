@@ -25,13 +25,18 @@ public partial class Builder
         MessageHistory.Clear();
     }
 
-    public void LogCompilerException(int code, int cursorCurrent, string message = "")
+    internal void SaveExceptionHistory(CompilerException ce)
+    {
+        ErrorCodeHistory.Add(ce.Code);
+        ColumnHistory.Add(ce.Column);
+        MessageHistory.Add(ce.Message);
+    }
+
+    public void LogCompilerException(int code, int cursorCurrent = 0)
     {
         Execute?.Failure = true;
-        var ce = new CompilerException(code, cursorCurrent, message);
-        ErrorCodeHistory.Add(code);
-        ColumnHistory.Add(cursorCurrent);
-        MessageHistory.Add(ce.Message);
+        var ce = new CompilerException(code, cursorCurrent, CompilerException.ErrorMessage[code]);
+        SaveExceptionHistory(ce);
         Console.Error.WriteLine(ce.Message);
     }
 
@@ -40,12 +45,10 @@ public partial class Builder
         Execute?.Failure = true;
         var message = $"{Environment.NewLine}{source.Text.Replace('\t', ' ')}{Environment.NewLine}";
         if (cursorCurrent > 0) message += $"{new string(' ', cursorCurrent)}!{Environment.NewLine}";
-        var fi = new FileInfo(source.PathName);
-        message += $"{fi.Name}({source.LineCountFile},{cursorCurrent + 1}) : error {code} -- {CompilerException.ErrorMessage[code]}";
+        var fileName = Path.GetFileName(source.PathName);
+        message += $"{fileName}({source.LineCountFile},{cursorCurrent + 1}) : error {code} -- {CompilerException.ErrorMessage[code]}";
         var ce = new CompilerException(code, cursorCurrent, message);
-        ErrorCodeHistory.Add(code);
-        ColumnHistory.Add(cursorCurrent);
-        MessageHistory.Add(ce.Message);
+        SaveExceptionHistory(ce);
         Console.Error.WriteLine(ce.Message);
     }
 

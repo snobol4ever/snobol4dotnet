@@ -35,8 +35,8 @@ public partial class Executive
         Console.Error.WriteLine("");
         if (AmpErrorType == 0)
             Console.Error.WriteLine(@"normal end");
-        var fi = new FileInfo(SourceFiles[AmpCurrentLineNumber - 1]);
-        Console.Error.WriteLine(@$"in file                  {fi.Name}");
+        var fileName = Path.GetFileName(SourceFiles[AmpCurrentLineNumber]);
+        Console.Error.WriteLine(@$"in file                  {fileName}");
         Console.Error.WriteLine(@$"in line                  {SourceLineNumbers[AmpCurrentLineNumber - 1]}");
         Console.Error.WriteLine(@$"in statement             {AmpCurrentLineNumber}");
         Console.Error.WriteLine(@$"statements executed      {AmpStatementCount}");

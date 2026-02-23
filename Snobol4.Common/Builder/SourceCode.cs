@@ -10,7 +10,6 @@ public class SourceCode
     internal int LineCountTotal;                   // Counter for numbers of lines in all files
     internal int SubLineCount;                     // Counter for semicolon delimited lines
     internal List<SourceLine> SourceLines = [];    // ListSource of source lines
-    //internal string EntryLabel = "";               // Label to start execution
     internal Dictionary<string, int> Labels = [];  // Dictionary associating labels to line numbers
     private readonly Builder _parent;              // Builder invoking this class
     private int _includeDepth;                     // Depth of INCLUDE statements
@@ -37,14 +36,16 @@ public class SourceCode
 
         try
         {
-            foreach (var fileInfo in _parent.FilesToCompile.Select(AdjustFileExtension).Select(fileName => new FileInfo(fileName)))
+            foreach (var fileName in _parent.FilesToCompile.Select(AdjustFileExtension))
             {
-                if (fileInfo.DirectoryName is not null)
-                    Directory.SetCurrentDirectory(fileInfo.DirectoryName);
+                var directoryName = Path.GetDirectoryName(fileName);
+                if (directoryName is not null)
+                    Directory.SetCurrentDirectory(directoryName);
 
-                PathList.Add(fileInfo.FullName);
-                using StreamReader sourceFileReader = new(fileInfo.FullName, Encoding.UTF8);
-                ReadFile(sourceFileReader, fileInfo.FullName);
+                var fullPath = Path.GetFullPath(fileName);
+                PathList.Add(fullPath);
+                using StreamReader sourceFileReader = new(fullPath, Encoding.UTF8);
+                ReadFile(sourceFileReader, fullPath);
             }
         }
         catch (IOException e)
@@ -56,7 +57,7 @@ public class SourceCode
         if (PathList.Count > 0 && EndFound)
             return;
 
-        _parent.LogCompilerException(216, 0, "Error: 216 syntax error: missing end line");
+        _parent.LogCompilerException(216, 0);
     }
 
     // For testing purposes
@@ -78,7 +79,7 @@ public class SourceCode
         if (EndFound)
             return;
 
-        _parent.LogCompilerException(216, 0, "Error: 216 syntax error: missing end line");
+        _parent.LogCompilerException(216);
     }
 
     internal void ReadCodeInString(string source, string pathName)
@@ -188,7 +189,7 @@ public class SourceCode
         var m = CompiledRegex.EntryLabelPattern().Match(subLine[3..]);
 
         if (!m.Success)
-            _parent.LogCompilerException(215, 0, line);
+            _parent.LogCompilerException(215);
 
         return m.Groups[2].Value;
     }
@@ -282,7 +283,7 @@ public class SourceCode
                 break;
 
             default:
-                _parent.LogCompilerException(247, 0, "$@\"ERROR: Un recognized directive -{match.Trim()} in {pathName}");
+                _parent.LogCompilerException(247);
                 break;
         }
     }

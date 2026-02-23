@@ -9,8 +9,8 @@ public partial class Executive
     public void LogRuntimeException(int code)
     {
         AmpErrorType = code;
-        var fi = new FileInfo(SourceFiles[AmpCurrentLineNumber]);
-        AmpErrorText = $"{fi.Name}({SourceLineNumbers[AmpCurrentLineNumber]}) : error {code} -- {CompilerException.ErrorMessage[code]}{Environment.NewLine}{SourceCode[AmpCurrentLineNumber].Split('\n')[1]}";
+        var fileName = Path.GetFileName(SourceFiles[AmpCurrentLineNumber]);
+        AmpErrorText = $"{fileName}({SourceLineNumbers[AmpCurrentLineNumber]}) : error {code} -- {CompilerException.ErrorMessage[code]}{Environment.NewLine}{SourceCode[AmpCurrentLineNumber].Split('\n')[1]}";
         Parent.ErrorCodeHistory.Add(code);
         Parent.ColumnHistory.Add(0);
         Failure = true;
@@ -19,12 +19,9 @@ public partial class Executive
         Parent.MessageHistory.Add(AmpErrorText);
         ErrorJump = SetExitNumber;
         AmpErrorLimit--;
-
-        if (!Parent.CodeMode || AmpErrorLimit == 0)
-        {
-            Console.Error.WriteLine(AmpErrorText);
-            throw ce;
-        }
+        if (Parent.CodeMode || AmpErrorLimit != 0) return;
+        Console.Error.WriteLine(AmpErrorText);
+        throw ce;
     }
 
     public StringVar NonExceptionFailure()

@@ -158,8 +158,8 @@ public partial class Executive
     internal void HandleFile(Var value, bool set)
     {
         if (ReadOnlyHandler(set)) return;
-        var fi = new FileInfo(SourceFiles[AmpCurrentLineNumber - 1]);
-        SystemStack.Push(new StringVar(fi.Name, "$file", true, true));
+        var fileName = Path.GetFileName(SourceFiles[AmpCurrentLineNumber - 1]);
+        SystemStack.Push(new StringVar(fileName, "$file", true, true));
     }
 
     internal void HandleFncLevel(Var value, bool set)
@@ -171,8 +171,8 @@ public partial class Executive
     internal void HandleLastFile(Var value, bool set)
     {
         if (ReadOnlyHandler(set)) return;
-        var fi = new FileInfo(SourceFiles[AmpLastLineNumber-1]);
-        SystemStack.Push(new StringVar(fi.Name, "&lastfile", true, true));
+        var fileName = Path.GetFileName(SourceFiles[AmpLastLineNumber-1]);
+        SystemStack.Push(new StringVar(fileName, "&lastfile", true, true));
     }
 
     internal void HandleLastNo(Var value, bool set)

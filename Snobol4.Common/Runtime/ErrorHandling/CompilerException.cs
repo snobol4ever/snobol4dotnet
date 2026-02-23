@@ -1,41 +1,11 @@
 ﻿namespace Snobol4.Common;
 
-public class CompilerException : Exception
+public class CompilerException(int error, int column, string? message = null) : Exception(message ?? "")
 {
     #region Members
 
-    public int Code { get; set; }
-    public int Column { get; set; }
-
-    #endregion
-
-    #region Constructors
-
-    //public CompilerException(int error, int column)
-    //{
-    //    Code = error;
-    //    Column = column;
-    //    Message = "";
-    //}
-
-    //public CompilerException(int error)
-    //{
-    //    Code = error;
-    //    Column = 0;
-    //    Message = "";
-    //}
-
-    //public int Code { get; set; }
-    //public int Column { get; set; }
-
-    public CompilerException(int error, int column, string? message = null)
-        : base(message ?? "")
-    {
-        Code = error;
-        Column = column;
-    }
-
-    public CompilerException(int error) : this(error, 0) { }
+    public int Code { get; set; } = error;
+    public int Column { get; set; } = column;
 
     #endregion
 

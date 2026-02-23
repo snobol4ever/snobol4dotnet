@@ -22,7 +22,6 @@ public partial class Executive
     internal Stack<string> ProgramDefinedFunctionStack = [];
 
     // Symbol Tables
-    //public Dictionary<string, FunctionTableEntry> FunctionTable;
     public FunctionTable FunctionTable;
     public IdentifierTable IdentifierTable;
     public LabelTable LabelTable;

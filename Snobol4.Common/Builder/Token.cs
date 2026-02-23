@@ -41,7 +41,6 @@ internal class Token
         FAILURE_GOTO = 20,
         IDENTIFIER_ARRAY_OR_TABLE = 21,
         IDENTIFIER_FUNCTION = 22,
-        //IDENTIFIER_TABLE = 23,
         IDENTIFIER = 23,
         INTEGER = 24,
         L_ANGLE = 25,
@@ -69,7 +68,6 @@ internal class Token
         SPACE = 47,
         STRING = 48,
         SUCCESS_GOTO = 49,
-        //       UNARY_NOT  = 50,
         UNARY_OPERATOR = 51,
         UNARY_STAR = 52,
         EXPRESSION = 53
@@ -106,19 +104,6 @@ internal class Token
         Index = index;
         DoubleValue = value;
     }
-
-    #endregion
-
-    #region Methods
-
-    //internal string ToString(bool detailed = false)
-    //{
-    //    if (detailed)
-    //        return "Type: " + TokenType + " <" + MatchedString;
-    //    return TokenType + new string(' ', 32 - TokenType.ToString().Length) +
-    //           "<" + MatchedString + ">" +
-    //           " (" + IntegerValue + ") (" + DoubleValue + ") [" + Index + "]";
-    //}
 
     #endregion
 

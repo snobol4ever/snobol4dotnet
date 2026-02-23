@@ -6,25 +6,36 @@ public class CompilerException : Exception
 
     public int Code { get; set; }
     public int Column { get; set; }
-    public new string Message { get; set; }
 
     #endregion
 
     #region Constructors
 
-    public CompilerException(int error, int column)
+    //public CompilerException(int error, int column)
+    //{
+    //    Code = error;
+    //    Column = column;
+    //    Message = "";
+    //}
+
+    //public CompilerException(int error)
+    //{
+    //    Code = error;
+    //    Column = 0;
+    //    Message = "";
+    //}
+
+    //public int Code { get; set; }
+    //public int Column { get; set; }
+
+    public CompilerException(int error, int column, string? message = null)
+        : base(message ?? "")
     {
         Code = error;
         Column = column;
-        Message = "";
     }
 
-    public CompilerException(int error)
-    {
-        Code = error;
-        Column = 0;
-        Message = "";
-    }
+    public CompilerException(int error) : this(error, 0) { }
 
     #endregion
 

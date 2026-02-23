@@ -11,6 +11,8 @@ public partial class Builder : IDisposable
 {
     #region Members
 
+    private const int UnexpectedExceptionErrorCode = 1000;
+
     public BuilderOptions BuildOptions = new();
 
     private readonly CompilerTargets _compilerTarget = new();
@@ -121,10 +123,10 @@ public partial class Builder : IDisposable
             _timerBuild.Stop();
             PrintCompilationStatistics();
 
-            if (MessageHistory.Count > 0 || BuildOptions.SuppressExecution)
-                return;
-
-            Execute.Execute(dll, loadContext, _compilerTarget.FullClassName);
+            if (MessageHistory.Count == 0 || !BuildOptions.SuppressExecution)
+            {
+                Execute.Execute(dll, loadContext, _compilerTarget.FullClassName);
+            }
         }
         catch (CompilerException)
         {
@@ -146,18 +148,14 @@ public partial class Builder : IDisposable
         try
         {
             GetNameSpaceAndClassName(GenerateCSharpCode.CompileTarget.EVAL);
-            Lex(this);
+            if (!Lex(this) && CodeMode) return;
             Parse(this);
             var cSharpCode = Generate(_compilerTarget.NameSpace, _compilerTarget.ClassName, false, GenerateCSharpCode.CompileTarget.EVAL, this);
             StatementCount += Code.SourceLines.Count;
-
             var loadContext = CreateTrackedLoadContext($"Eval_{_compilerTarget.EvalNum}");
             var dll = Compile(loadContext, _compilerTarget.FileName, cSharpCode);
             dynamic? instance = dll.CreateInstance(_compilerTarget.FullClassName);
-
-            if (instance == null)
-                return;
-
+            if (instance == null) return;
             instance.Run(Execute);
         }
         catch (CompilerException)
@@ -187,8 +185,8 @@ public partial class Builder : IDisposable
             if (instance == null)
                 return false;
 
-            
-            
+
+
             instance.Run(Execute);
             return true;
         }
@@ -222,8 +220,10 @@ public partial class Builder : IDisposable
         }
         catch (Exception e)
         {
-            Console.Error.WriteLine(@"***UNEXPECTED EXCEPTION");
-            Console.Error.WriteLine(@$"{e.StackTrace}");
+            Console.Error.WriteLine(@"
+***UNEXPECTED EXCEPTION");
+            Console.Error.WriteLine(@$"
+{e.StackTrace}");
             SaveException(e);
             WriteException(e);
             if (e.InnerException != null)
@@ -247,7 +247,7 @@ public partial class Builder : IDisposable
         var folded = input.ToUpperInvariant();
 
         // Cache the result if cache exists and isn't too large
-        if (_caseFoldCache != null && _caseFoldCache.Count < 1000)
+        if (_caseFoldCache != null && _caseFoldCache.Count < UnexpectedExceptionErrorCode)
         {
             _caseFoldCache[input] = folded;
         }

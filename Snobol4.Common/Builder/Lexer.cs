@@ -1097,7 +1097,14 @@ public partial class Lexer
                 lexLine[starPos] = new Token(Token.Type.EXPRESSION, "Star" + _parent.ExpressionList.Count.ToString("D8"), -1);
                 var searchIndex3 = lexLine[rArg].Index;
                 while (lexLine[rArg].Index != searchIndex3 || lexLine[rArg].TokenType != Token.Type.R_PAREN_CHOICE)
+                {
                     ++rArg;
+                    if (rArg >= lexLine.Count)
+                    {
+                        return;
+                    }
+                }
+
                 _parent.ExpressionList.Add(new DeferredExpression(lexLine.GetRange(starPos + 1, rArg - starPos)));
                 lexLine.RemoveRange(starPos + 1, rArg - starPos);
                 return;

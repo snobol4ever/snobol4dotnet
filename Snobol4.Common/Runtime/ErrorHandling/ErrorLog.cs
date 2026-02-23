@@ -15,9 +15,8 @@ public partial class Executive
         Parent.ColumnHistory.Add(0);
         Failure = true;
         SystemStack.Push(new StringVar(false));
-        var ce = new CompilerException(code);
-        ce.Message = AmpErrorText;
-        Parent.MessageHistory.Add(ce.Message);
+        var ce = new CompilerException(code, 0, AmpErrorText);
+        Parent.MessageHistory.Add(AmpErrorText);
         ErrorJump = SetExitNumber;
         AmpErrorLimit--;
 

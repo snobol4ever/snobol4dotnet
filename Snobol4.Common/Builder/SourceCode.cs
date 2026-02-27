@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using System.Text;
+﻿using System.Text;
 
 namespace Snobol4.Common;
 
@@ -9,10 +8,10 @@ public class SourceCode
 
     internal int LineCountFile;                    // Counter for number of lines in a file
     internal int BlankLineCount;                   // Counter for blank lines
-    internal int CommentContinuationDirectiveCount;        // Counter for comments and dierctives
+    internal int CommentContinuationDirectiveCount;        // Counter for comments and directives
     internal int LineCountTotal;                   // Counter for numbers of lines in all files
     internal int SubLineCount;                     // Counter for semicolon delimited lines
-    internal List<SourceLine> SourceLines = [];    // ListSource of source lines
+    internal List<SourceLine> SourceLines = [];    // List of source lines
     internal Dictionary<string, int> Labels = [];  // Dictionary associating labels to line numbers
     private readonly Builder _parent;              // Builder invoking this class
     private int _includeDepth;                     // Depth of INCLUDE statements
@@ -60,7 +59,7 @@ public class SourceCode
         if (PathList.Count > 0 && EndFound)
             return;
 
-        _parent.LogCompilerException(216, 0);
+        _parent.LogCompilerException(216);
     }
 
     // For testing purposes
@@ -143,7 +142,6 @@ public class SourceCode
             LineCountTotal++;
             var currentLine = ReadLineAndContinuations(reader, out int continuation);
             _continuation = continuation;
-            //LineCountFile += continuation;
             ListSource(currentLine);
             SubLineCount = 0;
             var subLines = SplitLineBySemicolons(currentLine);
@@ -173,7 +171,7 @@ public class SourceCode
                 if (!IsEndStatement(subLine))
                     continue;
 
-                _parent.EntryLabel = ProcessEntry(subLine, currentLine);
+                _parent.EntryLabel = ProcessEntry(subLine);
                 return;
             }
         }
@@ -210,7 +208,7 @@ public class SourceCode
     }
 
 
-    private string ProcessEntry(string subLine, string line)
+    private string ProcessEntry(string subLine)
     {
         EndFound = true;
         if (subLine.Trim().Length == 3)
@@ -277,7 +275,7 @@ public class SourceCode
             case "case":
                 if (directive.Length < 6 || !long.TryParse(directive[5..], out var i) || i < 0)
                 {
-                    _parent.LogCompilerException(247, 0);
+                    _parent.LogCompilerException(247);
                     return;
                 }
 
@@ -318,10 +316,10 @@ public class SourceCode
         }
     }
 
-    private string ReadLineAndContinuations(StreamReader reader, out int c)
+    private string ReadLineAndContinuations(StreamReader reader, out int continuationLines)
     {
         var line = reader.ReadLine();
-        c = 1;
+        continuationLines = 1;
 
         if (line == null)
         {
@@ -330,11 +328,11 @@ public class SourceCode
 
         var currentLine = line;
 
+        // Concatenate continuation lines
         while (!reader.EndOfStream && (reader.Peek() == '.' || reader.Peek() == '+'))
         {
-            line = reader.ReadLine();
-            currentLine += line[1..];
-            c++;
+            currentLine += reader.ReadLine()?[1..];
+            continuationLines++;
         }
 
         return currentLine;
@@ -406,12 +404,12 @@ public class SourceCode
 
     private static bool IsCommentOrContinuation(string line)
     {
-        return line.Length != 0 && "+.*".Contains(line[0]);
+        return line.Length > 0 && "+.*".Contains(line[0]);
     }
 
     private static bool IsCommand(string line)
     {
-        return line.Length != 0 && "-".Contains(line[0]);
+        return line.Length > 0 && "-".Contains(line[0]);
     }
 
     #endregion

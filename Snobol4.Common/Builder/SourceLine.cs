@@ -1,6 +1,4 @@
-﻿using OneOf.Types;
-
-namespace Snobol4.Common;
+﻿namespace Snobol4.Common;
 
 public class SourceLine
 {
@@ -45,10 +43,6 @@ public class SourceLine
         CommentContinuationDirectiveCount = code.CommentContinuationDirectiveCount;
         LineCountSubLine = code.SubLineCount;
         LineCountList = code.LineCountTotal;
-        ParseBody = [];
-        ParseFailureGoto = [];
-        ParseSuccessGoto = [];
-        ParseUnconditionalGoto = [];
         ParseBody = [];
         ParseFailureGoto = [];
         ParseSuccessGoto = [];

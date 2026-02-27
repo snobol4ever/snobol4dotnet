@@ -103,7 +103,7 @@ public class GenerateCSharpCode(Builder parent)
 
     private void GenerateEvalMode()
     {
-        for (var jStar = _parent.Execute.PreviousStarFunctionCount; jStar < _parent.ExpressionList.Count; ++jStar)
+        for (var jStar = _parent.Execute?.PreviousStarFunctionCount; jStar < _parent.ExpressionList.Count; ++jStar)
         {
             _csharpCode.AppendLine($"        // jStar: {jStar}");
             _csharpCode.AppendLine($"        x.StarFunctionList.Add(Star{jStar:D8});");

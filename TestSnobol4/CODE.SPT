@@ -45,7 +45,6 @@
 +				ARBNO(OPT_WHITE_ (ANY("SsFf") | "")
 +				OPT_WHITE_ ANY("(<") BREAKX(")>") LEN(1))
 +				OPT_WHITE_ RPOS(0)
-	OUTPUT = &STNO ' ' &LINE
 	Q_	    =	"'"
 	QQ_	    =	'"'
 

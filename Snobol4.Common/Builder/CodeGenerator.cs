@@ -8,6 +8,14 @@ public class GenerateCSharpCode(Builder parent)
     private Builder _parent = parent;
     private CompileTarget _compileTarget;
 
+    // Constants for runtime exception codes
+    //private const int GOTO_EVALUATION_FAILURE = 20;
+    //private const int GOTO_NOT_NATURAL_VARIABLE = 23;
+    //private const int GOTO_NOT_CODE = 24;
+
+    // Code generation indentation
+    //private const string INDENT = "        ";
+
     public enum CompileTarget
     {
         PROGRAM = 1,
@@ -103,7 +111,8 @@ public class GenerateCSharpCode(Builder parent)
 
     private void GenerateEvalMode()
     {
-        for (var jStar = _parent.Execute?.PreviousStarFunctionCount; jStar < _parent.ExpressionList.Count; ++jStar)
+        var startIndex = _parent.Execute?.PreviousStarFunctionCount ?? 0;
+        for (var jStar = startIndex; jStar < _parent.ExpressionList.Count; ++jStar)
         {
             _csharpCode.AppendLine($"        // jStar: {jStar}");
             _csharpCode.AppendLine($"        x.StarFunctionList.Add(Star{jStar:D8});");
@@ -206,7 +215,7 @@ public class GenerateCSharpCode(Builder parent)
     {
         for (var iStar = _parent.RecordedExpressionCount; iStar < _parent.ExpressionList.Count; ++iStar)
         {
-            _csharpCode.AppendLine($"        x.StarFunctionList.Add(Star{iStar++:D8});");
+            _csharpCode.AppendLine($"        x.StarFunctionList.Add(Star{iStar:D8});");
         }
 
         _csharpCode.AppendLine();
@@ -340,7 +349,7 @@ public class GenerateCSharpCode(Builder parent)
         _csharpCode.AppendLine("        x.Failure = false;");
         _csharpCode.Append(ToCSharp(line.ParseUnconditionalGoto));
         _csharpCode.AppendLine("        if (x.Failure)");
-        _csharpCode.AppendLine("            x.LogRuntimeException(20);");
+        _csharpCode.AppendLine($"            x.LogRuntimeException({20});");
         _csharpCode.AppendLine("        x.SaveStatus(bSaveStatus);");
 
         if (line.DirectGotoFirst)
@@ -360,7 +369,7 @@ public class GenerateCSharpCode(Builder parent)
             _csharpCode.AppendLine("        {");
             _csharpCode.Append(ToCSharp(line.ParseSuccessGoto));
             _csharpCode.AppendLine("            if (x.Failure)");
-            _csharpCode.AppendLine("                x.LogRuntimeException(20);");
+            _csharpCode.AppendLine($"                x.LogRuntimeException({20});");
 
             if (line.DirectGotoFirst)
                 DirectGoto();
@@ -372,7 +381,7 @@ public class GenerateCSharpCode(Builder parent)
             _csharpCode.AppendLine("        x.Failure = false;");
             _csharpCode.Append(ToCSharp(line.ParseFailureGoto));
             _csharpCode.AppendLine("        if (x.Failure)");
-            _csharpCode.AppendLine("            x.LogRuntimeException(20);");
+            _csharpCode.AppendLine($"            x.LogRuntimeException({20});");
             _csharpCode.AppendLine("        x.Failure = true;");
         }
         else
@@ -383,7 +392,7 @@ public class GenerateCSharpCode(Builder parent)
             _csharpCode.AppendLine("        x.Failure = false;");
             _csharpCode.Append(ToCSharp(line.ParseFailureGoto));
             _csharpCode.AppendLine("            if (x.Failure)");
-            _csharpCode.AppendLine("                x.LogRuntimeException(20);");
+            _csharpCode.AppendLine($"                x.LogRuntimeException({20});");
             _csharpCode.AppendLine("        x.Failure = true;");
 
             if (line.DirectGotoFirst)
@@ -395,7 +404,7 @@ public class GenerateCSharpCode(Builder parent)
             _csharpCode.AppendLine("        }");
             _csharpCode.Append(ToCSharp(line.ParseSuccessGoto));
             _csharpCode.AppendLine("        if (x.Failure)");
-            _csharpCode.AppendLine("            x.LogRuntimeException(20);");
+            _csharpCode.AppendLine($"            x.LogRuntimeException({20});");
         }
 
         if (line.DirectGotoSecond)
@@ -412,7 +421,7 @@ public class GenerateCSharpCode(Builder parent)
         _csharpCode.AppendLine($"            return {nextStatement};");
         _csharpCode.Append(ToCSharp(line.ParseSuccessGoto));
         _csharpCode.AppendLine("        if (x.Failure)");
-        _csharpCode.AppendLine("            x.LogRuntimeException(20);");
+        _csharpCode.AppendLine($"            x.LogRuntimeException({20});");
 
         if (line.DirectGotoFirst)
             DirectGoto();
@@ -429,7 +438,7 @@ public class GenerateCSharpCode(Builder parent)
         _csharpCode.AppendLine("        x.Failure = false;");
         _csharpCode.Append(ToCSharp(line.ParseFailureGoto));
         _csharpCode.AppendLine("        if (x.Failure)");
-        _csharpCode.AppendLine("            x.LogRuntimeException(20);");
+        _csharpCode.AppendLine($"            x.LogRuntimeException({20});");
         _csharpCode.AppendLine("        x.Failure = true;");
 
         if (line.DirectGotoFirst)
@@ -639,23 +648,18 @@ public class GenerateCSharpCode(Builder parent)
 
     #region Goto Helpers
 
-    // Runtime exception codes:
-    // 20 - Goto evaluation failure
-    // 23 - Goto operand is not a natural variable
-    // 24 - Goto operand in direct goto is not code
-
     private void DirectGoto()
     {
         _csharpCode.AppendLine("        if (x.IdentifierTable.ContainsKey(x.SystemStack.Peek().Symbol))");
         _csharpCode.AppendLine("            return ((CodeVar)(x.IdentifierTable[x.SystemStack.Pop().Symbol])).StatementNumber;");
-        _csharpCode.AppendLine("        x.LogRuntimeException(24);");
+        _csharpCode.AppendLine($"        x.LogRuntimeException({24});");
     }
 
     private void LabelGoto()
     {
         _csharpCode.AppendLine("        if (x.LabelTable[x.SystemStack.Peek().Symbol] != Executive.GotoNotFound)");
         _csharpCode.AppendLine("            return x.LabelTable[x.SystemStack.Pop().Symbol];");
-        _csharpCode.AppendLine("        x.LogRuntimeException(23);");
+        _csharpCode.AppendLine($"        x.LogRuntimeException({23});");
     }
 
     #endregion

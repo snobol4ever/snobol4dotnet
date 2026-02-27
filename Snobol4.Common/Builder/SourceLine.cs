@@ -1,4 +1,6 @@
-﻿namespace Snobol4.Common;
+﻿using OneOf.Types;
+
+namespace Snobol4.Common;
 
 public class SourceLine
 {
@@ -10,6 +12,9 @@ public class SourceLine
     internal int LineCountFile;                       // Index of this line in containing file
     internal int LineCountSubLine;                    // Index of this line among semicolon delimited lines
     internal int LineCountTotal;                      // Index of this line in all files
+    internal int LineCountList;                       // Index of this line in this listing
+    internal int BlankLineCount;                      // Count of blank lines
+    internal int CommentContinuationDirectiveCount;            // Count of comments and directives
     internal string PathName;                         // Path to file
     internal List<Token> LexBody = [];                // Lexical analysis of body
     internal List<Token> LexFailureGoto = [];         // Lexical analysis of failure goto
@@ -24,18 +29,22 @@ public class SourceLine
     internal List<Token> ParseUnconditionalGoto;      // Parse of unconditional got in RPN
     internal string Label = "";                       // Label of this line
     internal string Text;                             // Unprocessed source code
+    internal bool DeferredExpression;                 // True if expression is deferred to runtime (Has ' *(' prepended and ')' appended)       
 
     #endregion
 
     #region Constructor
 
-                internal SourceLine(string pathName, int includeDepth, string text, SourceCode code, bool errorOnUnhandledFail)
+    internal SourceLine(string pathName, int includeDepth, string text, SourceCode code, bool errorOnUnhandledFail)
     {
         ErrorOnUnhandledFail = errorOnUnhandledFail;
         IncludeDepth = includeDepth;
         LineCountTotal = code.LineCountTotal;
         LineCountFile = code.LineCountFile;
+        BlankLineCount = code.BlankLineCount;
+        CommentContinuationDirectiveCount = code.CommentContinuationDirectiveCount;
         LineCountSubLine = code.SubLineCount;
+        LineCountList = code.LineCountTotal;
         ParseBody = [];
         ParseFailureGoto = [];
         ParseSuccessGoto = [];

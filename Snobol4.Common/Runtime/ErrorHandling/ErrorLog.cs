@@ -10,7 +10,12 @@ public partial class Executive
     {
         AmpErrorType = code;
         var fileName = Path.GetFileName(SourceFiles[AmpCurrentLineNumber]);
-        AmpErrorText = $"{fileName}({SourceLineNumbers[AmpCurrentLineNumber]}) : error {code} -- {CompilerException.ErrorMessage[code]}{Environment.NewLine}{SourceCode[AmpCurrentLineNumber].Split('\n')[1]}";
+        var codeCount = 1 + Parent.Code.LineCountFile - Parent.Code.BlankLineCount -
+                        Parent.Code.CommentContinuationDirectiveCount;
+        var listCount = 1 + Parent.Code.LineCountFile - Parent.Code.CommentContinuationDirectiveCount;
+        int lineCount = 1 + Parent.Code.LineCountFile;
+        AmpErrorText =
+            $"{fileName}({codeCount}/{listCount}/{lineCount}): error {code} -- {CompilerException.ErrorMessage[code]}{Environment.NewLine}{SourceCode[AmpCurrentLineNumber].Split('\n')[1]}";
         Parent.ErrorCodeHistory.Add(code);
         Parent.ColumnHistory.Add(0);
         Failure = true;

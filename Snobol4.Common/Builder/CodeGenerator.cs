@@ -139,7 +139,10 @@ public class GenerateCSharpCode(Builder parent)
                 continue;
 
             var escapedLine = line.Text.Replace('\t', ' ').Replace("\"", "\"\"");
-            var pathLine = $"{Path.GetFileName(line.PathName)}({line.LineCountFile})\\n";
+            var codeCount = 1 + line.LineCountFile - line.BlankLineCount - line.CommentContinuationDirectiveCount;
+            var listCount = 1 + line.LineCountFile - line.CommentContinuationDirectiveCount;
+            int lineCount = 1 + line.LineCountFile;
+            var pathLine = $"{Path.GetFileName(line.PathName)}:{codeCount}/{listCount}/{lineCount})\\n";
             _csharpCode.AppendLine($"        x.SourceCode.Add(\"{pathLine}\" + @\"{escapedLine}\");");
         }
 
@@ -550,7 +553,7 @@ public class GenerateCSharpCode(Builder parent)
                     // c# does not consider a trailing decimal point to be a valid real literal,
                     // but snobol4 does, so add a zero if there is a trailing decimal point
                     var matchedString = t.MatchedString;
-                    if(matchedString[^1] == '.')
+                    if (matchedString[^1] == '.')
                         matchedString += "0";
                     code.AppendLine($"        x.Constant({matchedString});");
                     break;

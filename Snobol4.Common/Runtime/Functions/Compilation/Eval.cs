@@ -27,6 +27,7 @@ public partial class Executive
                 Parent.CodeMode = true;
                 Parent.Code = new SourceCode(Parent);
                 Parent.Code.ReadCodeInString($" *({stringVar.Data.Trim()})", Parent.FilesToCompile[^1]);
+                Parent.Code.SourceLines[0].DeferredExpression = true;
                 Parent.BuildEval();
                 Parent.BuildOptions.CaseFolding = previousCaseFolding;
                 StarFunctionList[^1](this);

@@ -35,7 +35,6 @@
 	&TRIM = 1
 	MAX_ORIGINAL = &MAXLNGTH
 	TERMINAL = 'Enter SPITBOL statements:'
-*	OUTPUT('BINOUT', .BINOUT, '[-f2 -r1]')
 	OUTPUT('BINOUT', .BINOUT, '', 1, 1, 1)
 
 	DEFINE('SLOAD(FILENAME)LIB,CODE,X,MAX_SAV,TRIM_SAV,POSITION')
@@ -46,6 +45,7 @@
 +				ARBNO(OPT_WHITE_ (ANY("SsFf") | "")
 +				OPT_WHITE_ ANY("(<") BREAKX(")>") LEN(1))
 +				OPT_WHITE_ RPOS(0)
+	OUTPUT = &STNO ' ' &LINE
 	Q_	    =	"'"
 	QQ_	    =	'"'
 

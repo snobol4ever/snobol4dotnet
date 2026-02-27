@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace Snobol4.Common;
 
@@ -7,6 +8,8 @@ public class SourceCode
     #region Members
 
     internal int LineCountFile;                    // Counter for number of lines in a file
+    internal int BlankLineCount;                   // Counter for blank lines
+    internal int CommentContinuationDirectiveCount;        // Counter for comments and dierctives
     internal int LineCountTotal;                   // Counter for numbers of lines in all files
     internal int SubLineCount;                     // Counter for semicolon delimited lines
     internal List<SourceLine> SourceLines = [];    // ListSource of source lines
@@ -85,6 +88,8 @@ public class SourceCode
     internal void ReadCodeInString(string source, string pathName)
     {
         LineCountFile = 1;
+        BlankLineCount = 0;
+        CommentContinuationDirectiveCount = 0;
         LineCountTotal++;
         SubLineCount = 0;
 
@@ -94,20 +99,28 @@ public class SourceCode
         {
             LineCountFile++;
             var subLines = SplitLineBySemicolons(line);
-            foreach (var subLine in subLines.Where(subLine => subLine.Trim() != ""))
+            foreach (var subLine in subLines)
             {
+                if (subLine.Trim() == "")
+                {
+                    BlankLineCount++;
+                    continue;
+                }
+
                 SubLineCount++;
 
                 switch (subLine[0])
                 {
                     // Ignore comments;
                     case '*':
-                        continue;
+                        CommentContinuationDirectiveCount++;
+                        break;
 
                     // Compiler directive
                     case '-':
+                        CommentContinuationDirectiveCount++;
                         ExecuteDirectives(subLine[1..], pathName);
-                        continue;
+                        break;
                 }
 
                 SourceLines.Add(new SourceLine(pathName, _includeDepth, subLine, this, _parent.BuildOptions.ErrorOnUnhandledFail));
@@ -119,21 +132,38 @@ public class SourceCode
 
     #region Private Methods
 
+    private int _continuation;
+
     private void ReadFile(StreamReader reader, string pathName)
     {
         LineCountFile = 0;
         while (!EndFound && !reader.EndOfStream)
         {
-            LineCountFile++;
+            LineCountFile += _continuation;
             LineCountTotal++;
-            var currentLine = ReadLineAndContinuations(reader);
+            var currentLine = ReadLineAndContinuations(reader, out int continuation);
+            _continuation = continuation;
+            //LineCountFile += continuation;
             ListSource(currentLine);
             SubLineCount = 0;
             var subLines = SplitLineBySemicolons(currentLine);
-            foreach (var subLine in subLines.Where(subLine => subLine.Trim() != "").Where(subLine => !IsCommentOrContinuation(subLine)))
+            foreach (var subLine in subLines)
             {
+                if (subLine.Trim() == "")
+                {
+                    BlankLineCount++;
+                    continue;
+                }
+
+                if (IsCommentOrContinuation(subLine))
+                {
+                    CommentContinuationDirectiveCount++;
+                    continue;
+                }
+
                 if (IsCommand(subLine))
                 {
+                    CommentContinuationDirectiveCount++;
                     ExecuteDirectives(subLine[1..], pathName);
                     continue;
                 }
@@ -142,7 +172,7 @@ public class SourceCode
 
                 if (!IsEndStatement(subLine))
                     continue;
-                
+
                 _parent.EntryLabel = ProcessEntry(subLine, currentLine);
                 return;
             }
@@ -288,12 +318,15 @@ public class SourceCode
         }
     }
 
-    private static string ReadLineAndContinuations(StreamReader reader)
+    private string ReadLineAndContinuations(StreamReader reader, out int c)
     {
         var line = reader.ReadLine();
+        c = 1;
 
         if (line == null)
+        {
             return "";
+        }
 
         var currentLine = line;
 
@@ -301,6 +334,7 @@ public class SourceCode
         {
             line = reader.ReadLine();
             currentLine += line[1..];
+            c++;
         }
 
         return currentLine;

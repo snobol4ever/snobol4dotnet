@@ -10,6 +10,7 @@ public partial class Executive
     public bool Failure;
     public Builder Parent;
     public List<long> SourceLineNumbers;
+    public List<long> SourceListingNumbers;
     public List<long> SourceStatementNumbers;
     public List<string> SourceCode;
     public List<string> SourceFiles;

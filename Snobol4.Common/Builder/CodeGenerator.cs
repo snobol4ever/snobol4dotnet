@@ -150,7 +150,7 @@ public class GenerateCSharpCode(Builder parent)
             var escapedLine = line.Text.Replace('\t', ' ').Replace("\"", "\"\"");
             var codeCount = 1 + line.LineCountFile - line.BlankLineCount - line.CommentContinuationDirectiveCount;
             var listCount = 1 + line.LineCountFile - line.CommentContinuationDirectiveCount;
-            int lineCount = 1 + line.LineCountFile;
+            var lineCount = 1 + line.LineCountFile;
             var pathLine = $"{Path.GetFileName(line.PathName)}:{codeCount}/{listCount}/{lineCount})\\n";
             _csharpCode.AppendLine($"        x.SourceCode.Add(\"{pathLine}\" + @\"{escapedLine}\");");
         }

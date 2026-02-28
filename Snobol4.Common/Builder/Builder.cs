@@ -230,7 +230,8 @@ public partial class Builder : IDisposable
         catch (Exception e)
         {
             Console.Error.WriteLine(@"
-***UNEXPECTED EXCEPTION");
+***UNEXPECTED EXCEPTION
+");
             Console.Error.WriteLine(@$"
 {e.StackTrace}");
             SaveException(e);

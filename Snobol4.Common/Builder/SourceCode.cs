@@ -154,7 +154,7 @@ public class SourceCode
         {
             LineCountFile += _continuation;
             LineCountTotal++;
-            var currentLine = ReadLineAndContinuations(reader, out int continuation);
+            var currentLine = ReadLineAndContinuations(reader, out var continuation);
             _continuation = continuation;
             ListSource(currentLine);
             

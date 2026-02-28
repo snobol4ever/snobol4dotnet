@@ -2,15 +2,42 @@
 
 namespace Snobol4.Common;
 
+/// <summary>
+/// Represents a lexical token produced during the lexical analysis phase of SNOBOL4 compilation.
+/// </summary>
+/// <remarks>
+/// Tokens are the basic building blocks of SNOBOL4 statements, representing operators, identifiers,
+/// literals, delimiters, and control structures. Each token maintains information about its type,
+/// matched text, associated values, and position in the nesting hierarchy.
+/// </remarks>
 [DebuggerDisplay("{DebugToken()}")]
 internal class Token
 {
-    #region Members
+    #region Properties
 
+    /// <summary>
+    /// Gets or sets the type of this token.
+    /// </summary>
     internal Type TokenType { get; set; } = Type.NULL;
+
+    /// <summary>
+    /// Gets or sets the string that was matched from the source code to create this token.
+    /// </summary>
     internal string MatchedString { get; set; }
+
+    /// <summary>
+    /// Gets or sets the double-precision floating-point value for real number tokens.
+    /// </summary>
     internal double DoubleValue { get; set; }
+
+    /// <summary>
+    /// Gets or sets the 64-bit integer value for integer tokens, or the count of arguments/elements for function/array tokens.
+    /// </summary>
     internal long IntegerValue { get; set; }
+
+    /// <summary>
+    /// Gets or sets the nesting depth index indicating the bracket/parenthesis level where this token appears.
+    /// </summary>
     internal int Index { get; set; }
 
     #endregion

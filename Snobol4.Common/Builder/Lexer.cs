@@ -7,11 +7,6 @@ public partial class Lexer
 {
     #region Members
 
-    /// <summary>
-    /// Represents an entry in the bracket matching stack, containing the bracket character and its context type.
-    /// </summary>
-    /// <param name="Bracket">The bracket character (e.g., "(", "<", "[").</param>
-    /// <param name="Context">The token type context for this bracket.</param>
     private readonly record struct BracketStackEntry(string Bracket, Token.Type Context);
 
     // Lexical analysis
@@ -93,10 +88,6 @@ public partial class Lexer
 
     #region Private Methods
 
-    /// <summary>
-    /// Initializes all lexer state variables for processing a new source line.
-    /// </summary>
-    /// <param name="sourceLine">The source line to initialize state for.</param>
     private void InitializeLexState(SourceLine sourceLine)
     {
         _bracketStack.Clear();
@@ -117,13 +108,6 @@ public partial class Lexer
         _unconditionalGotoStart = 0;
     }
 
-    /// <summary>
-    /// Validates that a character is within the ASCII range for state transitions.
-    /// UTF8 characters are allowed in literals, labels, and comments.
-    /// </summary>
-    /// <param name="c">The character to validate.</param>
-    /// <param name="sourceLine">The source line being processed.</param>
-    /// <returns><c>true</c> if the character is valid; otherwise, <c>false</c>.</returns>
     private bool IsValidCharacter(char c, SourceLine sourceLine)
     {
         // State transitions rely on ASCII characters.
@@ -136,11 +120,6 @@ public partial class Lexer
         return true;
     }
 
-    /// <summary>
-    /// Performs lexical analysis on all uncompiled source lines in the parent builder's code.
-    /// Converts source text into tokens and processes deferred expressions.
-    /// </summary>
-    /// <returns><c>true</c> if lexical analysis succeeds; otherwise, <c>false</c>.</returns>
     internal bool Lex()
     {
         foreach (var sourceLine in _parent.Code.SourceLines.Where(line => !line.Compiled))
@@ -157,11 +136,6 @@ public partial class Lexer
     }
 
 
-    /// <summary>
-    /// Performs lexical analysis on a single source line, converting text into tokens.
-    /// </summary>
-    /// <param name="sourceLine">The source line to process.</param>
-    /// <returns><c>true</c> if the line is successfully lexed; otherwise, <c>false</c>.</returns>
     private bool LexLine(SourceLine sourceLine)
     {
         ArgumentNullException.ThrowIfNull(sourceLine);
@@ -197,12 +171,6 @@ public partial class Lexer
         return CheckForUnbalancedBrackets(sourceLine);
     }
 
-    /// <summary>
-    /// Processes a lexeme based on the current DFA state, creating appropriate tokens.
-    /// </summary>
-    /// <param name="sourceLine">The source line being processed.</param>
-    /// <param name="state">The current DFA state (passed by reference for state transitions).</param>
-    /// <returns><c>true</c> if the lexeme is successfully processed; otherwise, <c>false</c>.</returns>
     private bool FindLexeme(SourceLine sourceLine, ref int state)
     {
         Match m;
@@ -413,12 +381,6 @@ public partial class Lexer
         return true;
     }
 
-    /// <summary>
-    /// Processes a closing bracket token based on its opening bracket context.
-    /// Handles conditional gotos, unconditional gotos, functions, arrays, and choice operations.
-    /// </summary>
-    /// <param name="sourceLine">The source line being processed.</param>
-    /// <returns><c>true</c> if the closing bracket is successfully processed; otherwise, <c>false</c>.</returns>
     private bool ProcessClosingBracket(SourceLine sourceLine)
     {
         var entry = _bracketStack.Pop();
@@ -500,14 +462,6 @@ public partial class Lexer
         }
     }
 
-    /// <summary>
-    /// Processes a closing bracket for a conditional goto (success or failure).
-    /// Validates the second goto field and sets up the alternate goto path.
-    /// </summary>
-    /// <param name="sourceLine">The source line being processed.</param>
-    /// <param name="entry">The bracket stack entry for the opening bracket.</param>
-    /// <param name="remainder">The remaining text after the closing bracket.</param>
-    /// <returns><c>true</c> if successfully processed; otherwise, <c>false</c>.</returns>
     private bool ProcessClosingConditionalGotoBracket(SourceLine sourceLine, BracketStackEntry entry, string remainder)
     {
         sourceLine.LexBody.Add(new Token(entry.Context, entry.Bracket, _bracketStack.Count + 1));
@@ -547,11 +501,6 @@ public partial class Lexer
         return true;
     }
 
-    /// <summary>
-    /// Detects and inserts implicit operators (concatenation or pattern match) based on context.
-    /// Implicit concatenation occurs in expressions; implicit pattern match occurs in statements.
-    /// </summary>
-    /// <param name="sourceLine">The source line being processed.</param>
     private void ProcessImplicitOperators(SourceLine sourceLine)
     {
         if (sourceLine.LexBody.Count < 2)
@@ -584,11 +533,6 @@ public partial class Lexer
         }
     }
 
-    /// <summary>
-    /// Determines if a token type can be followed by an implicit operator.
-    /// </summary>
-    /// <param name="tokenType">The token type to check.</param>
-    /// <returns><c>true</c> if the token can have an implicit operator; otherwise, <c>false</c>.</returns>
     private static bool CanHaveImplicitOperator(Token.Type tokenType)
     {
         return tokenType is Token.Type.IDENTIFIER
@@ -601,21 +545,12 @@ public partial class Lexer
             or Token.Type.R_ANGLE;
     }
 
-    /// <summary>
-    /// Adds an implicit concatenation operator and space token to the source line.
-    /// </summary>
-    /// <param name="sourceLine">The source line being processed.</param>
     private void AddImplicitConcatenation(SourceLine sourceLine)
     {
         sourceLine.LexBody.Add(new Token(Token.Type.BINARY_CONCAT, "┴", _bracketStack.Count));
         sourceLine.LexBody.Add(new Token(Token.Type.SPACE, " ", _bracketStack.Count));
     }
 
-    /// <summary>
-    /// Adds an implicit pattern match operator and space token to the source line.
-    /// Sets the pattern match found flag.
-    /// </summary>
-    /// <param name="sourceLine">The source line being processed.</param>
     private void AddImplicitPatternMatch(SourceLine sourceLine)
     {
         sourceLine.LexBody.Add(new Token(Token.Type.BINARY_QUESTION, " ", _bracketStack.Count));
@@ -623,11 +558,6 @@ public partial class Lexer
         _patternMatchFound = true;
     }
 
-    /// <summary>
-    /// Processes a goto statement, adding appropriate tokens for colon, goto type (S/F), and bracket.
-    /// </summary>
-    /// <param name="sourceLine">The source line being processed.</param>
-    /// <param name="gotoMatch">The regex match containing goto components.</param>
     private void ProcessGoto(SourceLine sourceLine, Match gotoMatch)
     {
         sourceLine.LexBody.Add(new Token(Token.Type.COLON, ":", _bracketStack.Count));
@@ -647,11 +577,6 @@ public partial class Lexer
         _cursorCurrent += gotoMatch.Length - 1;
     }
 
-    /// <summary>
-    /// Adds a goto type token (SUCCESS_GOTO or FAILURE_GOTO) to the source line if applicable.
-    /// </summary>
-    /// <param name="sourceLine">The source line being processed.</param>
-    /// <param name="condition">The goto condition ("S", "s", "F", "f", or empty for unconditional).</param>
     private void AddGotoTypeToken(SourceLine sourceLine, string condition)
     {
         var gotoToken = condition.ToLowerInvariant() switch
@@ -667,13 +592,6 @@ public partial class Lexer
         }
     }
 
-    /// <summary>
-    /// Adds a goto bracket token to the source line and updates the lexer state.
-    /// Pushes the bracket onto the stack for matching.
-    /// </summary>
-    /// <param name="sourceLine">The source line being processed.</param>
-    /// <param name="condition">The goto condition (S, F, or empty).</param>
-    /// <param name="bracket">The bracket character ("(" or "<").</param>
     private void AddGotoBracketToken(SourceLine sourceLine, string condition, string bracket)
     {
         var (bracketType, newState) = bracket switch
@@ -691,11 +609,6 @@ public partial class Lexer
         }
     }
 
-    /// <summary>
-    /// Saves the start position of a goto field based on its condition type.
-    /// </summary>
-    /// <param name="condition">The goto condition (empty for unconditional, "s" for success, "f" for failure).</param>
-    /// <param name="position">The position in the lex body to save.</param>
     private void SaveGotoStartPosition(string condition, int position)
     {
         var conditionLower = condition.ToLowerInvariant();
@@ -714,11 +627,6 @@ public partial class Lexer
         }
     }
 
-    /// <summary>
-    /// Saves the end position of a goto field based on the token type.
-    /// </summary>
-    /// <param name="tokenType">The token type of the opening bracket.</param>
-    /// <param name="position">The position in the lex body to save.</param>
     private void SaveGotoEnd(Token.Type tokenType, int position)
     {
         if (tokenType is Token.Type.L_PAREN_FAILURE or Token.Type.L_ANGLE_FAILURE)
@@ -731,11 +639,6 @@ public partial class Lexer
         }
     }
 
-    /// <summary>
-    /// Saves the start position of the alternate goto field based on the token type.
-    /// </summary>
-    /// <param name="tokenType">The token type of the opening bracket.</param>
-    /// <param name="position">The position in the lex body to save.</param>
     private void SaveGotoStart(Token.Type tokenType, int position)
     {
         if (tokenType is Token.Type.L_PAREN_FAILURE or Token.Type.L_ANGLE_FAILURE)
@@ -748,11 +651,6 @@ public partial class Lexer
         }
     }
 
-    /// <summary>
-    /// Extracts goto lexemes from the main lex body into separate goto lists.
-    /// Removes goto tokens from the main body after extraction.
-    /// </summary>
-    /// <param name="sourceLine">The source line to extract goto lexemes from.</param>
     private void ExtractGotoLexemes(SourceLine sourceLine)
     {
         if (_bracketStack.Count > 0 || !_colonFound)
@@ -778,13 +676,6 @@ public partial class Lexer
         sourceLine.LexBody.RemoveRange(_colonPosition, sourceLine.LexBody.Count - _colonPosition);
     }
 
-    /// <summary>
-    /// Validates that a closing bracket matches the expected opening bracket on the stack.
-    /// </summary>
-    /// <param name="expectedBracket">The expected bracket character.</param>
-    /// <param name="errorCode">The error code to log if validation fails.</param>
-    /// <param name="sourceLine">The source line being processed.</param>
-    /// <returns><c>true</c> if the bracket is valid; otherwise, <c>false</c>.</returns>
     private bool ValidateClosingBracket(string expectedBracket, int errorCode, SourceLine sourceLine)
     {
         if (_bracketStack.Count == 0 || _bracketStack.Peek().Bracket != expectedBracket)
@@ -795,12 +686,6 @@ public partial class Lexer
         return true;
     }
 
-    /// <summary>
-    /// Processes an opening bracket token, pushing it onto the stack and adding it to the lex body.
-    /// </summary>
-    /// <param name="sourceLine">The source line being processed.</param>
-    /// <param name="bracket">The bracket character.</param>
-    /// <param name="tokenType">The token type for this bracket.</param>
     private void ProcessOpenBracket(SourceLine sourceLine, string bracket, Token.Type tokenType)
     {
         _bracketStack.Push(new BracketStackEntry(bracket, tokenType));
@@ -809,12 +694,6 @@ public partial class Lexer
         _commaStack.Push(1);
     }
 
-    /// <summary>
-    /// Processes a comma token, distinguishing between choice commas and regular commas.
-    /// Updates the comma count for the current bracket context.
-    /// </summary>
-    /// <param name="sourceLine">The source line being processed.</param>
-    /// <returns><c>true</c> if the comma is successfully processed; otherwise, <c>false</c>.</returns>
     private bool ProcessComma(SourceLine sourceLine)
     {
         _cursorCurrent++;
@@ -841,11 +720,6 @@ public partial class Lexer
         return true;
     }
 
-    /// <summary>
-    /// Checks if all brackets have been properly closed at the end of a source line.
-    /// </summary>
-    /// <param name="sourceLine">The source line to check.</param>
-    /// <returns><c>true</c> if all brackets are balanced; otherwise, <c>false</c>.</returns>
     private bool CheckForUnbalancedBrackets(SourceLine sourceLine)
     {
         if (_bracketStack.Count == 0)
@@ -864,12 +738,6 @@ public partial class Lexer
         return false;
     }
 
-    /// <summary>
-    /// Processes an identifier token, determining if it's a variable, function, array, or table name
-    /// based on the following bracket type.
-    /// </summary>
-    /// <param name="sourceLine">The source line being processed.</param>
-    /// <returns><c>true</c> if the identifier is successfully processed; otherwise, <c>false</c>.</returns>
     private bool ProcessIdentifier(SourceLine sourceLine)
     {
         var m = IdentifierPattern().Match(sourceLine.Text[_cursorCurrent..]);
@@ -886,11 +754,6 @@ public partial class Lexer
         return true;
     }
 
-    /// <summary>
-    /// Processes a numeric literal token, determining if it's an integer or real number.
-    /// </summary>
-    /// <param name="sourceLine">The source line being processed.</param>
-    /// <returns><c>true</c> if the numeric literal is successfully processed; otherwise, <c>false</c>.</returns>
     private bool ProcessNumericLiteral(SourceLine sourceLine)
     {
         var m = NumericPattern().Match(sourceLine.Text[_cursorCurrent..]);
@@ -910,13 +773,6 @@ public partial class Lexer
         return ProcessInteger(sourceLine, m.Value);
     }
 
-    /// <summary>
-    /// Processes a real number literal, validating it's a legal .NET 64-bit floating point number.
-    /// Rejects IEEE infinity values.
-    /// </summary>
-    /// <param name="sourceLine">The source line being processed.</param>
-    /// <param name="value">The string representation of the real number.</param>
-    /// <returns><c>true</c> if the real number is valid; otherwise, <c>false</c>.</returns>
     private bool ProcessRealNumber(SourceLine sourceLine, string value)
     {
         if (!Var.ToReal(value, out var realValue))
@@ -936,12 +792,6 @@ public partial class Lexer
         return true;
     }
 
-    /// <summary>
-    /// Processes an integer literal, validating it's a legal .NET 64-bit signed integer.
-    /// </summary>
-    /// <param name="sourceLine">The source line being processed.</param>
-    /// <param name="value">The string representation of the integer.</param>
-    /// <returns><c>true</c> if the integer is valid; otherwise, <c>false</c>.</returns>
     private bool ProcessInteger(SourceLine sourceLine, string value)
     {
         if (!Var.ToInteger(value, out var intValue))
@@ -954,16 +804,6 @@ public partial class Lexer
         return true;
     }
 
-    /// <summary>
-    /// Processes the closing bracket of an unconditional goto.
-    /// Validates that no second goto field exists after an unconditional goto.
-    /// </summary>
-    /// <param name="sourceLine">The source line being processed.</param>
-    /// <param name="remainder">The remaining text after the closing bracket.</param>
-    /// <param name="tokenType">The token type for the closing bracket.</param>
-    /// <param name="bracket">The bracket character.</param>
-    /// <param name="newState">The new DFA state to transition to.</param>
-    /// <returns><c>true</c> if successfully processed; otherwise, <c>false</c>.</returns>
     private bool ProcessUnconditionalGotoClosing(SourceLine sourceLine, string remainder, Token.Type tokenType, string bracket, int newState)
     {
         sourceLine.LexBody.Add(new Token(tokenType, bracket, _bracketStack.Count + 1));
@@ -983,14 +823,6 @@ public partial class Lexer
         return false;
     }
 
-    /// <summary>
-    /// Processes a regular closing bracket (function, array, or choice operation).
-    /// Adds the closing token with comma count and processes implicit nulls.
-    /// </summary>
-    /// <param name="sourceLine">The source line being processed.</param>
-    /// <param name="tokenType">The token type for the closing bracket.</param>
-    /// <param name="bracket">The bracket character.</param>
-    /// <returns><c>true</c> always (method cannot fail).</returns>
     private bool ProcessRegularClosingBracket(SourceLine sourceLine, Token.Type tokenType, string bracket)
     {
         if (_commaStack.Count > 0)
@@ -1006,11 +838,6 @@ public partial class Lexer
         return true;
     }
 
-    /// <summary>
-    /// Processes an operator token, dispatching to unary, binary, or delete operator handlers.
-    /// </summary>
-    /// <param name="sourceLine">The source line being processed.</param>
-    /// <returns><c>true</c> if the operator is successfully processed; otherwise, <c>false</c>.</returns>
     private bool ProcessOperator(SourceLine sourceLine)
     {
         // Look for a unary operator or a sequence of unary operators
@@ -1040,13 +867,6 @@ public partial class Lexer
         return ProcessDeleteOperator(sourceLine);
     }
 
-    /// <summary>
-    /// Processes a sequence of unary operators, adding individual tokens for each operator.
-    /// Consecutive stars are treated as a single star operator.
-    /// </summary>
-    /// <param name="sourceLine">The source line being processed.</param>
-    /// <param name="match">The regex match containing the unary operator sequence.</param>
-    /// <returns><c>true</c> always (method cannot fail).</returns>
     private bool ProcessUnaryOperators(SourceLine sourceLine, Match match)
     {
         _cursorCurrent += match.Groups[1].Length;
@@ -1072,13 +892,6 @@ public partial class Lexer
         return true;
     }
 
-    /// <summary>
-    /// Processes a binary operator token, validating it and adding it to the lex body.
-    /// Sets the equals found flag for assignment operators.
-    /// </summary>
-    /// <param name="sourceLine">The source line being processed.</param>
-    /// <param name="match">The regex match containing the binary operator.</param>
-    /// <returns><c>true</c> if the operator is valid and processed; otherwise, <c>false</c>.</returns>
     private bool ProcessBinaryOperator(SourceLine sourceLine, Match match)
     {
         if (!_binaryOperators.TryGetValue(match.Groups[1].Value, out var tokenType))
@@ -1104,12 +917,6 @@ public partial class Lexer
         return true;
     }
 
-    /// <summary>
-    /// Processes a delete operator (equals sign with blank right-hand side).
-    /// Adds explicit null string token as the implicit operand.
-    /// </summary>
-    /// <param name="sourceLine">The source line being processed.</param>
-    /// <returns><c>true</c> if the delete operator is successfully processed; otherwise, <c>false</c>.</returns>
     private bool ProcessDeleteOperator(SourceLine sourceLine)
     {
         var m = DeleteOperatorPattern().Match(sourceLine.Text[_cursorCurrent..]);
@@ -1128,12 +935,6 @@ public partial class Lexer
         return true;
     }
 
-    /// <summary>
-    /// Processes a colon token, which initiates goto processing.
-    /// Validates goto syntax and dispatches to ProcessGoto.
-    /// </summary>
-    /// <param name="sourceLine">The source line being processed.</param>
-    /// <returns><c>true</c> if the colon and goto are valid; otherwise, <c>false</c>.</returns>
     private bool ProcessColon(SourceLine sourceLine)
     {
         var remainder = sourceLine.Text[_cursorCurrent..];
@@ -1177,11 +978,6 @@ public partial class Lexer
 
     #region Static Helper Functions
 
-    /// <summary>
-    /// Processes implicit null arguments in function calls, array indices, or choice operations.
-    /// Inserts NULL tokens where arguments are blank.
-    /// </summary>
-    /// <param name="sourceLine">The source line being processed.</param>
     private static void ProcessImplicitNulls(SourceLine sourceLine)
     {
         if (sourceLine.LexBody.Count == 0)
@@ -1202,11 +998,6 @@ public partial class Lexer
         }
     }
 
-    /// <summary>
-    /// Determines if the current token context indicates an implicit null argument.
-    /// </summary>
-    /// <param name="sourceLine">The source line to check.</param>
-    /// <returns><c>true</c> if an implicit null should be inserted; otherwise, <c>false</c>.</returns>
     private static bool IsImplicitNull(SourceLine sourceLine)
     {
         if (sourceLine.LexBody.Count < 2)
@@ -1225,13 +1016,6 @@ public partial class Lexer
         };
     }
 
-    /// <summary>
-    /// Checks if an implicit null should be inserted before a closing bracket.
-    /// Handles commas and opening brackets, accounting for optional whitespace.
-    /// </summary>
-    /// <param name="sourceLine">The source line to check.</param>
-    /// <param name="openingType">The expected opening bracket type.</param>
-    /// <returns><c>true</c> if an implicit null is needed; otherwise, <c>false</c>.</returns>
     private static bool CheckImplicitNull(SourceLine sourceLine, Token.Type openingType)
     {
         var secondLast = sourceLine.LexBody[^2].TokenType;
@@ -1250,12 +1034,6 @@ public partial class Lexer
         return false;
     }
 
-    /// <summary>
-    /// Checks if an implicit null should be inserted before a comma.
-    /// Handles multiple opening bracket types and commas, accounting for optional whitespace.
-    /// </summary>
-    /// <param name="sourceLine">The source line to check.</param>
-    /// <returns><c>true</c> if an implicit null is needed; otherwise, <c>false</c>.</returns>
     private static bool CheckCommaImplicitNull(SourceLine sourceLine)
     {
         var secondLast = sourceLine.LexBody[^2].TokenType;
@@ -1276,11 +1054,6 @@ public partial class Lexer
         return false;
     }
 
-    /// <summary>
-    /// Determines the token type for an identifier based on the following bracket.
-    /// </summary>
-    /// <param name="s">The bracket character following the identifier.</param>
-    /// <returns>The appropriate identifier token type.</returns>
     private static Token.Type GetOpenBracketToken(string s)
     {
         return s switch
@@ -1293,12 +1066,6 @@ public partial class Lexer
         };
     }
 
-    /// <summary>
-    /// Gets the mirror token type for a conditional goto bracket (success ↔ failure).
-    /// </summary>
-    /// <param name="tokenType">The source bracket token type.</param>
-    /// <returns>The mirrored bracket token type.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when an unexpected token type is provided.</exception>
     private static Token.Type GetMirrorGotoBracketToken(Token.Type tokenType)
     {
         return tokenType switch
@@ -1311,12 +1078,6 @@ public partial class Lexer
         };
     }
 
-    /// <summary>
-    /// Gets the mirror goto token type for a conditional goto (failure → success, success → failure).
-    /// </summary>
-    /// <param name="tokenType">The source goto token type.</param>
-    /// <returns>The mirrored goto token type.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when an unexpected token type is provided.</exception>
     private static Token.Type GetMirrorGotoToken(Token.Type tokenType)
     {
         return tokenType switch
@@ -1327,12 +1088,6 @@ public partial class Lexer
         };
     }
 
-    /// <summary>
-    /// Gets the success/failure character pair for a conditional goto bracket.
-    /// </summary>
-    /// <param name="tokenType">The goto bracket token type.</param>
-    /// <returns>"s" for failure gotos, "f" for success gotos.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when an unexpected token type is provided.</exception>
     private static string GetSfPair(Token.Type tokenType)
     {
         return tokenType switch
@@ -1343,12 +1098,6 @@ public partial class Lexer
         };
     }
 
-    /// <summary>
-    /// Determines the token type for an opening parenthesis based on context.
-    /// Returns L_PAREN_CHOICE for standalone or after operators, L_PAREN_FUNCTION after identifiers.
-    /// </summary>
-    /// <param name="lexBody">The current lex body to examine for context.</param>
-    /// <returns>The appropriate parenthesis token type.</returns>
     private static Token.Type GetOpenParenToken(List<Token> lexBody)
     {
         if (lexBody.Count == 0)
@@ -1367,13 +1116,6 @@ public partial class Lexer
         };
     }
 
-    /// <summary>
-    /// Finds the matching closing bracket in a token list.
-    /// </summary>
-    /// <param name="lexLine">The token list to search.</param>
-    /// <param name="position">The starting position (updated to closing bracket position if found).</param>
-    /// <param name="closingType">The expected closing bracket token type.</param>
-    /// <returns><c>true</c> if the matching bracket is found; otherwise, <c>false</c>.</returns>
     private bool FindMatchingBracket(List<Token> lexLine, ref int position, Token.Type closingType)
     {
         if (position >= lexLine.Count)
@@ -1392,13 +1134,6 @@ public partial class Lexer
         return position < lexLine.Count;
     }
 
-    /// <summary>
-    /// Creates a deferred expression for a star operator and its operand.
-    /// Replaces the star and operand tokens with a single EXPRESSION token.
-    /// </summary>
-    /// <param name="lexLine">The token list being processed.</param>
-    /// <param name="starPos">The position of the star operator.</param>
-    /// <param name="endPos">The end position of the operand.</param>
     private void CreateStarExpression(List<Token> lexLine, int starPos, int endPos)
     {
         if (starPos < 0 || endPos <= starPos || starPos >= lexLine.Count)
@@ -1419,11 +1154,6 @@ public partial class Lexer
         }
     }
 
-    /// <summary>
-    /// Converts all unary star operators in a token list into deferred expressions.
-    /// Processes stars in reverse order to maintain correct positions during removal.
-    /// </summary>
-    /// <param name="lexLine">The token list to process.</param>
     private void ConvertUnaryStarOperatorsToDeferredExpressions(List<Token> lexLine)
     {
         if (lexLine.Count == 0)
@@ -1451,12 +1181,6 @@ public partial class Lexer
         }
     }
 
-    /// <summary>
-    /// Extracts a star expression and its operand, creating a deferred expression.
-    /// Handles simple operands (literals, identifiers) and complex operands (functions, choices).
-    /// </summary>
-    /// <param name="lexLine">The token list being processed.</param>
-    /// <param name="starPos">The position of the star operator.</param>
     private void ExtractStarExpressions(List<Token> lexLine, int starPos)
     {
         if (starPos < 0 || starPos >= lexLine.Count || starPos + 1 >= lexLine.Count)
@@ -1509,13 +1233,6 @@ public partial class Lexer
         }
     }
 
-    /// <summary>
-    /// Creates a deferred expression for a star operator with a simple operand.
-    /// Simple operands are literals, identifiers, or single tokens.
-    /// </summary>
-    /// <param name="lexLine">The token list being processed.</param>
-    /// <param name="starPos">The position of the star operator.</param>
-    /// <param name="endPos">The end position of the operand (exclusive).</param>
     private void CreateSimpleStarExpression(List<Token> lexLine, int starPos, int endPos)
     {
         var expressionName = $"Star{_parent.ExpressionList.Count:D8}";

@@ -7,17 +7,7 @@ public partial class Lexer
 {
     #region Members
 
-    private struct BracketStackEntry
-    {
-        internal readonly string Bracket;
-        internal readonly Token.Type Context;
-
-        internal BracketStackEntry(string bracket, Token.Type context)
-        {
-            Bracket = bracket;
-            Context = context;
-        }
-    }
+    private readonly record struct BracketStackEntry(string Bracket, Token.Type Context);
 
     // Lexical analysis
     private bool _colonFound;                 // Colon before goto found
@@ -309,120 +299,20 @@ public partial class Lexer
             // that operates on two operands. The operands are the values
             // that the operator operates on.Emmer & Quillen 2000, pg. 18
             case 7: // OPERATOR
-                // Look for a unary operator or a sequence of unary
-                // operators A string of unary operators is lexically
-                // a single token that is broken into individual
-                // operators during code generation.
-                m = UnaryOperatorPattern().Match(sourceLine.Text[_cursorCurrent..]);
-
-                if (m.Success)
+                if (!ProcessOperator(sourceLine))
                 {
-                    _cursorCurrent += m.Groups[1].Length;
-                    for (var j = 0; j < m.Groups[1].Length; ++j)
-                    {
-                        var op = m.Groups[1].Value[j..(j + 1)];
-
-                        switch (op)
-                        {
-                            case "*":
-                                // Runs of consecutive of stars is the equivalent to one star; include once, then ignore
-                                if (sourceLine.LexBody.Count == 0 || sourceLine.LexBody[^1].TokenType != Token.Type.UNARY_STAR)
-                                    sourceLine.LexBody.Add(new Token(Token.Type.UNARY_STAR, op, _bracketStack.Count));
-                                break;
-
-                            default:
-                                sourceLine.LexBody.Add(new Token(Token.Type.UNARY_OPERATOR, op, _bracketStack.Count));
-                                break;
-                        }
-                    }
-
-                    break;
-                }
-
-                // Look for binary operator (Includes = assignment or replacement
-                m = BinaryOperatorPattern().Match(sourceLine.Text[_cursorCurrent..]);
-
-                if (m.Success)
-                {
-                    if (!_binaryOperators.TryGetValue(m.Groups[1].Value, out var type))
-                    {
-                        _parent.LogCompilerException(233, _cursorCurrent, sourceLine);
-                        return false;
-                    }
-
-                    if (sourceLine.LexBody.Count == 0)
-                    {
-                        _parent.LogCompilerException(221, _cursorCurrent, sourceLine);
-                        return false;
-                    }
-
-                    _cursorCurrent += m.Groups[1].Length;
-
-                    if (type == Token.Type.BINARY_EQUAL)
-                        _equalFound = true;
-
-                    sourceLine.LexBody.Add(new Token(type, m.Groups[1].Value, _bracketStack.Count));
-                    break;
-                }
-
-                // The equals sign (=) is a binary operator that is used for
-                // assignment or pattern replacement. When equal is a pattern
-                // replacement operator and the right hand is blank, a null
-                // string is the implicit operand. The following code identifies
-                // this situation and adds an explicit null string to the right
-                // hand of the assignment.
-                m = DeleteOperatorPattern().Match(sourceLine.Text[_cursorCurrent..]);
-
-                if (!m.Success)
-                {
-                    _parent.LogCompilerException(221, _cursorCurrent, sourceLine);
                     return false;
                 }
-
-                _equalFound = true;
-                //_cursorCurrent++;
-                _cursorCurrent += m.Groups[1].Length;
-                sourceLine.LexBody.Add(new Token(Token.Type.BINARY_EQUAL, "=", _bracketStack.Count));
-                sourceLine.LexBody.Add(new Token(Token.Type.SPACE, " ", _bracketStack.Count));
-                sourceLine.LexBody.Add(new Token(Token.Type.STRING, "", _bracketStack.Count));
                 break;
 
             // When a colon is detected, control transfers to ProcessGoto()
             // which looks ahead such that the state is changed to 10 or 11.
             // Therefore, state 8 should never appear.
             case 8: // COLON
-                var remainder = sourceLine.Text[_cursorCurrent..];
-                _cursorCurrent++;
-
-                if (_colonFound)
+                if (!ProcessColon(sourceLine))
                 {
-                    _parent.LogCompilerException(218, _cursorCurrent, sourceLine);
                     return false;
                 }
-
-                if (_bracketStack.Count > 0)
-                {
-                    _parent.LogCompilerException(_bracketStack.Peek().Bracket == "" ? 226 : 229, _cursorCurrent, sourceLine);
-                    return false;
-                }
-
-                if (EmptyGoToPattern().Match(remainder).Success)
-                {
-                    _parent.LogCompilerException(219, _cursorCurrent, sourceLine);
-                    return false;
-                }
-
-                if (!(m = GoToFirstPattern().Match(remainder)).Success)
-                {
-                    _parent.LogCompilerException(234, _cursorCurrent, sourceLine);
-                    return false;
-                }
-
-                sourceLine.DirectGotoFirst = m.Groups[0].Value.Contains('<');
-                sourceLine.SuccessFirst = m.Groups[0].Value.ToLower().Contains('s');
-                _colonFound = true;
-                _colonPosition = sourceLine.LexBody.Count;
-                ProcessGoto(sourceLine, m);
                 break;
 
             // A comma is used only to separate arguments in a function call,
@@ -568,7 +458,7 @@ public partial class Lexer
             case Token.Type.UNARY_STAR:
             case Token.Type.EXPRESSION:
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new InvalidOperationException($"Unexpected bracket context in ProcessClosingBracket: {entry.Context}");
         }
     }
 
@@ -581,7 +471,7 @@ public partial class Lexer
         SaveGotoEnd(entry.Context, sourceLine.LexBody.Count);
 
         // If everything after the closing bracket is whitespace, then nothing else to do
-        if (AfterGoToPattern().Match(remainder).Success)
+        if (AfterGoToPattern().IsMatch(remainder))
         {
             return true;
         }
@@ -668,23 +558,23 @@ public partial class Lexer
         _patternMatchFound = true;
     }
 
-    private void ProcessGoto(SourceLine sourceLine, Match m)
+    private void ProcessGoto(SourceLine sourceLine, Match gotoMatch)
     {
         sourceLine.LexBody.Add(new Token(Token.Type.COLON, ":", _bracketStack.Count));
 
-        var conditionValue = m.Groups[1].Value;
-        var bracketValue = m.Groups[2].Value;
+        var gotoCondition = gotoMatch.Groups[1].Value;
+        var gotoBracket = gotoMatch.Groups[2].Value;
         
         // Add goto type token (S or F)
-        AddGotoTypeToken(sourceLine, conditionValue);
+        AddGotoTypeToken(sourceLine, gotoCondition);
         
         // Add bracket token and update state
-        AddGotoBracketToken(sourceLine, conditionValue, bracketValue);
+        AddGotoBracketToken(sourceLine, gotoCondition, gotoBracket);
         
         // Save goto start position
-        SaveGotoStartPosition(conditionValue, sourceLine.LexBody.Count - 1);
+        SaveGotoStartPosition(gotoCondition, sourceLine.LexBody.Count - 1);
 
-        _cursorCurrent += m.Length - 1;
+        _cursorCurrent += gotoMatch.Length - 1;
     }
 
     private void AddGotoTypeToken(SourceLine sourceLine, string condition)
@@ -704,27 +594,26 @@ public partial class Lexer
 
     private void AddGotoBracketToken(SourceLine sourceLine, string condition, string bracket)
     {
-        switch (bracket)
+        var (bracketType, newState) = bracket switch
         {
-            case "(":
-                var parenCondition = _parenCondition[condition];
-                _bracketStack.Push(new BracketStackEntry("(", parenCondition));
-                sourceLine.LexBody.Add(new Token(parenCondition, "(", _bracketStack.Count));
-                _state = 10; // L_PAREN
-                break;
+            "(" => (_parenCondition[condition], 10),
+            "<" => (_angleCondition[condition], 11),
+            _ => ((Token.Type?)null, 0)
+        };
 
-            case "<":
-                var angleCondition = _angleCondition[condition];
-                _bracketStack.Push(new BracketStackEntry("<", angleCondition));
-                sourceLine.LexBody.Add(new Token(angleCondition, "<", _bracketStack.Count));
-                _state = 11; // L_ANGLE
-                break;
+        if (bracketType.HasValue)
+        {
+            _bracketStack.Push(new BracketStackEntry(bracket, bracketType.Value));
+            sourceLine.LexBody.Add(new Token(bracketType.Value, bracket, _bracketStack.Count));
+            _state = newState;
         }
     }
 
     private void SaveGotoStartPosition(string condition, int position)
     {
-        switch (condition.ToLowerInvariant())
+        var conditionLower = condition.ToLowerInvariant();
+        
+        switch (conditionLower)
         {
             case "":
                 _unconditionalGotoStart = position;
@@ -928,8 +817,8 @@ public partial class Lexer
         }
 
         // If the first goto field is unconditional, any non-whitespace in the second field is an error
-        var m = GoToSecondPattern().Match(remainder);
-        var errorCode = m.Success ? 218 : 234;
+        var isSecondGotoValid = GoToSecondPattern().IsMatch(remainder);
+        var errorCode = isSecondGotoValid ? 218 : 234;
         _parent.LogCompilerException(errorCode, _cursorCurrent, sourceLine);
         return false;
     }
@@ -949,95 +838,220 @@ public partial class Lexer
         return true;
     }
 
+    private bool ProcessOperator(SourceLine sourceLine)
+    {
+        // Look for a unary operator or a sequence of unary operators
+        // A string of unary operators is lexically a single token that is
+        // broken into individual operators during code generation.
+        var m = UnaryOperatorPattern().Match(sourceLine.Text[_cursorCurrent..]);
+
+        if (m.Success)
+        {
+            return ProcessUnaryOperators(sourceLine, m);
+        }
+
+        // Look for binary operator (includes = assignment or replacement)
+        m = BinaryOperatorPattern().Match(sourceLine.Text[_cursorCurrent..]);
+
+        if (m.Success)
+        {
+            return ProcessBinaryOperator(sourceLine, m);
+        }
+
+        // The equals sign (=) is a binary operator that is used for
+        // assignment or pattern replacement. When equal is a pattern
+        // replacement operator and the right hand is blank, a null
+        // string is the implicit operand. The following code identifies
+        // this situation and adds an explicit null string to the right
+        // hand of the assignment.
+        return ProcessDeleteOperator(sourceLine);
+    }
+
+    private bool ProcessUnaryOperators(SourceLine sourceLine, Match match)
+    {
+        _cursorCurrent += match.Groups[1].Length;
+        
+        for (var j = 0; j < match.Groups[1].Length; ++j)
+        {
+            var op = match.Groups[1].Value.Substring(j, 1);
+
+            if (op == "*")
+            {
+                // Runs of consecutive stars is equivalent to one star; include once, then ignore
+                if (sourceLine.LexBody.Count == 0 || sourceLine.LexBody[^1].TokenType != Token.Type.UNARY_STAR)
+                {
+                    sourceLine.LexBody.Add(new Token(Token.Type.UNARY_STAR, op, _bracketStack.Count));
+                }
+            }
+            else
+            {
+                sourceLine.LexBody.Add(new Token(Token.Type.UNARY_OPERATOR, op, _bracketStack.Count));
+            }
+        }
+
+        return true;
+    }
+
+    private bool ProcessBinaryOperator(SourceLine sourceLine, Match match)
+    {
+        if (!_binaryOperators.TryGetValue(match.Groups[1].Value, out var tokenType))
+        {
+            _parent.LogCompilerException(233, _cursorCurrent, sourceLine);
+            return false;
+        }
+
+        if (sourceLine.LexBody.Count == 0)
+        {
+            _parent.LogCompilerException(221, _cursorCurrent, sourceLine);
+            return false;
+        }
+
+        _cursorCurrent += match.Groups[1].Length;
+
+        if (tokenType == Token.Type.BINARY_EQUAL)
+        {
+            _equalFound = true;
+        }
+
+        sourceLine.LexBody.Add(new Token(tokenType, match.Groups[1].Value, _bracketStack.Count));
+        return true;
+    }
+
+    private bool ProcessDeleteOperator(SourceLine sourceLine)
+    {
+        var m = DeleteOperatorPattern().Match(sourceLine.Text[_cursorCurrent..]);
+
+        if (!m.Success)
+        {
+            _parent.LogCompilerException(221, _cursorCurrent, sourceLine);
+            return false;
+        }
+
+        _equalFound = true;
+        _cursorCurrent += m.Groups[1].Length;
+        sourceLine.LexBody.Add(new Token(Token.Type.BINARY_EQUAL, "=", _bracketStack.Count));
+        sourceLine.LexBody.Add(new Token(Token.Type.SPACE, " ", _bracketStack.Count));
+        sourceLine.LexBody.Add(new Token(Token.Type.STRING, "", _bracketStack.Count));
+        return true;
+    }
+
+    private bool ProcessColon(SourceLine sourceLine)
+    {
+        var remainder = sourceLine.Text[_cursorCurrent..];
+        _cursorCurrent++;
+
+        if (_colonFound)
+        {
+            _parent.LogCompilerException(218, _cursorCurrent, sourceLine);
+            return false;
+        }
+
+        if (_bracketStack.Count > 0)
+        {
+            var errorCode = _bracketStack.Peek().Bracket == "" ? 226 : 229;
+            _parent.LogCompilerException(errorCode, _cursorCurrent, sourceLine);
+            return false;
+        }
+
+        if (EmptyGoToPattern().IsMatch(remainder))
+        {
+            _parent.LogCompilerException(219, _cursorCurrent, sourceLine);
+            return false;
+        }
+
+        var m = GoToFirstPattern().Match(remainder);
+        if (!m.Success)
+        {
+            _parent.LogCompilerException(234, _cursorCurrent, sourceLine);
+            return false;
+        }
+
+        sourceLine.DirectGotoFirst = m.Groups[0].Value.Contains('<');
+        sourceLine.SuccessFirst = m.Groups[0].Value.Contains('s', StringComparison.OrdinalIgnoreCase);
+        _colonFound = true;
+        _colonPosition = sourceLine.LexBody.Count;
+        ProcessGoto(sourceLine, m);
+        return true;
+    }
+
     #endregion
 
     #region Static Helper Functions
 
     private static void ProcessImplicitNulls(SourceLine sourceLine)
     {
+        if (sourceLine.LexBody.Count == 0)
+        {
+            return;
+        }
+        
         var index = sourceLine.LexBody[^1].Index;
 
         if (index == 0)
+        {
             return;
+        }
 
         if (IsImplicitNull(sourceLine))
+        {
             sourceLine.LexBody.Insert(sourceLine.LexBody.Count - 1, new Token(Token.Type.NULL, "", index));
+        }
     }
 
     private static bool IsImplicitNull(SourceLine sourceLine)
     {
+        if (sourceLine.LexBody.Count < 2)
+        {
+            return false;
+        }
+        
         return sourceLine.LexBody[^1].TokenType switch
         {
-            Token.Type.R_ANGLE => sourceLine.LexBody[^2].TokenType switch
-            {
-                Token.Type.COMMA or Token.Type.L_ANGLE => true,
-
-                Token.Type.SPACE => sourceLine.LexBody[^3].TokenType switch
-                {
-                    Token.Type.COMMA or Token.Type.L_ANGLE => true,
-                    _ => false
-                },
-
-                _ => false
-            },
-
-            Token.Type.R_PAREN_CHOICE => sourceLine.LexBody[^2].TokenType switch
-            {
-                Token.Type.COMMA or Token.Type.L_PAREN_CHOICE => true,
-
-                Token.Type.SPACE => sourceLine.LexBody[^3].TokenType switch
-                {
-                    Token.Type.COMMA or Token.Type.L_PAREN_CHOICE => true,
-                    _ => false
-                },
-
-                _ => false
-            },
-
-
-            Token.Type.R_PAREN_FUNCTION => sourceLine.LexBody[^2].TokenType switch
-            {
-                Token.Type.COMMA or Token.Type.L_PAREN_FUNCTION => true,
-
-                Token.Type.SPACE => sourceLine.LexBody[^3].TokenType switch
-                {
-                    Token.Type.COMMA or Token.Type.L_PAREN_FUNCTION => true,
-                    _ => false
-                },
-
-                _ => false
-            },
-
-            Token.Type.R_SQUARE => sourceLine.LexBody[^2].TokenType switch
-            {
-                Token.Type.COMMA or Token.Type.L_SQUARE => true,
-
-                Token.Type.SPACE => sourceLine.LexBody[^3].TokenType switch
-                {
-                    Token.Type.COMMA or Token.Type.L_SQUARE => true,
-                    _ => false
-                },
-
-                _ => false
-            },
-
-            Token.Type.COMMA => sourceLine.LexBody[^2].TokenType switch
-            {
-                Token.Type.COMMA or Token.Type.L_SQUARE or Token.Type.L_ANGLE or Token.Type.L_PAREN_CHOICE
-                    or Token.Type.L_PAREN_FUNCTION => true,
-
-                Token.Type.SPACE => sourceLine.LexBody[^3].TokenType switch
-                {
-                    Token.Type.COMMA or Token.Type.L_SQUARE or Token.Type.L_ANGLE or Token.Type.L_PAREN_CHOICE
-                        or Token.Type.L_PAREN_FUNCTION => true,
-
-                    _ => false
-                },
-
-                _ => false
-            },
+            Token.Type.R_ANGLE => CheckImplicitNull(sourceLine, Token.Type.L_ANGLE),
+            Token.Type.R_PAREN_CHOICE => CheckImplicitNull(sourceLine, Token.Type.L_PAREN_CHOICE),
+            Token.Type.R_PAREN_FUNCTION => CheckImplicitNull(sourceLine, Token.Type.L_PAREN_FUNCTION),
+            Token.Type.R_SQUARE => CheckImplicitNull(sourceLine, Token.Type.L_SQUARE),
+            Token.Type.COMMA => CheckCommaImplicitNull(sourceLine),
             _ => false
         };
+    }
+
+    private static bool CheckImplicitNull(SourceLine sourceLine, Token.Type openingType)
+    {
+        var secondLast = sourceLine.LexBody[^2].TokenType;
+        
+        if (secondLast == Token.Type.COMMA || secondLast == openingType)
+        {
+            return true;
+        }
+
+        if (secondLast == Token.Type.SPACE && sourceLine.LexBody.Count >= 3)
+        {
+            var thirdLast = sourceLine.LexBody[^3].TokenType;
+            return thirdLast == Token.Type.COMMA || thirdLast == openingType;
+        }
+
+        return false;
+    }
+
+    private static bool CheckCommaImplicitNull(SourceLine sourceLine)
+    {
+        var secondLast = sourceLine.LexBody[^2].TokenType;
+        
+        if (secondLast is Token.Type.COMMA or Token.Type.L_SQUARE or Token.Type.L_ANGLE 
+            or Token.Type.L_PAREN_CHOICE or Token.Type.L_PAREN_FUNCTION)
+        {
+            return true;
+        }
+
+        if (secondLast == Token.Type.SPACE && sourceLine.LexBody.Count >= 3)
+        {
+            var thirdLast = sourceLine.LexBody[^3].TokenType;
+            return thirdLast is Token.Type.COMMA or Token.Type.L_SQUARE or Token.Type.L_ANGLE 
+                or Token.Type.L_PAREN_CHOICE or Token.Type.L_PAREN_FUNCTION;
+        }
+
+        return false;
     }
 
     private static Token.Type GetOpenBracketToken(string s)
@@ -1122,14 +1136,21 @@ public partial class Lexer
 
     private void CreateStarExpression(List<Token> lexLine, int starPos, int endPos)
     {
+        if (starPos < 0 || endPos <= starPos || starPos >= lexLine.Count)
+        {
+            return;
+        }
+        
         var expressionName = $"Star{_parent.ExpressionList.Count:D8}";
         lexLine[starPos] = new Token(Token.Type.EXPRESSION, expressionName, -1);
         
+        var rangeStart = starPos + 1;
         var rangeLength = endPos - starPos;
-        if (rangeLength > 0 && starPos + 1 < lexLine.Count)
+        
+        if (rangeLength > 0 && rangeStart < lexLine.Count)
         {
-            _parent.ExpressionList.Add(new DeferredExpression(lexLine.GetRange(starPos + 1, rangeLength)));
-            lexLine.RemoveRange(starPos + 1, rangeLength);
+            _parent.ExpressionList.Add(new DeferredExpression(lexLine.GetRange(rangeStart, rangeLength)));
+            lexLine.RemoveRange(rangeStart, rangeLength);
         }
     }
 
@@ -1162,102 +1183,66 @@ public partial class Lexer
 
     private void ExtractStarExpressions(List<Token> lexLine, int starPos)
     {
-        if (starPos < 0 || starPos >= lexLine.Count)
+        if (starPos < 0 || starPos >= lexLine.Count || starPos + 1 >= lexLine.Count)
         {
             return;
         }
         
-        var rArg = starPos + 1;
+        var currentPos = starPos + 1;
 
-        while (rArg < lexLine.Count && 
-               (lexLine[rArg].TokenType == Token.Type.UNARY_OPERATOR ||
-                lexLine[rArg].TokenType == Token.Type.UNARY_STAR))
+        // Skip over any unary operators following the star
+        while (currentPos < lexLine.Count && 
+               lexLine[currentPos].TokenType is Token.Type.UNARY_OPERATOR or Token.Type.UNARY_STAR)
         {
-            rArg++;
+            currentPos++;
         }
         
-        if (rArg >= lexLine.Count)
+        if (currentPos >= lexLine.Count)
         {
             return;
         }
 
-        switch (lexLine[rArg].TokenType)
+        switch (lexLine[currentPos].TokenType)
         {
             case Token.Type.SPACE:
             case Token.Type.REAL:
             case Token.Type.STRING:
             case Token.Type.INTEGER:
             case Token.Type.IDENTIFIER:
-                lexLine[starPos] = new Token(Token.Type.EXPRESSION, "Star" + _parent.ExpressionList.Count.ToString("D8"), -1);
-                rArg++;
-                _parent.ExpressionList.Add(new DeferredExpression(lexLine[(starPos + 1)..rArg]));
-                lexLine.RemoveRange(starPos + 1, rArg - starPos - 1);
+                CreateSimpleStarExpression(lexLine, starPos, currentPos + 1);
                 return;
 
             case Token.Type.L_PAREN_CHOICE:
-                if (!FindMatchingBracket(lexLine, ref rArg, Token.Type.R_PAREN_CHOICE))
+                if (FindMatchingBracket(lexLine, ref currentPos, Token.Type.R_PAREN_CHOICE))
                 {
-                    return;
+                    CreateStarExpression(lexLine, starPos, currentPos);
                 }
-                CreateStarExpression(lexLine, starPos, rArg);
                 return;
 
             case Token.Type.IDENTIFIER_FUNCTION:
-                rArg++;
-                if (!FindMatchingBracket(lexLine, ref rArg, Token.Type.R_PAREN_FUNCTION))
+                currentPos++;
+                if (FindMatchingBracket(lexLine, ref currentPos, Token.Type.R_PAREN_FUNCTION))
                 {
-                    return;
+                    CreateStarExpression(lexLine, starPos, currentPos);
                 }
-                CreateStarExpression(lexLine, starPos, rArg);
                 return;
 
-            case Token.Type.BINARY_AMPERSAND:
-            case Token.Type.BINARY_AT:
-            case Token.Type.BINARY_CARET:
-            case Token.Type.BINARY_CONCAT:
-            case Token.Type.BINARY_DOLLAR:
-            case Token.Type.BINARY_EQUAL:
-            case Token.Type.BINARY_HASH:
-            case Token.Type.BINARY_MINUS:
-            case Token.Type.BINARY_PERCENT:
-            case Token.Type.BINARY_PERIOD:
-            case Token.Type.BINARY_PIPE:
-            case Token.Type.BINARY_PLUS:
-            case Token.Type.BINARY_QUESTION:
-            case Token.Type.BINARY_SLASH:
-            case Token.Type.BINARY_STAR:
-            case Token.Type.BINARY_TILDE:
-            case Token.Type.COLON:
-            case Token.Type.COMMA:
-            case Token.Type.COMMA_CHOICE:
-            case Token.Type.FAILURE_GOTO:
-            case Token.Type.IDENTIFIER_ARRAY_OR_TABLE:
-            case Token.Type.L_ANGLE:
-            case Token.Type.L_ANGLE_FAILURE:
-            case Token.Type.L_ANGLE_SUCCESS:
-            case Token.Type.L_ANGLE_UNCONDITIONAL:
-            case Token.Type.L_PAREN_FAILURE:
-            case Token.Type.L_PAREN_FUNCTION:
-            case Token.Type.L_PAREN_SUCCESS:
-            case Token.Type.L_PAREN_UNCONDITIONAL:
-            case Token.Type.L_SQUARE:
-            case Token.Type.NULL:
-            case Token.Type.R_ANGLE:
-            case Token.Type.R_ANGLE_FAILURE:
-            case Token.Type.R_ANGLE_SUCCESS:
-            case Token.Type.R_ANGLE_UNCONDITIONAL:
-            case Token.Type.R_PAREN_CHOICE:
-            case Token.Type.R_PAREN_FAILURE:
-            case Token.Type.R_PAREN_FUNCTION:
-            case Token.Type.R_PAREN_SUCCESS:
-            case Token.Type.R_PAREN_UNCONDITIONAL:
-            case Token.Type.R_SQUARE:
-            case Token.Type.SUCCESS_GOTO:
-            case Token.Type.UNARY_OPERATOR:
-            case Token.Type.UNARY_STAR:
-            case Token.Type.EXPRESSION:
             default:
-                throw new ArgumentOutOfRangeException();
+                // For any other token type, we can't create a star expression
+                return;
+        }
+    }
+
+    private void CreateSimpleStarExpression(List<Token> lexLine, int starPos, int endPos)
+    {
+        var expressionName = $"Star{_parent.ExpressionList.Count:D8}";
+        lexLine[starPos] = new Token(Token.Type.EXPRESSION, expressionName, -1);
+        
+        var rangeLength = endPos - starPos - 1;
+        if (rangeLength > 0 && starPos + 1 < lexLine.Count)
+        {
+            _parent.ExpressionList.Add(new DeferredExpression(lexLine[(starPos + 1)..endPos]));
+            lexLine.RemoveRange(starPos + 1, rangeLength);
         }
     }
 

@@ -13,14 +13,12 @@ public partial class Builder
         Console.Error.WriteLine();
         Console.Error.WriteLine("*** UNEXPECTED EXCEPTION ***");
         Console.Error.WriteLine();
+        
+        SaveAndWriteExceptionRecursive(e);
+        
+        Console.Error.WriteLine();
+        Console.Error.WriteLine("Stack Trace:");
         Console.Error.WriteLine(e.StackTrace);
-
-        SaveAndWriteException(e);
-
-        if (e.InnerException is not null)
-        {
-            SaveAndWriteException(e.InnerException);
-        }
     }
 
     /// <summary>
@@ -31,6 +29,22 @@ public partial class Builder
     {
         SaveException(e);
         WriteException(e);
+    }
+
+    /// <summary>
+    /// Recursively saves and writes an exception and all its inner exceptions.
+    /// </summary>
+    /// <param name="e">The exception to save and write.</param>
+    private void SaveAndWriteExceptionRecursive(Exception e)
+    {
+        SaveAndWriteException(e);
+        
+        if (e.InnerException is not null)
+        {
+            Console.Error.WriteLine();
+            Console.Error.WriteLine("--- Inner Exception ---");
+            SaveAndWriteExceptionRecursive(e.InnerException);
+        }
     }
 
     /// <summary>
@@ -86,7 +100,7 @@ public partial class Builder
 
         var ce = new CompilerException(code, cursorCurrent, message);
         SaveExceptionHistory(ce);
-        Console.Error.WriteLine(ce.Message);
+        Console.Error.WriteLine(message);
     }
 
     /// <summary>
@@ -99,6 +113,9 @@ public partial class Builder
     private static string BuildErrorMessage(int code, int cursorCurrent, SourceLine source)
     {
         var (formattedSource, adjustedCursor) = FormatSourceLine(source, cursorCurrent);
+        var fileName = Path.GetFileName(source.PathName);
+        var errorMessage = CompilerException.ErrorMessage[code];
+        var (codeCount, listCount, lineCount) = CalculateLineCounts(source);
 
         var sb = new StringBuilder();
         sb.AppendLine();
@@ -109,10 +126,6 @@ public partial class Builder
             sb.Append(' ', adjustedCursor);
             sb.AppendLine("!");
         }
-
-        var fileName = Path.GetFileName(source.PathName);
-        var errorMessage = CompilerException.ErrorMessage[code];
-        var (codeCount, listCount, lineCount) = CalculateLineCounts(source);
 
         sb.AppendLine($"{fileName}({codeCount}/{listCount}/{lineCount}): error {code} -- {errorMessage}");
         return sb.ToString();
@@ -176,6 +189,7 @@ public partial class Builder
             return;
         }
 
-        Console.Error.WriteLine(e.Message);
+        var exceptionType = e.GetType().Name;
+        Console.Error.WriteLine($"{exceptionType}: {e.Message}");
     }
 }

@@ -6,6 +6,12 @@ public partial class Executive
     {
         using var profiler1 = Profiler.Start3($"Function", this);
 
+        // Don't execute function if there was already a failure in this statement
+        if (Failure)
+        {
+            return;
+        }
+
         // Get all arguments and check for prior failure
         List<Var> arguments = [];
         if (SystemStack.ExtractArguments(argumentCount, arguments, this))

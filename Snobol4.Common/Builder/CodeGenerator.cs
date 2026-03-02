@@ -285,7 +285,7 @@ public class GenerateCSharpCode(Builder parent)
 
         GenerateStatementBody(line);
         _csharpCode.AppendLine("        x.FinalizeStatement();");
-        _csharpCode.AppendLine("        if (x.ErrorJump > 0) x.ExecuteLoop(x.ErrorJump);");
+        _csharpCode.AppendLine("        if (x.ErrorJump > 0) x.ProcessTrappedError();");
         GenerateStatementGotos(line, statementNumber + 1);
         _csharpCode.AppendLine("    }");
     }

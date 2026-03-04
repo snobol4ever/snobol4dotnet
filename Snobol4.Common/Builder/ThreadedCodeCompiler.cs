@@ -111,6 +111,7 @@ internal sealed class ThreadedCodeCompiler
             Emit(new Instruction(OpCode.CheckGotoFailure));
             EmitDispatch(line.DirectGotoFirst);
             PatchHere(fp);
+            Emit(new Instruction(OpCode.ClearFailure));   // x.Failure = false before failure-goto eval
             EmitTokenList(line.ParseFailureGoto);
             Emit(new Instruction(OpCode.CheckGotoFailure));
             Emit(new Instruction(OpCode.SetFailure));
@@ -119,6 +120,7 @@ internal sealed class ThreadedCodeCompiler
         else
         {
             int sp = EmitPlaceholder(OpCode.JumpOnSuccess);
+            Emit(new Instruction(OpCode.ClearFailure));   // x.Failure = false before failure-goto eval
             EmitTokenList(line.ParseFailureGoto);
             Emit(new Instruction(OpCode.CheckGotoFailure));
             Emit(new Instruction(OpCode.SetFailure));
@@ -141,6 +143,7 @@ internal sealed class ThreadedCodeCompiler
     private void EmitFailureOnly(SourceLine line, int next)
     {
         EmitJumpToStmt(OpCode.JumpOnSuccess, next);
+        Emit(new Instruction(OpCode.ClearFailure));   // x.Failure = false before failure-goto eval
         EmitTokenList(line.ParseFailureGoto);
         Emit(new Instruction(OpCode.CheckGotoFailure));
         Emit(new Instruction(OpCode.SetFailure));

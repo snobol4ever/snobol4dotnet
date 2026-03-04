@@ -4,6 +4,16 @@ public partial class Executive
 {
     public int ExecuteLoop(int i)
     {
+        // Threaded path: delegate to ThreadedExecuteLoop starting at statement i
+        if (Thread != null)
+        {
+            var starts = Parent.StatementInstructionStarts;
+            int startInstr = (i >= 0 && starts != null && i < starts.Length)
+                ? starts[i]
+                : 0;
+            return ThreadedExecuteLoop(startInstr);
+        }
+
         if (LabelTable[Parent.FoldCase(Parent.EntryLabel)] != GotoNotFound)
             i = LabelTable[Parent.FoldCase(Parent.EntryLabel)];
 

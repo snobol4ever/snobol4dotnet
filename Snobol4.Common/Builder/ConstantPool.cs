@@ -38,7 +38,7 @@ internal sealed class ConstantPool
             return idx;
 
         idx = _pool.Count;
-        _pool.Add(new StringVar(value));
+        _pool.Add(new StringVar(value) { Succeeded = true });
         _stringIndex[value] = idx;
         return idx;
     }
@@ -52,7 +52,7 @@ internal sealed class ConstantPool
             return idx;
 
         idx = _pool.Count;
-        _pool.Add(new IntegerVar(value));
+        _pool.Add(new IntegerVar(value) { Succeeded = true });
         _integerIndex[value] = idx;
         return idx;
     }
@@ -66,7 +66,7 @@ internal sealed class ConstantPool
             return idx;
 
         idx = _pool.Count;
-        _pool.Add(new RealVar(value));
+        _pool.Add(new RealVar(value) { Succeeded = true });
         _realIndex[value] = idx;
         return idx;
     }

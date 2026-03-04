@@ -2,34 +2,45 @@ namespace Snobol4.Common;
 
 /// <summary>
 /// Threaded execution engine for SNOBOL4.NET.
-///
-/// Replaces the two-layer dispatch of the C# generation path:
-///   Old: ExecuteLoop → Statements[i](x) → InitializeStatement → string dict lookups
-///   New: ThreadedExecuteLoop → switch(instr.Op) → direct method calls
-///
-/// Variables and functions are accessed by pre-resolved array index.
-/// Static gotos are pre-resolved instruction indices.
-/// Constants are pre-allocated Var objects from the constant pool.
+/// Accepts a starting instruction index and returns an exit code matching
+/// ExecuteLoop's contract: -1 = normal end, -2 = RETURN, -3 = FRETURN, -4 = NRETURN.
+/// Safe for recursive calls: all mutable state that must survive a nested
+/// call is saved on the C# call stack and restored on return.
 /// </summary>
 public partial class Executive
 {
-    // Saved Failure value during unconditional goto evaluation
-    private bool _savedFailure;
-
-    /// <summary>
-    /// Execute the compiled Instruction[] thread.
-    /// Called in place of the C# generated Run() method when
-    /// BuildOptions.UseThreadedExecution is true.
-    /// </summary>
-    internal void ThreadedExecuteLoop()
+    internal int ThreadedExecuteLoop(int startAt = 0)
     {
         var thread    = Thread!;
         var varSlots  = Parent.VariableSlots;
         var constPool = Parent.Constants.Pool;
         var funcSlots = Parent.FunctionSlots;
 
-        var savedFailure = ErrorJump > 0;
+        // Save all fields that recursive calls may overwrite
+        var savedIP         = InstructionPointer;
+        var savedFailure    = ErrorJump > 0;
+        var savedErrorJump  = ErrorJump;
         ErrorJump = 0;
+
+        // Set the instruction pointer for this call
+        InstructionPointer = startAt;
+        if (startAt == 0)
+        {
+            var entryKey = Parent.FoldCase(Parent.EntryLabel);
+            if (!string.IsNullOrEmpty(entryKey))
+            {
+                var entryStmt = LabelTable[entryKey];
+                if (entryStmt >= 0)
+                {
+                    var starts = Parent.StatementInstructionStarts;
+                    if (starts != null && entryStmt < starts.Length)
+                        InstructionPointer = starts[entryStmt];
+                }
+            }
+        }
+
+        int  exitCode        = -1;
+        bool localSavedFailure = false; // local SaveFailure/RestoreFailure state
 
         while (InstructionPointer >= 0 && InstructionPointer < thread.Length)
         {
@@ -37,8 +48,6 @@ public partial class Executive
 
             switch (instr.Op)
             {
-                // ---- Statement boundary --------------------------------
-
                 case OpCode.Init:
                     AmpCurrentLineNumber = instr.IntOperand;
                     Failure = false;
@@ -50,6 +59,7 @@ public partial class Executive
                     {
                         LogRuntimeException(244);
                         Failure = true;
+                        exitCode = -1;
                         goto Done;
                     }
                     break;
@@ -61,8 +71,6 @@ public partial class Executive
                     AmpLastLineNumber = AmpCurrentLineNumber;
                     if (ErrorJump > 0) ProcessTrappedErrorThreaded();
                     break;
-
-                // ---- Stack push ----------------------------------------
 
                 case OpCode.PushVar:
                     Identifier(varSlots[instr.IntOperand].Symbol);
@@ -77,13 +85,11 @@ public partial class Executive
                     Constant(StarFunctionList[instr.IntOperand]);
                     break;
 
-                // ---- Function call -------------------------------------
-
                 case OpCode.CallFunc:
-                    Function_BySlot(funcSlots[instr.IntOperand], instr.IntOperand2);
+                    // Function name StringVar was pushed before the args by PushConst.
+                    // Function() pops args then the name.
+                    Function(instr.IntOperand2);
                     break;
-
-                // ---- Binary operators ----------------------------------
 
                 case OpCode.OpAdd:       Operator("__+", 2); break;
                 case OpCode.OpSubtract:  Operator("__-", 2); break;
@@ -101,8 +107,6 @@ public partial class Executive
                 case OpCode.OpHash:      Operator("__#", 2); break;
                 case OpCode.OpTilde:     Operator("__~", 2); break;
 
-                // ---- Unary operators -----------------------------------
-
                 case OpCode.OpUnaryMinus:    Operator("_-", 1); break;
                 case OpCode.OpUnaryPlus:     Operator("_+", 1); break;
                 case OpCode.OpIndirection:   Operator("_$", 1); break;
@@ -115,57 +119,28 @@ public partial class Executive
                 case OpCode.OpUnaryHash:     Operator("_#", 1); break;
                 case OpCode.OpUnarySlash:    Operator("_/", 1); break;
 
-                // ---- Assignment / indexing -----------------------------
-
-                case OpCode.BinaryEquals:
-                    _BinaryEquals();
-                    break;
-
-                case OpCode.IndexCollection:
-                    IndexCollection();
-                    break;
-
-                // ---- Choice (comma operator) ---------------------------
+                case OpCode.BinaryEquals:    _BinaryEquals();   break;
+                case OpCode.IndexCollection: IndexCollection(); break;
 
                 case OpCode.ChoiceStart:
-                    if (Failure)
-                    {
-                        SystemStack.Pop();
-                        Failure = false;
-                    }
+                    if (Failure) { SystemStack.Pop(); Failure = false; }
                     break;
 
-                case OpCode.ChoiceEnd:
-                    // Close (IntOperand - 1) extra brace levels — mirrors R_PAREN_CHOICE
-                    for (var i = 1; i < instr.IntOperand; i++) { /* closing braces */ }
-                    break;
-
-                // ---- Control flow -------------------------------------
-
-                case OpCode.Jump:
-                    InstructionPointer = instr.IntOperand;
-                    break;
-
-                case OpCode.JumpOnSuccess:
-                    if (!Failure) InstructionPointer = instr.IntOperand;
-                    break;
-
-                case OpCode.JumpOnFailure:
-                    if (Failure)  InstructionPointer = instr.IntOperand;
-                    break;
+                case OpCode.Jump:          InstructionPointer = instr.IntOperand;                     break;
+                case OpCode.JumpOnSuccess: if (!Failure) InstructionPointer = instr.IntOperand;       break;
+                case OpCode.JumpOnFailure: if  (Failure) InstructionPointer = instr.IntOperand;       break;
 
                 case OpCode.Halt:
+                    exitCode = -1;
                     goto Done;
 
-                // ---- Goto helpers --------------------------------------
-
                 case OpCode.SaveFailure:
-                    _savedFailure = Failure;
+                    localSavedFailure = Failure;
                     Failure = false;
                     break;
 
                 case OpCode.RestoreFailure:
-                    Failure = _savedFailure;
+                    Failure = localSavedFailure;
                     break;
 
                 case OpCode.SetFailure:
@@ -178,99 +153,50 @@ public partial class Executive
 
                 case OpCode.GotoIndirect:
                 {
-                    var sym = SystemStack.Peek().Symbol;
+                    var sym    = SystemStack.Peek().Symbol;
                     var target = LabelTable[sym];
-                    if (target != GotoNotFound)
-                    {
-                        SystemStack.Pop();
-                        // target is a statement index — resolve to instruction index
-                        InstructionPointer = StatementIndexToInstrIndex(target);
-                    }
-                    else
-                    {
-                        SystemStack.Pop();
-                        LogRuntimeException(instr.IntOperand); // error 23
-                        InstructionPointer = -1;
-                    }
+                    SystemStack.Pop();
+                    if (target <= -2 && target >= -7) { exitCode = target; goto Done; }
+                    if (target >= 0) InstructionPointer = StatementIndexToInstrIndex(target);
+                    else { LogRuntimeException(instr.IntOperand); InstructionPointer = -1; }
                     break;
                 }
 
                 case OpCode.GotoIndirectCode:
                 {
                     var sym = SystemStack.Peek().Symbol;
-                    if (IdentifierTable.ContainsKey(sym) &&
-                        IdentifierTable[sym] is CodeVar codeVar)
+                    SystemStack.Pop();
+                    if (IdentifierTable.ContainsKey(sym) && IdentifierTable[sym] is CodeVar cv)
                     {
-                        SystemStack.Pop();
-                        InstructionPointer = StatementIndexToInstrIndex(codeVar.StatementNumber);
+                        var target = cv.StatementNumber;
+                        if (target <= -2 && target >= -7) { exitCode = target; goto Done; }
+                        InstructionPointer = StatementIndexToInstrIndex(target);
                     }
-                    else
-                    {
-                        SystemStack.Pop();
-                        LogRuntimeException(instr.IntOperand); // error 24
-                        InstructionPointer = -1;
-                    }
+                    else { LogRuntimeException(instr.IntOperand); InstructionPointer = -1; }
                     break;
                 }
             }
         }
 
         Done:
-        Failure = savedFailure;
+        // Restore all fields saved at entry so the caller's context is intact
+        InstructionPointer = savedIP;
+        ErrorJump          = savedErrorJump;
+        Failure            = savedFailure;
+        return exitCode;
     }
 
-    // -----------------------------------------------------------------------
-    // Helper: resolve a statement index to an instruction index
-    // The compiler stored statement starts in Builder; we need them at runtime.
-    // -----------------------------------------------------------------------
     private int StatementIndexToInstrIndex(int stmtIdx)
     {
-        if (stmtIdx == -1) return -1;
-        if (stmtIdx < 0)  return stmtIdx;
-
+        if (stmtIdx < 0) return stmtIdx;
         var starts = Parent.StatementInstructionStarts;
-        if (starts != null && stmtIdx < starts.Length)
-            return starts[stmtIdx];
-
-        // Temporary debug
-        Console.Error.WriteLine($"[DEBUG] StatementIndexToInstrIndex: stmtIdx={stmtIdx}, starts.Length={starts?.Length ?? -1}");
-        return -1;
+        return (starts != null && stmtIdx < starts.Length) ? starts[stmtIdx] : -1;
     }
 
-    // -----------------------------------------------------------------------
-    // Function call by pre-resolved FunctionSlot
-    // Avoids the FunctionName push + Function() string lookup path
-    // -----------------------------------------------------------------------
-    private void Function_BySlot(FunctionSlot slot, int argCount)
-    {
-        if (Failure) return;
-
-        List<Var> arguments = [];
-        if (SystemStack.ExtractArguments(argCount, arguments, this))
-            return;
-
-        var entry = FunctionTable[slot.Symbol];
-        if (entry == null)
-        {
-            LogRuntimeException(22);
-            return;
-        }
-
-        for (var i = arguments.Count; i < entry.ArgumentCount; i++)
-            arguments.Add(StringVar.Null());
-
-        InputArguments(arguments);
-        arguments.Add(new StringVar(slot.Symbol));
-        entry.Handler(arguments);
-    }
-
-    // -----------------------------------------------------------------------
-    // Trapped error handling in threaded mode
-    // -----------------------------------------------------------------------
     private void ProcessTrappedErrorThreaded()
     {
         var target = ErrorJump;
-        ErrorJump = 0;
+        ErrorJump  = 0;
         InstructionPointer = StatementIndexToInstrIndex(target);
     }
 }

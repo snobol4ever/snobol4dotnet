@@ -69,8 +69,9 @@ public sealed class StringVar : Var
 
     internal StringVar(StringVar template)
     {
-        Symbol = template.Symbol;
-        Data = template.Data;
+        Symbol    = template.Symbol;
+        Data      = template.Data;
+        Succeeded = template.Succeeded;
     }
 
     #endregion

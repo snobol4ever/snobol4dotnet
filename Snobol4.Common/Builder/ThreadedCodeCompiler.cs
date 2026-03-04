@@ -209,16 +209,19 @@ internal sealed class ThreadedCodeCompiler
                 }
 
                 case Token.Type.IDENTIFIER_FUNCTION:
+                    // Push function name now (before args) matching C# generated convention.
+                    // Store name for use at R_PAREN_FUNCTION.
                     _pendingFunctions.Push(t.MatchedString);
+                    Emit(new Instruction(OpCode.PushConst,
+                        _parent.Constants.GetOrAddString(t.MatchedString)));
                     break;
 
                 case Token.Type.R_PAREN_FUNCTION:
                 {
-                    var name     = _pendingFunctions.Pop();
-                    var canon    = _parent.FoldCase(name);
-                    var argc     = (int)t.IntegerValue;
-                    var slotIdx  = _parent.FunctionSlotIndex[$"{canon}/{argc}"];
-                    Emit(new Instruction(OpCode.CallFunc, slotIdx, argc));
+                    // Function name was already pushed before args.
+                    // Just call Function(argc) — it will pop args then the name.
+                    _pendingFunctions.Pop(); // discard — name was pushed as PushConst
+                    Emit(new Instruction(OpCode.CallFunc, 0, (int)t.IntegerValue));
                     break;
                 }
 

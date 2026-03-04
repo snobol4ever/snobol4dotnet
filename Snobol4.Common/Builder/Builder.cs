@@ -57,6 +57,24 @@ public partial class Builder : IDisposable
     // Move into Code generator
     internal int RecordedExpressionCount = 0;
 
+    // -----------------------------------------------------------------------
+    // Pre-resolution tables for threaded execution (Phase 2)
+    //
+    // Populated by ResolveSlots() after Parse() completes.
+    // The C# generation path does not use these — additive, no behaviour change.
+    // -----------------------------------------------------------------------
+
+    /// <summary>All distinct variable names, indexed by slot number.</summary>
+    internal List<VariableSlot> VariableSlots = new(64);
+    internal Dictionary<string, int> VariableSlotIndex = new(64, StringComparer.Ordinal);
+
+    /// <summary>All distinct function/operator call sites, indexed by slot number.</summary>
+    internal List<FunctionSlot> FunctionSlots = new(64);
+    internal Dictionary<string, int> FunctionSlotIndex = new(64, StringComparer.Ordinal);
+
+    /// <summary>Interned constant literals (strings, integers, reals).</summary>
+    internal ConstantPool Constants = new();
+
     #endregion
 
     #region Constructor
@@ -113,6 +131,7 @@ public partial class Builder : IDisposable
             _timerBuild.Restart();
             Lex(this);
             Parse(this);
+            ResolveSlots();
             var cSharpCode = Generate(_compilerTarget.NameSpace, _compilerTarget.ClassName, true, GenerateCSharpCode.CompileTarget.PROGRAM, this);
             StatementCount += Code.SourceLines.Count;
             var loadContext = CreateTrackedLoadContext($"Main_{_compilerTarget.ClassName}");

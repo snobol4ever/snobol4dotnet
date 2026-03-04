@@ -49,7 +49,7 @@ internal sealed class ThreadedCodeCompiler
             var line = lines[si];
             _statementStart.Add(_thread.Count);
 
-            Emit(new Instruction(OpCode.Init, (int)line.LineCountTotal));
+            Emit(new Instruction(OpCode.Init, si));   // si = statement index, matches InitializeStatement(statementNumber)
             EmitTokenList(line.ParseBody);
             Emit(new Instruction(OpCode.Finalize));
             EmitGotos(line, si);
@@ -266,11 +266,11 @@ internal sealed class ThreadedCodeCompiler
                     break;
 
                 case Token.Type.R_PAREN_CHOICE:
-                    // Patch all JumpOnSuccess targets for this choice expression.
-                    // IntegerValue = number of closing braces = number of COMMA_CHOICEs + 1.
-                    // So patch IntegerValue-1 entries (one per COMMA_CHOICE).
+                    // Parser emits this only when IntegerValue > 1.
+                    // IntegerValue = number of COMMA_CHOICE tokens in this construct.
+                    // Patch all of them to jump here.
                     {
-                        int levels = (int)t.IntegerValue - 1;
+                        int levels = (int)t.IntegerValue;
                         for (var i = 0; i < levels; i++)
                         {
                             if (_choiceStack.Count > 0)
@@ -309,6 +309,11 @@ internal sealed class ThreadedCodeCompiler
                         $"ThreadedCodeCompiler: unhandled token {t.TokenType}");
             }
         }
+
+        // Single-comma choices (A,B) produce one COMMA_CHOICE but no R_PAREN_CHOICE.
+        // Any jump left on the choice stack targets "just after the last alternative" — here.
+        while (_choiceStack.Count > 0)
+            PatchHere(_choiceStack.Pop());
     }
 
     // -----------------------------------------------------------------------

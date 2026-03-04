@@ -28,20 +28,6 @@ public partial class Executive
         var constPool = Parent.Constants.Pool;
         var funcSlots = Parent.FunctionSlots;
 
-        // Honour EntryLabel (same as ExecuteLoop)
-        InstructionPointer = 0;
-        var entryKey = Parent.FoldCase(Parent.EntryLabel);
-        if (!string.IsNullOrEmpty(entryKey) &&
-            LabelTable[entryKey] != GotoNotFound)
-        {
-            // LabelTable maps label → statement index; we need instruction index.
-            // StatementStart is recorded in the compiler — use the label table
-            // value to index into Parent's statement-start list.
-            var stmtIdx = LabelTable[entryKey];
-            if (stmtIdx >= 0 && stmtIdx < Parent.VariableSlots.Count)
-                InstructionPointer = stmtIdx; // will be overridden below if needed
-        }
-
         var savedFailure = ErrorJump > 0;
         ErrorJump = 0;
 
@@ -239,15 +225,16 @@ public partial class Executive
     // -----------------------------------------------------------------------
     private int StatementIndexToInstrIndex(int stmtIdx)
     {
-        // Special SNOBOL4 return labels
-        if (stmtIdx == -1) return -1; // end of program
-        if (stmtIdx < 0)  return stmtIdx; // RETURN, FRETURN etc. — handled by caller
+        if (stmtIdx == -1) return -1;
+        if (stmtIdx < 0)  return stmtIdx;
 
         var starts = Parent.StatementInstructionStarts;
         if (starts != null && stmtIdx < starts.Length)
             return starts[stmtIdx];
 
-        return -1; // safety fallback
+        // Temporary debug
+        Console.Error.WriteLine($"[DEBUG] StatementIndexToInstrIndex: stmtIdx={stmtIdx}, starts.Length={starts?.Length ?? -1}");
+        return -1;
     }
 
     // -----------------------------------------------------------------------

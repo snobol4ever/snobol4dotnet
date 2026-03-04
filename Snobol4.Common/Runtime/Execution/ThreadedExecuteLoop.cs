@@ -83,7 +83,8 @@ public partial class Executive
                     break;
 
                 case OpCode.PushConst:
-                    SystemStack.Push(constPool[instr.IntOperand]);
+                    // Clone to prevent runtime mutation of the shared pool object
+                    SystemStack.Push(constPool[instr.IntOperand].Clone());
                     break;
 
                 case OpCode.PushExpr:

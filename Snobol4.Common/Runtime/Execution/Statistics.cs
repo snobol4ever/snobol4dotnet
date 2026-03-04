@@ -119,7 +119,7 @@ public class Profiler : IDisposable
 
     public void Dispose()
     {
-        _timer.Stop();
+        _timer!.Stop();
 
         if (!_exec.ProfileTotal.ContainsKey(_statement))
         {

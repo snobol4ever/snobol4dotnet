@@ -19,7 +19,7 @@ internal class ConcatenatePattern : NonTerminalPattern
 
                                                                                                                                                                 internal override Pattern Clone()
     {
-        return new ConcatenatePattern(LeftPattern, RightPattern);
+        return new ConcatenatePattern(LeftPattern!, RightPattern!);
     }
 
     #endregion

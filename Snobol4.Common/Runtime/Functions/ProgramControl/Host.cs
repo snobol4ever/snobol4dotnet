@@ -22,17 +22,20 @@ public partial class Executive
         if (arguments[0] is StringVar { Data: "" })
         {
             var cpuName = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
-            var moc = new ManagementObjectSearcher("select * from Win32_Processor").Get();
 
-            foreach (var obj in moc)
+            if (OperatingSystem.IsWindows())
             {
-                try
+                var moc = new ManagementObjectSearcher("select * from Win32_Processor").Get();
+                foreach (var obj in moc)
                 {
-                    cpuName = obj["Name"].ToString();
-                }
-                catch
-                {
-                    // ignored
+                    try
+                    {
+                        cpuName = obj["Name"].ToString();
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
                 }
             }
 

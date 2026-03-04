@@ -74,7 +74,7 @@ public partial class Executive
 
                 FunctionTable.Remove(newFunction);
                 var existingFunctionEntry = FunctionTable[existingFunction];
-                FunctionTable.Add(newFunction, new FunctionTableEntry(this, newFunction, existingFunctionEntry.Handler, existingFunctionEntry.ArgumentCount, false));
+                FunctionTable.Add(newFunction, new FunctionTableEntry(this, newFunction, existingFunctionEntry!.Handler, existingFunctionEntry.ArgumentCount, false));
                 break;
 
             case 1:
@@ -88,7 +88,7 @@ public partial class Executive
                 newFunction = "_" + newFunction;
                 FunctionTable.Remove(newFunction);
                 var unusedUnaryOperator = FunctionTable[existingFunction];
-                FunctionTable.Add(newFunction, new FunctionTableEntry(this, newFunction, unusedUnaryOperator.Handler, unusedUnaryOperator.ArgumentCount, false));
+                FunctionTable.Add(newFunction, new FunctionTableEntry(this, newFunction, unusedUnaryOperator!.Handler, unusedUnaryOperator.ArgumentCount, false));
                 break;
 
             case 2:
@@ -102,7 +102,7 @@ public partial class Executive
                 newFunction = "__" + newFunction;
                 FunctionTable.Remove(newFunction);
                 var unusedBinaryOperator = FunctionTable[existingFunction];
-                FunctionTable.Add(newFunction, new FunctionTableEntry(this, newFunction, unusedBinaryOperator.Handler, unusedBinaryOperator.ArgumentCount, false));
+                FunctionTable.Add(newFunction, new FunctionTableEntry(this, newFunction, unusedBinaryOperator!.Handler, unusedBinaryOperator.ArgumentCount, false));
                 break;
         }
 

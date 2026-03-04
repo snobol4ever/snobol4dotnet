@@ -58,7 +58,7 @@ public class Scanner
 
     private MatchResult Match(AbstractSyntaxTreeNode node)
     {
-        _state.ClearAlternates();
+        _state!.ClearAlternates();
 
         while (true)
         {
@@ -82,7 +82,7 @@ public class Scanner
                     if (!_state.HasAlternates())
                         return mr;
                     var (alternateIndex, _) = _state.RestoreAlternate();
-                    node = _ast[alternateIndex];
+                    node = _ast![alternateIndex];
                     break;
 
                 case MatchResult.Status.ABORT:

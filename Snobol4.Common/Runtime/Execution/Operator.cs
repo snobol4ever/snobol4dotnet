@@ -22,7 +22,7 @@ public partial class Executive
         // If any arguments have input channels, get input now
         InputArguments(arguments);
 
-        FunctionTable[functionName].Handler(arguments);
+        FunctionTable[functionName]!.Handler(arguments);
     }
 
     public void Undefined(List<Var> arguments)

@@ -97,39 +97,30 @@ public abstract class Var : IEquatable<Var>
     // These methods enable double dispatch for type-safe arithmetic
     // Subclasses override these to provide type-specific behavior
 
-    [DoesNotReturn]
     protected internal virtual Var AddInteger(IntegerVar left, Executive executive)
 => ThrowNotSupportedException($"Cannot add {left.DataType()} to {DataType()}");
 
-    [DoesNotReturn]
     protected internal virtual Var AddReal(RealVar left, Executive executive)
 => ThrowNotSupportedException($"Cannot add {left.DataType()} to {DataType()}");
 
-    [DoesNotReturn]
     protected internal virtual Var AddString(StringVar left, Executive executive)
 => ThrowNotSupportedException($"Cannot add {left.DataType()} to {DataType()}");
 
-    [DoesNotReturn]
     protected internal virtual Var SubtractInteger(IntegerVar left, Executive executive)
 => ThrowNotSupportedException($"Cannot subtract {DataType()} from {left.DataType()}");
 
-    [DoesNotReturn]
     protected internal virtual Var SubtractReal(RealVar left, Executive executive)
 => ThrowNotSupportedException($"Cannot subtract {DataType()} from {left.DataType()}");
 
-    [DoesNotReturn]
     protected internal virtual Var MultiplyInteger(IntegerVar left, Executive executive)
 => ThrowNotSupportedException($"Cannot multiply {left.DataType()} by {DataType()}");
 
-    [DoesNotReturn]
     protected internal virtual Var MultiplyReal(RealVar left, Executive executive)
 => ThrowNotSupportedException($"Cannot multiply {left.DataType()} by {DataType()}");
 
-    [DoesNotReturn]
     protected internal virtual Var DivideInteger(IntegerVar left, Executive executive)
 => ThrowNotSupportedException($"Cannot divide {left.DataType()} by {DataType()}");
 
-    [DoesNotReturn]
     protected internal virtual Var DivideReal(RealVar left, Executive executive)
 => ThrowNotSupportedException($"Cannot divide {left.DataType()} by {DataType()}");
 
@@ -167,6 +158,8 @@ public abstract class Var : IEquatable<Var>
     }
 
     public override bool Equals(object? obj) => obj is Var other && Equals(other);
+
+    public override int GetHashCode() => SequenceId.GetHashCode();
 
 
     internal virtual bool IsIdentical(Var other)

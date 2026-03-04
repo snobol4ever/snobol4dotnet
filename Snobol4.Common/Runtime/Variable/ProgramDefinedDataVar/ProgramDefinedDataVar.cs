@@ -66,30 +66,23 @@ public sealed class ProgramDefinedDataVar : Var
     protected internal override Var AddInteger(IntegerVar left, Executive executive)
         => LogArithmeticTypeError(executive, 2); // RightPattern operand of + is not numeric
 
-
     protected internal override Var AddReal(RealVar left, Executive executive)
         => LogArithmeticTypeError(executive, 2); // RightPattern operand of + is not numeric
-
 
     protected internal override Var SubtractInteger(IntegerVar left, Executive executive)
         => LogArithmeticTypeError(executive, 33); // RightPattern operand of - is not numeric
 
-
     protected internal override Var SubtractReal(RealVar left, Executive executive)
         => LogArithmeticTypeError(executive, 33); // RightPattern operand of - is not numeric
-
 
     protected internal override Var MultiplyInteger(IntegerVar left, Executive executive)
         => LogArithmeticTypeError(executive, 27); // RightPattern operand of * is not numeric
 
-
     protected internal override Var MultiplyReal(RealVar left, Executive executive)
         => LogArithmeticTypeError(executive, 27); // RightPattern operand of * is not numeric
 
-
     protected internal override Var DivideInteger(IntegerVar left, Executive executive)
         => LogArithmeticTypeError(executive, 13); // RightPattern operand of / is not numeric
-
 
     protected internal override Var DivideReal(RealVar left, Executive executive)
         => LogArithmeticTypeError(executive, 13); // RightPattern operand of / is not numeric

@@ -72,6 +72,7 @@ public partial class Executive
         SourceCode = [];
         SourceFiles = [];
         SourceLineNumbers = [];
+        SourceListingNumbers = [];
         SourceStatementNumbers = [];
         SystemStack = [];
         StarFunctionList = [];

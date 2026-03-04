@@ -14,6 +14,7 @@ internal sealed class ThreadedCodeCompiler
     private readonly List<int> _statementStart = new(128);
     private readonly List<(int InstrIdx, int StmtIdx)> _jumpFixups = new(128);
     private readonly Stack<string> _pendingFunctions = new();
+    private readonly Stack<int>    _choiceStack       = new();
 
     internal ThreadedCodeCompiler(Builder parent)
     {
@@ -251,11 +252,31 @@ internal sealed class ThreadedCodeCompiler
                     break;
 
                 case Token.Type.COMMA_CHOICE:
-                    Emit(OpCode.ChoiceStart);
+                    // If the preceding expression succeeded, skip this alternative.
+                    // Emit: pop stack, clear failure, then enter alternative body.
+                    // Structure: JumpOnSuccess(past-this-block), pop, clear-failure
+                    // The JumpOnSuccess target is patched when R_PAREN_CHOICE arrives.
+                    {
+                        // JumpOnSuccess skips the alternative (patched by ChoiceEnd)
+                        int skipIdx = EmitPlaceholder(OpCode.JumpOnSuccess);
+                        _choiceStack.Push(skipIdx);
+                        // If we reach here, previous expression failed: pop its result, clear failure
+                        Emit(OpCode.ChoiceStart);  // pops top + clears failure
+                    }
                     break;
 
                 case Token.Type.R_PAREN_CHOICE:
-                    Emit(new Instruction(OpCode.ChoiceEnd, (int)t.IntegerValue));
+                    // Patch all JumpOnSuccess targets for this choice expression.
+                    // IntegerValue = number of closing braces = number of COMMA_CHOICEs + 1.
+                    // So patch IntegerValue-1 entries (one per COMMA_CHOICE).
+                    {
+                        int levels = (int)t.IntegerValue - 1;
+                        for (var i = 0; i < levels; i++)
+                        {
+                            if (_choiceStack.Count > 0)
+                                PatchHere(_choiceStack.Pop());
+                        }
+                    }
                     break;
 
                 // Structural tokens — no instruction emitted

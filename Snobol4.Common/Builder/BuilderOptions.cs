@@ -97,6 +97,6 @@ public class BuilderOptions
     /// threaded executor is used instead of ExecuteLoop.
     /// Default: false during Phases 3-4 development; will become true in Phase 5.
     /// </summary>
-    public bool UseThreadedExecution { get; set; } = false;
+    public bool UseThreadedExecution { get; set; } = true;
 }
 

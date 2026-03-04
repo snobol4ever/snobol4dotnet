@@ -75,6 +75,13 @@ public partial class Builder : IDisposable
     /// <summary>Interned constant literals (strings, integers, reals).</summary>
     internal ConstantPool Constants = new();
 
+    /// <summary>
+    /// Maps statement index → first instruction index in Thread[].
+    /// Populated by ThreadedCodeCompiler.Compile() and used by
+    /// ThreadedExecuteLoop to resolve label-table gotos at runtime.
+    /// </summary>
+    internal int[]? StatementInstructionStarts;
+
     #endregion
 
     #region Constructor

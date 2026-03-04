@@ -15,10 +15,20 @@ public partial class Executive
     internal void Execute(Assembly dll, AssemblyLoadContext _, string fullClassName)
     {
         _timerExecute.Restart();
-        dynamic? instance = dll.CreateInstance(fullClassName);
-        if (instance == null)
-            throw new ApplicationException("internal void Execute(Assembly dll, AssemblyLoadContext _, string fullClassName)");
-        instance.Run(this);
+
+        if (Thread != null)
+        {
+            // Threaded execution path — no Roslyn assembly needed at runtime
+            ThreadedExecuteLoop();
+        }
+        else
+        {
+            dynamic? instance = dll.CreateInstance(fullClassName);
+            if (instance == null)
+                throw new ApplicationException("internal void Execute(Assembly dll, AssemblyLoadContext _, string fullClassName)");
+            instance.Run(this);
+        }
+
         _timerExecute.Stop();
     }
 

@@ -27,7 +27,12 @@ internal sealed class ThreadedCodeCompiler
         _jumpFixups.Clear();
 
         Pass1_Emit();
-        return Pass2_Patch();
+        var result = Pass2_Patch();
+
+        // Expose statement→instruction map to Builder for runtime goto resolution
+        _parent.StatementInstructionStarts = _statementStart.ToArray();
+
+        return result;
     }
 
     // -----------------------------------------------------------------------

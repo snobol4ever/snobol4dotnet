@@ -249,7 +249,10 @@ internal sealed class ThreadedCodeCompiler
                     break;
 
                 case Token.Type.EXPRESSION:
-                    Emit(new Instruction(OpCode.PushExpr, (int)t.IntegerValue));
+                    // MatchedString is "Star00000000", "Star00000001", etc.
+                    // The numeric suffix is the index into StarFunctionList.
+                    var exprIdx = int.Parse(t.MatchedString[4..]);
+                    Emit(new Instruction(OpCode.PushExpr, exprIdx));
                     break;
 
                 case Token.Type.R_ANGLE:

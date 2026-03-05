@@ -10,7 +10,7 @@ public class SetupTests
     public static string WindowsOutput = @"C:\Users\jcooper\Documents\Visual Studio 2022\Snobol4.Net\TestSnobol4\Output\";
     public static string LinuxOutput = @"/mnt/c/Users/jcooper/Documents/Visual Studio 2022/Snobol4.Net/TestSnobol4/Output/";
 
-    internal static Builder SetupScript(string directives, string script)
+    internal static Builder SetupScript(string directives, string script, bool compileOnly = false)
     {
         // Get array of commands and source files
         var commands = new List<string>(
@@ -30,8 +30,12 @@ public class SetupTests
 
         Builder builder = new();
         builder.ParseCommandLine(args);
+        builder.BuildOptions.UseThreadedExecution = true;
         builder.Code.ReadTestScript(new MemoryStream(Encoding.UTF8.GetBytes(script)));
-        builder.BuildMain();
+        if (compileOnly)
+            builder.BuildMainCompileOnly();
+        else
+            builder.BuildMain();
         return builder;
     }
 

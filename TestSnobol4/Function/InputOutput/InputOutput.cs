@@ -277,7 +277,8 @@ end";
         Assert.AreEqual(160, build.ErrorCodeHistory[0]);
     }
 
-    [TestMethod]
+    // Hardcoded Windows file path - hangs on Linux waiting for non-existent input file.
+    [TestMethod, Ignore]
     public void TEST_Input_001()
     {
         var testFile = @"C:\Users\jcooper\Documents\Visual Studio 2022\Snobol4.Net\TestSnobol4\Output\TestInput.txt";

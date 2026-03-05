@@ -8,7 +8,7 @@ public partial class Executive
     {
         CodeVar code = new()
         {
-            StatementNumber = Statements.Count,
+            StatementNumber = Parent.StatementCount,
             Data = ""
         };
 

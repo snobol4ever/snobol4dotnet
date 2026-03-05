@@ -1,6 +1,4 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
-
-namespace Snobol4.Common;
+﻿namespace Snobol4.Common;
 
 public partial class Executive
 {

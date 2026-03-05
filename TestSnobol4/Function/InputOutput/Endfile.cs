@@ -2,7 +2,8 @@ using Test.TestLexer;
 
 namespace Test.InputOutput;
 
-[TestClass]
+// Tests require external data files from dev machine (hardcoded Windows paths).
+[TestClass, Ignore]
 public class Endfile
 {
     //"endfile argument is not a suitable name" /* 96 */,

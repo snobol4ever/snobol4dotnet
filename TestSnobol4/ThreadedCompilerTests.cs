@@ -13,7 +13,7 @@ public class ThreadedCompilerTests
 {
     private static Instruction[] Compile(string script)
     {
-        var build = SetupTests.SetupScript("-b", script);
+        var build = SetupTests.SetupScript("-b", script, compileOnly: true);
         return new ThreadedCodeCompiler(build).Compile();
     }
 

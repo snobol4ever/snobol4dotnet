@@ -125,7 +125,7 @@ public class NameConversionStrategy : IConversionStrategy
 
         CodeVar code = new()
         {
-            StatementNumber = exec.Statements.Count,
+            StatementNumber = exec.Parent.StatementCount,
             Data = stringVarCode.Symbol
         };
 

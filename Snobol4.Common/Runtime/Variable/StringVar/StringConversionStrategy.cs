@@ -81,7 +81,7 @@ public class StringConversionStrategy : IConversionStrategy
     {
         CodeVar code = new()
         {
-            StatementNumber = exec.Statements.Count,
+            StatementNumber = exec.Parent.StatementCount,
             Data = stringSelf.Data
         };
 

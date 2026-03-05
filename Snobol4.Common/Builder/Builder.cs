@@ -192,7 +192,10 @@ public partial class Builder : IDisposable
             var loadContext = CreateTrackedLoadContext($"Eval_{_compilerTarget.EvalNum}");
             var dll = Compile(loadContext, _compilerTarget.FileName, cSharpCode);
             dynamic? instance = dll.CreateInstance(_compilerTarget.FullClassName);
+            var savedThread = Execute?.Thread;
+            if (Execute != null) Execute.Thread = null;
             instance?.Run(Execute);
+            if (Execute != null) Execute.Thread = savedThread;
         }
         catch (CompilerException)
         {
@@ -224,7 +227,10 @@ public partial class Builder : IDisposable
                 return false;
             }
 
+            var savedThread2 = Execute?.Thread;
+            if (Execute != null) Execute.Thread = null;
             instance.Run(Execute);
+            if (Execute != null) Execute.Thread = savedThread2;
             return true;
         }
         catch (CompilerException)

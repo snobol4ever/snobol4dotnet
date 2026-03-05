@@ -168,7 +168,12 @@ public partial class Executive
                     SystemStack.Pop();
                     if (target == -1)                 { exitCode = -1; goto Done; }
                     if (target <= -2 && target >= -7) { exitCode = target; goto Done; }
-                    if (target >= 0) InstructionPointer = StatementIndexToInstrIndex(target);
+                    if (target >= 0)
+                    {
+                        var instrIdx = StatementIndexToInstrIndex(target);
+                        if (instrIdx >= 0) InstructionPointer = instrIdx;
+                        else { exitCode = target; goto Done; } // CODE'd label in Statements[]
+                    }
                     else { LogRuntimeException(instr.IntOperand); InstructionPointer = -1; }
                     break;
                 }
@@ -182,7 +187,9 @@ public partial class Executive
                         var target = cv.StatementNumber;
                         if (target == -1)                 { exitCode = -1; goto Done; }
                         if (target <= -2 && target >= -7) { exitCode = target; goto Done; }
-                        InstructionPointer = StatementIndexToInstrIndex(target);
+                        var instrIdx = StatementIndexToInstrIndex(target);
+                        if (instrIdx >= 0) InstructionPointer = instrIdx;
+                        else { exitCode = target; goto Done; } // CODE'd stmt in Statements[]
                     }
                     else { LogRuntimeException(instr.IntOperand); InstructionPointer = -1; }
                     break;

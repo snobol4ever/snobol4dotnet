@@ -223,6 +223,33 @@ public partial class Builder : IDisposable
         }
     }
 
+    /// <summary>Registers labels and source info for CODE'd statements.</summary>
+    private void PopulateCodeMetadata(int stmtOffset)
+    {
+        if (Execute == null) return;
+        var stmtNumber = stmtOffset;
+        foreach (var line in Code.SourceLines)
+        {
+            if (!line.Compiled)
+            {
+                var text      = line.Text.Replace('\t', ' ');
+                var codeCount = 1 + line.LineCountFile - line.BlankLineCount - line.CommentContinuationDirectiveCount;
+                var listCount = 1 + line.LineCountFile - line.CommentContinuationDirectiveCount;
+                Execute.SourceCode.Add($"{Path.GetFileName(line.PathName)}:{codeCount}/{listCount})\n{text}");
+                Execute.SourceFiles.Add(line.PathName);
+                Execute.SourceLineNumbers.Add(line.LineCountFile);
+                Execute.SourceStatementNumbers.Add(stmtNumber + 1);
+                if (line.Label.Length > 0)
+                {
+                    var folded = BuildOptions.CaseFolding ? line.Label.ToUpper() : line.Label;
+                    if (folded is not "END")
+                        Execute.LabelTable[folded] = stmtNumber;
+                }
+            }
+            stmtNumber++;
+        }
+    }
+
     internal bool BuildCode()
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
@@ -232,6 +259,20 @@ public partial class Builder : IDisposable
             GetNameSpaceAndClassName(GenerateCSharpCode.CompileTarget.CODE);
             Lex(this);
             Parse(this);
+
+            if (Execute?.Thread != null)
+            {
+                // Threaded path — extend the running thread with the CODE'd statements.
+                var stmtOffset = StatementCount;
+                ResolveSlots();
+                var tc = new ThreadedCodeCompiler(this);
+                Execute.Thread = tc.AppendCompile(Execute.Thread, stmtOffset);
+                CompileStarFunctions(tc);
+                PopulateCodeMetadata(stmtOffset);
+                StatementCount += Code.SourceLines.Count;
+                return true;
+            }
+
             var cSharpCode = Generate(_compilerTarget.NameSpace, _compilerTarget.ClassName, false, GenerateCSharpCode.CompileTarget.CODE, this);
             StatementCount += Code.SourceLines.Count;
             var loadContext = CreateTrackedLoadContext($"Code_{_compilerTarget.CodeNum}");

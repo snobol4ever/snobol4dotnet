@@ -54,6 +54,8 @@ public partial class Executive
                     AlphaStack.Clear();
                     BetaStack.Clear();
                     SystemStack.Push(new StatementSeparator());
+                    if (Parent.BuildOptions.TraceStatements)
+                        Console.Error.WriteLine($"Init stmt={instr.IntOperand}");
                     if (AmpStatementLimit >= 0) AmpStatementCount++;
                     if (AmpStatementLimit > 0 && AmpStatementCount >= AmpStatementLimit)
                     {
@@ -171,8 +173,12 @@ public partial class Executive
                     if (target >= 0)
                     {
                         var instrIdx = StatementIndexToInstrIndex(target);
-                        if (instrIdx >= 0) InstructionPointer = instrIdx;
-                        else { exitCode = target; goto Done; } // CODE'd label in Statements[]
+                        if (instrIdx >= 0)
+                        {
+                            thread = Thread!;  // AppendCompile may have extended Thread
+                            InstructionPointer = instrIdx;
+                        }
+                        else { exitCode = target; goto Done; }
                     }
                     else { LogRuntimeException(instr.IntOperand); InstructionPointer = -1; }
                     break;

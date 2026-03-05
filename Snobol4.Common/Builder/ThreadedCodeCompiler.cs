@@ -36,6 +36,72 @@ internal sealed class ThreadedCodeCompiler
         return result;
     }
 
+    /// <summary>
+    /// Extends an existing thread with newly CODE'd statements.
+    /// stmtOffset = number of statements already compiled (index of first new one).
+    /// Returns the combined Instruction[] and updates StatementInstructionStarts.
+    /// </summary>
+    internal Instruction[] AppendCompile(Instruction[] existing, int stmtOffset)
+    {
+        _thread.Clear();
+        _statementStart.Clear();
+        _jumpFixups.Clear();
+
+        var lines = _parent.Code.SourceLines;
+        int instrOffset = existing.Length - 1; // existing ends with Halt; overwrite it
+
+        for (var si = 0; si < lines.Count; si++)
+        {
+            var line = lines[si];
+            _statementStart.Add(_thread.Count);
+            Emit(new Instruction(OpCode.Init, stmtOffset + si));
+            EmitTokenList(line.ParseBody);
+            Emit(new Instruction(OpCode.Finalize));
+            EmitGotos(line, si);
+        }
+        Emit(new Instruction(OpCode.Halt));
+
+        // Pass 2: patch jump targets within the new fragment
+        var newArr = Pass2_Patch();
+
+        // Adjust new instruction indices by instrOffset (they go after existing)
+        var combined = new Instruction[instrOffset + newArr.Length];
+        Array.Copy(existing, combined, instrOffset);   // existing without trailing Halt
+        int newHalt = instrOffset + newArr.Length - 1; // index of Halt in combined array
+        // Patch existing jump targets that pointed to the old Halt (now overwritten)
+        for (int i = 0; i < instrOffset; i++)
+        {
+            var old2 = combined[i];
+            if (old2.Op is OpCode.Jump or OpCode.JumpOnFailure or OpCode.JumpOnSuccess
+                && old2.IntOperand == instrOffset)   // was pointing to old Halt
+            {
+                combined[i] = new Instruction(old2.Op, newHalt, old2.IntOperand2);
+            }
+        }
+        for (int i = 0; i < newArr.Length; i++)
+        {
+            var instr = newArr[i];
+            // Adjust absolute instruction targets embedded in Jump/JumpOn* ops
+            if (instr.Op is OpCode.Jump or OpCode.JumpOnFailure or OpCode.JumpOnSuccess
+                && instr.IntOperand >= 0)
+            {
+                instr = new Instruction(instr.Op, instr.IntOperand + instrOffset, instr.IntOperand2);
+            }
+            combined[instrOffset + i] = instr;
+        }
+
+        // Extend StatementInstructionStarts
+        var old = _parent.StatementInstructionStarts ?? [];
+        int newLen = stmtOffset + _statementStart.Count;
+        var newStarts = new int[newLen];
+        for (int i = 0; i < old.Length && i < newLen; i++) newStarts[i] = old[i];
+        for (int i = 0; i < _statementStart.Count; i++)
+            newStarts[stmtOffset + i] = _statementStart[i] + instrOffset;
+        _parent.StatementInstructionStarts = newStarts;
+
+        return combined;
+    }
+
     // -----------------------------------------------------------------------
     // Pass 1
     // -----------------------------------------------------------------------

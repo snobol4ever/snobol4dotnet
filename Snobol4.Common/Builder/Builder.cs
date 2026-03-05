@@ -194,13 +194,23 @@ public partial class Builder : IDisposable
             }
             
             Parse(this);
+
+            if (Execute?.Thread != null)
+            {
+                // Threaded path: resolve any new identifiers from the EVAL
+                // expression, then compile it as a star function.
+                // StarFunctionList[^1] is called by Eval.cs after we return.
+                ResolveSlots();
+                CompileStarFunctions(new ThreadedCodeCompiler(this));
+                StatementCount += Code.SourceLines.Count;
+                return;
+            }
+
             var cSharpCode = Generate(_compilerTarget.NameSpace, _compilerTarget.ClassName, false, GenerateCSharpCode.CompileTarget.EVAL, this);
             StatementCount += Code.SourceLines.Count;
             var loadContext = CreateTrackedLoadContext($"Eval_{_compilerTarget.EvalNum}");
             var dll = Compile(loadContext, _compilerTarget.FileName, cSharpCode);
             dynamic? instance = dll.CreateInstance(_compilerTarget.FullClassName);
-            if (Execute?.Thread != null)
-                CompileStarFunctions(new ThreadedCodeCompiler(this));
             instance?.Run(Execute);
         }
         catch (CompilerException)

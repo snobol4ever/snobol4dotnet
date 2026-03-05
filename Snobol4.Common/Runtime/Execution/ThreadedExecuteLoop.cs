@@ -198,10 +198,13 @@ public partial class Executive
         }
 
         Done:
-        // Restore all fields saved at entry so the caller's context is intact
-        InstructionPointer = savedIP;
-        ErrorJump          = savedErrorJump;
-        Failure            = savedFailure;
+        // Restore all fields saved at entry so the caller's context is intact.
+        // Save the expression's final Failure state first so RunExpressionThread
+        // can re-apply it after the restore.
+        LastExpressionFailure = Failure;
+        InstructionPointer    = savedIP;
+        ErrorJump             = savedErrorJump;
+        Failure               = savedFailure;
         return exitCode;
     }
 

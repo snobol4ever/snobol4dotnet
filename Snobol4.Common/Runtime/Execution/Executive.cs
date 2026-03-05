@@ -8,6 +8,9 @@ public partial class Executive
     public const int GotoNotFound = -10;
 
     public bool Failure;
+    /// <summary>Set by ThreadedExecuteLoop before restoring Failure, so
+    /// RunExpressionThread can re-apply the sub-expression's failure result.</summary>
+    internal bool LastExpressionFailure;
     public Builder Parent;
     public List<long> SourceLineNumbers;
     public List<long> SourceListingNumbers;

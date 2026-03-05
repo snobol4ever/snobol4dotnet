@@ -69,7 +69,12 @@ public partial class Executive
         Thread          = subThread;
         InstructionPointer = 0;
         ThreadedExecuteLoop(0);
+        // ThreadedExecuteLoop saved the sub-expression's final Failure state in
+        // LastExpressionFailure before restoring Failure to the pre-call value.
+        // Re-apply it so the pattern engine sees GT/LT/etc. failure correctly.
+        var exprFailure    = LastExpressionFailure;
         Thread             = savedThread;
         InstructionPointer = savedIP;
+        Failure            = exprFailure;
     }
 }

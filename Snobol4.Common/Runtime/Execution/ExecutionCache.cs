@@ -133,21 +133,27 @@ public partial class Executive
     }
 
     // -------------------------------------------------------------------------
+    // Reusable argument scratch list — avoids heap allocation on every operator
+    // call.  Cleared before use.  NOT thread-safe (Executive is single-threaded).
+    // -------------------------------------------------------------------------
+    private readonly List<Var> _argScratch = new(4);
+
+    // -------------------------------------------------------------------------
     // Fast operator dispatch (replaces Operator(string, int) on hot path)
     // -------------------------------------------------------------------------
 
     /// <summary>
     /// Dispatch an operator whose handler is already resolved in
     /// OperatorHandlers[op].  Identical logic to Operator() but avoids the
-    /// dictionary lookup and the Profiler allocation in Release builds.
+    /// dictionary lookup, the Profiler allocation, and the List allocation.
     /// </summary>
     internal void OperatorFast(OpCode op, int argumentCount)
     {
-        List<Var> arguments = [];
-        if (SystemStack.ExtractArguments(argumentCount, arguments, this))
+        _argScratch.Clear();
+        if (SystemStack.ExtractArguments(argumentCount, _argScratch, this))
             return;
-        InputArguments(arguments);
-        OperatorHandlers![(int)op]!(arguments);
+        InputArguments(_argScratch);
+        OperatorHandlers![(int)op]!(_argScratch);
     }
 
     /// <summary>

@@ -83,9 +83,14 @@ public partial class Executive
                 }
 
                 case OpCode.PushConst:
-                    // Clone to prevent runtime mutation of the shared pool object
-                    SystemStack.Push(constPool[instr.IntOperand].Clone());
+                {
+                    // IntegerVar and RealVar are never mutated through the stack,
+                    // so we can push them directly without cloning.
+                    // StringVar must be cloned because PatternMatch sets .Symbol on it.
+                    var c = constPool[instr.IntOperand];
+                    SystemStack.Push(c is IntegerVar or RealVar ? c : c.Clone());
                     break;
+                }
 
                 case OpCode.PushExpr:
                     Constant(StarFunctionList[instr.IntOperand]);

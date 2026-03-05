@@ -27,7 +27,7 @@ public class SystemStack : Stack<Var>
         if (arguments.All(arg => arg.Succeeded)) 
             return false;
         
-        base.Push(new StringVar(false));
+        base.Push(x.FailureSentinel);
         return true;
 
     }

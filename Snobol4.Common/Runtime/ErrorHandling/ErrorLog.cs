@@ -17,7 +17,7 @@ public partial class Executive
         Parent.ErrorCodeHistory.Add(code);
         Parent.ColumnHistory.Add(0);
         Failure = true;
-        SystemStack.Push(new StringVar(false));
+        SystemStack.Push(_sentinelFailure);
         var ce = new CompilerException(code, 0, AmpErrorText);
         Parent.MessageHistory.Add(AmpErrorText);
         ErrorJump = SetExitNumber;
@@ -27,19 +27,29 @@ public partial class Executive
         throw ce;
     }
 
+    // -------------------------------------------------------------------------
+    // Static sentinels — reused for every predicate success/failure push.
+    // These objects carry only the Succeeded flag; their string data is never
+    // read before they are discarded at the next Finalize boundary.
+    // Marking them IsReadOnly prevents accidental mutation.
+    // -------------------------------------------------------------------------
+    private static readonly StringVar _sentinelSuccess = new(true)  { IsReadOnly = true };
+    private static readonly StringVar _sentinelFailure = new(false) { IsReadOnly = true };
+
+    /// <summary>Shared failure sentinel — use instead of new StringVar(false).</summary>
+    public StringVar FailureSentinel => _sentinelFailure;
+
     public StringVar NonExceptionFailure()
     {
         Failure = true;
-        var nullVar = new StringVar(false);
-        SystemStack.Push(nullVar);
-        return nullVar;
+        SystemStack.Push(_sentinelFailure);
+        return _sentinelFailure;
     }
 
     public StringVar PredicateSuccess()
     {
         Failure = false;
-        var nullVar = new StringVar(true);
-        SystemStack.Push(nullVar);
-        return nullVar;
+        SystemStack.Push(_sentinelSuccess);
+        return _sentinelSuccess;
     }
 }

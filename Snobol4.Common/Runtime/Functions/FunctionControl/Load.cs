@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Runtime.Loader;
 
 namespace Snobol4.Common;
@@ -10,6 +11,31 @@ namespace Snobol4.Common;
 
 public partial class Executive
 {
+    /// <summary>
+    /// AssemblyLoadContext that resolves dependencies (e.g. FSharp.Core) from
+    /// the same directory as the loaded DLL, then falls back to the default context.
+    /// Snobol4.Common is always resolved from the shared context to prevent
+    /// interface-type mismatches when casting to IExternalLibrary.
+    /// </summary>
+    private sealed class PluginLoadContext(string pluginPath) : AssemblyLoadContext(null, isCollectible: true)
+    {
+        private readonly AssemblyDependencyResolver _resolver = new(pluginPath);
+
+        protected override Assembly? Load(AssemblyName assemblyName)
+        {
+            // Always use the shared Snobol4.Common so IExternalLibrary types match
+            if (assemblyName.Name == "Snobol4.Common")
+                return null;
+
+            // Resolve other dependencies from the plugin's own directory
+            var path = _resolver.ResolveAssemblyToPath(assemblyName);
+            if (path != null) return LoadFromAssemblyPath(path);
+
+            // Fall back to default context
+            return null;
+        }
+    }
+
     /// <summary>
     /// Keyed by fully-resolved absolute DLL path so two DLLs with the
     /// same filename in different directories don't collide.
@@ -59,7 +85,7 @@ public partial class Executive
 
         try
         {
-            var loadContext = new AssemblyLoadContext(null, isCollectible: true);
+            var loadContext = new PluginLoadContext(resolvedPath);
             var assembly = loadContext.LoadFromAssemblyPath(resolvedPath);
             var instance = assembly.CreateInstance(className) as IExternalLibrary;
 

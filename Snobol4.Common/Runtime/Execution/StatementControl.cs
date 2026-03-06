@@ -7,8 +7,8 @@ public partial class Executive
         if (LabelTable[Parent.FoldCase(Parent.EntryLabel)] != GotoNotFound)
             i = LabelTable[Parent.FoldCase(Parent.EntryLabel)];
 
-        var failure = ErrorJump > 0;
-        ErrorJump = 0;
+        var failure = OnErrorGoto > 0;
+        OnErrorGoto = 0;
 
         while (i >= 0)
         {

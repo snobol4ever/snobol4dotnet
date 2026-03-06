@@ -25,11 +25,18 @@ public sealed class RealConversionStrategy : IConversionStrategy
 
     private static bool ConvertToString(RealVar realSelf, out Var varOut, out object valueOut)
     {
-        valueOut = realSelf.Data.ToString(CultureInfo.CurrentCulture);
-        varOut = new StringVar((string)valueOut);
+        var strOut = realSelf.Data.ToString(CultureInfo.CurrentCulture);
+        strOut = TweakRealString(strOut);
+        varOut = new StringVar(strOut);
+        valueOut = strOut;
         return true;
     }
 
+    public static string TweakRealString(string str)
+    {
+        // This is to ensure that the string representation of a real is distinguishable from an integer
+        return str.Contains('.') || str.Contains('E') ? str : str + ".0";
+    }
 
     private static bool ConvertToInteger(RealVar realSelf, out Var varOut, out object valueOut)
     {

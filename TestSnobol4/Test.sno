@@ -1,3 +1,8 @@
-﻿		output = 3 + 5
-123abc    OUTPUT = "Hello,"  " World!"
-end 123abc
+﻿		SETEXIT(.ERR)
+		&ERRLIMIT = 100
+		A = 2
+		OUTPUT = A
+		A = 1 / 2			:(CONTINUE)
+		OUTPUT = 'RETURN'     :(END)
+ERR		OUTPUT = "Error trapped: Division by zero"
+END

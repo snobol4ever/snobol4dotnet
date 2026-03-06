@@ -1011,6 +1011,27 @@ end
         Assert.AreEqual("+console-output", build.Execute!.IdentifierTable[build.FoldCase("b")].OutputChannel);
     }
 
+    [TestMethod]
+    public void RealOutput()
+    {
+        var s = @"
+        R1 = 1.0 ' '
+        R1 = R1 -1.0  ' '
+        R1 = R1 1. ' '
+        R1 = R1 -1. ' '
+        R1 = R1 0.1e4 ' '
+        R1 = R1 0.1e-4 ' '
+        R1 = R1 1E4 ' '
+        R1 = R1 1E-4
+END
+";
+
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("1.0 -1.0 1.0 -1.0 1000.0 1E-05 10000.0 0.0001", build.Execute!.IdentifierTable[build.FoldCase("R1")].ToString());
+
+    }
 
 
 }

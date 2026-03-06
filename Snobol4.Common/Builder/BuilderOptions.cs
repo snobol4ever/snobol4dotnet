@@ -94,8 +94,12 @@ public class BuilderOptions
 
     /// <summary>
     /// When true, the threaded code compiler runs after Parse() and the
-    /// threaded executor is used instead of ExecuteLoop.
-    /// Default: false during Phases 3-4 development; will become true in Phase 5.
+    /// <summary>
+    /// When true (default), the threaded execution engine is used.
+    /// When false, the legacy Roslyn C#-codegen path is used instead.
+    ///
+    /// NOT exposed as a command-line flag. Set this in test code only,
+    /// to run the Roslyn path for regression comparison against the threaded path.
     /// </summary>
     public bool UseThreadedExecution { get; set; } = true;
 }

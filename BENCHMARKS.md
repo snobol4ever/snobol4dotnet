@@ -150,3 +150,43 @@ CSNOBOL4 is the canonical C port of the original Bell Labs SNOBOL4 implementatio
 SNOBOL4.NET is approximately **165x slower than CSNOBOL4** per statement.
 This gap lives entirely in the interpreter loop and is the target for future
 optimization phases (see PLAN.md Step 4).
+
+---
+
+## Phase 9 — Roslyn Removal + Argument List Pooling (feature/threaded-execution)
+
+> Recorded: 2026-03-06
+> Method: Stopwatch, 5 reps, 1 warmup run, Release build
+> Environment: Linux (Ubuntu 24.04 LTS), .NET 10.0
+
+### Changes
+
+**Roslyn removed (Step 4c):**
+- Deleted `CodeGenerator.cs` and `CSharpCompile.cs` (dead code since threaded execution)
+- Removed `Microsoft.CodeAnalysis.*` NuGet packages from `Snobol4.Common.csproj`
+- Removed dead `_Dead_BuildMain/Eval/Code_Roslyn` methods from `Builder.cs`
+- Removed dead `_Dead_ExecuteLoop_Roslyn` from `StatementControl.cs`
+- Reduces binary size and eliminates Roslyn startup overhead
+
+**Argument list pooling (Step 4a partial):**
+- Added `_reusableArgList` (pre-allocated `List<Var>` with capacity 8) to `Executive`
+- `OperatorFast` (hot path for all arithmetic and comparison operators) now clears
+  and reuses this list instead of allocating `new List<Var>()` on every call
+- Eliminated the dominant per-operator-call allocation on the hot path
+
+### Benchmark Results
+
+| Benchmark | Phase 8 | Phase 9 | Δ |
+|---|---|---|---|
+| `Roman_1776` | 17.2 ms | 5.0 ms | **-71%** |
+| `ArithLoop_1000` | 25.0 ms | 14.4 ms | **-42%** |
+| `StringPattern_200` | 159.4 ms | 71.6 ms | **-55%** |
+| `Fibonacci_18` | 364.4 ms | 176.0 ms | **-52%** |
+| `StringManip_500` | 29.6 ms | 34.6 ms | +17% (noise) |
+| `FuncCallOverhead_3000` | 11.6 ms | 8.2 ms | **-29%** |
+| `StringConcat_500` | 19.4 ms | 3.0 ms | **-85%** |
+| `VarAccess_2000` | 83.0 ms | 81.6 ms | flat |
+| `OperatorDispatch_100` | 4.2 ms | 5.2 ms | flat (noise) |
+| `PatternBacktrack_500` | 21.6 ms | 27.8 ms | flat (noise) |
+| `TableAccess_500` | 24.8 ms | 9.4 ms | **-62%** |
+| `MixedWorkload_200` | 176.8 ms | 158.0 ms | **-11%** |

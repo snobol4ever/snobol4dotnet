@@ -29,6 +29,12 @@ public partial class Executive
     internal Instruction[]? Thread;
     internal int InstructionPointer;
 
+    /// <summary>
+    /// Reusable argument list for OperatorFast — avoids per-call List allocation.
+    /// Cleared and refilled before every use. Must not be retained across calls.
+    /// </summary>
+    internal readonly List<Var> _reusableArgList = new(8);
+
     // Symbol Tables
     public FunctionTable FunctionTable;
     public IdentifierTable IdentifierTable;

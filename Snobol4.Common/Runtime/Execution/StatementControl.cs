@@ -33,38 +33,4 @@ public partial class Executive
         InstructionPointer = savedIP;
         Failure            = exprFailure;
     }
-
-    // =========================================================================
-    // DEAD CODE — Roslyn Statements[] execution loop, kept for reference only.
-    // =========================================================================
-#pragma warning disable CS0162
-    private int _Dead_ExecuteLoop_Roslyn(int i)
-    {
-        throw new NotImplementedException("Roslyn path removed");
-
-        if (LabelTable[Parent.FoldCase(Parent.EntryLabel)] != GotoNotFound)
-            i = LabelTable[Parent.FoldCase(Parent.EntryLabel)];
-
-        var failure = ErrorJump > 0;
-        ErrorJump = 0;
-
-        while (i >= 0)
-        {
-            using var profiler1 = Profiler.Start1($"Statement{AmpCurrentLineNumber:000000}", this);
-            if (Parent.BuildOptions.TraceStatements)
-                Console.Error.WriteLine(@$"{i} {SourceCode[i]}");
-            if (AmpStatementLimit >= 0) AmpStatementCount++;
-            i = Statements[i](this);
-            if (AmpStatementLimit <= 0) continue;
-            if (AmpStatementCount < AmpStatementLimit) continue;
-            LogRuntimeException(244);
-            Failure = true;
-            break;
-        }
-
-        Failure = failure;
-        return i;
-    }
-#pragma warning restore CS0162
-    // =========================================================================
 }

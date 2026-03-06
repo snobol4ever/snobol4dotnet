@@ -143,11 +143,12 @@ public partial class Executive
     /// </summary>
     internal void OperatorFast(OpCode op, int argumentCount)
     {
-        List<Var> arguments = [];
-        if (SystemStack.ExtractArguments(argumentCount, arguments, this))
+        // Reuse the pre-allocated list to avoid per-call heap allocation.
+        _reusableArgList.Clear();
+        if (SystemStack.ExtractArguments(argumentCount, _reusableArgList, this))
             return;
-        InputArguments(arguments);
-        OperatorHandlers![(int)op]!(arguments);
+        InputArguments(_reusableArgList);
+        OperatorHandlers![(int)op]!(_reusableArgList);
     }
 
     /// <summary>

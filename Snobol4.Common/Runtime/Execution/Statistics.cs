@@ -40,7 +40,7 @@ public partial class Executive
             Console.Error.WriteLine(@"normal end");
         var fileName = Path.GetFileName(SourceFiles[AmpCurrentLineNumber]);
         Console.Error.WriteLine(@$"in file                  {fileName}");
-        Console.Error.WriteLine(@$"in line                  {SourceLineNumbers[AmpCurrentLineNumber - 1]}");
+        Console.Error.WriteLine(@$"in line                  {SourceLineNumbers[AmpCurrentLineNumber]}");
         Console.Error.WriteLine(@$"in statement             {AmpCurrentLineNumber}");
         Console.Error.WriteLine(@$"statements executed      {AmpStatementCount}");
         Console.Error.WriteLine(@$"execution time seconds   {_timerExecute.ElapsedTicks / 10000000.0}");

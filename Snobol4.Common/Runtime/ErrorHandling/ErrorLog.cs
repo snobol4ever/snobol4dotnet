@@ -2,7 +2,7 @@
 
 public partial class Executive
 {
-    public int ErrorJump;
+    public int OnErrorGoto;
 
     public void LogRuntimeException(int code)
     {
@@ -20,9 +20,14 @@ public partial class Executive
         SystemStack.Push(new StringVar(false));
         var ce = new CompilerException(code, 0, AmpErrorText);
         Parent.MessageHistory.Add(AmpErrorText);
-        ErrorJump = SetExitNumber;
-        AmpErrorLimit--;
-        if (Parent.CodeMode || AmpErrorLimit != 0) return;
+        OnErrorGoto = SetExitNumber;
+
+        if (AmpErrorLimit > 0)
+        {
+            AmpErrorLimit--;
+            return;
+        }
+
         Console.Error.WriteLine(AmpErrorText);
         throw ce;
     }

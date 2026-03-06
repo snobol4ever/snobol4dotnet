@@ -8,14 +8,6 @@ public class GenerateCSharpCode(Builder parent)
     private Builder _parent = parent;
     private CompileTarget _compileTarget;
 
-    // Constants for runtime exception codes
-    //private const int GOTO_EVALUATION_FAILURE = 20;
-    //private const int GOTO_NOT_NATURAL_VARIABLE = 23;
-    //private const int GOTO_NOT_CODE = 24;
-
-    // Code generation indentation
-    //private const string INDENT = "        ";
-
     public enum CompileTarget
     {
         PROGRAM = 1,
@@ -302,7 +294,7 @@ public class GenerateCSharpCode(Builder parent)
 
         GenerateStatementBody(line);
         _csharpCode.AppendLine("        x.FinalizeStatement();");
-        _csharpCode.AppendLine("        if (x.ErrorJump > 0) x.ProcessTrappedError();");
+        _csharpCode.AppendLine("        if (x.OnErrorGoto > 0) x.ProcessTrappedError();");
         GenerateStatementGotos(line, statementNumber + 1);
         _csharpCode.AppendLine("    }");
     }

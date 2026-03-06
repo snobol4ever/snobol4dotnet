@@ -12,13 +12,11 @@ public partial class Executive
         {
             case RealVar:
                 var symbol1 = Parent.FoldCase(((RealVar)arguments[0]).Data.ToString(CultureInfo.InvariantCulture));
-                //var symbol1 = ((RealVar)arguments[0]).Data.ToString(CultureInfo.CurrentCulture);
                 SystemStack.Push(IdentifierTable[symbol1]);
                 return;
 
             case IntegerVar:
                 var symbol2 = Parent.FoldCase(((IntegerVar)arguments[0]).Data.ToString(CultureInfo.InvariantCulture));
-                //var symbol2 = ((IntegerVar)arguments[0]).Data.ToString();
                 SystemStack.Push(IdentifierTable[symbol2]);
                 return;
 

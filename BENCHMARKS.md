@@ -322,3 +322,53 @@ itself. The primary bottlenecks (in order of expected impact):
 
 3. **String allocation** — Pattern matching and string operations allocate
    new objects on every call. Interning or pooling common strings would reduce GC pressure.
+
+---
+
+## Phase 8 — Self-Referential UDF Bug Fix (feature/threaded-execution)
+
+> Recorded: 2026-03-06
+> Method: Stopwatch, 5 reps, 1 warmup run, Release build
+> Environment: Linux (Ubuntu 24.04 LTS), .NET 10.0
+
+### Bug Fixed
+
+**Root cause:** Two independent bugs combined to break UDF calls:
+
+1. `ThreadedExecuteLoop.cs` line 21: `var savedFailure = ErrorJump > 0` was always
+   `false` because `ErrorJump` is cleared on the next line. Fixed to `var savedFailure = Failure`.
+
+2. `Define.cs` `ExecuteProgramDefinedFunction`: arguments were bound to parameters by
+   mutating `.Symbol` in-place on the passed `Var` object. Because `PushVar` pushes the
+   live slot reference without cloning, the same object could be on the SystemStack as the
+   LHS of an outer assignment (e.g. `R = INC(R)`). Mutating it renamed `R` to `N`, causing
+   the outer assignment to write to `N` instead. Fixed by cloning the argument before
+   renaming it as the parameter.
+
+**Symptom:** Any self-referential UDF call (`R = INC(R)`) either hung infinitely or
+silently wrote to the wrong variable. The minimal reproduction now correctly outputs `5`.
+
+### Full Benchmark Results (all benchmarks enabled)
+
+| Benchmark | Mean | ± StdDev | Alloc/run | Result |
+|---|---|---|---|---|
+| `Roman_1776` | 17.2 ms | ± 32.4 ms | 438 KB | MDCCLXXVI |
+| `ArithLoop_1000` | 25.0 ms | ± 23.9 ms | 1,944 KB | 1000 |
+| `StringPattern_200` | 159.4 ms | ± 32.8 ms | 6,334 KB | (alphabeta...) |
+| `Fibonacci_18` | 364.4 ms | ± 93.1 ms | 17,417 KB | 2584 |
+| `StringManip_500` | 29.6 ms | ± 4.5 ms | 3,086 KB | 43 |
+| `FuncCallOverhead_3000` | 11.6 ms | ± 18.1 ms | 982 KB | 300 |
+| `StringConcat_500` | 19.4 ms | ± 35.9 ms | 402 KB | 100 |
+
+### Bottleneck Isolation
+
+| Benchmark | Mean | ± StdDev | Alloc/run | Result |
+|---|---|---|---|---|
+| `VarAccess_2000` | 83.0 ms | ± 5.8 ms | 8,251 KB | 12012 |
+| `OperatorDispatch_100` | 4.2 ms | ± 8.4 ms | 690 KB | 165116 |
+| `PatternBacktrack_500` | 21.6 ms | ± 6.7 ms | 2,125 KB | 500 |
+| `TableAccess_500` | 24.8 ms | ± 23.3 ms | 2,069 KB | 250500 |
+| `MixedWorkload_200` | 176.8 ms | ± 18.2 ms | 17,295 KB | 550 |
+
+`FuncCallOverhead_3000` and `StringConcat_500` were previously excluded pending
+this fix. Both now run correctly.

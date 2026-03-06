@@ -136,9 +136,14 @@ public partial class Executive
             var v = IdentifierTable[symbol];
             saveVars.Add(v);
 
-            // Set local variables to the new values
-            arguments[i].Symbol = symbol;
-            IdentifierTable[arguments[i].Symbol] = arguments[i];
+            // Clone the argument before renaming: the caller may still hold a
+            // reference to the same Var object on the SystemStack (e.g. as the
+            // LHS of an assignment like "R = INC(R)").  Mutating .Symbol in-place
+            // would corrupt that stack reference, causing the outer assignment to
+            // write to the wrong identifier.
+            var paramVar = arguments[i].Clone();
+            paramVar.Symbol = symbol;
+            IdentifierTable[symbol] = paramVar;
         }
 
         for (var i = 0; i < localsCount; ++i)
@@ -171,7 +176,11 @@ public partial class Executive
             FunctionTraceEntry(arguments, functionName);
         }
 
-        // Run function by transferring to the entry label
+        // Run function by transferring to the entry label.
+        // Save caller's Failure state: ThreadedExecuteLoop restores it internally,
+        // but we must not let RETURN unconditionally force Failure=false and clobber
+        // the pre-call state (e.g. a prior LT() failure that a :F(label) depends on).
+        var callerFailure = Failure;
         var nextIndex = ExecuteLoop(LabelTable[definition.EntryLabel]);
         var returnVar = IdentifierTable[functionName];
 
@@ -180,17 +189,18 @@ public partial class Executive
             case -2:
                 AmpReturnType = "RETURN";
                 returnVar.Succeeded = true;
-                Failure = false;
+                Failure = callerFailure;   // preserve caller's Failure; UDF success doesn't clear it
                 break;
 
             case -3:
                 AmpReturnType = "FRETURN";
                 returnVar = StringVar.Null(functionName);
-                Failure = true;
+                Failure = true;            // FRETURN explicitly signals failure
                 break;
 
             case -4:
                 AmpReturnType = "NRETURN";
+                Failure = callerFailure;   // NRETURN is neutral — restore caller's state
                 break;
         }
 

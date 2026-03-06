@@ -18,6 +18,8 @@ internal class Program
         Run("StringPattern_200",    Scripts.StringPattern,        "FINAL",  Reps, Warmup);
         Run("Fibonacci_18",         Scripts.Fibonacci,            "RESULT", Reps, Warmup);
         Run("StringManip_500",     Scripts.StringManip,          "RESULT", Reps, Warmup);
+        Run("FuncCallOverhead_3000", Scripts.FunctionCallOverhead, "RESULT", Reps, Warmup);
+        Run("StringConcat_500",      Scripts.StringConcat,         "RESULT", Reps, Warmup);
 
         Console.WriteLine();
         Console.WriteLine("--- Bottleneck isolation ---");

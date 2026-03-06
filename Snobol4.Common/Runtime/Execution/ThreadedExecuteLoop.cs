@@ -18,7 +18,7 @@ public partial class Executive
 
         // Save all fields that recursive calls may overwrite
         var savedIP         = InstructionPointer;
-        var savedFailure    = ErrorJump > 0;
+        var savedFailure    = Failure;
         var savedErrorJump  = ErrorJump;
         ErrorJump = 0;
 

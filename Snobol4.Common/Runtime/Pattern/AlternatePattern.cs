@@ -19,7 +19,7 @@ internal class AlternatePattern : NonTerminalPattern
 
                         internal override Pattern Clone()
     {
-        return new AlternatePattern(LeftPattern, RightPattern);
+        return new AlternatePattern(LeftPattern!, RightPattern!);
     }
 
     #endregion

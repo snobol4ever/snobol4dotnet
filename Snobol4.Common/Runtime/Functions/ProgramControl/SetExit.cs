@@ -4,7 +4,7 @@
 
 public partial class Executive
 {
-    public string SetExitLabel;
+    public string SetExitLabel = "";
     public int SetExitNumber;
 
     internal void SetExit(List<Var> arguments)

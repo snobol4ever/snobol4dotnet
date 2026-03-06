@@ -35,17 +35,16 @@ public partial class Executive
             case NameVar nameVar:
                 if (nameVar.Pointer == "")
                 {
-                    var v = IdentifierTable[nameVar.Collection.Symbol];
-
+                    var v = IdentifierTable[nameVar.Collection!.Symbol];
 
                     switch (v)
                     {
                         case ArrayVar arrayVar:
-                            SystemStack.Push(arrayVar.Data[(int)(long)nameVar.Key]);
+                            SystemStack.Push(arrayVar.Data[(int)(long)nameVar.Key!]);
                             return;
 
                         case TableVar tableVar:
-                            SystemStack.Push(tableVar.Data[nameVar.Key]);
+                            SystemStack.Push(tableVar.Data[nameVar.Key!]);
                             return;
 
                     }

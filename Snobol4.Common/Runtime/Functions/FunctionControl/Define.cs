@@ -161,7 +161,7 @@ public partial class Executive
         }
 
         // Save value of local variables on the stack
-        entry.StateStack.Push(saveVars);
+        entry!.StateStack.Push(saveVars);
 
         // Update keywords
         AmpFunctionLevel++;

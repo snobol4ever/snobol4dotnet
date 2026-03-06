@@ -1,0 +1,17 @@
+* var_access.sno
+* Bottleneck: identifier lookup (PushVar = IdentifierTable[symbol] per access)
+* 5 distinct variables, read+write. Expected: 6000012
+        A = 1
+        B = 2
+        C = 0
+        D = 0
+        E = 0
+        N = 0
+LOOP    A = A + 1
+        B = B + 2
+        C = A + B
+        D = C + A
+        E = D + B
+        N = LT(N, 1000000) N + 1       :S(LOOP)
+        OUTPUT = E
+end

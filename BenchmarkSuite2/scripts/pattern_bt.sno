@@ -1,0 +1,11 @@
+* pattern_bt.sno
+* Bottleneck: pattern backtracking, alternation, node allocation
+* Match attempts requiring backtracking. Expected: 200000
+        &ANCHOR = 0
+        PAT = ('aaa' | 'bbb' | 'ccc' | 'ddd') SPAN('abcd') . W
+        S = 'xxxxxxxxxxbbbccccddddaaaaxxxxxxxxxxbbbccccddddaaaa'
+        N = 0
+LOOP    S PAT                          :F(DONE)
+        N = LT(N, 200000) N + 1        :S(LOOP)
+DONE    OUTPUT = N
+end

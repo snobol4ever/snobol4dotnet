@@ -1,0 +1,9 @@
+* string_concat.sno
+* Bottleneck: string allocation and GC pressure (O(n^2) copies)
+* Append one char 2000 times. Expected SIZE: 2000
+        S = ''
+        N = 0
+LOOP    N = LT(N, 2000) N + 1          :F(DONE)
+        S = S 'x'                      :(LOOP)
+DONE    OUTPUT = SIZE(S)
+end

@@ -1,0 +1,15 @@
+* table_access.sno
+* Bottleneck: TABLE hash lookup, Var boxing per entry
+* Insert 1000 keys, sum them, repeat 200 times. Expected: 1001000
+        OUTER = 0
+OUTER   T = TABLE(1024)
+        I = 0
+FILL    I = LT(I, 1000) I + 1         :F(READ)
+        T[I] = I * 2                   :(FILL)
+READ    SUM = 0
+        I = 0
+LOOP    I = LT(I, 1000) I + 1         :F(NEXT)
+        SUM = SUM + T[I]               :(LOOP)
+NEXT    OUTER = LT(OUTER, 200) OUTER + 1  :S(OUTER)
+        OUTPUT = SUM
+end

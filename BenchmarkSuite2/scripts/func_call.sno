@@ -1,0 +1,12 @@
+* func_call.sno
+* Bottleneck: function call/return overhead, local var save/restore
+* Trivial INC function. Expected: 2000000
+        DEFINE('INC(N)')               :(INC_END)
+INC     INC = N + 1                    :(RETURN)
+INC_END
+        R = 0
+        N = 0
+LOOP    N = LT(N, 2000000) N + 1       :F(DONE)
+        R = INC(R)                     :(LOOP)
+DONE    OUTPUT = R
+end

@@ -1,0 +1,12 @@
+* op_dispatch.sno
+* Bottleneck: operator dispatch (string dict lookup per arithmetic op)
+* All four arithmetic ops + comparison in rotation. Expected: ~9000000
+        N = 1
+        OUTER = 0
+OUTER   N = N + 3
+        N = N - 1
+        N = N * 2
+        N = GE(N, 10000000) N / 10000  :S(OUTER)F(NEXT)
+NEXT    OUTER = LT(OUTER, 100000) OUTER + 1  :S(OUTER)
+        OUTPUT = N
+end

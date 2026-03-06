@@ -3,16 +3,14 @@ using Test.TestLexer;
 
 namespace Test.FunctionControl;
 
-// Tests require AreaLibrary.dll from dev machine (hardcoded Windows path).
-[TestClass, Ignore]
+[TestClass]
 public class Load
 {
     [TestMethod]
     public void TEST_Load_001()
     {
-        var dllName = @"C:\Users\jcooper\Documents\Visual Studio 2022\Snobol4.Net\CustomFunction\bin\Debug\net10.0\AreaLibrary.dll";
-        if (SetupTests.IsLinux)
-            dllName = @"/mnt/c/Users/jcooper/Documents/Visual Studio 2022/Snobol4.Net/CustomFunction/bin/Debug/net10.0/AreaLibrary.dll";
+        var dllName = SetupTests.AreaLibraryPath;
+        Assert.IsTrue(File.Exists(dllName), $"AreaLibrary.dll not found at: {dllName}");
 
         var s = $"""
 
@@ -25,7 +23,9 @@ public class Load
         const string directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("Area of circle with radius 4.5 is 63.61725123519331", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r1")]).Data);
-        Assert.AreEqual("Area of square with side  15.9 is 252.81", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r2")]).Data);
+        Assert.AreEqual("Area of circle with radius 4.5 is 63.61725123519331",
+            ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r1")]).Data);
+        Assert.AreEqual("Area of square with side  15.9 is 252.81",
+            ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r2")]).Data);
     }
 }

@@ -42,4 +42,21 @@ public class SetupTests
     public static bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
     public static bool IsLinux => RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
     public static bool IsMacOs => RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+
+    /// <summary>
+    /// Absolute path to AreaLibrary.dll, built from the CustomFunction project.
+    /// Walks up from the test assembly's bin directory to find the solution root.
+    /// </summary>
+    public static string AreaLibraryPath
+    {
+        get
+        {
+            // AppDomain.BaseDirectory = …/TestSnobol4/bin/Release/net10.0/
+            // Walk up: net10.0 → Release → bin → TestSnobol4 → solution root
+            var dir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
+            for (var i = 0; i < 4; i++)
+                dir = Path.GetDirectoryName(dir) ?? dir;
+            return Path.Combine(dir, "CustomFunction", "bin", "Release", "net10.0", "AreaLibrary.dll");
+        }
+    }
 }

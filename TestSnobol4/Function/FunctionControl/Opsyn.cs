@@ -7,13 +7,12 @@ namespace Test.FunctionControl;
 public class Opsyn
 {
 
-    // Requires AreaLibrary.dll from dev machine (hardcoded Windows path).
-    [TestMethod, Ignore]
+    // Requires AreaLibrary.dll — resolved from solution root via SetupTests.AreaLibraryPath.
+    [TestMethod]
     public void TEST_Opsyn_001()
     {
-        var dllName = @"C:\Users\jcooper\Documents\Visual Studio 2022\Snobol4.Net\CustomFunction\bin\Debug\net10.0\AreaLibrary.dll";
-        if (SetupTests.IsLinux)
-            dllName = @"/mnt/c/Users/jcooper/Documents/Visual Studio 2022/Snobol4.Net/CustomFunction/bin/Debug/net10.0/AreaLibrary.dll";
+        var dllName = SetupTests.AreaLibraryPath;
+        Assert.IsTrue(File.Exists(dllName), $"AreaLibrary.dll not found at: {dllName}");
 
         var s = $"""
 

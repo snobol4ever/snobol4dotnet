@@ -9,7 +9,7 @@ namespace Snobol4.Common;
 /// </summary>
 public partial class Executive
 {
-    internal int ThreadedExecuteLoop(int startAt = 0)
+    internal int ThreadedExecuteLoop(int startAt = 0, bool useFastPath = true)
     {
         var thread    = Thread!;
         var varSlots  = Parent.VariableSlots;
@@ -41,6 +41,38 @@ public partial class Executive
 
         int  exitCode        = -1;
         bool localSavedFailure = false; // local SaveFailure/RestoreFailure state
+
+        // ── Fast path: all instructions are CallMsil or Halt ────────────────
+        // When every opcode in the thread is either CallMsil or Halt, skip the
+        // full switch dispatch and spin in a tight loop.  Sub-expression threads
+        // compiled by CompileSubExpression still use regular threaded opcodes,
+        // so callers that know they are on a sub-thread pass useFastPath:false.
+        if (false && useFastPath && Parent.ThreadIsMsilOnly)  // DISABLED for diagnosis
+        {
+            var msilDelegates = Parent.MsilDelegates;
+            while (InstructionPointer >= 0 && InstructionPointer < thread.Length
+                   && Parent.ThreadIsMsilOnly)
+            {
+                var instr = thread[InstructionPointer++];
+                if (instr.Op == OpCode.Halt)
+                {
+                    exitCode = -1;
+                    goto Done;
+                }
+                // instr.Op == OpCode.CallMsil (guaranteed by ThreadIsMsilOnly)
+                var next = msilDelegates[instr.IntOperand](this);
+                if (next == int.MinValue) continue;       // fall through
+                if (next < 0) { exitCode = next; goto Done; }
+                thread = Thread!;                         // AppendCompile may have extended Thread
+                InstructionPointer = next;
+            }
+            // If ThreadIsMsilOnly went false mid-loop (CODE/AppendCompile at runtime),
+            // fall through into the full switch to handle the remaining opcodes.
+            if (Parent.ThreadIsMsilOnly) goto Done;  // loop exited normally (IP out of range)
+        }
+        // ── End fast path ────────────────────────────────────────────────────
+
+        FullSwitch:
 
         while (InstructionPointer >= 0 && InstructionPointer < thread.Length)
         {

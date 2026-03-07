@@ -67,7 +67,7 @@ public partial class Executive
         Thread             = subThread;
         InstructionPointer = 0;
         InitExecutionCache();   // no-op after first call
-        ThreadedExecuteLoop(0);
+        ThreadedExecuteLoop(0, useFastPath: false);
         var exprFailure    = LastExpressionFailure;
         Thread             = savedThread;
         InstructionPointer = savedIP;

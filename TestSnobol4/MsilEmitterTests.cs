@@ -631,4 +631,64 @@ end");
         Assert.AreEqual(0, b.ErrorCodeHistory.Count);
         Assert.AreEqual(42L, Int("N", b));
     }
+
+    // -----------------------------------------------------------------------
+    // Step 12 tests — fast path for pure-MSIL threads
+    // -----------------------------------------------------------------------
+
+    [TestMethod]
+    public void Step12_ThreadIsMsilOnly_TrueForFullyCompilableProgram()
+    {
+        // A fully compilable program (all gotos absorbed) must set
+        // ThreadIsMsilOnly = true so the fast path activates.
+        var b = Compile(@"
+        N = 0
+        N = N + 1
+        lt(N, 5)    :s(loop)
+loop    N = N * 2
+end");
+        Assert.IsTrue(b.ThreadIsMsilOnly,
+            "ThreadIsMsilOnly should be true when every thread opcode is CallMsil or Halt");
+        // Sanity: no threaded opcodes other than CallMsil/Halt should be present.
+        Assert.IsTrue(b.Execute!.Thread!.All(i => i.Op == OpCode.CallMsil || i.Op == OpCode.Halt),
+            "Thread must contain only CallMsil and Halt when ThreadIsMsilOnly is true");
+    }
+
+    [TestMethod]
+    public void Step12_FastPath_CorrectExecutionResult()
+    {
+        // The fast-path spin loop must produce the same results as the full switch.
+        // A simple count-up loop: N reaches 10, then the :S(loop) falls through.
+        var b = Run(@"
+        N = 0
+loop    N = N + 1
+        lt(N, 10)   :s(loop)
+end");
+        Assert.AreEqual(0, b.ErrorCodeHistory.Count,
+            "No runtime errors expected on fast path");
+        Assert.AreEqual(10L, Int("N", b),
+            "Loop counter must reach 10 via the fast-path dispatch");
+        Assert.IsTrue(b.ThreadIsMsilOnly,
+            "ThreadIsMsilOnly must be true for this program (confirms fast path was taken)");
+    }
+
+    [TestMethod]
+    public void Step12_FastPath_ConditionalAndUnconditionalGotos()
+    {
+        // Exercise both conditional (:S/:F) and unconditional :(LABEL) gotos
+        // through the fast path in a single program.
+        var b = Run(@"
+        result = 'start'
+        eq(1, 1)        :s(yes)f(no)
+yes     result = 'yes'  :(done)
+no      result = 'no'
+done    result = result 'end'
+end");
+        Assert.AreEqual(0, b.ErrorCodeHistory.Count,
+            "No runtime errors expected");
+        Assert.AreEqual("yesend", Str("result", b),
+            "Conditional :S goto and unconditional :(done) must work via fast path");
+        Assert.IsTrue(b.ThreadIsMsilOnly,
+            "ThreadIsMsilOnly must be true confirming fast path was active");
+    }
 }

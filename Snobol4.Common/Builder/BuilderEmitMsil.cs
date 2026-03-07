@@ -239,7 +239,9 @@ public partial class Builder
         bool hasGoto = directGotoLabel  != null || indirectGotoExpr != null ||
                        successLabel     != null || successExpr      != null ||
                        failureLabel     != null || failureExpr      != null;
-        if (tokens.Count == 0 && !hasGoto) return;
+        // Allow empty-body delegates through for body slots (label-only / 'end' statements)
+        // so Init/Finalize are inlined in a CallMsil and no threaded opcodes remain.
+        if (tokens.Count == 0 && !hasGoto && !isBody) return;
         if (tokens.Count == 0 && !isBody) return;
         if (MsilCache.ContainsKey(tokens)) return;
 
@@ -320,11 +322,13 @@ public partial class Builder
         while (choiceLabels2.Count > 0)
             il.MarkLabel(choiceLabels2.Pop());
 
-        // A body-only delegate with no tokens is valid when a goto is absorbed.
+        // A body-only delegate with no tokens is valid when a goto is absorbed,
+        // OR when this is a body with zero tokens (label-only / 'end' statement)
+        // so that Init/Finalize still fire and the thread stays pure-CallMsil.
         bool hasGoto = directGotoLabel  != null || indirectGotoExpr != null ||
                        successLabel     != null || successExpr      != null ||
                        failureLabel     != null || failureExpr      != null;
-        if (!anyEmitted && !hasGoto) return null;
+        if (!anyEmitted && !hasGoto && !(isBody && tokens.Count == 0)) return null;
 
         // ── Body delegates: finalize + goto / fall-through return ─────────
         if (isBody)

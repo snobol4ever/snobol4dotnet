@@ -44,6 +44,15 @@ public partial class Builder : IDisposable
     internal ConstantPool Constants = new();
     internal int[]? StatementInstructionStarts;
 
+    /// <summary>
+    /// True when the compiled thread contains only <c>CallMsil</c> and <c>Halt</c>
+    /// opcodes — all control flow has been absorbed into delegates.
+    /// Set after <see cref="ThreadedCodeCompiler.Compile"/> / <c>AppendCompile</c>.
+    /// When true, <see cref="Executive.ThreadedExecuteLoop"/> can skip the full
+    /// switch dispatch and spin in a tight CallMsil-only fast path.
+    /// </summary>
+    internal bool ThreadIsMsilOnly;
+
     #endregion
 
     #region Constructor
@@ -103,6 +112,7 @@ public partial class Builder : IDisposable
                 Execute.Thread = tc.Compile();
                 CompileStarFunctions(tc);
                 PopulateMainMetadata();
+                ComputeThreadIsMsilOnly();
                 _timerBuild.Stop();
                 PrintCompilationStatistics();
                 Execute.ExecuteLoop(0);
@@ -148,6 +158,7 @@ public partial class Builder : IDisposable
             Execute.Thread = tc.Compile();
             CompileStarFunctions(tc);
             PopulateMainMetadata();
+            ComputeThreadIsMsilOnly();
         }
         catch (CompilerException) { }
         catch (Exception e) { ReportProgrammingError(e); }
@@ -190,6 +201,7 @@ public partial class Builder : IDisposable
             CompileStarFunctions(tc);
             PopulateCodeMetadata(stmtOffset);
             StatementCount += Code.SourceLines.Count;
+            ComputeThreadIsMsilOnly();
             return true;
         }
         catch (CompilerException) { }
@@ -304,6 +316,29 @@ public partial class Builder : IDisposable
             }
             stmtNumber++;
         }
+    }
+
+    #endregion
+
+    #region ThreadIsMsilOnly analysis
+
+    /// <summary>
+    /// Inspects the compiled thread and sets <see cref="ThreadIsMsilOnly"/> to
+    /// <c>true</c> iff every instruction is either <c>CallMsil</c> or <c>Halt</c>.
+    /// Called immediately after each compile path finishes building the thread.
+    /// </summary>
+    private void ComputeThreadIsMsilOnly()
+    {
+        if (Execute?.Thread == null) { ThreadIsMsilOnly = false; return; }
+        foreach (var instr in Execute.Thread)
+        {
+            if (instr.Op != OpCode.CallMsil && instr.Op != OpCode.Halt)
+            {
+                ThreadIsMsilOnly = false;
+                return;
+            }
+        }
+        ThreadIsMsilOnly = true;
     }
 
     #endregion

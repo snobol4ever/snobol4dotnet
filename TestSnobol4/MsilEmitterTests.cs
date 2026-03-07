@@ -373,5 +373,45 @@ end");
         Assert.AreEqual(0, b.ErrorCodeHistory.Count);
         Assert.AreEqual(5L, Int("I", b));
     }
+
+    // -----------------------------------------------------------------------
+    // Step 8 tests — fall-through Jump absorbed into delegate return value
+    // -----------------------------------------------------------------------
+
+    [TestMethod]
+    public void Step8_NoGoto_NoJumpInThread()
+    {
+        // A statement with no goto clause should NOT emit a Jump opcode —
+        // the delegate returns int.MinValue which the loop treats as fall-through.
+        var b = Compile(@"
+        A = 'x'
+        B = 'y'
+end");
+        var thread = b.Execute!.Thread!;
+        // No standalone Jump should appear between consecutive CallMsil opcodes
+        var ops = thread.Select(i => i.Op).ToList();
+        for (int i = 0; i < ops.Count - 1; i++)
+        {
+            if (ops[i] == OpCode.CallMsil && ops[i + 1] == OpCode.Jump)
+                Assert.Fail($"Jump at [{i+1}] directly after CallMsil at [{i}] — should be absorbed");
+        }
+    }
+
+    [TestMethod]
+    public void Step8_NoGoto_MultiStatementExecutesInOrder()
+    {
+        // Behavioral: all statements run in sequence with no goto.
+        var b = Run(@"
+        A = 1
+        B = A + 1
+        C = B + 1
+        D = C + 1
+end");
+        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
+        Assert.AreEqual(1L,  Int("A", b));
+        Assert.AreEqual(2L,  Int("B", b));
+        Assert.AreEqual(3L,  Int("C", b));
+        Assert.AreEqual(4L,  Int("D", b));
+    }
 }
 // NOTE: closing brace already present — appending before it handled by str_replace below

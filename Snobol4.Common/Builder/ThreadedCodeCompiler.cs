@@ -149,7 +149,10 @@ internal sealed class ThreadedCodeCompiler
 
         if (line.ParseFailureGoto.Count == 0 && line.ParseSuccessGoto.Count == 0)
         {
-            EmitJumpToStmt(OpCode.Jump, next);
+            // If the body is a compiled delegate it already returns int.MinValue
+            // (fall through) — no Jump opcode needed.
+            if (!_parent.MsilCache.ContainsKey(line.ParseBody))
+                EmitJumpToStmt(OpCode.Jump, next);
             return;
         }
 

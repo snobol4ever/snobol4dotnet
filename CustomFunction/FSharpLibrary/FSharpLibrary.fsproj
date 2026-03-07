@@ -4,6 +4,9 @@
     <AssemblyName>FSharpLibrary</AssemblyName>
     <Nullable>enable</Nullable>
     <EnableDefaultNamespaceProvider>false</EnableDefaultNamespaceProvider>
+    <!-- Copy FSharp.Core.dll alongside the plugin DLL so AssemblyDependencyResolver
+         can find it on Linux (where it is not in a globally-known location). -->
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="FSharpLibrary.fs" />

@@ -15,6 +15,11 @@ public partial class Executive
     internal void PushVarBySlot(int slotIdx)
     {
         if (slotIdx >= VarSlotArray.Length) ExpandVarSlotArray();
+        // Fire trace hooks for identifier access and value — mirrors the
+        // IdentifierTable indexer path that the threaded PushVar opcode takes.
+        var varName = Parent.VariableSlots[slotIdx].Symbol;
+        TraceIdentifierAccess(varName);
+        TraceIdentifierValue(varName);
         SystemStack.Push(VarSlotArray[slotIdx]);
     }
 
@@ -57,7 +62,9 @@ public partial class Executive
         // Add the function name as the last argument, matching Function()'s contract.
         _reusableArgList.Add(new StringVar(slot.Symbol));
 
+        TraceFunctionCall(slot.Symbol);
         entry.Handler(_reusableArgList);
+        TraceFunctionReturn(slot.Symbol);
     }
 
     /// <summary>
@@ -131,6 +138,7 @@ public partial class Executive
     /// </summary>
     internal int ResolveLabel(string sym, int errorCode = 23)
     {
+        TraceGoto(sym);
         var target = LabelTable[sym];
         if (target == -1)                 return -1;
         if (target <= -2 && target >= -7) return target;
@@ -155,6 +163,7 @@ public partial class Executive
         var sym    = SystemStack.Peek().Symbol;
         var target = LabelTable[sym];
         SystemStack.Pop();
+        TraceGoto(sym);
         if (target == -1)                 return -1;
         if (target <= -2 && target >= -7) return target;
         if (target >= 0)
@@ -177,6 +186,7 @@ public partial class Executive
     {
         var sym = SystemStack.Peek().Symbol;
         SystemStack.Pop();
+        TraceGoto(sym);
         if (IdentifierTable.TryGetValue(sym, out var v) && v is CodeVar cv)
         {
             var target = cv.StatementNumber;

@@ -691,4 +691,115 @@ end");
         Assert.IsTrue(b.ThreadIsMsilOnly,
             "ThreadIsMsilOnly must be true confirming fast path was active");
     }
+
+    // -----------------------------------------------------------------------
+    // Step 13 tests — TRACE hooks in the MSIL path
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// Compile a program, inject trace state, execute, and verify the hook fired
+    /// (AmpTrace is decremented each time a registered hook fires).
+    /// </summary>
+    private static Builder CompileAndRunWithTrace(string script,
+        Action<Executive> setupTrace)
+    {
+        var b = Compile(script);
+        var exec = b.Execute!;
+        setupTrace(exec);
+        exec.ExecuteLoop(0);
+        return b;
+    }
+
+    [TestMethod]
+    public void Step13_TraceGoto_FiresThroughMsilPath()
+    {
+        // A program with an unconditional goto to a labelled statement.
+        // Register the label for tracing, set AmpTrace=1, verify it decrements.
+        var b = Compile(@"
+        N = 0
+        N = N + 1   :(done)
+done    N = N + 10
+end");
+        var exec = b.Execute!;
+        exec.AmpTrace = 10;
+        exec.TraceTableLabel[b.FoldCase("done")] = "";
+        exec.ExecuteLoop(0);
+
+        Assert.AreEqual(0, b.ErrorCodeHistory.Count,
+            "No runtime errors expected");
+        // AmpTrace should have been decremented when the goto 'done' was traced.
+        Assert.IsTrue(exec.AmpTrace < 10,
+            "AmpTrace should be decremented when TraceGoto fires through MSIL path");
+        Assert.AreEqual(11L, Int("N", b),
+            "Program result must be correct when tracing is active");
+    }
+
+    [TestMethod]
+    public void Step13_TraceIdentifierAccess_FiresThroughMsilPath()
+    {
+        // A program that reads variable N via PushVarBySlot.
+        // Register N for access tracing and verify AmpTrace is decremented.
+        var b = Compile(@"
+        N = 42
+        R = N
+end");
+        var exec = b.Execute!;
+        exec.AmpTrace = 10;
+        exec.TraceTableIdentifierAccess[b.FoldCase("N")] = "";
+        exec.ExecuteLoop(0);
+
+        Assert.AreEqual(0, b.ErrorCodeHistory.Count,
+            "No runtime errors expected");
+        Assert.IsTrue(exec.AmpTrace < 10,
+            "AmpTrace should be decremented when TraceIdentifierAccess fires through MSIL path");
+        Assert.AreEqual("42", Str("R", b),
+            "Variable value must be correct when access tracing is active");
+    }
+
+    [TestMethod]
+    public void Step13_TraceFunctionCallAndReturn_FiresThroughMsilPath()
+    {
+        // A program that calls SIZE() via CallFuncBySlot.
+        // Register SIZE for call+return tracing and verify AmpTrace decrements twice.
+        var b = Compile(@"
+        R = SIZE('hello')
+end");
+        var exec = b.Execute!;
+        exec.AmpTrace = 10;
+        var sizeName = b.FoldCase("size");
+        exec.TraceTableFunctionCall[sizeName]   = "";
+        exec.TraceTableFunctionReturn[sizeName] = "";
+        exec.ExecuteLoop(0);
+
+        Assert.AreEqual(0, b.ErrorCodeHistory.Count,
+            "No runtime errors expected");
+        // TraceFunctionCall + TraceFunctionReturn each decrement AmpTrace once.
+        Assert.IsTrue(exec.AmpTrace <= 8,
+            "AmpTrace should be decremented for both function call and return through MSIL path");
+        Assert.AreEqual("5", Str("R", b),
+            "Function result must be correct when call/return tracing is active");
+    }
+
+    [TestMethod]
+    public void Step13_TraceDoesNotFireWhenAmpTraceIsZero()
+    {
+        // With AmpTrace = 0 the hooks must not fire (guard condition).
+        var b = Compile(@"
+        N = 1
+        R = SIZE('hi')  :(done)
+done    N = N + 1
+end");
+        var exec = b.Execute!;
+        exec.AmpTrace = 0;   // disabled
+        exec.TraceTableLabel[b.FoldCase("done")]          = "";
+        exec.TraceTableFunctionCall[b.FoldCase("size")]   = "";
+        exec.TraceTableFunctionReturn[b.FoldCase("size")] = "";
+        exec.TraceTableIdentifierAccess[b.FoldCase("N")]  = "";
+        exec.ExecuteLoop(0);
+
+        Assert.AreEqual(0, b.ErrorCodeHistory.Count,
+            "No runtime errors expected");
+        Assert.AreEqual(0L, exec.AmpTrace,
+            "AmpTrace must remain 0 when it starts at 0 (no hooks should fire)");
+    }
 }

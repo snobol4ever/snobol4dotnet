@@ -74,6 +74,9 @@ internal enum OpCode : byte
     SetFailure       = 78,  // x.Failure = true
     ClearFailure     = 79,  // x.Failure = false (used before failure-goto eval)
     CheckGotoFailure = 80,  // LogRuntimeException(20) if x.Failure
+
+    // --- MSIL-compiled expression delegate ---
+    CallMsil = 90,  // Operand: index into Builder.MsilDelegates
 }
 
 // ---------------------------------------------------------------------------

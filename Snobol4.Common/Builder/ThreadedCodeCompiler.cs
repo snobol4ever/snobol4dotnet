@@ -229,6 +229,15 @@ internal sealed class ThreadedCodeCompiler
 
     private void EmitTokenList(List<Token> tokens)
     {
+        // If BuilderEmitMsil has already JIT-compiled this token list into a
+        // DynamicMethod delegate, emit a single CallMsil instruction instead
+        // of the individual opcodes.  The threaded path is the fallback.
+        if (_parent.MsilCache.TryGetValue(tokens, out var delegateIdx))
+        {
+            Emit(new Instruction(OpCode.CallMsil, delegateIdx));
+            return;
+        }
+
         foreach (var t in tokens)
         {
             switch (t.TokenType)

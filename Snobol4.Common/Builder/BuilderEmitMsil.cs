@@ -140,10 +140,10 @@ public partial class Builder
         {
             var line = Code.SourceLines[si];
 
-            // For direct unconditional gotos, the goto label is baked into the
-            // body delegate — one CallMsil covers Init + body + Finalize + goto.
-            // Only :(LABEL) form (DirectGotoFirst == false, single IDENTIFIER) —
-            // NOT :<VAR> (DirectGotoFirst == true) which needs GotoIndirectCode.
+            // ── Detect what can be absorbed into the body delegate ─────────
+            // Plain-paren form :(LABEL) / :S(LABEL) / :F(LABEL) with a single
+            // bare IDENTIFIER.  Angle-bracket forms (DirectGotoFirst == true)
+            // use GotoIndirectCode and remain in the thread.
             string? directUncondLabel = null;
             if (!line.DirectGotoFirst &&
                 line.ParseUnconditionalGoto.Count == 1 &&
@@ -152,25 +152,73 @@ public partial class Builder
                 directUncondLabel = line.ParseUnconditionalGoto[0].MatchedString;
             }
 
-            TryCache(line.ParseBody,              stmtIdx: si, isBody: true,
-                                                  directGotoLabel: directUncondLabel);
+            // Conditional gotos — only when no unconditional goto (mutually exclusive).
+            string? successLabel = null;
+            string? failureLabel = null;
+            if (directUncondLabel == null)
+            {
+                bool hasBoth = line.ParseSuccessGoto.Count > 0 && line.ParseFailureGoto.Count > 0;
 
-            // Only cache goto token lists separately when NOT absorbed into body
+                // Determine which DirectGotoX flag applies to each side.
+                // DirectGotoFirst applies to whichever goto is listed first in source.
+                // DirectGotoSecond applies to the other.
+                bool successIsFirst  = line.SuccessFirst;
+                bool successIsDirect = hasBoth
+                    ? (successIsFirst ? line.DirectGotoFirst : line.DirectGotoSecond)
+                    : line.DirectGotoFirst;
+                bool failureIsDirect = hasBoth
+                    ? (successIsFirst ? line.DirectGotoSecond : line.DirectGotoFirst)
+                    : line.DirectGotoFirst;
+
+                if (!successIsDirect &&
+                    line.ParseSuccessGoto.Count == 1 &&
+                    line.ParseSuccessGoto[0].TokenType == Token.Type.IDENTIFIER)
+                    successLabel = line.ParseSuccessGoto[0].MatchedString;
+
+                if (!failureIsDirect &&
+                    line.ParseFailureGoto.Count == 1 &&
+                    line.ParseFailureGoto[0].TokenType == Token.Type.IDENTIFIER)
+                    failureLabel = line.ParseFailureGoto[0].MatchedString;
+
+                // If both gotos present but only one can be absorbed, absorb neither —
+                // the delegate needs to handle both or the threaded path handles both.
+                // (Partial absorption would require a more complex hybrid approach.)
+                if (hasBoth && (successLabel == null) != (failureLabel == null))
+                {
+                    successLabel = null;
+                    failureLabel = null;
+                }
+            }
+
+            TryCache(line.ParseBody, stmtIdx: si, isBody: true,
+                     directGotoLabel: directUncondLabel,
+                     successLabel:    successLabel,
+                     failureLabel:    failureLabel,
+                     successFirst:    line.SuccessFirst);
+
+            // Only cache goto token lists separately when NOT absorbed into body.
             if (directUncondLabel == null)
                 TryCache(line.ParseUnconditionalGoto, stmtIdx: si, isBody: false);
-            TryCache(line.ParseSuccessGoto,       stmtIdx: si, isBody: false);
-            TryCache(line.ParseFailureGoto,       stmtIdx: si, isBody: false);
+            if (successLabel == null)
+                TryCache(line.ParseSuccessGoto,       stmtIdx: si, isBody: false);
+            if (failureLabel == null)
+                TryCache(line.ParseFailureGoto,       stmtIdx: si, isBody: false);
         }
     }
 
     private void TryCache(List<Token> tokens, int stmtIdx, bool isBody,
-                          string? directGotoLabel = null)
+                          string? directGotoLabel = null,
+                          string? successLabel    = null,
+                          string? failureLabel    = null,
+                          bool    successFirst    = false)
     {
-        if (tokens.Count == 0 && directGotoLabel == null) return;
+        bool hasGoto = directGotoLabel != null || successLabel != null || failureLabel != null;
+        if (tokens.Count == 0 && !hasGoto) return;
         if (tokens.Count == 0 && !isBody) return;
         if (MsilCache.ContainsKey(tokens)) return;
 
-        var dm = EmitAndCache(tokens, stmtIdx, isBody, directGotoLabel);
+        var dm = EmitAndCache(tokens, stmtIdx, isBody, directGotoLabel,
+                              successLabel, failureLabel, successFirst);
         if (dm == null) return;
 
         int idx = MsilDelegates.Count;
@@ -182,7 +230,10 @@ public partial class Builder
     /// token list contains nothing emittable (structural tokens only).
     /// </summary>
     private Func<Executive, int>? EmitAndCache(List<Token> tokens, int stmtIdx, bool isBody,
-                                               string? directGotoLabel = null)
+                                               string? directGotoLabel = null,
+                                               string? successLabel    = null,
+                                               string? failureLabel    = null,
+                                               bool    successFirst    = false)
     {
         var dm = new DynamicMethod(
             name:            "Snobol4_Expr",
@@ -466,9 +517,9 @@ public partial class Builder
         while (choiceLabels.Count > 0)
             il.MarkLabel(choiceLabels.Pop());
 
-        // A body-only delegate with no tokens is valid when directGotoLabel is set
-        // (e.g. a label-only statement with :(GOTO) but no expression body).
-        if (!anyEmitted && directGotoLabel == null) return null;
+        // A body-only delegate with no tokens is valid when a goto is absorbed.
+        bool hasGoto = directGotoLabel != null || successLabel != null || failureLabel != null;
+        if (!anyEmitted && !hasGoto) return null;
 
         // ── Body delegates: finalize + goto / fall-through return ─────────
         if (isBody)
@@ -478,12 +529,19 @@ public partial class Builder
 
             if (directGotoLabel != null)
             {
-                // Bake the label into IL — returns the target IP directly.
+                // Unconditional :(LABEL) — resolve label, return IP.
                 il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Ldstr, directGotoLabel);
-                il.Emit(OpCodes.Ldc_I4, 23);          // error code matching GotoIndirect
+                il.Emit(OpCodes.Ldc_I4, 23);
                 il.Emit(OpCodes.Call, _resolveLabel);
                 il.Emit(OpCodes.Ret);
+                return (Func<Executive, int>)dm.CreateDelegate(typeof(Func<Executive, int>));
+            }
+
+            if (successLabel != null || failureLabel != null)
+            {
+                // Conditional gotos — branch on Failure field.
+                EmitConditionalGotoIL(il, successLabel, failureLabel, successFirst);
                 return (Func<Executive, int>)dm.CreateDelegate(typeof(Func<Executive, int>));
             }
         }
@@ -493,6 +551,92 @@ public partial class Builder
         il.Emit(OpCodes.Ret);
 
         return (Func<Executive, int>)dm.CreateDelegate(typeof(Func<Executive, int>));
+    }
+
+    /// <summary>
+    /// Emit IL that implements conditional goto branching after the body and Finalize.
+    /// Mirrors the JumpOnFailure/JumpOnSuccess + CheckGotoFailure + GotoIndirect
+    /// threaded sequence, but inline in IL returning the target IP directly.
+    /// </summary>
+    private void EmitConditionalGotoIL(ILGenerator il,
+                                        string? successLabel, string? failureLabel,
+                                        bool successFirst)
+    {
+        // Local helper: ldarg.0; ldstr label; ldc.i4 23; call ResolveLabel; ret
+        void EmitResolve(string label)
+        {
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldstr, label);
+            il.Emit(OpCodes.Ldc_I4, 23);
+            il.Emit(OpCodes.Call, _resolveLabel);
+            il.Emit(OpCodes.Ret);
+        }
+
+        // Local helper: ldc.i4 int.MinValue; ret  (fall through)
+        void EmitFallthrough()
+        {
+            il.Emit(OpCodes.Ldc_I4, int.MinValue);
+            il.Emit(OpCodes.Ret);
+        }
+
+        // Local helper: clear Failure flag
+        void EmitClearFailure()
+        {
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldc_I4_0);
+            il.Emit(OpCodes.Stfld, _failureField);
+        }
+
+        if (successLabel != null && failureLabel == null)
+        {
+            // :S(SL) only — if Failure fall through; else resolve SL.
+            var fallLabel = il.DefineLabel();
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldfld, _failureField);
+            il.Emit(OpCodes.Brtrue, fallLabel);    // Failure == true → fall through
+            EmitResolve(successLabel);
+            il.MarkLabel(fallLabel);
+            EmitFallthrough();
+        }
+        else if (failureLabel != null && successLabel == null)
+        {
+            // :F(FL) only — if !Failure fall through; else clear Failure + resolve FL.
+            var fallLabel = il.DefineLabel();
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldfld, _failureField);
+            il.Emit(OpCodes.Brfalse, fallLabel);   // Failure == false → fall through
+            EmitClearFailure();
+            EmitResolve(failureLabel);
+            il.MarkLabel(fallLabel);
+            EmitFallthrough();
+        }
+        else // both successLabel != null && failureLabel != null
+        {
+            if (successFirst)
+            {
+                // :S(SL)F(FL) — success evaluated first
+                var failPath = il.DefineLabel();
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldfld, _failureField);
+                il.Emit(OpCodes.Brtrue, failPath);   // Failure → go to fail path
+                EmitResolve(successLabel);
+                il.MarkLabel(failPath);
+                EmitClearFailure();
+                EmitResolve(failureLabel);
+            }
+            else
+            {
+                // :F(FL)S(SL) — failure evaluated first
+                var succPath = il.DefineLabel();
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldfld, _failureField);
+                il.Emit(OpCodes.Brfalse, succPath);  // !Failure → go to success path
+                EmitClearFailure();
+                EmitResolve(failureLabel);
+                il.MarkLabel(succPath);
+                EmitResolve(successLabel);
+            }
+        }
     }
 
     // -----------------------------------------------------------------------

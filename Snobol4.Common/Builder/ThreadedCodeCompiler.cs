@@ -164,18 +164,47 @@ internal sealed class ThreadedCodeCompiler
             return;
         }
 
+        // Check if conditional gotos were absorbed into the body delegate.
+        bool hasBoth = line.ParseSuccessGoto.Count > 0 && line.ParseFailureGoto.Count > 0;
+        bool successIsFirst  = line.SuccessFirst;
+        bool successIsDirect = hasBoth
+            ? (successIsFirst ? line.DirectGotoFirst : line.DirectGotoSecond)
+            : line.DirectGotoFirst;
+        bool failureIsDirect = hasBoth
+            ? (successIsFirst ? line.DirectGotoSecond : line.DirectGotoFirst)
+            : line.DirectGotoFirst;
+
+        bool successAbsorbed =
+            !successIsDirect &&
+            line.ParseSuccessGoto.Count == 1 &&
+            line.ParseSuccessGoto[0].TokenType == Token.Type.IDENTIFIER &&
+            _parent.MsilCache.ContainsKey(line.ParseBody);
+
+        bool failureAbsorbed =
+            !failureIsDirect &&
+            line.ParseFailureGoto.Count == 1 &&
+            line.ParseFailureGoto[0].TokenType == Token.Type.IDENTIFIER &&
+            _parent.MsilCache.ContainsKey(line.ParseBody);
+
+        // Both-goto: partial absorption not supported — absorb only if both qualify.
+        if (hasBoth && successAbsorbed != failureAbsorbed)
+        { successAbsorbed = false; failureAbsorbed = false; }
+
         if (line.ParseSuccessGoto.Count > 0 && line.ParseFailureGoto.Count > 0)
         {
+            if (successAbsorbed && failureAbsorbed) return;  // both in delegate
             EmitBothGotos(line, next);
             return;
         }
 
         if (line.ParseSuccessGoto.Count > 0)
         {
+            if (successAbsorbed) return;
             EmitSuccessOnly(line, next);
             return;
         }
 
+        if (failureAbsorbed) return;
         EmitFailureOnly(line, next);
     }
 

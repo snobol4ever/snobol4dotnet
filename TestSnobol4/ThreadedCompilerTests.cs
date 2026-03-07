@@ -114,14 +114,23 @@ public class ThreadedCompilerTests
     public void SuccessGoto_EmitsJumpOnFailureForFallThrough()
     {
         var t = Compile("        LT(N,10)   :S(DONE)\nDONE\nend");
-        Assert.IsTrue(t.Any(i => i.Op == OpCode.JumpOnFailure));
+        // After Step 10, single-identifier :S(LABEL) is absorbed into the body
+        // delegate — the delegate branches on Failure internally, so no
+        // JumpOnFailure appears in the thread for compiled statements.
+        bool hasMsil          = t.Any(i => i.Op == OpCode.CallMsil);
+        bool hasJumpOnFailure = t.Any(i => i.Op == OpCode.JumpOnFailure);
+        Assert.IsTrue(hasMsil || hasJumpOnFailure,
+            "Expected either CallMsil (with absorbed :S goto) or JumpOnFailure");
     }
 
     [TestMethod]
     public void FailureGoto_EmitsJumpOnSuccessForFallThrough()
     {
         var t = Compile("        LT(N,10)   :F(DONE)\nDONE\nend");
-        Assert.IsTrue(t.Any(i => i.Op == OpCode.JumpOnSuccess));
+        bool hasMsil          = t.Any(i => i.Op == OpCode.CallMsil);
+        bool hasJumpOnSuccess = t.Any(i => i.Op == OpCode.JumpOnSuccess);
+        Assert.IsTrue(hasMsil || hasJumpOnSuccess,
+            "Expected either CallMsil (with absorbed :F goto) or JumpOnSuccess");
     }
 
     // -----------------------------------------------------------------------

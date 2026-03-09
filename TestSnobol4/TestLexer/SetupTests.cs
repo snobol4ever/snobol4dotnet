@@ -1,6 +1,7 @@
+using Snobol4.Common;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
-using Snobol4.Common;
 
 namespace Test.TestLexer;
 
@@ -8,17 +9,18 @@ namespace Test.TestLexer;
 public class SetupTests
 {
     public static string WindowsOutput = @"..\..\..\..\..\TestSnobol4\Output\";
-    public static string LinuxOutput =   @"../../../../../TestSnobol4/Output/";
+    public static string LinuxOutput = @"../../../../../TestSnobol4/Output/";
 
-    public static string WindowsDll =     @"C:\Users\jcooper\Documents\Visual Studio 2022\Snobol4.Net.Master\Snobol4.Net\CustomFunction\bin\Debug\net10.0\AreaLibrary.dll";
-    public static string LinuxDll =   @"\mnt\c\Users\jcooper\Documents\Visual Studio 2022\Snobol4.Net.Master\Snobol4.Net\CustomFunction\bin\Debug\net10.0\AreaLibrary.dll";
+    public static string CurrentDir = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+    public static string WindowsDll = CurrentDir.Replace(@"\TestSnobol4\", @"\CustomFunction\") + @"\AreaLibrary.dll";
+    public static string LinuxDll = CurrentDir.Replace(@"/TestSnobol4/", @"/CustomFunction/") + @"/AreaLibrary.dll";
 
     internal static Builder SetupScript(string directives, string script)
     {
         // Get array of commands and source files
         var commands = new List<string>(
-            directives.Split(" ",
-                StringSplitOptions.RemoveEmptyEntries));
+                directives.Split(" ",
+                    StringSplitOptions.RemoveEmptyEntries));
 
         // Get cross-platform test file path
         var testDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TestSnobol4");

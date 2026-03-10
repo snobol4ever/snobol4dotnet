@@ -11,6 +11,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="MathLibrary/**" />
+    <Compile Remove="FSharpLibrary/**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Snobol4.Common\Snobol4.Common.csproj">
       <Private>True</Private>
     </ProjectReference>

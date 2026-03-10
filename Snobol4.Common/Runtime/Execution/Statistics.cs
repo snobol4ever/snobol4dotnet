@@ -25,8 +25,15 @@ public partial class Executive
         _timerExecute.Stop();
     }
 
+    internal void StartTimer()
+    {
+        _timerExecute.Start();
+    }
+
     internal void PrintExecutionStatistics()
     {
+        _timerExecute.Stop();
+
         if (!Parent.BuildOptions.ShowExecutionStatistics)
             return;
 
@@ -39,15 +46,14 @@ public partial class Executive
         if (AmpErrorType == 0)
             Console.Error.WriteLine(@"normal end");
         var fileName = Path.GetFileName(SourceFiles[AmpCurrentLineNumber]);
-        Console.Error.WriteLine(@$"in file                  {fileName}");
-        Console.Error.WriteLine(@$"in line                  {SourceLineNumbers[AmpCurrentLineNumber]}");
-        Console.Error.WriteLine(@$"in statement             {AmpCurrentLineNumber}");
-        Console.Error.WriteLine(@$"statements executed      {AmpStatementCount}");
-        Console.Error.WriteLine(@$"execution time seconds   {_timerExecute.ElapsedTicks / 10000000.0}");
-        Console.Error.WriteLine(@$"regenerations            {GC.CollectionCount(memInfo.Generation)}");
-        Console.Error.WriteLine(@$"memory used (bytes)      {memoryUsed}");
-        Console.Error.WriteLine(@$"memory left (bytes)      {memoryLeft}");
-        Console.Error.WriteLine("");
+        Console.Error.WriteLine(@$"in file                   {fileName}");
+        Console.Error.WriteLine(@$"in line                   {SourceLineNumbers[AmpCurrentLineNumber]}");
+        Console.Error.WriteLine(@$"in statement              {AmpCurrentLineNumber}");
+        Console.Error.WriteLine(@$"statements executed       {AmpStatementCount}");
+        Console.Error.WriteLine(@$"execution time (h:m:s.μ)  {_timerExecute.Elapsed}");
+        Console.Error.WriteLine(@$"regenerations             {GC.CollectionCount(memInfo.Generation)}");
+        Console.Error.WriteLine(@$"memory used (bytes)       {memoryUsed}");
+        Console.Error.WriteLine(@$"memory left (bytes)       {memoryLeft}");
 
 
         if (AmpProfile != 1 && AmpProfile != 3 && AmpProfile != 4)

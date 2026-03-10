@@ -111,13 +111,23 @@ public static class SnoconeLexer
         Newline,        // logical end-of-statement newline
         Eof,
         Unknown,
+
+        // Parser synthetic — postfix call/array nodes emitted by SnoconeParser
+        ScCall,         // function call  f(a,b)  — carries ArgCount
+        ScArrayRef,     // array ref      f[a,b]  — carries ArgCount
     }
 
     // -------------------------------------------------------------------------
     // Token record
     // -------------------------------------------------------------------------
 
-    public readonly record struct ScToken(ScKind Kind, string Text, int Line);
+    public readonly record struct ScToken(ScKind Kind, string Text, int Line)
+    {
+        /// <summary>True when this operator token was emitted in unary position.</summary>
+        public bool IsUnary   { get; init; }
+        /// <summary>Argument count for ScCall / ScArrayRef synthetic tokens.</summary>
+        public int  ArgCount  { get; init; }
+    }
 
     // -------------------------------------------------------------------------
     // Keyword table

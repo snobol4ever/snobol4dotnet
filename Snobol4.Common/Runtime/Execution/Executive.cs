@@ -28,6 +28,7 @@ public partial class Executive
     // Threaded execution (Phase 3+)
     internal Instruction[]? Thread;
     internal int InstructionPointer;
+    internal int ErrorJump;
 
     /// <summary>
     /// Reusable argument list for OperatorFast — avoids per-call List allocation.
@@ -48,7 +49,7 @@ public partial class Executive
     internal List<ArrayVar> IndexedArrays;
     internal List<TableVar> IndexedTables;
 
-    private readonly Stopwatch _timerExecute; // Timer for statistics
+    internal readonly Stopwatch _timerExecute; // Timer for statistics
 
     // Map of channel names to streams. A stream is either
     // a StreamReader or a StreamWriter, but not both.

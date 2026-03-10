@@ -115,6 +115,7 @@ public partial class Builder : IDisposable
                 ComputeThreadIsMsilOnly();
                 _timerBuild.Stop();
                 PrintCompilationStatistics();
+                Execute._timerExecute.Restart();
                 Execute.ExecuteLoop(0);
             }
             else

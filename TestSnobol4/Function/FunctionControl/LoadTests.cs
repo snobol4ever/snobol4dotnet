@@ -89,6 +89,14 @@ FAIL    result = 'failed'              :(END)
 OK      result = 'ok'
 END
 end");
+        // NOTE
+        // This script was checking whether result == 'failed'
+        // However, the exception was thrown adn logged before the result variable was set
+        // So, result stayed as null string.
+        // Fix is to check for the error code instead of the result variable.
+        // The other alternative is to set &ERRLIMIT to 2. THat will prevent exception from being thrown
+        // and allow the script to check the result variable as originally intended.
+
         Assert.AreEqual(142, b.ErrorCodeHistory[0]);
     }
 
@@ -130,6 +138,12 @@ end");
         unload('{dll}')
 end");
         Assert.AreEqual(0, b.ErrorCodeHistory.Count);
+
+        // NOTE
+        // This was testing whether r == 16.
+        // However, in SNOBOL4, the string representation of a real 16 is '16.0' and does not match '16'.
+        // THis was corrected a few times..
+
         Assert.AreEqual("16.0", Str("r", b));
     }
 

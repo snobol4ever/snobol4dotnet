@@ -287,14 +287,21 @@ end");
         // Verify error 244 (statement limit exceeded) is raised before the
         // program finishes — proving InitStatement checks the limit correctly.
         var b = SetupTests.SetupScript("-b", @"
+        &STLIMIT = 3
         N = 1
         N = N + 1
         N = N + 1
         N = N + 1
-end", compileOnly: true);
-        b.Execute!.AmpStatementLimit = 3;
-        b.Execute!.AmpStatementCount = 0;
-        b.Execute!.ExecuteLoop(0);
+end");
+        //b.Execute!.AmpStatementLimit = 3;
+        //b.Execute!.AmpStatementCount = 0;
+
+        // NOTE:
+        // ExecuteLoop throws uncaught exceptions that would otherwise be
+        // caught in the SetupScript loop
+        // Fix is to set &STLIMIT in the script and take out no-comile option.
+
+        //b.Execute!.ExecuteLoop(0);
         Assert.IsTrue(b.ErrorCodeHistory.Contains(244),
             "Expected error 244 (statement limit) — InitStatement must check AmpStatementLimit");
     }

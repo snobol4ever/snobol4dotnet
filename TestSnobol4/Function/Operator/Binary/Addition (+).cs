@@ -140,10 +140,17 @@ public class Addition
     public void TEST_003_Addition()
     {
         //-9223372036854775808 to 9223372036854775807
-        var s = " a = 9223372036854775807 + 2";
+        var s = @"
+        &ERRLIMIT = 3
+        a = 9223372036854775807 + 2  :S(OK)F(ERR)
+ERR     result = 'Fail'              :(END)
+OK      result = 'Succeed'           :(END)
+END
+                    ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(3, build.ErrorCodeHistory[0]);
+        Assert.AreEqual("Fail", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("result")]).Data);
     }
 
     [TestMethod]

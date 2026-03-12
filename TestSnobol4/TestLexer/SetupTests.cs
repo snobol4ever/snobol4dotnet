@@ -59,14 +59,30 @@ public class SetupTests
 
     private static string LibraryPath(string project, string dll)
     {
-        // AppDomain.BaseDirectory = …/TestSnobol4/bin/Release/net10.0/
-        // Walk up: net10.0 → Release → bin → TestSnobol4 → solution root
-        var dir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
+        // AppDomain.BaseDirectory = …/TestSnobol4/bin/<Config>/net10.0/
+        // Walk up: net10.0 → <Config> → bin → TestSnobol4 → solution root
+        var baseDir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
+        var config  = DetectConfiguration(baseDir);
+        var dir     = baseDir;
         for (var i = 0; i < 4; i++)
             dir = Path.GetDirectoryName(dir) ?? dir;
         var projectDir = string.IsNullOrEmpty(project)
-            ? Path.Combine(dir, "CustomFunction", "bin", "Debug", "net10.0")
-            : Path.Combine(dir, "CustomFunction", project, "bin", "Debug", "net10.0");
+            ? Path.Combine(dir, "CustomFunction", "bin", config, "net10.0")
+            : Path.Combine(dir, "CustomFunction", project, "bin", config, "net10.0");
         return Path.Combine(projectDir, dll);
+    }
+
+    /// <summary>
+    /// Infer the build configuration (Debug / Release / etc.) from the
+    /// test assembly's output path so LibraryPath finds the matching DLLs.
+    /// </summary>
+    private static string DetectConfiguration(string baseDir)
+    {
+        var sep  = Path.DirectorySeparatorChar;
+        var path = baseDir + sep;
+        foreach (var config in new[] { "Release", "Debug" })
+            if (path.Contains(sep + config + sep, StringComparison.OrdinalIgnoreCase))
+                return config;
+        return "Debug";
     }
 }

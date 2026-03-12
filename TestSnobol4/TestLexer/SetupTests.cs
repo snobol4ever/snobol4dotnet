@@ -138,7 +138,7 @@ public class SetupTests
         var sep  = Path.DirectorySeparatorChar;
         var path = baseDir + sep;
         foreach (var config in new[] { "Release", "Debug" })
-            if (path.Contains(sep + config + sep, StringComparison.OrdinalIgnoreCase))
+            if (path.Contains(sep + config + sep, System.StringComparison.OrdinalIgnoreCase))
                 return config;
         return "Debug";
     }

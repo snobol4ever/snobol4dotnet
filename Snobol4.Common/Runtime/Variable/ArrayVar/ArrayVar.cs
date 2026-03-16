@@ -155,17 +155,22 @@ public sealed class ArrayVar : Var
     {
         var dimensions = (int)Dimensions;
 
-        // Use Span-based string concatenation for better performance
+        // CSNOBOL4 prototype format:
+        //   lower==1 → emit just the upper bound (the size)
+        //   lower!=1 → emit "lower:upper"
+        static string FormatDim(long lower, long upper) =>
+            lower == 1 ? upper.ToString() : $"{lower}:{upper}";
+
         if (dimensions == 1)
         {
-            Prototype = $"{LowerBounds[0]}:{UpperBounds[0]}";
+            Prototype = FormatDim(LowerBounds[0], UpperBounds[0]);
             return;
         }
 
         var parts = new string[dimensions];
         for (var d = dimensions - 1; d >= 0; --d)
         {
-            parts[dimensions - 1 - d] = $"{LowerBounds[d]}:{UpperBounds[d]}";
+            parts[dimensions - 1 - d] = FormatDim(LowerBounds[d], UpperBounds[d]);
         }
         Prototype = string.Join(',', parts);
     }

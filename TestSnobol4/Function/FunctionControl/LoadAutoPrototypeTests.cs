@@ -349,4 +349,38 @@ end");
         Assert.AreEqual("20", Str("r1", b));
         Assert.AreEqual("20", Str("r2", b));
     }
+
+    // ── Step 6: IExternalLibrary fast path auto-detected ──────────────────
+
+    [TestMethod]
+    public void IExternalLibrary_FastPath_UsedWhenImplemented()
+    {
+        // MathLibrary implements IExternalLibrary — LOAD should take the fast path
+        // (ActiveContexts, not DotNetReflectContexts) and register Add/Multiply/etc.
+        var mathDll = SetupTests.MathLibraryPath;
+        var b = Run($@"
+        load('{mathDll}', 'MathFunction.MathFunctions')
+        r1 = Add(3, 4)
+        r2 = Multiply(5, 6)
+end");
+        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
+        Assert.AreEqual("7",  Str("r1", b));
+        Assert.AreEqual("30.", Str("r2", b));
+    }
+
+    [TestMethod]
+    public void IExternalLibrary_FastPath_UnloadByPath()
+    {
+        // IExternalLibrary UNLOAD is keyed by resolved DLL path (not fname).
+        var mathDll = SetupTests.MathLibraryPath;
+        var b = Run($@"
+        load('{mathDll}', 'MathFunction.MathFunctions')
+        r1 = Add(10, 5)
+        unload('{mathDll}')
+        r2 = r1
+end");
+        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
+        Assert.AreEqual("15", Str("r1", b));
+        Assert.AreEqual("15", Str("r2", b));
+    }
 }

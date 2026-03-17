@@ -313,16 +313,11 @@ public partial class Executive
 
         var alphabet = Enumerable.Range(0, 256).Select(i => (char)i).ToArray();
         AmpAlphabet = "";
-        AmpLowerCaseLetters = "";
-        AmpUpperCaseLetters = "";
         foreach (var letter in alphabet)
-        {
-            // Use the culture-specific method for case conversion
             AmpAlphabet += letter;
-            if (!char.IsLower(letter)) continue;
-            AmpLowerCaseLetters += letter;
-            AmpUpperCaseLetters += char.ToUpper(letter, CultureInfo.CurrentCulture);
-        }
+        // SPITBOL MINIMAL: &lcase and &ucase are exactly 26 ASCII letters (sbl.min: lcase/ucase dac 26)
+        AmpLowerCaseLetters = "abcdefghijklmnopqrstuvwxyz";
+        AmpUpperCaseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
         IdentifierTable = new IdentifierTable(this)
         {

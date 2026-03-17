@@ -215,7 +215,7 @@ end";
         var s = @"
         data('node(val,lson,rson)')
         a = node('x', 'y', 'z')
-        differ(datatype(a), 'NODE')                   :f(e001)
+        differ(datatype(a), 'node')                   :f(e001)
         output = 'FAIL 1115/001: datatype of node'     :(end)
 e001
         differ(val(a), 'x')                   :f(e002)

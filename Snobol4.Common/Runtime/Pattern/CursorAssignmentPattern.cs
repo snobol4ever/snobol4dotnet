@@ -34,18 +34,15 @@ internal class AtSign : TerminalPattern
     {
         using var profile1 = Profiler.Start4("@", scan.Exec);
 
-        // Create arguments for assignment: [variable, cursor_position]
-        List<Var> arguments =
-        [
-            _assignee,
-            new IntegerVar(scan.CursorPosition)
-        ];
-
-        // Perform the assignment using the executive's Assign method
-        _exec.Assign(arguments);
-
-        // Pop the assignment result from the stack (we don't need it)
-        _exec.SystemStack.Pop();
+        // SPITBOL @N: immediately assign current cursor position (integer) to the
+        // named variable. Write directly to IdentifierTable to avoid SystemStack
+        // side-effects from the general Assign() path that corrupt pattern matching.
+        var symbol = _assignee is NameVar nv ? nv.Pointer : _assignee.Symbol;
+        if (symbol != "")
+        {
+            var cursorVar = new IntegerVar(scan.CursorPosition) { Symbol = symbol };
+            _exec.IdentifierTable[symbol] = cursorVar;
+        }
 
         // Always succeed without advancing the cursor
         return MatchResult.Success(scan);

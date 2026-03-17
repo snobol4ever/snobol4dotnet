@@ -24,8 +24,8 @@ public sealed class ProgramDefinedDataConversionStrategy : IConversionStrategy
     public string GetDataType(Var self)
     {
         var dataSelf = (ProgramDefinedDataVar)self;
-        // Return the user-defined type name, not "data"
-        return dataSelf.DataName;
+        // SPITBOL MINIMAL folds data type names to lowercase (flstg at sdat1)
+        return dataSelf.DataName.ToLowerInvariant();
     }
 
 

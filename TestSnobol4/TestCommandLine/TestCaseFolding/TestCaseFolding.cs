@@ -81,7 +81,8 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("PRODUCT", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
+        // SPITBOL MINIMAL folds DATA type names to lowercase (flstg at sdat1 in sbl.min)
+        Assert.AreEqual("product", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
     }
 
     [TestMethod]

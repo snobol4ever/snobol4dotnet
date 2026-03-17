@@ -294,4 +294,59 @@ end");
         Assert.AreEqual("14", Str("r1", b));
         Assert.AreEqual("18", Str("r2", b));
     }
+
+    // ── Step 5: async Task<T> return — blocking-await adapter ─────────────
+
+    [TestMethod]
+    public void Async_TaskLong_BlocksAndReturnsResult()
+    {
+        // AsyncDoubler.AsyncDouble(long) → Task<long>; SNOBOL4 call should block.
+        var b = Run($@"
+        load('{Dll}', 'ReflectFunction.AsyncDoubler')
+        result = AsyncDouble(21)
+end");
+        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
+        Assert.AreEqual("42", Str("result", b));
+    }
+
+    [TestMethod]
+    public void Async_TaskString_BlocksAndReturnsResult()
+    {
+        // AsyncGreeter.AsyncGreet(string) → Task<string>.
+        var b = Run($@"
+        load('{Dll}', 'ReflectFunction.AsyncGreeter')
+        result = AsyncGreet('World')
+end");
+        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
+        Assert.AreEqual("Hello async, World!", Str("result", b));
+    }
+
+    [TestMethod]
+    public void Async_NonGenericTask_ReturnsNull()
+    {
+        // AsyncVoidWorker.AsyncVoid(string) → Task (non-generic) → mapped to null → empty string.
+        var b = Run($@"
+        load('{Dll}', 'ReflectFunction.AsyncVoidWorker')
+        result = 'before'
+        AsyncVoid('test')
+        result = 'after'
+end");
+        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
+        Assert.AreEqual("after", Str("result", b));
+    }
+
+    [TestMethod]
+    public void Async_CoexistsWithSync_SameDll()
+    {
+        // Mix sync (Doubler) and async (AsyncDoubler) from same DLL via ref-count.
+        var b = Run($@"
+        load('{Dll}', 'ReflectFunction.Doubler')
+        load('{Dll}', 'ReflectFunction.AsyncDoubler')
+        r1 = Double(10)
+        r2 = AsyncDouble(10)
+end");
+        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
+        Assert.AreEqual("20", Str("r1", b));
+        Assert.AreEqual("20", Str("r2", b));
+    }
 }

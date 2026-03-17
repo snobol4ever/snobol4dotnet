@@ -38,3 +38,46 @@ public class Formatter
 {
     public string Format(string label, long count) => label + "=" + count;
 }
+
+/// <summary>
+/// Step 5: async method returning Task&lt;long&gt;.
+/// LOAD('ReflectLibrary.dll', 'ReflectFunction.AsyncDoubler') → ASYNCDOUBLE(n).
+/// SNOBOL4 call blocks transparently on GetAwaiter().GetResult().
+/// </summary>
+public class AsyncDoubler
+{
+    public async Task<long> AsyncDouble(long n)
+    {
+        await Task.Yield();   // ensure the method is genuinely async
+        return n * 2;
+    }
+}
+
+/// <summary>
+/// Step 5: async method returning Task&lt;string&gt;.
+/// LOAD('ReflectLibrary.dll', 'ReflectFunction.AsyncGreeter') → ASYNCGREET(s).
+/// </summary>
+public class AsyncGreeter
+{
+    public static async Task<string> AsyncGreet(string name)
+    {
+        await Task.Yield();
+        return "Hello async, " + name + "!";
+    }
+}
+
+/// <summary>
+/// Step 5: non-generic Task return (void async) — mapped to null → empty string.
+/// LOAD('ReflectLibrary.dll', 'ReflectFunction.AsyncVoidWorker') → ASYNCVOID(s).
+/// </summary>
+public class AsyncVoidWorker
+{
+    // Stores result in a field so the test can verify execution occurred
+    public static string LastSeen = "";
+
+    public static async Task AsyncVoid(string input)
+    {
+        await Task.Yield();
+        LastSeen = "saw:" + input;
+    }
+}

@@ -621,6 +621,18 @@ public partial class Executive
 
         var raw = method.Invoke(target, callArgs);
 
+        // Step 5: if the method returns Task or Task<T>, block until it completes.
+        if (raw is Task task)
+        {
+            task.GetAwaiter().GetResult();   // blocks; rethrows on exception
+
+            // Extract the result from Task<T> via reflection; plain Task → null.
+            var taskType = raw.GetType();
+            raw = taskType.IsGenericType
+                ? taskType.GetProperty("Result")!.GetValue(raw)
+                : null;
+        }
+
         // Map return value to Var
         Var result = raw switch
         {

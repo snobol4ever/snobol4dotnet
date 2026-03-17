@@ -56,6 +56,9 @@ public class SetupTests
     /// <summary>Absolute path to FSharpLibrary.dll.</summary>
     public static string FSharpLibraryPath => LibraryPath("FSharpLibrary", "FSharpLibrary.dll");
 
+    /// <summary>Absolute path to FSharpOptionLibrary.dll (plain F# — no IExternalLibrary; exercises option/DU coercion).</summary>
+    public static string FSharpOptionLibraryPath => LibraryPath("FSharpOptionLibrary", "FSharpOptionLibrary.dll");
+
     /// <summary>Absolute path to ReflectLibrary.dll (plain C# — no IExternalLibrary).</summary>
     public static string ReflectLibraryPath => LibraryPath("ReflectLibrary", "ReflectLibrary.dll");
 

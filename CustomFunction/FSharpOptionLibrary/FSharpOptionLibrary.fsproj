@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>FSharpOptionLibrary</AssemblyName>
+    <Nullable>enable</Nullable>
+    <EnableDefaultNamespaceProvider>false</EnableDefaultNamespaceProvider>
+    <!-- Copy FSharp.Core.dll so AssemblyDependencyResolver finds it on Linux -->
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="FSharpOptionLibrary.fs" />
+  </ItemGroup>
+</Project>

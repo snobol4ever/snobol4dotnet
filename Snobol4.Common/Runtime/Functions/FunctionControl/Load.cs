@@ -404,6 +404,93 @@ public partial class Executive
     private static StringVar PtrToStr(IntPtr p) =>
         new(p == IntPtr.Zero ? "" : Marshal.PtrToStringAnsi(p) ?? "");
 
+    // ── F# union helpers (Step 8) ─────────────────────────────────────────
+
+    /// <summary>
+    /// Returns true if <paramref name="t"/> is an F# discriminated union type.
+    /// Uses FSharp.Core FSharpType.IsUnion when available; falls back to duck-type.
+    /// </summary>
+    private static bool IsFSharpUnion(Type t)
+    {
+        try
+        {
+            var fsharpCoreAsm = AppDomain.CurrentDomain.GetAssemblies()
+                .FirstOrDefault(a => a.GetName().Name == "FSharp.Core");
+            if (fsharpCoreAsm != null)
+            {
+                var fsharpType = fsharpCoreAsm.GetType("Microsoft.FSharp.Reflection.FSharpType");
+                if (fsharpType != null)
+                {
+                    var isUnion = fsharpType.GetMethod("IsUnion",
+                        BindingFlags.Public | BindingFlags.Static,
+                        null, [typeof(Type), typeof(object)], null);
+                    if (isUnion != null)
+                    {
+                        var result = isUnion.Invoke(null, [t, null]);
+                        return result is true;
+                    }
+                }
+            }
+        }
+        catch { /* fall through to duck-type */ }
+
+        // Duck-type fallback: F# DUs have a "Tag" property and are abstract classes
+        return t.IsClass && t.GetProperty("Tag") != null;
+    }
+
+    /// <summary>
+    /// Converts an F# discriminated union value to a human-readable string:
+    ///   zero fields  → "CaseName"
+    ///   one field    → "CaseName value"
+    ///   many fields  → "CaseName v1 v2 ..."
+    /// Uses FSharp.Core FSharpValue.GetUnionFields when available.
+    /// </summary>
+    private static string FSharpUnionToString(object value, Type t)
+    {
+        try
+        {
+            var fsharpCoreAsm = AppDomain.CurrentDomain.GetAssemblies()
+                .FirstOrDefault(a => a.GetName().Name == "FSharp.Core");
+            if (fsharpCoreAsm != null)
+            {
+                var fsharpValue = fsharpCoreAsm.GetType("Microsoft.FSharp.Reflection.FSharpValue");
+                if (fsharpValue != null)
+                {
+                    // GetUnionFields(value, type, bindingFlags=null) → Tuple<UnionCaseInfo, object[]>
+                    var getFields = fsharpValue.GetMethod("GetUnionFields",
+                        BindingFlags.Public | BindingFlags.Static,
+                        null, [typeof(object), typeof(Type), typeof(object)], null);
+                    if (getFields != null)
+                    {
+                        var returned = getFields.Invoke(null, [value, t, null]);
+                        if (returned != null)
+                        {
+                            // The return is a Tuple<UnionCaseInfo, object[]> — unpack via reflection
+                            var returnedType = returned.GetType();
+                            var caseInfo = returnedType.GetProperty("Item1")!.GetValue(returned)!;
+                            var fields   = (object[])returnedType.GetProperty("Item2")!.GetValue(returned)!;
+                            var caseName = (string)caseInfo.GetType().GetProperty("Name")!.GetValue(caseInfo)!;
+
+                            if (fields.Length == 0)
+                                return caseName;
+
+                            var sb = new System.Text.StringBuilder(caseName);
+                            foreach (var f in fields)
+                            {
+                                sb.Append(' ');
+                                sb.Append(f?.ToString() ?? "");
+                            }
+                            return sb.ToString();
+                        }
+                    }
+                }
+            }
+        }
+        catch { /* fall through */ }
+
+        return value.ToString() ?? "";
+    }
+
     // ── .NET-native path (existing, unchanged) ────────────────────────────
 
     // ── .NET-reflect tracking (auto-prototype) ────────────────────────────
@@ -631,6 +718,40 @@ public partial class Executive
             raw = taskType.IsGenericType
                 ? taskType.GetProperty("Result")!.GetValue(raw)
                 : null;
+        }
+
+        // Step 8: F# option<T> coercion.
+        // FSharpOption<T> is a class where null == None and non-null == Some(value).
+        // We detect it by checking whether the runtime type is a closed generic
+        // whose open form is Microsoft.FSharp.Core.FSharpOption`1.
+        if (raw != null)
+        {
+            var rawType = raw.GetType();
+
+            // ── option<T> ─────────────────────────────────────────────────
+            if (rawType.IsGenericType &&
+                rawType.GetGenericTypeDefinition().FullName == "Microsoft.FSharp.Core.FSharpOption`1")
+            {
+                // Some: extract the .Value property
+                var valueProperty = rawType.GetProperty("Value");
+                raw = valueProperty?.GetValue(raw);
+                // If somehow Value is null treat as None → fail
+                if (raw == null) { NonExceptionFailure(); return; }
+            }
+            // ── discriminated union (any F# DU) ──────────────────────────
+            // F# DUs compile to abstract classes; the Tag property (int) identifies
+            // the case and there is one static readonly field per case label.
+            // We render as "<Tag> [field1 [field2 ...]]" (space-separated).
+            else if (IsFSharpUnion(rawType))
+            {
+                raw = FSharpUnionToString(raw, rawType);
+            }
+        }
+        else
+        {
+            // raw == null  →  F# None (option returned null object ref)
+            NonExceptionFailure();
+            return;
         }
 
         // Map return value to Var

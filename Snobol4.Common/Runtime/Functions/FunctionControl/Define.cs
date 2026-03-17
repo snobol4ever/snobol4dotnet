@@ -49,9 +49,9 @@ public partial class Executive
             return;
         }
 
-        // function name cannot be an existing function
-        //if (FunctionTable.ContainsKey(functionName))
-        if (FunctionTable[functionName] is not null)
+        // function name cannot redefine a protected (system) function
+        var existingEntry = FunctionTable[functionName];
+        if (existingEntry is not null && existingEntry.IsProtected)
         {
             LogRuntimeException(248);
             return;
@@ -75,17 +75,24 @@ public partial class Executive
 
         // Get entry label
         string entryLabel;
-        if (arguments[1] is StringVar entryVar && entryVar.Data == "")
+        if (arguments.Count < 2 || arguments[1] is StringVar { Data: "" })
         {
+            // No second arg or empty string → use function name as entry label
             entryLabel = functionName;
+        }
+        else if (arguments[1] is StringVar strArg)
+        {
+            // String second arg → use it directly as label name
+            entryLabel = Parent.FoldCase(strArg.Data.Trim());
         }
         else
         {
+            // Name/indirect reference (.label)
             if (!arguments[1].Convert(VarType.NAME, out var entry, out _, this))
             {
                 LogRuntimeException(86);
+                return;
             }
-
             entryLabel = ((NameVar)entry).Pointer;
         }
 
@@ -102,7 +109,7 @@ public partial class Executive
         var tempLocals = new List<string>(match.Groups[5].Value.Split(','));
         List<string> locals = new();
         locals.AddRange(tempLocals.Select(t => t.Trim()).Where(local => local != ""));
-        var argumentCount = locals.Count;
+        var argumentCount = parameters.Count;
         var newEntry = new FunctionTableEntry(this, functionName, ExecuteProgramDefinedFunction, argumentCount, false);
         FunctionTable[functionName] = newEntry;
 
@@ -119,7 +126,11 @@ public partial class Executive
         var entry = FunctionTable[functionName];
         List<Var> saveVars = [];
         var definition = UserFunctionTable[entry?.Symbol!];
-        var parametersCount = definition!.Parameters.Count;
+        // For OPSYN aliases, definition.FunctionName is the original (e.g. "fact"),
+        // while functionName may be the alias (e.g. "facto").
+        // The return variable is always named after the original function.
+        var returnVarName = definition!.FunctionName;
+        var parametersCount = definition.Parameters.Count;
         var localsCount = definition.Locals.Count;
 
         for (var i = 0; i < parametersCount; ++i)
@@ -182,7 +193,7 @@ public partial class Executive
         // the pre-call state (e.g. a prior LT() failure that a :F(label) depends on).
         var callerFailure = Failure;
         var nextIndex = ExecuteLoop(LabelTable[definition.EntryLabel]);
-        var returnVar = IdentifierTable[functionName];
+        var returnVar = IdentifierTable[returnVarName];
 
         switch (nextIndex)
         {
@@ -194,7 +205,7 @@ public partial class Executive
 
             case -3:
                 AmpReturnType = "FRETURN";
-                returnVar = StringVar.Null(functionName);
+                returnVar = StringVar.Null(returnVarName);
                 Failure = true;            // FRETURN explicitly signals failure
                 break;
 
@@ -205,7 +216,7 @@ public partial class Executive
         }
 
         SystemStack.Push(returnVar);
-        IdentifierTable[functionName] = StringVar.Null(functionName); // Clear function name variable
+        IdentifierTable[returnVarName] = StringVar.Null(returnVarName); // Clear function name variable
         AmpFunctionLevel--;
 
         // Post-processing

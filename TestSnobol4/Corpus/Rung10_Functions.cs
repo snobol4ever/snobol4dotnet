@@ -37,7 +37,6 @@ public class Rung10_Functions
     }
 
     [TestMethod]
-    [Ignore(/* DOTNET gap */ "OPSYN alias and alternate entry label not fully supported in DOTNET threaded path")]
     public void TEST_Corpus_1010_func_recursion()
     {
         var s = @"
@@ -70,7 +69,6 @@ end";
     }
 
     [TestMethod]
-    [Ignore(/* DOTNET gap */ "DEFINE redefine / function-name-as-arg not fully supported in DOTNET")]
     public void TEST_Corpus_1011_func_redefine()
     {
         var s = @"
@@ -202,7 +200,6 @@ end";
     }
 
     [TestMethod]
-    [Ignore(/* DOTNET gap */ "Unevaluated expression (*expr) / EVAL not fully supported in DOTNET")]
     public void TEST_Corpus_1016_eval()
     {
         var s = @"
@@ -227,7 +224,6 @@ end";
     }
 
     [TestMethod]
-    [Ignore(/* DOTNET gap */ "ARG / LOCAL introspection functions not implemented in DOTNET")]
     public void TEST_Corpus_1017_arg_local()
     {
         var s = @"
@@ -264,7 +260,6 @@ end";
     }
 
     [TestMethod]
-    [Ignore(/* DOTNET gap */ "APPLY not implemented in DOTNET")]
     public void TEST_Corpus_1018_apply()
     {
         var s = @"

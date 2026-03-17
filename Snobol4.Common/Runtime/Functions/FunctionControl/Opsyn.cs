@@ -75,6 +75,16 @@ public partial class Executive
                 FunctionTable.Remove(newFunction);
                 var existingFunctionEntry = FunctionTable[existingFunction];
                 FunctionTable.Add(newFunction, new FunctionTableEntry(this, newFunction, existingFunctionEntry!.Handler, existingFunctionEntry.ArgumentCount, false));
+                // If aliasing a program-defined function, copy its UserFunctionTableEntry
+                // under the new name. The FunctionName field stays as the ORIGINAL name
+                // so ExecuteProgramDefinedFunction resolves the return variable correctly:
+                // e.g. opsyn(.facto,'fact') → facto body still writes to 'fact', not 'facto'.
+                if (UserFunctionTable.TryGetValue(existingFunction, out var existingUserEntry))
+                    UserFunctionTable[newFunction] = new UserFunctionTableEntry(
+                        existingUserEntry.FunctionName,   // original name = return var name
+                        existingUserEntry.Prototype,
+                        existingUserEntry.Parameters, existingUserEntry.Locals,
+                        existingUserEntry.EntryLabel);
                 break;
 
             case 1:

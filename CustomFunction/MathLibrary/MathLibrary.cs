@@ -32,8 +32,8 @@ public class MathFunctions : IExternalLibrary
     /// <summary>Add(a, b) — integer + integer → IntegerVar</summary>
     private void Add(List<Var> args)
     {
-        if (!args[0].Convert(Executive.VarType.INTEGER, out _, out var a, _exec) ||
-            !args[1].Convert(Executive.VarType.INTEGER, out _, out var b, _exec))
+        if (!args[0].Convert(Executive.VarType.INTEGER, out _, out var a, _exec!) ||
+            !args[1].Convert(Executive.VarType.INTEGER, out _, out var b, _exec!))
             throw new InvalidCastException("Add: arguments must be numeric");
 
         _exec!.SystemStack.Push(new IntegerVar((long)a + (long)b));
@@ -42,8 +42,8 @@ public class MathFunctions : IExternalLibrary
     /// <summary>Multiply(a, b) — real × real → RealVar</summary>
     private void Multiply(List<Var> args)
     {
-        if (!args[0].Convert(Executive.VarType.REAL, out _, out var a, _exec) ||
-            !args[1].Convert(Executive.VarType.REAL, out _, out var b, _exec))
+        if (!args[0].Convert(Executive.VarType.REAL, out _, out var a, _exec!) ||
+            !args[1].Convert(Executive.VarType.REAL, out _, out var b, _exec!))
             throw new InvalidCastException("Multiply: arguments must be numeric");
 
         _exec!.SystemStack.Push(new RealVar((double)a * (double)b));
@@ -52,7 +52,7 @@ public class MathFunctions : IExternalLibrary
     /// <summary>Reverse(s) — string → StringVar (reversed)</summary>
     private void Reverse(List<Var> args)
     {
-        if (!args[0].Convert(Executive.VarType.STRING, out _, out var s, _exec))
+        if (!args[0].Convert(Executive.VarType.STRING, out _, out var s, _exec!))
             throw new InvalidCastException("Reverse: argument must be a string");
 
         var chars = ((string)s).ToCharArray();
@@ -63,9 +63,9 @@ public class MathFunctions : IExternalLibrary
     /// <summary>Clamp(value, lo, hi) — 3 real args → RealVar clamped to [lo,hi]</summary>
     private void Clamp(List<Var> args)
     {
-        if (!args[0].Convert(Executive.VarType.REAL, out _, out var v, _exec) ||
-            !args[1].Convert(Executive.VarType.REAL, out _, out var lo, _exec) ||
-            !args[2].Convert(Executive.VarType.REAL, out _, out var hi, _exec))
+        if (!args[0].Convert(Executive.VarType.REAL, out _, out var v, _exec!) ||
+            !args[1].Convert(Executive.VarType.REAL, out _, out var lo, _exec!) ||
+            !args[2].Convert(Executive.VarType.REAL, out _, out var hi, _exec!))
             throw new InvalidCastException("Clamp: arguments must be numeric");
 
         _exec!.SystemStack.Push(new RealVar(Math.Clamp((double)v, (double)lo, (double)hi)));
@@ -77,7 +77,7 @@ public class MathFunctions : IExternalLibrary
     /// </summary>
     private void IsPositive(List<Var> args)
     {
-        if (!args[0].Convert(Executive.VarType.REAL, out _, out var n, _exec))
+        if (!args[0].Convert(Executive.VarType.REAL, out _, out var n, _exec!))
             throw new InvalidCastException("IsPositive: argument must be numeric");
 
         if ((double)n > 0)

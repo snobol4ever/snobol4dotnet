@@ -23,19 +23,19 @@ public class Area : IExternalLibrary
 
     public void AreaOfCircle(List<Var> arguments)
     {
-        if (!arguments[0].Convert(Executive.VarType.REAL, out var _, out var radiusValue, _executive))
+        if (!arguments[0].Convert(Executive.VarType.REAL, out var _, out var radiusValue, _executive!))
             throw new InvalidCastException("Cannot convert argument for area of a circle to a number");
 
         var area = Math.PI * (double)radiusValue * (double)radiusValue;
-        _executive?.SystemStack.Push(new RealVar(area));
+        _executive!.SystemStack.Push(new RealVar(area));
     }
 
     public void AreaOfSquare(List<Var> arguments)
     {
-        if (!arguments[0].Convert(Executive.VarType.REAL, out var _, out var sideValue, _executive))
+        if (!arguments[0].Convert(Executive.VarType.REAL, out var _, out var sideValue, _executive!))
             throw new InvalidCastException("Cannot convert argument for area of a square to a number");
 
         var area = (double)sideValue * (double)sideValue;
-        _executive?.SystemStack.Push(new RealVar(area));
+        _executive!.SystemStack.Push(new RealVar(area));
     }
 }

@@ -11,7 +11,7 @@ public class SetupTests
     public static string WindowsOutput = @"..\..\..\..\..\TestSnobol4\Output\";
     public static string LinuxOutput = @"../../../../../TestSnobol4/Output/";
 
-    public static string CurrentDir = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+    public static string CurrentDir = Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!;
     public static string WindowsDll = CurrentDir.Replace(@"\TestSnobol4\", @"\CustomFunction\") + @"\AreaLibrary.dll";
     public static string LinuxDll = CurrentDir.Replace(@"/TestSnobol4/", @"/CustomFunction/") + @"/AreaLibrary.dll";
 

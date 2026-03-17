@@ -663,7 +663,7 @@ public partial class Builder
             il.Emit(OpCodes.Ldfld, _failureField);
             il.Emit(OpCodes.Brfalse, fallLabel);   // Failure == false → fall through
             EmitClearFailure();
-            EmitResolve(failureLabel);
+            EmitResolve(failureLabel!);
             il.MarkLabel(fallLabel);
             EmitFallthrough();
         }
@@ -676,10 +676,10 @@ public partial class Builder
                 il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Ldfld, _failureField);
                 il.Emit(OpCodes.Brtrue, failPath);   // Failure → go to fail path
-                EmitResolve(successLabel);
+                EmitResolve(successLabel!);
                 il.MarkLabel(failPath);
                 EmitClearFailure();
-                EmitResolve(failureLabel);
+                EmitResolve(failureLabel!);
             }
             else
             {
@@ -689,9 +689,9 @@ public partial class Builder
                 il.Emit(OpCodes.Ldfld, _failureField);
                 il.Emit(OpCodes.Brfalse, succPath);  // !Failure → go to success path
                 EmitClearFailure();
-                EmitResolve(failureLabel);
+                EmitResolve(failureLabel!);
                 il.MarkLabel(succPath);
-                EmitResolve(successLabel);
+                EmitResolve(successLabel!);
             }
         }
     }

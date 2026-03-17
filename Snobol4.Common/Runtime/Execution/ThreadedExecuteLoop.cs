@@ -72,7 +72,9 @@ public partial class Executive
         }
         // ── End fast path ────────────────────────────────────────────────────
 
+#pragma warning disable CS0164  // label present for readability; fast path falls through here
         FullSwitch:
+#pragma warning restore CS0164
 
         while (InstructionPointer >= 0 && InstructionPointer < thread.Length)
         {

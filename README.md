@@ -1,4 +1,5 @@
 # <center>SNOBOL4.NET</center>
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 A compiler for the SNOBOL4 language written in C# and .NET and runs under Windows, Linux, and Mac OS.
 

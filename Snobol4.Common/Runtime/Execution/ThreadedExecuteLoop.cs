@@ -47,7 +47,7 @@ public partial class Executive
         // full switch dispatch and spin in a tight loop.  Sub-expression threads
         // compiled by CompileSubExpression still use regular threaded opcodes,
         // so callers that know they are on a sub-thread pass useFastPath:false.
-        if (false && useFastPath && Parent.ThreadIsMsilOnly)  // DISABLED for diagnosis
+        if (useFastPath && Parent.ThreadIsMsilOnly)
         {
             var msilDelegates = Parent.MsilDelegates;
             while (InstructionPointer >= 0 && InstructionPointer < thread.Length

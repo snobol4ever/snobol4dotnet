@@ -44,6 +44,8 @@ public partial class Executive
 
         if (NativeContexts.TryGetValue(fnameKey, out var nativeEntry))
         {
+            // xncbp: fire shutdown callback if one was registered and not yet fired.
+            FireNativeCallback(nativeEntry);
             nativeEntry.FreeXndta();
             NativeLibrary.Free(nativeEntry.LibraryHandle);
             NativeContexts.Remove(fnameKey);

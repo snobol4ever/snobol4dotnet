@@ -442,5 +442,8 @@ public partial class Executive
         IdentifierTable["TERMINAL"].OutputChannel = "+terminal-output";
         IdentifierTable["INPUT"].InputChannel = "+console-input";
         IdentifierTable["TERMINAL"].InputChannel = "+terminal-input";
+
+        // xncbp: fire any unfired shutdown callbacks when the process exits.
+        AppDomain.CurrentDomain.ProcessExit += (_, _) => FireAllNativeCallbacks();
     }
 }

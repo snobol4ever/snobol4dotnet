@@ -81,6 +81,13 @@ public partial class Executive
         internal bool    FirstCall  = true;
         internal IntPtr  XnBlkData  = IntPtr.Zero;   // pointer into _xndtaPin
 
+        // ── xncbp shutdown callback ───────────────────────────────────────
+        // The C function may call snobol4_register_callback(fp) to register
+        // a cleanup function that is invoked when the function is UNLOADed
+        // or when the process exits.  CallbackFired prevents double-fire.
+        internal IntPtr  CallbackPtr    = IntPtr.Zero;
+        internal bool    CallbackFired  = false;
+
         private long[]?   _xndtaBuf;
         private GCHandle  _xndtaPin;
 
@@ -422,21 +429,29 @@ public partial class Executive
 
     // ── libsnobol4_rt callback registration ──────────────────────────────────
     //
-    // If a loaded native library exports snobol4_rt_register, we pass it a
-    // function pointer to _RtGetContext.  That callback reads the [ThreadStatic]
-    // _currentNativeEntry set around every CallNativeFunction dispatch and writes
-    // the xndta pointer and first_call flag into the out-parameters.
+    // If a loaded native library exports snobol4_rt_register, we pass it TWO
+    // function pointers:
+    //   1. _RtGetContext  — reads xndta/first_call from the current NativeEntry.
+    //   2. _RtSetCallback — stores a C shutdown callback into the current entry's
+    //                       CallbackPtr (implements snobol4_register_callback).
     //
-    // The callback is an unmanaged delegate pinned for the lifetime of the process.
-    // It is idempotent — safe to call for every LOAD (harmless double-register).
+    // Both pointers are pinned delegates held for process lifetime.
+    // Registration is idempotent — safe to call on every LOAD.
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void RtGetContextDelegate(IntPtr xndtaOut, IntPtr firstCallOut);
 
-    // Pinned so the GC never moves it; held for process lifetime.
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate void RtSetCallbackDelegate(IntPtr callbackFn);
+
+    // Pinned so the GC never moves them; held for process lifetime.
     private static readonly RtGetContextDelegate _rtGetContextDelegate = RtGetContext;
     private static readonly IntPtr _rtGetContextPtr =
         Marshal.GetFunctionPointerForDelegate(_rtGetContextDelegate);
+
+    private static readonly RtSetCallbackDelegate _rtSetCallbackDelegate = RtSetCallback;
+    private static readonly IntPtr _rtSetCallbackPtr =
+        Marshal.GetFunctionPointerForDelegate(_rtSetCallbackDelegate);
 
     private static unsafe void RtGetContext(IntPtr xndtaOut, IntPtr firstCallOut)
     {
@@ -447,15 +462,42 @@ public partial class Executive
             *(int*)firstCallOut = (e != null && e.FirstCall) ? 1 : 0;
     }
 
+    private static void RtSetCallback(IntPtr callbackFn)
+    {
+        var e = _currentNativeEntry;
+        if (e != null)
+            e.CallbackPtr = callbackFn;
+    }
+
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate void SnobolRtRegisterDelegate(IntPtr fn);
+    private delegate void SnobolRtRegisterDelegate(IntPtr getContextFn, IntPtr setCallbackFn);
 
     private static unsafe void TryRegisterRtCallback(IntPtr libraryHandle)
     {
         if (!NativeLibrary.TryGetExport(libraryHandle, "snobol4_rt_register", out var procAddr))
             return;
         var register = Marshal.GetDelegateForFunctionPointer<SnobolRtRegisterDelegate>(procAddr);
-        register(_rtGetContextPtr);
+        register(_rtGetContextPtr, _rtSetCallbackPtr);
+    }
+
+    // ── xncbp: fire shutdown callback ────────────────────────────────────────
+    //
+    // Called by UNLOAD (spec path) and by the ProcessExit handler.
+    // The double-fire guard (CallbackFired) ensures the callback runs at most once
+    // regardless of which path fires first.
+
+    internal static unsafe void FireNativeCallback(NativeEntry entry)
+    {
+        if (entry.CallbackPtr == IntPtr.Zero) return;
+        if (entry.CallbackFired) return;
+        entry.CallbackFired = true;
+        ((delegate* unmanaged[Cdecl]<void>)(void*)entry.CallbackPtr)();
+    }
+
+    internal void FireAllNativeCallbacks()
+    {
+        foreach (var entry in NativeContexts.Values)
+            FireNativeCallback(entry);
     }
 
     // ── Native dispatch helper ───────────────────────────────────────────────

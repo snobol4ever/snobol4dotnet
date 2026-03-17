@@ -59,6 +59,9 @@ public class SetupTests
     /// <summary>Absolute path to ReflectLibrary.dll (plain C# — no IExternalLibrary).</summary>
     public static string ReflectLibraryPath => LibraryPath("ReflectLibrary", "ReflectLibrary.dll");
 
+    /// <summary>Absolute path to ObjectLifecycleLibrary.dll.</summary>
+    public static string ObjectLifecycleLibraryPath => LibraryPath("ObjectLifecycleLibrary", "ObjectLifecycleLibrary.dll");
+
     private static string LibraryPath(string project, string dll)
     {
         // AppDomain.BaseDirectory = …/TestSnobol4/bin/Release/net10.0/

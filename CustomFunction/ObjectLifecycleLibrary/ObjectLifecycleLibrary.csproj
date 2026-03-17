@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>ObjectLifecycleLibrary</AssemblyName>
+    <EnableDefaultNamespaceProvider>false</EnableDefaultNamespaceProvider>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Snobol4.Common\Snobol4.Common.csproj">
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

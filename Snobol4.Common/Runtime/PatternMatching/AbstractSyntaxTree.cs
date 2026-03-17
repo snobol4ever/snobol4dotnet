@@ -34,9 +34,13 @@ internal class AbstractSyntaxTree
         ComputeSubsequentsAndAlternates();
         FindStartNode();
 
-        // Cache in pattern
-        rootPattern.Ast = _nodes;
-        rootPattern.StartNode = _startNode;
+        // Cache in pattern — guard: only set once, never overwrite
+        // (prevents NEXTH loop from poisoning StartNode on 2nd PatternMatch call)
+        if (rootPattern.StartNode == null)
+        {
+            rootPattern.Ast = _nodes;
+            rootPattern.StartNode = _startNode;
+        }
     }
 
     private void BuildNodeList(Pattern rootPattern)

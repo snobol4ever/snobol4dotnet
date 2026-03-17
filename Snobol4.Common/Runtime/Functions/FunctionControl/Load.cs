@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
 
@@ -69,6 +70,43 @@ public partial class Executive
         internal readonly IntPtr LibraryHandle = libraryHandle;
         internal readonly string LibraryPath    = libraryPath;
         internal readonly PrototypeInfo Proto   = proto;
+
+        // ── XNBLK persistent state ────────────────────────────────────────
+        // xndta: 32-long (256-byte) private storage block, pinned so the C
+        // function receives a stable pointer across calls.  Allocated lazily
+        // on the first call that requests it via EnsureXndta().
+        // FirstCall mirrors the SPITBOL xn1st flag: true until the first
+        // actual dispatch through CallNativeFunction.
+
+        internal bool    FirstCall  = true;
+        internal IntPtr  XnBlkData  = IntPtr.Zero;   // pointer into _xndtaPin
+
+        private long[]?   _xndtaBuf;
+        private GCHandle  _xndtaPin;
+
+        /// <summary>
+        /// Ensures the 32-long xndta buffer is allocated and pinned.
+        /// Returns the stable native pointer to xndta[0].
+        /// Safe to call multiple times — allocates only once.
+        /// </summary>
+        internal IntPtr EnsureXndta()
+        {
+            if (XnBlkData != IntPtr.Zero) return XnBlkData;
+            _xndtaBuf  = new long[32];          // 256 bytes of private storage
+            _xndtaPin  = GCHandle.Alloc(_xndtaBuf, GCHandleType.Pinned);
+            XnBlkData  = _xndtaPin.AddrOfPinnedObject();
+            return XnBlkData;
+        }
+
+        /// <summary>
+        /// Frees the pinned xndta buffer.  Called from UnloadExternalFunction.
+        /// </summary>
+        internal void FreeXndta()
+        {
+            if (_xndtaPin.IsAllocated) _xndtaPin.Free();
+            XnBlkData = IntPtr.Zero;
+            _xndtaBuf = null;
+        }
     }
 
     /// <summary>
@@ -187,6 +225,10 @@ public partial class Executive
             var entry  = new NativeEntry(handle, resolvedLib, proto);
             NativeContexts[fnameKey] = entry;
 
+            // If this library exports snobol4_rt_register, wire up the context
+            // callback so snobol4_xndta() / snobol4_first_call() work inside it.
+            TryRegisterRtCallback(handle);
+
             // Register a FunctionTableEntry that coerces args and dispatches
             // via NativeLibrary.GetExport at call time (lazy — avoids keeping
             // a typed delegate per signature).
@@ -270,6 +312,11 @@ public partial class Executive
     // Supported signatures: INTEGER/REAL/STRING return × arity 0–3.
     // Args are coerced per prototype ArgTypes before the call.
 
+    // Thread-local: the NativeEntry currently being dispatched.
+    // Set around every CallNativeFunction call so that snobol4_xndta() and
+    // snobol4_first_call() in libsnobol4_rt can read the entry's xndta/FirstCall.
+    [ThreadStatic] internal static NativeEntry? _currentNativeEntry;
+
     private unsafe void CallNativeFunction(NativeEntry entry, List<Var> args)
     {
         var proto = entry.Proto;
@@ -287,6 +334,14 @@ public partial class Executive
         var ptrs    = new IntPtr[n];
         var allocated = new List<IntPtr>();
         var noconvHandles = new List<GCHandle>();
+
+        // Capture first-call state before we flip it; ensure xndta is ready.
+        var isFirstCall = entry.FirstCall;
+        entry.EnsureXndta();
+
+        // Set thread-local so libsnobol4_rt shim helpers can reach this entry.
+        var prevEntry = _currentNativeEntry;
+        _currentNativeEntry = entry;
 
         try
         {
@@ -343,6 +398,9 @@ public partial class Executive
             Var resultVar = InvokeNative(fp, retSig, argSig, longs, doubles, ptrs);
             SystemStack.Push(resultVar);
             Failure = false;
+
+            // Flip FirstCall after a successful dispatch.
+            if (isFirstCall) entry.FirstCall = false;
         }
         catch
         {
@@ -350,9 +408,48 @@ public partial class Executive
         }
         finally
         {
+            _currentNativeEntry = prevEntry;
             foreach (var p in allocated) Marshal.FreeHGlobal(p);
             foreach (var gh in noconvHandles) if (gh.IsAllocated) gh.Free();
         }
+    }
+
+    // ── libsnobol4_rt callback registration ──────────────────────────────────
+    //
+    // If a loaded native library exports snobol4_rt_register, we pass it a
+    // function pointer to _RtGetContext.  That callback reads the [ThreadStatic]
+    // _currentNativeEntry set around every CallNativeFunction dispatch and writes
+    // the xndta pointer and first_call flag into the out-parameters.
+    //
+    // The callback is an unmanaged delegate pinned for the lifetime of the process.
+    // It is idempotent — safe to call for every LOAD (harmless double-register).
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate void RtGetContextDelegate(IntPtr xndtaOut, IntPtr firstCallOut);
+
+    // Pinned so the GC never moves it; held for process lifetime.
+    private static readonly RtGetContextDelegate _rtGetContextDelegate = RtGetContext;
+    private static readonly IntPtr _rtGetContextPtr =
+        Marshal.GetFunctionPointerForDelegate(_rtGetContextDelegate);
+
+    private static unsafe void RtGetContext(IntPtr xndtaOut, IntPtr firstCallOut)
+    {
+        var e = _currentNativeEntry;
+        if (xndtaOut != IntPtr.Zero)
+            *(long**)xndtaOut = e != null ? (long*)e.XnBlkData : null;
+        if (firstCallOut != IntPtr.Zero)
+            *(int*)firstCallOut = (e != null && e.FirstCall) ? 1 : 0;
+    }
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate void SnobolRtRegisterDelegate(IntPtr fn);
+
+    private static unsafe void TryRegisterRtCallback(IntPtr libraryHandle)
+    {
+        if (!NativeLibrary.TryGetExport(libraryHandle, "snobol4_rt_register", out var procAddr))
+            return;
+        var register = Marshal.GetDelegateForFunctionPointer<SnobolRtRegisterDelegate>(procAddr);
+        register(_rtGetContextPtr);
     }
 
     // ── Native dispatch helper ───────────────────────────────────────────────
@@ -660,7 +757,31 @@ public partial class Executive
                 // IExternalLibrary uses ActiveContexts (keyed by path), not the
                 // shared-ALC machinery. Remove the shared entry we may have created.
                 if (ownedNewContext) { DllSharedContexts.Remove(resolvedPath); DllRefCounts.Remove(resolvedPath); }
+
+                // Snapshot keys before Init so we can identify newly-added entries.
+                var keysBefore = new HashSet<string>(FunctionTable.Keys);
                 instance.Init(this);
+
+                // Step 4: if the library also implements IStatefulExternalLibrary,
+                // wrap every newly-registered FunctionTableEntry with a one-shot
+                // first-call guard that fires OnFirstCall(executive) exactly once.
+                if (instance is IStatefulExternalLibrary stateful)
+                {
+                    var fired = false;
+                    foreach (var key in FunctionTable.Keys.Where(k => !keysBefore.Contains(k)).ToList())
+                    {
+                        var original = FunctionTable[key];
+                        FunctionTable[key] = new FunctionTableEntry(
+                            this, key,
+                            args =>
+                            {
+                                if (!fired) { fired = true; stateful.OnFirstCall(this); }
+                                original.Handler(args);
+                            },
+                            original.ArgumentCount, false);
+                    }
+                }
+
                 ActiveContexts[resolvedPath] = (loadContext, instance);
                 SystemStack.Push(StringVar.Null());
                 PredicateSuccess();

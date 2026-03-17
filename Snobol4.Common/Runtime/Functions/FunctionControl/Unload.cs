@@ -44,6 +44,7 @@ public partial class Executive
 
         if (NativeContexts.TryGetValue(fnameKey, out var nativeEntry))
         {
+            nativeEntry.FreeXndta();
             NativeLibrary.Free(nativeEntry.LibraryHandle);
             NativeContexts.Remove(fnameKey);
             FunctionTable.Remove(fnameKey);

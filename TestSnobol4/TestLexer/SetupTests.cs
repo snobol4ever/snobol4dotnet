@@ -81,6 +81,28 @@ public class SetupTests
         }
     }
 
+    public static string XnRtLibPath
+    {
+        get
+        {
+            var dir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
+            for (var i = 0; i < 4; i++)
+                dir = Path.GetDirectoryName(dir) ?? dir;
+            return Path.Combine(dir, "CustomFunction", "SpitbolXnLib", "libsnobol4_rt.so");
+        }
+    }
+
+    public static string XnCLibPath
+    {
+        get
+        {
+            var dir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
+            for (var i = 0; i < 4; i++)
+                dir = Path.GetDirectoryName(dir) ?? dir;
+            return Path.Combine(dir, "CustomFunction", "SpitbolXnLib", "libspitbol_xn.so");
+        }
+    }
+
     private static string LibraryPath(string project, string dll)
     {
         // AppDomain.BaseDirectory = …/TestSnobol4/bin/Release/net10.0/

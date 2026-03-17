@@ -668,6 +668,7 @@ public partial class Builder
 
             case Token.Type.R_PAREN_FUNCTION:
             {
+                if (pendingFunctionNames.Count == 0) return false; // mismatched token — fall back
                 var funcName = pendingFunctionNames.Pop();
                 var key      = FoldCase(funcName);
                 var argCount = (int)t.IntegerValue;

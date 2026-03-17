@@ -802,4 +802,51 @@ end");
         Assert.AreEqual(0L, exec.AmpTrace,
             "AmpTrace must remain 0 when it starts at 0 (no hooks should fire)");
     }
+
+    // -----------------------------------------------------------------------
+    // Step 15 tests — R_PAREN_FUNCTION stack safety + MsilOnly coverage
+    // -----------------------------------------------------------------------
+
+    [TestMethod]
+    public void Step15_RParen_StackGuard_NoExceptionOnMismatch()
+    {
+        // Defensive guard: EmitSingleToken must not crash (Stack empty)
+        // when R_PAREN_FUNCTION appears without a matching IDENTIFIER_FUNCTION.
+        // The program must still compile and execute correctly via the threaded path.
+        var b = Run(@"
+        T = TABLE()
+        T['X'] = 42
+        OUTPUT = T['X']
+end");
+        Assert.AreEqual(0, b.ErrorCodeHistory.Count,
+            "TABLE() program must execute without errors");
+        Assert.AreEqual("42", b.Execute!.IdentifierTable[b.FoldCase("OUTPUT")]?.ToString() ?? "",
+            "Table lookup must return 42");
+    }
+
+    [TestMethod]
+    public void Step15_MsilOnly_ArithLoop()
+    {
+        // A tight arithmetic loop with :S(LABEL) must compile to pure MSIL.
+        var b = Compile(@"
+        N = 0
+LOOP    N = LT(N,10) N + 1   :S(LOOP)
+        OUTPUT = N
+end");
+        Assert.IsTrue(b.ThreadIsMsilOnly,
+            "Arith loop with :S(LABEL) must be ThreadIsMsilOnly=true");
+    }
+
+    [TestMethod]
+    public void Step15_MsilOnly_PatternMatch()
+    {
+        // Pattern match with :F(LABEL) must compile to pure MSIL.
+        var b = Compile(@"
+        'HELLO' 'HE'   :F(FAIL)
+        OUTPUT = 'OK'  :(END)
+FAIL    OUTPUT = 'FAIL'
+end");
+        Assert.IsTrue(b.ThreadIsMsilOnly,
+            "Pattern-match program with :F/:S must be ThreadIsMsilOnly=true");
+    }
 }

@@ -8,7 +8,7 @@ As a rule, any statement about SPITBOL in the SPITBOL manual, applies to SNOBOL4
 
 One major difference is that SNOBOL4.NET is slower than SPITBOL. This is the trade-off of using a high level language and safe programming practices. Hopefully, people will find the source code readable, and some will improve the code for readability and speed.
 
-That said, performance is a continuous focus. A threaded-code JIT compiles hot statement paths to MSIL delegates at runtime, and the pattern engine uses the Byrd Box model — the same four-port (α/β/γ/ω) state machine used by native SPITBOL — so patterns carry zero interpreter dispatch overhead on the matched path. Current benchmarks, Release build, .NET 10, Linux x64:
+That said, performance is a continuous focus. A threaded-code JIT compiles hot statement paths to MSIL delegates at runtime. Current benchmarks, Release build, .NET 10, Linux x64:
 
 | Benchmark | Mean | Alloc/run | Notes |
 |-----------|-----:|----------:|-------|
@@ -209,16 +209,6 @@ All SPITBOL keywords are implemented, including:
 ```
 
 `DUMP()` prints the current variable table to the listing file. `&FTRACE` counts down function call traces. `SETEXIT('label')` intercepts runtime errors for recovery.
-
----
-
-## A Note on the Pattern Engine
-
-SNOBOL4.NET compiles every pattern to a **Byrd Box** — a four-port state machine with entry (α), retry (β), success (γ), and failure (ω) ports. Boxes wire together into a graph: γ of one box connects to α of the next (concatenation); ω chains back for alternation; ARBNO wires α → γ in a loop. The result is a pure goto structure with no interpreter loop on the hot path.
-
-This is the same execution model used by the original SPITBOL compiler and by snobol4x (the native compiler in the snobol4ever family). The four ports are not an implementation detail — they are the architecture. Every primitive pattern type, every compound pattern, every recursive named pattern reference reduces to this model.
-
-The practical consequence: pattern matching in SNOBOL4.NET is not a regex engine and not an NFA simulator. It is a compiled state machine. It handles the full Chomsky hierarchy — regular languages, context-free languages, context-sensitive languages — from a single engine, without special cases.
 
 ---
 

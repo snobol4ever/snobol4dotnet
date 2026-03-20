@@ -15,7 +15,8 @@ internal enum OpCode : byte
     PushExpr    = 3,   // Operand: ParseExpression index (star function)
 
     // --- Function call ---
-    CallFunc    = 10,  // Operand A: FunctionSlot index, Operand B: arg count
+    CallFunc         = 10,  // Operand A: FunctionSlot index, Operand B: arg count
+    CallFuncIndirect = 11,  // Operand: arg count; function name is on stack below args (via $VAR)
 
     // --- Binary operators ---
     OpAdd       = 20,  // __+

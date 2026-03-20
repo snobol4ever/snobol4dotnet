@@ -48,4 +48,47 @@ public partial class Executive
         // Invoke the function obtained from the Function Table
         functionEntry.Handler(arguments);
     }
+
+    /// <summary>
+    /// Indirect function call: <c>$VAR(args)</c>.
+    /// The function name is determined at runtime by resolving the value already
+    /// pushed by <c>OpIndirection</c>.  Stack layout when called:
+    ///   [ resolved-name-Var ] [ arg0 ] … [ argN-1 ]   (top = argN-1)
+    /// </summary>
+    public void FunctionIndirect(int argumentCount)
+    {
+        if (Failure)
+            return;
+
+        var arguments = _reusableArgList;
+        arguments.Clear();
+        if (SystemStack.ExtractArguments(argumentCount, arguments, this))
+            return;
+
+        // The name was resolved by OpIndirection — pop and convert to string.
+        var nameVar = SystemStack.Pop();
+        var functionName = Parent.FoldCase(nameVar.ToString() ?? "");
+
+        if (string.IsNullOrEmpty(functionName))
+        {
+            LogRuntimeException(22);
+            return;
+        }
+
+        var functionStringVar = new StringVar(functionName);
+        var functionEntry = FunctionTable[functionName];
+        if (functionEntry == null)
+        {
+            LogRuntimeException(22);
+            return;
+        }
+
+        for (var i = arguments.Count; i < functionEntry.ArgumentCount; ++i)
+            arguments.Add(StringVar.Null());
+
+        InputArguments(arguments);
+        arguments.Add(functionStringVar);
+
+        functionEntry.Handler(arguments);
+    }
 }

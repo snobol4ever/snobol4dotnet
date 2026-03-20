@@ -131,6 +131,15 @@ public partial class Executive
                     Function(instr.IntOperand2);
                     break;
 
+                case OpCode.CallFuncIndirect:
+                    // $VAR(args): the indirection result is the function name string.
+                    // The stack has: [fn-name-string] [arg0] ... [argN-1]
+                    // OpIndirection already ran and pushed the resolved name value.
+                    // FunctionIndirect() pops args, then pops the name value and
+                    // converts it to string for lookup.
+                    FunctionIndirect(instr.IntOperand2);
+                    break;
+
                 case OpCode.OpAdd:       OperatorFast(OpCode.OpAdd,       2); break;
                 case OpCode.OpSubtract:  OperatorFast(OpCode.OpSubtract,  2); break;
                 case OpCode.OpMultiply:  OperatorFast(OpCode.OpMultiply,  2); break;

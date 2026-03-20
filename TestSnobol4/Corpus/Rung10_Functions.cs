@@ -94,7 +94,6 @@ end";
     }
 
     [TestMethod]
-    [Ignore(/* DOTNET gap */ "Semicolon statement separator in SNOBOL4 not supported in DOTNET")]
     public void TEST_Corpus_1012_func_locals()
     {
         var s = @"

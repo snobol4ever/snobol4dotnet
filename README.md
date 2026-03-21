@@ -80,7 +80,7 @@ Full SNOBOL4/SPITBOL — every feature the language defines.
 | Category | What |
 |----------|------|
 | Execution | GOTO-driven labeled-statement execution; conditional `:S()` / `:F()` routing |
-| Patterns | LIT, ANY, NOTANY, SPAN, BREAK, BREAKX, ARB, ARBNO, FENCE, ABORT, BAL, CONJ, POS, RPOS, TAB, RTAB, REM, cursor capture (`@`) |
+| Patterns | LIT, ANY, NOTANY, SPAN, BREAK, BREAKX, ARB, ARBNO, FENCE, ABORT, BAL, CONCAT, POS, RPOS, TAB, RTAB, REM, cursor capture (`@`) |
 | Functions | DEFINE / RETURN / FRETURN / NRETURN; recursive functions; APPLY; OPSYN |
 | Data types | STRING, INTEGER, REAL, PATTERN, ARRAY, TABLE, DATA/FIELD, CODE, NAME |
 | CODE() | Dynamic compilation of SNOBOL4 source at runtime |
@@ -198,7 +198,7 @@ Patterns in SNOBOL4 are not regular expressions. `SPAN(&LCASE)` matches one or m
 
 snobol4dotnet takes *MACRO SPITBOL* (Emmer & Quillen) as its specification, with Griswold, Poage & Polonsky's *The SNOBOL4 Programming Language* as the base reference. When CSNOBOL4 and SPITBOL MINIMAL diverge, SPITBOL MINIMAL wins.
 
-CSNOBOL4 2.3.3 (Phil Budne) and SPITBOL x64 4.0f (Cheyenne Wills) serve as conformance oracles. The shared `snobol4corpus` crosscheck ladder (106 programs, 11 rungs + `beauty.sno`) is the acceptance test. Current status: **79/80** (one known failure: `@N` cursor capture when match position > 0 — fix in progress, sprint `net-polish`).
+CSNOBOL4 2.3.3 (Phil Budne) and SPITBOL x64 4.0f (Cheyenne Wills) serve as conformance oracles. The shared `snobol4corpus` crosscheck ladder (106 programs, 11 rungs + `beauty.sno`) is the acceptance test. Known open issue: `@N` cursor capture when match position > 0 — fix in progress, sprint `net-polish`.
 
 ---
 

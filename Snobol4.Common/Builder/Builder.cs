@@ -89,6 +89,7 @@ public partial class Builder : IDisposable
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         Execute = new Executive(this);
+        ApplyStartupOptions(Execute);
         try
         {
             GetNameSpaceAndClassName(CompileTarget.PROGRAM);
@@ -126,6 +127,7 @@ public partial class Builder : IDisposable
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         Execute = new Executive(this);
+        ApplyStartupOptions(Execute);
         try
         {
             GetNameSpaceAndClassName(CompileTarget.PROGRAM);
@@ -203,11 +205,27 @@ public partial class Builder : IDisposable
             var loadContext = CreateTrackedLoadContext("RunDll");
             var dll = loadContext.LoadFromAssemblyPath(dllFileName);
             Execute = new Executive(this);
+            ApplyStartupOptions(Execute);
             var className = Path.GetFileNameWithoutExtension(dllFileName);
             Execute.Execute(dll, loadContext, $"{className}0.{className}");
         }
         catch (CompilerException) { }
         catch (Exception e) { ReportProgrammingError(e); }
+    }
+
+    /// <summary>
+    /// Applies BuildOptions that take effect at Executive creation time:
+    /// -e (errors to stdout), -m (max object size → &amp;MAXLNGTH).
+    /// Called once per Executive instance, immediately after construction.
+    /// </summary>
+    private void ApplyStartupOptions(Executive exec)
+    {
+        // -e: redirect Console.Error to Console.Out so errors can be piped
+        if (BuildOptions.ErrorsToStdout)
+            Console.SetError(Console.Out);
+
+        // -m: seed &MAXLNGTH from the command-line value before any user code runs
+        exec.AmpMaxLength = BuildOptions.MaxObjectBytes;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

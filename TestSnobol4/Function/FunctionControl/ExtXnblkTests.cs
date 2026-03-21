@@ -118,6 +118,7 @@ END");
         foreach (var key in exec.FunctionTable.Keys.Where(k => !keysBefore.Contains(k)).ToList())
         {
             var original = exec.FunctionTable[key];
+            if (original is null) continue;
             exec.FunctionTable[key] = new FunctionTableEntry(
                 exec, key,
                 args =>
@@ -133,9 +134,9 @@ END");
 
         // Invoke AccumSum three times through the wrapped entry.
         var fnKey = b.FoldCase("AccumSum");
-        exec.FunctionTable[fnKey].Handler([new IntegerVar(10)]);
-        exec.FunctionTable[fnKey].Handler([new IntegerVar(20)]);
-        exec.FunctionTable[fnKey].Handler([new IntegerVar(30)]);
+        exec.FunctionTable[fnKey]!.Handler([new IntegerVar(10)]);
+        exec.FunctionTable[fnKey]!.Handler([new IntegerVar(20)]);
+        exec.FunctionTable[fnKey]!.Handler([new IntegerVar(30)]);
 
         Assert.IsTrue(fired, "first-call guard should have fired");
         Assert.AreEqual(1, StatefulSumLibrary.OnFirstCallCount,

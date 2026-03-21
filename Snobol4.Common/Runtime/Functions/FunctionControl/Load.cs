@@ -831,6 +831,7 @@ public partial class Executive
                     foreach (var key in FunctionTable.Keys.Where(k => !keysBefore.Contains(k)).ToList())
                     {
                         var original = FunctionTable[key];
+                        if (original is null) continue;
                         FunctionTable[key] = new FunctionTableEntry(
                             this, key,
                             args =>

@@ -54,7 +54,7 @@ public sealed class ExternalVar : Var
 
     public override int GetHashCode() => Pointer.GetHashCode();
 
-    public bool Equals(Var? other) =>
+    public override bool Equals(Var? other) =>
         other is ExternalVar ext && Pointer == ext.Pointer;
 
     public override string ToString() => _formattingStrategy.ToString(this);

@@ -240,3 +240,23 @@ MIT. See [LICENSE](LICENSE).
 ---
 
 *Part of [snobol4ever](https://github.com/snobol4ever) — snobol4all. snobol4now. snobol4ever.*
+
+---
+
+## Source Volume (G-VOLUME · M-VOL-DOTNET ✅ · 2026-03-22)
+
+> `wc -l` scan of `Snobol4*/`. Categories are logical function — comparable across snobol4x, snobol4jvm, snobol4dotnet.
+
+| Category | Files | Lines | Blank-stripped | % total |
+|----------|------:|------:|:--------------:|--------:|
+| Parser / lexer | 8 | 3,681 | 3,206 | 16.6% |
+| Code emitter | 13 | 2,825 | 2,484 | 12.7% |
+| Pattern engine | 33 | 2,260 | 1,701 | 10.2% |
+| Runtime / builtins | 201 | 11,938 | 9,909 | 53.7% |
+| Driver / CLI | 12 | 1,040 | 915 | 4.7% |
+| Extensions / plugins | 7 | 548 | 476 | 2.5% |
+| Tests | 160 | 28,008 | 25,102 | — |
+| Benchmarks | 5 | 474 | 435 | — |
+| Docs / Markdown | 5 | 668 | 471 | — |
+| **Total (src)** | **272** | **22,212** | **18,626** | **100%** |
+

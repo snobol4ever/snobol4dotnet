@@ -361,3 +361,27 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# ── Project-specific additions ──────────────────────────────────────────────
+
+# Debian/Ubuntu package files (accidentally committed by Jeff, Mar 2026)
+*.deb
+
+# ZIP snapshots of source (not for version control — use git history instead)
+*.zip
+
+# CSV/text scratch files committed accidentally
+AST.csv
+ATS1.csv
+RecordTest.txt
+Corrigenda.md
+
+# README backup files
+README.md.backup
+*.md.backup
+
+# dotnet install scripts (downloaded tooling, not source)
+dotnet-install.sh
+dotnet-install-install.sh
+
+# nettrace profiling output
+*.nettrace

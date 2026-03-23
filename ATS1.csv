@@ -1,6 +1,0 @@
-﻿AbstractSyntaxTreeNode,AbstractSyntaxTreeNode.Self,AbstractSyntaxTreeNode.SelfIndex,AbstractSyntaxTreeNode.ChildType,AbstractSyntaxTreeNode.ParentIndex,AbstractSyntaxTreeNode.LeftChild,AbstractSyntaxTreeNode.RightChild,AbstractSyntaxTreeNode.Subsequent,AbstractSyntaxTreeNode.Alternate
-Snobol4.Common.AbstractSyntaxTreeNode,Snobol4.Common.AlternatePattern,0,NONE,-1,1,2,-1,-1
-Snobol4.Common.AbstractSyntaxTreeNode,Snobol4.Common.NullPattern,1,LEFT,0,-1,-1,-1,-1
-Snobol4.Common.AbstractSyntaxTreeNode,Snobol4.Common.ConcatenatePattern,2,RIGHT,0,-1,-1,-1,-1
-Snobol4.Common.AbstractSyntaxTreeNode,Snobol4.Common.AnyPattern,3,LEFT,2,-1,-1,-1,-1
-Snobol4.Common.AbstractSyntaxTreeNode,Snobol4.Common.UnevaluatedPattern,4,RIGHT,2,-1,-1,-1,-1

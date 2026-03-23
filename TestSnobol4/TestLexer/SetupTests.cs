@@ -122,8 +122,8 @@ public class SetupTests
         for (var i = 0; i < 4; i++)
             dir = Path.GetDirectoryName(dir) ?? dir;
         var projectDir = string.IsNullOrEmpty(project)
-            ? Path.Combine(dir, "CustomFunction", "bin", "Release", "net10.0")
-            : Path.Combine(dir, "CustomFunction", project, "bin", "Release", "net10.0");
+            ? Path.Combine(dir, "CustomFunction", "bin", "Debug", "net10.0")
+            : Path.Combine(dir, "CustomFunction", project, "bin", "Debug", "net10.0");
         return Path.Combine(projectDir, dll);
     }
 }

@@ -72,7 +72,8 @@ end");
         load('{dll}', 'AreaFunction.Area')   :S(OK)F(FAIL)
 FAIL    result = 'failed'                    :(END)
 OK      result = 'ok'
-END     unload('{dll}')
+        unload('{dll}')
+END
 end");
         Assert.AreEqual(0, b.ErrorCodeHistory.Count);
         Assert.AreEqual("ok", Str("result", b));
@@ -88,7 +89,7 @@ FAIL    result = 'failed'              :(END)
 OK      result = 'ok'
 END
 end");
-        Assert.AreEqual("failed", Str("result", b));
+        Assert.AreEqual(142, b.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
@@ -100,7 +101,7 @@ FAIL    result = 'failed'                        :(END)
 OK      result = 'ok'
 END
 end");
-        Assert.AreEqual("failed", Str("result", b));
+        Assert.AreEqual(143, b.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
@@ -189,7 +190,7 @@ end");
         unload('{dll}')
 end");
         Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual("10.", Str("r", b));
+        Assert.AreEqual("10", Str("r", b));
     }
 
     [TestMethod]
@@ -215,7 +216,7 @@ end");
         unload('{dll}')
 end");
         Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual("10.", Str("r", b));
+        Assert.AreEqual("10", Str("r", b));
     }
 
     [TestMethod]
@@ -330,7 +331,7 @@ end");
         unload('{dll}')
 end");
         Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual("5.", Str("r", b));
+        Assert.AreEqual("5", Str("r", b));
     }
 
     [TestMethod]
@@ -346,7 +347,7 @@ end");
         unload('{dll}')
 end");
         Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual("5",   Str("r1", b));  // FsFib returns IntegerVar
+        Assert.AreEqual("5",  Str("r1", b));
         Assert.AreEqual("13", Str("r2", b));
     }
 

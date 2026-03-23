@@ -19,8 +19,8 @@ public partial class Executive
         // Save all fields that recursive calls may overwrite
         var savedIP         = InstructionPointer;
         var savedFailure    = Failure;
-        var savedErrorJump  = ErrorJump;
-        ErrorJump = 0;
+        var savedErrorJump  = OnErrorGoto;
+        OnErrorGoto = 0;
 
         // Set the instruction pointer for this call
         InstructionPointer = startAt;
@@ -103,7 +103,7 @@ public partial class Executive
                         SystemStack.Pop();
                     SystemStack.Pop();
                     AmpLastLineNumber = AmpCurrentLineNumber;
-                    if (ErrorJump > 0) ProcessTrappedErrorThreaded();
+                    if (OnErrorGoto > 0) ProcessTrappedErrorThreaded();
                     break;
 
                 case OpCode.PushVar:
@@ -271,7 +271,7 @@ public partial class Executive
         // can re-apply it after the restore.
         LastExpressionFailure = Failure;
         InstructionPointer    = savedIP;
-        ErrorJump             = savedErrorJump;
+        OnErrorGoto             = savedErrorJump;
         Failure               = savedFailure;
         return exitCode;
     }
@@ -285,8 +285,8 @@ public partial class Executive
 
     private void ProcessTrappedErrorThreaded()
     {
-        var target = ErrorJump;
-        ErrorJump  = 0;
+        var target = OnErrorGoto;
+        OnErrorGoto  = 0;
         InstructionPointer = StatementIndexToInstrIndex(target);
     }
 }

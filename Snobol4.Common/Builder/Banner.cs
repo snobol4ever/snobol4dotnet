@@ -23,6 +23,7 @@ public partial class Builder
                       {now.DayOfWeek} {now.Day} {now:MMMM} {now.Year} {now:HH:mm:ss}
                                                                     
 
+                      
                       """;
         writer.WriteLine(banner);
     }

@@ -1,8 +1,2 @@
-﻿		SETEXIT(.ERR)
-		&ERRLIMIT = 100
-		A = 2
-		OUTPUT = A
-		A = 1 / 2			:(CONTINUE)
-		OUTPUT = 'RETURN'     :(END)
-ERR		OUTPUT = "Error trapped: Division by zero"
+﻿	OUTPUT = A = 4 + 6.0
 END

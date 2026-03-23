@@ -124,7 +124,7 @@ public partial class Executive
             SystemStack.Pop();
         SystemStack.Pop();
         AmpLastLineNumber = AmpCurrentLineNumber;
-        if (ErrorJump > 0) ProcessTrappedErrorThreaded();
+        if (OnErrorGoto > 0) ProcessTrappedErrorThreaded();
     }
 
     /// <summary>

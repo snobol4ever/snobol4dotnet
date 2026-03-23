@@ -108,7 +108,7 @@ public partial class Builder : IDisposable
             if (BuildOptions.WriteDll) SaveDll();
             _timerBuild.Stop();
             PrintCompilationStatistics();
-            Execute._timerExecute.Restart();
+            Execute.StartTimer();
             Execute.ExecuteLoop(0);
         }
         catch (CompilerException) { }

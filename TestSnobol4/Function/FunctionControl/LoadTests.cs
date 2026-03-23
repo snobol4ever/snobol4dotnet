@@ -89,7 +89,7 @@ FAIL    result = 'failed'              :(END)
 OK      result = 'ok'
 END
 end");
-        Assert.AreEqual(142, b.ErrorCodeHistory[0]);
+        Assert.AreEqual("failed", Str("result", b));
     }
 
     [TestMethod]
@@ -101,7 +101,7 @@ FAIL    result = 'failed'                        :(END)
 OK      result = 'ok'
 END
 end");
-        Assert.AreEqual(143, b.ErrorCodeHistory[0]);
+        Assert.AreEqual("failed", Str("result", b));
     }
 
     [TestMethod]

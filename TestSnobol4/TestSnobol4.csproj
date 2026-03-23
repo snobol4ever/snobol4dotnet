@@ -59,6 +59,8 @@
                       ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\CustomFunction\FSharpOptionLibrary\FSharpOptionLibrary.fsproj"
                       ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\CustomFunction\VbLibrary\VbLibrary.vbproj"
+                      ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />

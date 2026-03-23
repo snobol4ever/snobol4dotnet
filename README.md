@@ -48,9 +48,9 @@ These three files should be stored in the same folder and the folder placed anyw
 ### Experienced Users
 If you want to run an existing SPITBOL program, consider the following items that may need to change:
 
-* Command-line options
+#### Command-line options
 
-Check the command-line options. The following operate the same as SPITBOL. 
+The following command line options function the same as SPITBOL. 
 
 * -a   equivalent to -c, -l -x
 * -b   Suppress sign on message
@@ -78,7 +78,7 @@ The .Net framework automatically optimizes all memory allocation on a program-by
 * -m   Max object size
 * -s   Stack size
 
-The show listing command line option (-l) creates a listing similar to SPITBOL, but without pagination or limits on line length. Printing preferences (lines per page, columns per line, font, line spacing, and can be controlled by a text editor or a word processor more completely than SPITBOL's command line options. As such, the following command line options are not implemented: 
+The show listing command line option (-l) creates a listing similar to SPITBOL, but the following command line options are not implemented. A text editor or word processor can manage SPITBOL's command line options as well as preferences not available in SPITBOL, such as line spacing, indentations, justification, and fonts.
 
 * -g   Listing page length
 * -p   Long listing format
@@ -87,10 +87,10 @@ The show listing command line option (-l) creates a listing similar to SPITBOL, 
 
 The following command line options are not implemented:
 
-* -e   Errors to list file only
+* -e   Errors to list file only (can be replaced with -o)
 * -r   Input from source file following END statement
-* -T   Write terminal output to file 
-* -#   Associate file with I/O channel number 
+* -T   Write terminal output to file (Can be accomplished by redirecting STDIO or STDERR)
+* -#   Associate file with I/O channel number (Can be done inline with INPUT() or OUTPUT() functions.
 
 
 
@@ -110,7 +110,7 @@ The following command line options are not implemented:
 
 
 
-* INPUT() and OUTPUT() functions.
+#### INPUT() and OUTPUT() functions.
 
 In SPITBOL the arguments are INPUT(.Variable, Channel, "filename[options]) and the same for OUTPUT(). In SNOBOL4.NET, a third object is the file mode option, a fourth argument is the file share option, and a fifth argument for OUTPUT controls whether an end of line is printed. If 0 (the default), an end of line is printed. If non-zero, an end of line is not printed. If options are not used, INPUT() and OUTPUT() function identically between SNOBOL4.NET and SPITBOL.
 

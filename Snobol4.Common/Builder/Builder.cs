@@ -69,12 +69,6 @@ public partial class Builder : IDisposable
 
     #region Static helpers (Lex / Parse)
 
-    internal static string Generate(string nameSpace, string className, bool firstInit,
-                                     GenerateCSharpCode.CompileTarget compileTarget, Builder parent)
-    {
-        return new GenerateCSharpCode(parent).GenerateCSharp(nameSpace, className, firstInit, compileTarget, parent);
-    }
-
     internal static bool Lex(Builder parent, int startState = 1)
     {
         Lexer lex = new(parent, startState);
@@ -95,6 +89,7 @@ public partial class Builder : IDisposable
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         Execute = new Executive(this);
+        ApplyStartupOptions(Execute);
         try
         {
             GetNameSpaceAndClassName(CompileTarget.PROGRAM);
@@ -104,33 +99,17 @@ public partial class Builder : IDisposable
             Parse(this);
             ResolveSlots();
 
-            if (BuildOptions.UseThreadedExecution)
-            {
-                // ── Threaded path (default, fast) ──────────────────────────────
-                var tc = new ThreadedCodeCompiler(this);
-                EmitMsilForAllStatements();
-                Execute.Thread = tc.Compile();
-                CompileStarFunctions(tc);
-                PopulateMainMetadata();
-                ComputeThreadIsMsilOnly();
-                _timerBuild.Stop();
-                PrintCompilationStatistics();
-                Execute.StartTimer();
-                Execute.ExecuteLoop(0);
-            }
-            else
-            {
-                // ── Roslyn path (legacy, switchable via -useroslyn flag) ────────
-                var cSharpCode = Generate(_compilerTarget.NameSpace, _compilerTarget.ClassName,
-                                          true, GenerateCSharpCode.CompileTarget.PROGRAM, this);
-                StatementCount += Code.SourceLines.Count;
-                var loadContext = CreateTrackedLoadContext($"Main_{_compilerTarget.ClassName}");
-                var dll = Compile(loadContext, _compilerTarget.FileName, cSharpCode);
-                _timerBuild.Stop();
-                PrintCompilationStatistics();
-                if (MessageHistory.Count == 0 || !BuildOptions.SuppressExecution)
-                    Execute.Execute(dll, loadContext, _compilerTarget.FullClassName);
-            }
+            var tc = new ThreadedCodeCompiler(this);
+            EmitMsilForAllStatements();
+            Execute.Thread = tc.Compile();
+            CompileStarFunctions(tc);
+            PopulateMainMetadata();
+            ComputeThreadIsMsilOnly();
+            if (BuildOptions.WriteDll) SaveDll();
+            _timerBuild.Stop();
+            PrintCompilationStatistics();
+            Execute.StartTimer();
+            Execute.ExecuteLoop(0);
         }
         catch (CompilerException) { }
         catch (Exception e) { ReportProgrammingError(e); }
@@ -148,6 +127,7 @@ public partial class Builder : IDisposable
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         Execute = new Executive(this);
+        ApplyStartupOptions(Execute);
         try
         {
             GetNameSpaceAndClassName(CompileTarget.PROGRAM);
@@ -210,7 +190,7 @@ public partial class Builder : IDisposable
         return false;
     }
 
-    /// <summary>Load a pre-compiled Roslyn DLL and run it (legacy entry point).</summary>
+    /// <summary>Load a pre-compiled DLL and run it. Handles both threaded (sentinel) and legacy formats.</summary>
     public void RunDll(string dllFileName)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(dllFileName);
@@ -218,14 +198,34 @@ public partial class Builder : IDisposable
         try
         {
             ClearExceptionHistory();
+            // Threaded format: detect Snobol4ThreadedDll sentinel → re-compile from embedded source
+            if (TryRunThreadedDll(dllFileName))
+                return;
+            // Legacy format: Roslyn-generated DLL with a Run(Executive) method
             var loadContext = CreateTrackedLoadContext("RunDll");
             var dll = loadContext.LoadFromAssemblyPath(dllFileName);
             Execute = new Executive(this);
+            ApplyStartupOptions(Execute);
             var className = Path.GetFileNameWithoutExtension(dllFileName);
             Execute.Execute(dll, loadContext, $"{className}0.{className}");
         }
         catch (CompilerException) { }
         catch (Exception e) { ReportProgrammingError(e); }
+    }
+
+    /// <summary>
+    /// Applies BuildOptions that take effect at Executive creation time:
+    /// -e (errors to stdout), -m (max object size → &amp;MAXLNGTH).
+    /// Called once per Executive instance, immediately after construction.
+    /// </summary>
+    private void ApplyStartupOptions(Executive exec)
+    {
+        // -e: redirect Console.Error to Console.Out so errors can be piped
+        if (BuildOptions.ErrorsToStdout)
+            Console.SetError(Console.Out);
+
+        // -m: seed &MAXLNGTH from the command-line value before any user code runs
+        exec.AmpMaxLength = BuildOptions.MaxObjectBytes;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -414,14 +414,10 @@ public partial class Builder : IDisposable
         if (!BuildOptions.ShowCompilerStatistics || _timerBuild == null) return;
         var memoryUsed = Process.GetCurrentProcess().WorkingSet64;
         var memInfo    = GC.GetGCMemoryInfo();
-        Console.Error.WriteLine($"memory used (bytes)       {memoryUsed}");
-        Console.Error.WriteLine($"memory left (bytes)       {memInfo.TotalAvailableMemoryBytes}");
-        Console.Error.WriteLine($"build errors              {ErrorCodeHistory.Count}");
-        Console.Error.WriteLine($"regenerations             {GC.CollectionCount(memInfo.Generation)}");
-        Console.Error.WriteLine($"build time (h:m:s.μ)      {_timerBuild.Elapsed}");
-        Console.Error.WriteLine();
-        Console.Error.WriteLine();
-        Console.Error.WriteLine();
+        Console.Error.WriteLine($"memory used (bytes)  {memoryUsed}");
+        Console.Error.WriteLine($"memory left (bytes)  {memInfo.TotalAvailableMemoryBytes}");
+        Console.Error.WriteLine($"comp errors          {ErrorCodeHistory.Count}");
+        Console.Error.WriteLine($"comp time (sec)      {_timerBuild.Elapsed}");
     }
 
     #endregion
@@ -452,55 +448,4 @@ public partial class Builder : IDisposable
 
     #endregion
 
-    // =========================================================================
-    // DEAD CODE — Roslyn path preserved for reference only. Never called.
-    // =========================================================================
-#pragma warning disable CS0162 // Unreachable code detected
-#pragma warning disable IDE0051 // Remove unused private members
-
-    private static void _Dead_BuildMain_Roslyn(Builder b)
-    {
-        throw new NotImplementedException("Roslyn path removed");
-        var cSharpCode = _Dead_Generate(b._compilerTarget.NameSpace, b._compilerTarget.ClassName,
-                                        true, CompileTarget.PROGRAM, b);
-        b.StatementCount += b.Code.SourceLines.Count;
-        var ctx = b.CreateTrackedLoadContext($"Main_{b._compilerTarget.ClassName}");
-        var dll = b.Compile(ctx, b._compilerTarget.FileName, cSharpCode);
-        b.Execute!.Execute(dll, ctx, b._compilerTarget.FullClassName);
-    }
-
-    private static void _Dead_BuildEval_Roslyn(Builder b)
-    {
-        throw new NotImplementedException("Roslyn path removed");
-        var cSharpCode = _Dead_Generate(b._compilerTarget.NameSpace, b._compilerTarget.ClassName,
-                                        false, CompileTarget.EVAL, b);
-        b.StatementCount += b.Code.SourceLines.Count;
-        var ctx = b.CreateTrackedLoadContext($"Eval_{b._compilerTarget.EvalNum}");
-        var dll = b.Compile(ctx, b._compilerTarget.FileName, cSharpCode);
-        dynamic? inst = dll.CreateInstance(b._compilerTarget.FullClassName);
-        inst?.Run(b.Execute);
-    }
-
-    private static void _Dead_BuildCode_Roslyn(Builder b)
-    {
-        throw new NotImplementedException("Roslyn path removed");
-        var cSharpCode = _Dead_Generate(b._compilerTarget.NameSpace, b._compilerTarget.ClassName,
-                                        false, CompileTarget.CODE, b);
-        b.StatementCount += b.Code.SourceLines.Count;
-        var ctx = b.CreateTrackedLoadContext($"Code_{b._compilerTarget.CodeNum}");
-        var dll = b.Compile(ctx, b._compilerTarget.FileName, cSharpCode);
-        dynamic? inst = dll.CreateInstance(b._compilerTarget.FullClassName);
-        inst?.Run(b.Execute);
-    }
-
-    private static string _Dead_Generate(string ns, string cn, bool firstInit,
-                                          CompileTarget ct, Builder parent)
-    {
-        throw new NotImplementedException("Roslyn path removed");
-        return new GenerateCSharpCode(parent).GenerateCSharp(ns, cn, firstInit, (GenerateCSharpCode.CompileTarget)(int)ct, parent);
-    }
-
-#pragma warning restore CS0162
-#pragma warning restore IDE0051
-    // =========================================================================
 }

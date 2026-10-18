@@ -184,7 +184,7 @@ public partial class Executive
                 var rval = rightVar is NameVar rvNv ? rvNv.Dereference(this) : rightVar;
                 // Clone rightVar before mutating Key/Collection so the source variable's
                 // VarSlotArray slot (if rightVar came from PushVar) is not contaminated.
-                var arrVal = rval is ArrayVar or TableVar ? rval : rval.Clone();
+                var arrVal = rval is ArrayVar or TableVar ? rval : StoredCopy(rval);
                 arrVal.Key        = leftVar.Key;
                 arrVal.Collection = leftVar.Collection;
                 arrayVar.Data[(int)(long)leftVar.Key!] = arrVal;
@@ -195,7 +195,7 @@ public partial class Executive
             case TableVar tableVar:
             {
                 var rval = rightVar is NameVar rvNv ? rvNv.Dereference(this) : rightVar;
-                var tblVal = rval is ArrayVar or TableVar ? rval : rval.Clone();
+                var tblVal = rval is ArrayVar or TableVar ? rval : StoredCopy(rval);
                 tblVal.Key        = leftVar.Key;
                 tblVal.Collection = leftVar.Collection;
                 tableVar.Data[leftVar.Key!] = tblVal;
@@ -207,7 +207,7 @@ public partial class Executive
                 // If the lvalue is a NameVar (e.g. returned via NRETURN), assign through
                 // its Pointer — the actual variable being referenced — not leftVar.Symbol.
                 var targetSymbol = leftVar is NameVar nameVar ? nameVar.Pointer : leftVar.Symbol;
-                var newVar = rightVar is ArrayVar or TableVar ? rightVar : rightVar.Clone();
+                var newVar = rightVar is ArrayVar or TableVar ? rightVar : StoredCopy(rightVar);
                 newVar.Symbol = targetSymbol;
                 // Strip array/table bookkeeping from the stored scalar value.
                 // A value read from A<K> carries .Collection=arrayVar and .Key=k so
@@ -302,5 +302,15 @@ public partial class Executive
                 StreamOutputs[outputVar.OutputChannel].Write(Encoding.UTF8.GetBytes(outputVar + Environment.NewLine));
                 break;
         }
+    }
+
+    // The copy of a value an assignment stores: protection and keyword-ness belong to the variable the
+    // value came from (FAIL, &TRIM), not to the value, so X = FAIL then X = 1 is an ordinary assignment
+    private static Var StoredCopy(Var value)
+    {
+        var copy = value.Clone();
+        copy.IsReadOnly = false;
+        copy.IsKeyword = false;
+        return copy;
     }
 }

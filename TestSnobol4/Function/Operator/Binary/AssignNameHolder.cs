@@ -27,4 +27,26 @@ end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("ONE TWO,STRING,,,held,via nreturn", ((StringVar)build.Execute!.IdentifierTable["S"]).Data);
     }
+
+    [TestMethod]
+    public void TEST_Assign_a_protected_value_leaves_the_target_unprotected()
+    {
+        // sbl -b answers 1 two three el: a variable or element that was given FAIL, ARB or REM can be
+        // given another value (Gimpel's ONCE does $NAME = FAIL twice); snobol4dotnet refused with error 42
+        var build = SetupTests.SetupScript("-b", @"
+        X = FAIL
+        X = 1
+        Y = ARB
+        Y = 'two'
+        N = 'Z'
+        $N = REM
+        $N = 'three'
+        A = ARRAY(1)
+        A<1> = FAIL
+        A<1> = 'el'
+        R = X ' ' Y ' ' Z ' ' A<1>
+end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("1 two three el", build.Execute!.IdentifierTable["R"].ToString());
+    }
 }

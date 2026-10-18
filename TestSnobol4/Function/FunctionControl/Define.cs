@@ -156,4 +156,45 @@ end";
         Assert.AreEqual(88L, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("rest")]).Data);
     }
 
+    [TestMethod]
+    [Timeout(10000)]
+    public void TEST_Define_007_error_inside_function_ends_program()
+    {
+        // With &ERRLIMIT = 0 a runtime error ends the whole program, not just
+        // the function it occurs in (SPITBOL and CSNOBOL4 both stop at the
+        // first error 22 and never reach the next statement).
+        var s = @"
+        define('f()')       :(fend)
+f       x = undef()         :(return)
+fend    f()
+        after = 'ran'
+end";
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s);
+        CollectionAssert.AreEqual(new List<int> { 22 }, build.ErrorCodeHistory);
+        var key = build.FoldCase("after");
+        Assert.IsFalse(build.Execute!.IdentifierTable.ContainsKey(key)
+                       && build.Execute.IdentifierTable[key] is StringVar { Data: "ran" });
+    }
+
+    [TestMethod]
+    [Timeout(10000)]
+    public void TEST_Define_008_error_two_functions_deep_ends_program()
+    {
+        var s = @"
+        define('f()')       :(fend)
+f       g()                 :(return)
+fend    define('g()')       :(gend)
+g       x = undef()         :(return)
+gend    f()
+        after = 'ran'
+end";
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s);
+        CollectionAssert.AreEqual(new List<int> { 22 }, build.ErrorCodeHistory);
+        var key = build.FoldCase("after");
+        Assert.IsFalse(build.Execute!.IdentifierTable.ContainsKey(key)
+                       && build.Execute.IdentifierTable[key] is StringVar { Data: "ran" });
+    }
+
 }

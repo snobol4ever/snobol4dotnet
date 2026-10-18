@@ -2,6 +2,8 @@ namespace Snobol4.Common;
 
 public partial class Executive
 {
+    private bool _inExecuteLoop;
+
     public int ExecuteLoop(int i)
     {
         // Threaded path (default): delegate to ThreadedExecuteLoop.
@@ -13,15 +15,33 @@ public partial class Executive
                 : 0;
             InitExecutionCache();   // no-op after first call
             int result;
-            try
+            // A CompilerException from LogRuntimeException is fatal to the whole
+            // program, so only the outermost ExecuteLoop catches it and halts.
+            // ExecuteLoop also runs function bodies, CODE gotos and SETEXIT
+            // handlers; catching in one of those returned -1 to its caller, which
+            // resumed after the error (an error inside a function looped or
+            // overflowed the stack).
+            if (_inExecuteLoop)
             {
                 result = ThreadedExecuteLoop(startInstr);
             }
-            catch (CompilerException)
+            else
             {
-                // Error already recorded in ErrorCodeHistory by LogRuntimeException.
-                // Halt gracefully rather than propagating through the test harness.
-                return -1;
+                _inExecuteLoop = true;
+                try
+                {
+                    result = ThreadedExecuteLoop(startInstr);
+                }
+                catch (CompilerException)
+                {
+                    // Error already recorded in ErrorCodeHistory by LogRuntimeException.
+                    // Halt gracefully rather than propagating through the test harness.
+                    return -1;
+                }
+                finally
+                {
+                    _inExecuteLoop = false;
+                }
             }
             // Non-negative: threaded loop exited to a CODE'd Statements[] index — run it.
             if (result < 0) return result;

@@ -15,7 +15,7 @@ public partial class Executive
 
                                """);
 
-        AmpCurrentLineNumber = lineNumber;
+        BeginStatement(lineNumber);
         Failure = false;
         AlphaStack.Clear(); // Used for conditional variable association
         BetaStack.Clear();  // Used for conditional variable association
@@ -50,6 +50,16 @@ public partial class Executive
             SystemStack.Pop();
 
         SystemStack.Pop();
-        AmpLastLineNumber = AmpCurrentLineNumber;
     }
+
+    // A statement begins: the one that began before it becomes &LASTNO, as in SPITBOL, where a
+    // function body's first statement reads the calling statement as its last
+    internal void BeginStatement(int index)
+    {
+        AmpLastLineNumber = _statementBegun ? AmpCurrentLineNumber : -1;
+        AmpCurrentLineNumber = index;
+        _statementBegun = true;
+    }
+
+    private bool _statementBegun;
 }

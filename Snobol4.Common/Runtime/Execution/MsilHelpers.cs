@@ -112,7 +112,7 @@ public partial class Executive
     /// delegate should abort immediately.</returns>
     internal bool InitStatementMsil(int stmtIdx)
     {
-        AmpCurrentLineNumber = stmtIdx;
+        BeginStatement(stmtIdx);
         Failure = false;
         AlphaStack.Clear();
         BetaStack.Clear();
@@ -151,7 +151,6 @@ public partial class Executive
         while (SystemStack.Peek() is not StatementSeparator)
             SystemStack.Pop();
         SystemStack.Pop();
-        AmpLastLineNumber = AmpCurrentLineNumber;
         if (OnErrorGoto > 0) ProcessTrappedErrorThreaded();
     }
 

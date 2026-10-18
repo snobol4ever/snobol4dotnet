@@ -25,7 +25,7 @@ public partial class Executive
     internal Pattern AmpFailPattern = new FailPattern();
     internal Pattern AmpFencePattern = new AlternatePattern(new NullPattern(), new AbortPattern());
     internal long AmpFunctionLevel;
-    internal int AmpLastLineNumber;
+    internal int AmpLastLineNumber = -1;    // index of the previous statement executed; -1 before the first
     internal string AmpLowerCaseLetters;
     internal int AmpCurrentLineNumber;
     internal Pattern AmpRemPattern = new RemPattern();
@@ -155,11 +155,20 @@ public partial class Executive
         SystemStack.Push(new PatternVar(AmpFencePattern, "&fence", true, true));
     }
 
+    // A statement index (AmpCurrentLineNumber, AmpLastLineNumber) read as SPITBOL numbers it:
+    // &STNO counts statements from 1, a blank line being a null statement; &LINE is the line in its
+    // file. Index -1 (no previous statement yet) reads 0 and the null string.
+    private long StatementNumber(int index) => index >= 0 && index < SourceStno.Count ? SourceStno[index] : 0;
+
+    private long StatementLine(int index) => index >= 0 && index < SourceLineNumbers.Count ? SourceLineNumbers[index] + 1 : 0;
+
+    private string StatementFile(int index) =>
+        index >= 0 && index < SourceFiles.Count ? Path.GetFileName(SourceFiles[index]) : "";
+
     internal void HandleFile(Var value, bool set)
     {
         if (ReadOnlyHandler(set)) return;
-        var fileName = Path.GetFileName(SourceFiles[AmpCurrentLineNumber - 1]);
-        SystemStack.Push(new StringVar(fileName, "$file", true, true));
+        SystemStack.Push(new StringVar(StatementFile(AmpCurrentLineNumber), "$file", true, true));
     }
 
     internal void HandleFncLevel(Var value, bool set)
@@ -171,20 +180,19 @@ public partial class Executive
     internal void HandleLastFile(Var value, bool set)
     {
         if (ReadOnlyHandler(set)) return;
-        var fileName = Path.GetFileName(SourceFiles[AmpLastLineNumber-1]);
-        SystemStack.Push(new StringVar(fileName, "&lastfile", true, true));
+        SystemStack.Push(new StringVar(StatementFile(AmpLastLineNumber), "&lastfile", true, true));
     }
 
     internal void HandleLastNo(Var value, bool set)
     {
         if (ReadOnlyHandler(set)) return;
-        SystemStack.Push(new IntegerVar(AmpLastLineNumber, "&lastno", true, true));
+        SystemStack.Push(new IntegerVar(StatementNumber(AmpLastLineNumber), "&lastno", true, true));
     }
 
     internal void HandleLastLine(Var value, bool set)
     {
         if (ReadOnlyHandler(set)) return;
-        SystemStack.Push(new IntegerVar(SourceLineNumbers[AmpLastLineNumber - 1], "&lastline", true, true));
+        SystemStack.Push(new IntegerVar(StatementLine(AmpLastLineNumber), "&lastline", true, true));
     }
 
     internal void HandleLCase(Var value, bool set)
@@ -196,7 +204,7 @@ public partial class Executive
     internal void HandleStNo(Var value, bool set)
     {
         if (ReadOnlyHandler(set)) return;
-        SystemStack.Push(new IntegerVar(AmpCurrentLineNumber, "&line", true, true));
+        SystemStack.Push(new IntegerVar(StatementNumber(AmpCurrentLineNumber), "&stno", true, true));
     }
 
     internal void HandleRem(Var value, bool set)
@@ -220,7 +228,7 @@ public partial class Executive
     internal void HandleLine(Var value, bool set)
     {
         if (ReadOnlyHandler(set)) return;
-        SystemStack.Push(new IntegerVar(SourceLineNumbers[AmpCurrentLineNumber - 1], "&stno", true, true));
+        SystemStack.Push(new IntegerVar(StatementLine(AmpCurrentLineNumber), "&line", true, true));
     }
 
     internal void HandleSucceed(Var value, bool set)

@@ -87,7 +87,7 @@ public partial class Executive
             switch (instr.Op)
             {
                 case OpCode.Init:
-                    AmpCurrentLineNumber = instr.IntOperand;
+                    BeginStatement(instr.IntOperand);
                     Failure = false;
                     AlphaStack.Clear();
                     BetaStack.Clear();
@@ -120,7 +120,6 @@ public partial class Executive
                     while (SystemStack.Peek() is not StatementSeparator)
                         SystemStack.Pop();
                     SystemStack.Pop();
-                    AmpLastLineNumber = AmpCurrentLineNumber;
                     if (OnErrorGoto > 0) ProcessTrappedErrorThreaded();
                     break;
 

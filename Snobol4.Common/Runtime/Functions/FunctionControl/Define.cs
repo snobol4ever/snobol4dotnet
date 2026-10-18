@@ -240,7 +240,11 @@ public partial class Executive
         var callerBetaStack = BetaStack;
         AlphaStack = [];
         BetaStack = [];
+        // On return the calling statement is the current one again, so the statement after it
+        // reads it as &LASTNO, as in SPITBOL
+        var callerStatement = AmpCurrentLineNumber;
         var nextIndex = ExecuteLoop(LabelTable[definition.EntryLabel]);
+        AmpCurrentLineNumber = callerStatement;
         AlphaStack = callerAlphaStack;
         BetaStack = callerBetaStack;
         var returnVar = IdentifierTable[returnVarName];

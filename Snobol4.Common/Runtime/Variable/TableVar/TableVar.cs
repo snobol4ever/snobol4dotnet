@@ -9,6 +9,10 @@ public sealed class TableVar : Var
     #region Data
 
     internal Dictionary<object, Var> Data;
+    // SPITBOL's idval (DUMP's TABLE(11) #1) and the table's bucket count, TABLE's first argument or
+    // 11, which DUMP prints and orders entries by
+    internal long BlockId;
+    internal int Buckets = 11;
     internal readonly Var Fill;
 
     #endregion

@@ -79,8 +79,14 @@ public partial class Executive
     internal Dictionary<string, long> ProfileTotal;
     internal Dictionary<string, long> ProfileCount;
 
+    // SPITBOL numbers arrays, tables and DATA objects as it creates them (idval), and DUMP prints the
+    // number; one program runs on one thread, so the count is per thread and starts again per program
+    [ThreadStatic] private static long _blockCounter;
+    internal static long NewBlockId() => ++_blockCounter;
+
     public Executive(Builder parent)
     {
+        _blockCounter = 0;
         Parent = parent;
         Statements = [];
         AlphaStack = [];

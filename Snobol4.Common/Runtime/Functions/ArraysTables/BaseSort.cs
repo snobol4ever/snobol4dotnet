@@ -83,7 +83,7 @@ public partial class Executive
 
         //Transfer sorted matrix back to new array
         var index = 0;
-        var arraySort = new ArrayVar();
+        var arraySort = new ArrayVar { BlockId = NewBlockId() };
         arraySort.ConfigurePrototype(array.Prototype, StringVar.Null());
 
         foreach (var cell in matrix.SelectMany(row => row))

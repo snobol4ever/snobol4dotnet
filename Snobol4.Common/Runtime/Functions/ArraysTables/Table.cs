@@ -8,7 +8,9 @@ public partial class Executive
                         public void CreateTable(List<Var> arguments)
     {
         var fill = arguments[2];
-        TableVar newTable = new(fill);
+        TableVar newTable = new(fill) { BlockId = NewBlockId() };
+        if (arguments[0].Convert(VarType.INTEGER, out _, out var size, this) && (long)size > 0)
+            newTable.Buckets = (int)Math.Min((long)size, int.MaxValue);
         SystemStack.Push(newTable);
     }
 

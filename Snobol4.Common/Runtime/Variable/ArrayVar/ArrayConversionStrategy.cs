@@ -45,7 +45,8 @@ public class ArrayConversionStrategy : IConversionStrategy
             return InitializeFailure(out varOut, out valueOut);
 
         // Create new table with appropriate capacity
-        var convertedTable = new TableVar(array.Fill);
+        // one bucket per row, as SPITBOL sizes the table it builds
+        var convertedTable = new TableVar(array.Fill) { BlockId = Executive.NewBlockId(), Buckets = (int)Math.Max(1, dataCount >> 1) };
         var entryCount = dataCount >> 1; // Divide by 2 using bit shift
         
         // Pre-allocate dictionary capacity to avoid resizing

@@ -38,6 +38,8 @@ public sealed class ProgramDefinedDataVar : Var
         DataName = dataName;
         FieldValues = new ArrayVar();
         FieldValues.ConfigurePrototype("0:" + (fieldNames.Count - 1), new StringVar(""));
+        FieldValues.DataOwner = this;
+        FieldValues.BlockId = Executive.NewBlockId();
 
         //foreach (var index in Definition.FieldNames.Select(name => Definition.FieldNames.IndexOf(name)))
         for (var index = 0; index < Definition.FieldNames.Count; index++)

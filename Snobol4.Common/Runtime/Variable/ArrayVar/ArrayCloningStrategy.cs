@@ -10,6 +10,7 @@ public class ArrayCloningStrategy : ICloningStrategy
 
         var clonedArray = new ArrayVar
         {
+            BlockId = Executive.NewBlockId(),
             Symbol = arraySelf.Symbol,
             Prototype = arraySelf.Prototype,
             Dimensions = arraySelf.Dimensions,

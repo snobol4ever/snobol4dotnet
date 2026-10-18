@@ -14,6 +14,8 @@ public sealed class TableCloningStrategy : ICloningStrategy
         // Pre-allocate dictionary capacity to avoid resizing
         var clonedTable = new TableVar(clonedFill, sourceCount)
         {
+            BlockId = Executive.NewBlockId(),
+            Buckets = tableSelf.Buckets,
             Symbol = tableSelf.Symbol,
             InputChannel = tableSelf.InputChannel,
             OutputChannel = tableSelf.OutputChannel

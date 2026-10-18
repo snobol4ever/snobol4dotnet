@@ -37,7 +37,7 @@ public sealed class TableConversionStrategy : IConversionStrategy
         }
 
         // Create 2D array: rows = table entry count, columns = 2 (key, value)
-        var convertedArray = new ArrayVar();
+        var convertedArray = new ArrayVar { BlockId = Executive.NewBlockId() };
         convertedArray.ConfigurePrototype($"{count},2", tableSelf.Fill);
 
         var arrayData = convertedArray.Data;

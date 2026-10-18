@@ -25,6 +25,7 @@ public partial class Executive
 
         if (result == 0)
         {
+            av.BlockId = NewBlockId();
             SystemStack.Push(av);
             return;
         }

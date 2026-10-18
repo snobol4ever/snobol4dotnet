@@ -10,6 +10,10 @@ public sealed class ArrayVar : Var
 {
     #region Data
 
+    // SPITBOL's idval: the creation number DUMP prints (ARRAY(3) #2); 0 until the array is given one
+    internal long BlockId;
+    // the DATA object whose fields this array holds, so DUMP can name a field (VAL(N))
+    internal ProgramDefinedDataVar? DataOwner;
     internal List<long> Sizes { get; } = [];
     internal List<Var> Data { get; private set; } = [];
     internal long Dimensions { get; set; }

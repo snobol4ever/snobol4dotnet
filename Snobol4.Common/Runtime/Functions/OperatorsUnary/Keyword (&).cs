@@ -48,7 +48,7 @@ public partial class Executive
     internal long AmpFullScan = 1;
     internal long AmpInput = 1;
     internal long AmpMaxLength = 16777216;
-    internal string AmpOutput;
+    internal long AmpOutput = 1;   // 0 suspends every output association, as in SPITBOL
     internal long AmpProfile;
     internal long AmpStatementLimit = 2147483647;
     internal long AmpTrace;
@@ -395,11 +395,11 @@ public partial class Executive
     {
         if (set)
         {
-            if (StringHandler(value, out var stringVar)) return;
-            AmpOutput = stringVar.Data;
+            if (IntegerHandler(value, out var integerVar)) return;
+            AmpOutput = integerVar.Data;
         }
 
-        SystemStack.Push(new StringVar(AmpOutput, "&output", true));
+        SystemStack.Push(new IntegerVar(AmpOutput, "&output", true));
     }
 
     internal void HandleProfile(Var value, bool set)

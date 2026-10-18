@@ -274,7 +274,8 @@ public partial class Executive
                 MonitorIpc.EmitValue(lvalueName, stored);
         }
 
-        if (SystemStack.Peek().OutputChannel == "")
+        // &OUTPUT = 0 suspends output associations (the variable still takes its value), as in SPITBOL
+        if (SystemStack.Peek().OutputChannel == "" || AmpOutput == 0)
         {
             return;
         }

@@ -112,7 +112,7 @@ public partial class Executive
         StreamReadersByChannel = [];  // Dictionary associating labels to line numbers;
 
         AmpReturnType = "";
-        AmpOutput = "";
+        AmpOutput = 1;
 
         TraceTableIdentifierAccess = [];
         TraceTableIdentifierKeyword = [];

@@ -32,34 +32,48 @@ public sealed class RealConversionStrategy : IConversionStrategy
     }
 
     /// <summary>
-    /// A real's string form, as SPITBOL writes it: 15 significant digits with trailing zeros dropped
-    /// and the decimal point always present (100., 0.333333333333333); fixed notation from 0.1 up to
-    /// below 1e15, otherwise 0.ddd followed by e and the signed exponent (0.1e-2, 0.123456789012346e+17).
-    /// Measured against sbl -b on 19 values at the edges of both forms.
+    /// A real's string form, computed as SPITBOL computes it (sbl.min gtstg, label gts10 on): scale the
+    /// value into [0.1, 1) by steps of 10**10 and then the powers-of-ten table, add the rounding bias
+    /// 0.5 * 10**-15, take the 15 digits as trunc(x * 10**15), and write them in fixed form from 0.1 up to
+    /// below 1e15 (100., 0.333333333333333) or else as 0.ddd and a signed exponent (0.1e-2, 0.1e+16),
+    /// trailing zeros dropped. The double arithmetic is SPITBOL's own, step for step, so the 15th digit
+    /// is SPITBOL's too, not a correctly rounded one; matched against sbl -b on 3,000 computed values.
     /// </summary>
     public static string SpitbolRealString(double value)
     {
         if (value == 0)
             return "0.";
 
+        var x = Math.Abs(value);
+        var exponent = 0;
+        while (x - 0.1 < 0) { x *= 1e10; exponent -= 10; }
+        if (x - 1.0 >= 0)
+        {
+            while (x - 1e10 >= 0) { x /= 1e10; exponent += 10; }
+            var k = 0;
+            do { k++; exponent++; } while (x - _powersOfTen[k] >= 0);
+            x /= _powersOfTen[k];
+        }
+
+        x += _roundingBias;
+        if (x - 1.0 >= 0) { exponent++; x /= 10.0; }
+
+        var digits = ((long)(x * _digitScale)).ToString(CultureInfo.InvariantCulture).PadLeft(15, '0');
         var sign = value < 0 ? "-" : "";
-        var scientific = Math.Abs(value).ToString("E14", CultureInfo.InvariantCulture);   // d.ddddddddddddddE+xxx
-        var exponentAt = scientific.IndexOf('E');
-        var digits = scientific[..exponentAt].Replace(".", "").TrimEnd('0');
-        if (digits.Length == 0)
-            digits = "0";
-        var exponent = int.Parse(scientific[(exponentAt + 1)..], CultureInfo.InvariantCulture) + 1;   // value = 0.digits x 10^exponent
-
         if (exponent is < 0 or > 15)
-            return $"{sign}0.{digits}e{(exponent >= 0 ? "+" : "-")}{Math.Abs(exponent)}";
+        {
+            var mantissa = digits.TrimEnd('0');
+            return $"{sign}0.{(mantissa.Length == 0 ? "0" : mantissa)}e{(exponent >= 0 ? "+" : "-")}{Math.Abs(exponent)}";
+        }
 
-        if (exponent == 0)
-            return $"{sign}0.{digits}";
-
-        var integerPart = digits.Length >= exponent ? digits[..exponent] : digits.PadRight(exponent, '0');
-        var fractionPart = digits.Length > exponent ? digits[exponent..] : "";
-        return $"{sign}{integerPart}.{fractionPart}";
+        return $"{sign}{(exponent > 0 ? digits[..exponent] : "0")}.{digits[exponent..].TrimEnd('0')}";
     }
+
+    private static readonly double[] _powersOfTen = [1.0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10];
+
+    // 10**15 by fifteen multiplications by 10.0 and 0.5 / 10**15, as SPITBOL's initialisation forms them
+    private static readonly double _digitScale = Enumerable.Repeat(10.0, 15).Aggregate(1.0, (a, b) => a * b);
+    private static readonly double _roundingBias = 0.5 / _digitScale;
 
 
     private static bool ConvertToInteger(RealVar realSelf, out Var varOut, out object valueOut)

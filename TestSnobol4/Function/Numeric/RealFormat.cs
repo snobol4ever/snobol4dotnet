@@ -36,4 +36,16 @@ end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(" 0.15e-2 0.999e-1 0.1 999999999999999. 100000000000000. 0.123456789012346e+17 -0.1e-19 0.1e+101 0.25e-299 0. 3. 1.25 0.7 123.456 999999999999999. 0.999999999999999 1.", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
     }
+
+    [TestMethod]
+    public void TEST_RealFormat_the_fifteenth_digit_is_spitbols()
+    {
+        // 171725223 / 414359639 prints ...804 under sbl -b, where a correctly rounded 15 digits would end
+        // in 803: SPITBOL adds 0.5 * 10**-15 to the scaled value and truncates, and that is what is copied
+        var build = SetupTests.SetupScript("-b", @"
+        R = (171725223 * 1.0) / 414359639
+end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("0.414435207575804", build.Execute!.IdentifierTable["R"].ToString());
+    }
 }

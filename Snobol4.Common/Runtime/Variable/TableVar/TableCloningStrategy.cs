@@ -29,7 +29,8 @@ public sealed class TableCloningStrategy : ICloningStrategy
         
         foreach (var kvp in sourceData)
         {
-            targetData[kvp.Key] = kvp.Value.Clone();
+            // an array, table or DATA object value is shared, as SPITBOL's COPY copies one level
+            targetData[kvp.Key] = kvp.Value is ArrayVar or TableVar or ProgramDefinedDataVar ? kvp.Value : kvp.Value.Clone();
         }
 
         return clonedTable;

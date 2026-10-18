@@ -48,7 +48,9 @@ public class ArrayCloningStrategy : ICloningStrategy
         var sourceData = source.Data;
         for (var i = 0; i < totalSize; i++)
         {
-            target.Data.Add(sourceData[i].Clone());
+            // an array, table or DATA object element is shared, as SPITBOL's COPY copies one level
+            var element = sourceData[i];
+            target.Data.Add(element is ArrayVar or TableVar or ProgramDefinedDataVar ? element : element.Clone());
         }
     }
 }

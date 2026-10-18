@@ -289,6 +289,7 @@ public partial class Executive
                 rtnTypeStr = "FRETURN";
                 returnVar = StringVar.Null(returnVarName);
                 Failure = true;            // FRETURN explicitly signals failure
+                FailureOrigin = SystemStack.Count;   // where the call's value is pushed below
                 break;
 
             case -4:

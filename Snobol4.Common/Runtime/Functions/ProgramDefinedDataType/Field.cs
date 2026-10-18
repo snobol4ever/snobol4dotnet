@@ -35,6 +35,7 @@ public partial class Executive
         if (index < 0 || index >= definition.FieldNames.Count)
         {
             Failure = true;
+            FailureOrigin = SystemStack.Count;
             SystemStack.Push(StringVar.Null());
             return;
         }

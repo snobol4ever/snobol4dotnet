@@ -58,6 +58,7 @@ public partial class Executive
     {
         AmpLastLineNumber = _statementBegun ? AmpCurrentLineNumber : -1;
         AmpCurrentLineNumber = index;
+        FailureOrigin = int.MaxValue;
         _statementBegun = true;
         StatementSerial++;
     }

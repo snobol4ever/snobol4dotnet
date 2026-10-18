@@ -8,6 +8,10 @@ public partial class Executive
     public const int GotoNotFound = -10;
 
     public bool Failure;
+    // The stack position of the value that began the statement's current failure (a FRETURN, a failed
+    // predicate, an error); ~ flips only a failure that began inside its own operand. int.MaxValue
+    // when unknown, which lets ~ flip as before
+    internal int FailureOrigin = int.MaxValue;
     /// <summary>Set by ThreadedExecuteLoop before restoring Failure, so
     /// RunExpressionThread can re-apply the sub-expression's failure result.</summary>
     internal bool LastExpressionFailure;

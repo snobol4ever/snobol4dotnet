@@ -204,6 +204,7 @@ public partial class Executive
                 // arg0 is not a DATA instance (e.g. PatternVar during build-time pattern
                 // construction). Signal FRETURN — caller must handle failure branch.
                 Failure = true;
+                FailureOrigin = SystemStack.Count;
                 SystemStack.Push(StringVar.Null());
                 return;
             }

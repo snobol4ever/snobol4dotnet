@@ -28,6 +28,7 @@ public partial class Executive
         Parent.ErrorCodeHistory.Add(code);
         Parent.ColumnHistory.Add(0);
         Failure = true;
+        FailureOrigin = SystemStack.Count;
         SystemStack.Push(new StringVar(false));
         var ce = new CompilerException(code, 0, LastDiagnostic);
         Parent.MessageHistory.Add(LastDiagnostic);
@@ -46,6 +47,7 @@ public partial class Executive
     public StringVar NonExceptionFailure()
     {
         Failure = true;
+        FailureOrigin = SystemStack.Count;
         var nullVar = new StringVar(false) { Succeeded = false };
         SystemStack.Push(nullVar);
         return nullVar;

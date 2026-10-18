@@ -1,8 +1,8 @@
 // benchmarks/Program.cs
 //
-// SNOBOL4.NET Benchmark Runner — loads .sno programs from snobol4corpus submodule.
+// SNOBOL4.NET Benchmark Runner — loads .sno programs from snobol4ever/corpus.
 //
-// Programs live in:  corpus/benchmarks/*.sno
+// Programs live in:  corpus/benchmarks/snobol4/*.sno  (or the folder CORPUS names)
 //
 // Run with:
 //   cd snobol4dotnet
@@ -21,19 +21,28 @@ using Snobol4.Common;
 
 static string FindCorpus()
 {
-    // Walk up from the executable until we find corpus/benchmarks/
+    // CORPUS names the folder that holds the .sno programs (BUILDING.md)
+    string? named = Environment.GetEnvironmentVariable("CORPUS");
+    if (!string.IsNullOrEmpty(named))
+    {
+        if (Directory.Exists(named)) return named;
+        throw new DirectoryNotFoundException($"CORPUS={named} is not a directory");
+    }
+
+    // Otherwise walk up from the executable until we find corpus/benchmarks/snobol4/:
+    // snobol4ever/corpus keeps each language's benchmarks in a folder of its own
     string dir = AppContext.BaseDirectory;
     for (int i = 0; i < 8; i++)
     {
-        string candidate = Path.Combine(dir, "corpus", "benchmarks");
+        string candidate = Path.Combine(dir, "corpus", "benchmarks", "snobol4");
         if (Directory.Exists(candidate)) return candidate;
         string parent = Directory.GetParent(dir)?.FullName ?? dir;
         if (parent == dir) break;
         dir = parent;
     }
     throw new DirectoryNotFoundException(
-        "Cannot find corpus/benchmarks/ — ensure the snobol4corpus submodule is initialised.\n" +
-        "Run: git submodule update --init --recursive");
+        "Cannot find corpus/benchmarks/snobol4/ above the runner — clone snobol4ever/corpus beside\n" +
+        "snobol4dotnet, or set CORPUS to the folder that holds the benchmark .sno programs.");
 }
 
 string benchDir = FindCorpus();

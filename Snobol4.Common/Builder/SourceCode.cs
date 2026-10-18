@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 
 namespace Snobol4.Common;
 
@@ -54,6 +55,9 @@ public class SourceCode
 
     // Continuation line counter
     private int _continuation;
+    private string? _lineFileName;   // the file a -LINE control named, for the lines after it
+    private string? _staleIncludeName;   // the included file's name, which sbl gives the next statement after it
+    private bool _lastLineIsNote;        // the last line read was a comment or a control line
 
     internal SourceCode(Builder parent)
     {
@@ -148,8 +152,14 @@ public class SourceCode
     /// <param name="pathName">Full path to the source file</param>
     private void ReadFile(StreamReader reader, string pathName)
     {
+        // An included file counts its own lines from 1, and the including file resumes its count after
+        // it, as &LINE reads under sbl; a -LINE file name lasts to the end of the file that set it
+        var (callerLineCount, callerContinuation, callerLineFileName, callerStaleName) = (LineCountFile, _continuation, _lineFileName, _staleIncludeName);
         LineCountFile = 0;
-        
+        _continuation = 0;
+        _lineFileName = null;
+        _staleIncludeName = null;
+
         while (!EndFound && !reader.EndOfStream)
         {
             LineCountFile += _continuation;
@@ -158,8 +168,23 @@ public class SourceCode
             _continuation = continuation;
             ListSource(currentLine);
             
-            ProcessLineWithSubLines(currentLine, pathName);
+            ProcessLineWithSubLines(currentLine, _staleIncludeName ?? _lineFileName ?? pathName);
+
+            // A comment or control line leaves a carried-over included name in place for the next
+            // statement; a statement or a blank (null statement) line uses it up
+            _lastLineIsNote = currentLine.Length > 0 && currentLine[0] is '*' or '-';
+            if (!_lastLineIsNote)
+                _staleIncludeName = null;
         }
+
+        // When an included file ends on a comment or control line, sbl names the including file's next
+        // statement after the included file, keeping its own line number (Budne's include and line:
+        // line2.sno ends with *)
+        if (_includeDepth > 0)
+            (LineCountFile, _continuation, _lineFileName, _staleIncludeName) =
+                (callerLineCount, callerContinuation, callerLineFileName, _lastLineIsNote ? pathName : null);
+        else
+            _staleIncludeName = callerStaleName;
 
         // The lines after END are data: -r gives them to INPUT, as in SPITBOL
         if (EndFound && _includeDepth == 0 && _parent.LinesAfterEnd.Count == 0)
@@ -427,11 +452,14 @@ public class SourceCode
                 _parent.BuildOptions.ListSource = false;
                 break;
 
+            case "line":
+                ProcessLineDirective(directive);
+                break;
+
             case "print":
             case "noprint":
             case "double":
             case "on":
-            case "line":
             case "nooptimize":
             case "optimize":
             case "stitl":
@@ -446,18 +474,43 @@ public class SourceCode
     }
 
     /// <summary>
+    /// -LINE n ["file"]: the next line is line n (of file, when named), the lines after it following on,
+    /// as &LINE and &FILE read under sbl
+    /// </summary>
+    private void ProcessLineDirective(string directive)
+    {
+        var m = System.Text.RegularExpressions.Regex.Match(directive, @"^\s*LINE\s+(\d+)(?:\s+[""']([^""']*)[""'])?",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        if (!m.Success)
+        {
+            _parent.LogCompilerException(247);
+            return;
+        }
+
+        LineCountFile = int.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture) - 1 - _continuation;
+        if (m.Groups[2].Success)
+        {
+            _lineFileName = m.Groups[2].Value;
+            _staleIncludeName = null;
+        }
+    }
+
+    /// <summary>
     /// Processes an INCLUDE or COPY directive
     /// </summary>
     /// <param name="directive">The directive text</param>
     private void ProcessIncludeDirective(string directive)
     {
-        // A blank before the closing quote is dropped, a leading one kept, as sbl reads the name
-        var include = CompiledRegex.QuotePattern().Match(directive.Replace('\'', '\"')).Value.Replace("\"", "").TrimEnd(' ');
+        // sbl skips a name it has already included, comparing the name as written, and opens it with a
+        // blank before the closing quote dropped (a leading one kept): "line2.sno " is a second include
+        var written = CompiledRegex.QuotePattern().Match(directive.Replace('\'', '\"')).Value.Replace("\"", "");
+        var include = written.TrimEnd(' ');
+        _staleIncludeName = null;
 
-        if (_parent.IncludeList.Contains(include))
+        if (_parent.IncludeList.Contains(written))
             return;
 
-        _parent.IncludeList.Add(include);
+        _parent.IncludeList.Add(written);
         _includeDepth++;
         
         try

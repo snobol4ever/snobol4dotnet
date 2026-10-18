@@ -197,4 +197,20 @@ end";
                        && build.Execute.IdentifierTable[key] is StringVar { Data: "ran" });
     }
 
+    [TestMethod]
+    public void TEST_Define_the_entry_label_is_needed_only_at_the_call()
+    {
+        // sbl -b: DEFINE('ZZ(X)') with no ZZ label succeeds, CODE then supplies the label and ZZ(1) is 2;
+        // a call while the label is undefined is error 286
+        var build = SetupTests.SetupScript("-b", @"
+        DEFINE('ZZ(X)')
+        CODE('ZZ ZZ = X + 1 :(RETURN)')
+        R = ZZ(1)
+        DEFINE('YY(X)')
+        S = YY(1)
+end");
+        Assert.AreEqual("2", build.Execute!.IdentifierTable["R"].ToString());
+        Assert.AreEqual(1, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(286, build.ErrorCodeHistory[0]);
+    }
 }

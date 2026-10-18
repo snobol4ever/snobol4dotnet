@@ -97,11 +97,8 @@ public partial class Executive
             entryLabel = ((NameVar)entry).Pointer;
         }
 
-        //if (!LabelTable.ContainsKey(entryLabel))
-        if (LabelTable[entryLabel] == GotoNotFound)
-        {
-            LogRuntimeException(86);
-        }
+        // The entry label need not exist yet (CODE may compile it later); a call to it while it is
+        // undefined is error 286, as in SPITBOL
 
         // Build table entry
         var tempParameters = new List<string>(match.Groups[3].Value.Split(','));
@@ -150,6 +147,12 @@ public partial class Executive
         }
 
         var definition = UserFunctionTable[entry.Symbol];
+        if (LabelTable[definition!.EntryLabel] == GotoNotFound)
+        {
+            LogRuntimeException(286);
+            return;
+        }
+
         // For OPSYN aliases, definition.FunctionName is the original (e.g. "fact"),
         // while functionName may be the alias (e.g. "facto").
         // The return variable is always named after the original function.

@@ -274,6 +274,10 @@ public partial class Executive
         BetaStack = callerBetaStack;
         var returnVar = IdentifierTable[returnVarName];
 
+        // A goto to END inside the body ends the whole program, as in SPITBOL, not just the call
+        if (nextIndex == -1)
+            throw new ProgramEndException();
+
         string rtnTypeStr;
         switch (nextIndex)
         {

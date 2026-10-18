@@ -38,6 +38,11 @@ public partial class Executive
                     // Halt gracefully rather than propagating through the test harness.
                     return -1;
                 }
+                catch (ProgramEndException)
+                {
+                    // a goto to END inside a function body ends the program
+                    return -1;
+                }
                 finally
                 {
                     _inExecuteLoop = false;
@@ -120,3 +125,6 @@ public partial class Executive
         Failure            = exprFailure;
     }
 }
+
+/// <summary>A goto to END from inside a nested run (a function body): unwinds to the outermost loop.</summary>
+internal sealed class ProgramEndException : Exception;

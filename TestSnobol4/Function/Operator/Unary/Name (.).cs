@@ -225,4 +225,25 @@ end";
         Assert.AreEqual("else", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("y")]).Data);
         Assert.AreEqual("STRING", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("z")]).Data);
     }
+
+    [TestMethod]
+    public void TEST_Name_of_an_element_written_from_a_function_value()
+    {
+        // sbl -b answers new: B[2] holds the value SW assigned, and .B[2] is still the element's name,
+        // not SW's (Gimpel's HSORT swapped through such names and came out unsorted)
+        var build = SetupTests.SetupScript("-b", @"
+        DEFINE('SW(A2)')               :(SW_END)
+SW      SW = 'v'
+        $A2 = SW
+        SW =                           :(RETURN)
+SW_END
+        B = ARRAY(2)
+        SW(.B[2])
+        N = .B[2]
+        $N = 'new'
+        R = B[2]
+end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("new", build.Execute!.IdentifierTable["R"].ToString());
+    }
 }

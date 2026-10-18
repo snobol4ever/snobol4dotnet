@@ -13,7 +13,12 @@ public partial class Executive
             return;
         }
 
-        var nameVar = new NameVar(arguments[0].Symbol, arguments[0].Key, arguments[0].Collection);
+        // An element this statement read (.A[K], a DATA field) names the element, even when its value
+        // still carries the name of the variable it was copied from (SWAP = ...; $ARG = SWAP left
+        // Symbol SWAP on the element, and .A[K] named SWAP); anything else names its variable
+        var operand = arguments[0];
+        var isElement = operand.Key != null && operand.Collection != null && operand.LvalueMark == StatementSerial;
+        var nameVar = new NameVar(isElement ? "" : operand.Symbol, operand.Key, operand.Collection);
         SystemStack.Push(nameVar);
     }
 }

@@ -12,15 +12,16 @@ public partial class Executive
         AmpErrorType = code;
         TraceKeyword("ERRTYPE", code);
         var fileName = Path.GetFileName(SourceFiles[AmpCurrentLineNumber]);
-        var codeCount = 1 + Parent.Code.LineCountFile - Parent.Code.BlankLineCount -
-                        Parent.Code.CommentContinuationDirectiveCount;
-        var listCount = 1 + Parent.Code.LineCountFile - Parent.Code.CommentContinuationDirectiveCount;
-        var lineCount = 1 + Parent.Code.LineCountFile;
+        // The erring statement's own numbers, recorded when it was compiled ("name:code/list)" and its
+        // physical line), not the compiler's counters, which have moved on to the end of the source
+        var header = SourceCode[AmpCurrentLineNumber].Split('\n')[0];
+        var counts = header[(header.LastIndexOf(':') + 1)..].TrimEnd(')');
+        var lineCount = 1 + SourceLineNumbers[AmpCurrentLineNumber];
         // &ERRTEXT is the message alone, as in SPITBOL; the full diagnostic (file, numbers, source
         // line) is what is printed and recorded
         AmpErrorText = CompilerException.ErrorMessage[code];
         LastDiagnostic =
-            $"{fileName}({codeCount}/{listCount}/{lineCount}): error {code} -- {CompilerException.ErrorMessage[code]}{Environment.NewLine}{SourceCode[AmpCurrentLineNumber].Split('\n')[1]}";
+            $"{fileName}({counts}/{lineCount}): error {code} -- {CompilerException.ErrorMessage[code]}{Environment.NewLine}{SourceCode[AmpCurrentLineNumber].Split('\n')[1]}";
         Parent.ErrorCodeHistory.Add(code);
         Parent.ColumnHistory.Add(0);
         Failure = true;

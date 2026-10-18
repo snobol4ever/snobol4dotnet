@@ -291,4 +291,22 @@ end";
         Assert.AreEqual("53.1doublequotelong", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Data);
         Assert.AreEqual(5000, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
     }
+
+    [TestMethod]
+    public void TEST_Indirection_through_the_name_of_a_keyword()
+    {
+        // K = .&ANCHOR: $K = 1 sets &ANCHOR and $K reads it, as sbl -b does (answers 1 1 1)
+        var build = SetupTests.SetupScript("-b", @"
+        K = .&ANCHOR
+        $K = 1
+        A = &ANCHOR
+        B = $K
+        &ANCHOR = 0
+        K = .&TRIM
+        $K = 1
+        C = &TRIM
+end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("1 1 1", $"{build.Execute!.IdentifierTable["A"]} {build.Execute!.IdentifierTable["B"]} {build.Execute!.IdentifierTable["C"]}");
+    }
 }

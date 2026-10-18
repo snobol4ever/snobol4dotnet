@@ -49,6 +49,15 @@ public partial class Executive
 
                     }
                 }
+
+                // The NAME of a keyword (K = .&ANCHOR) reaches the keyword itself, so $K reads and
+                // assigns &ANCHOR, as in SPITBOL
+                if (KeywordTable.TryGetValue(nameVar.Pointer, out var keywordHandler))
+                {
+                    keywordHandler(nameVar, false);
+                    return;
+                }
+
                 SystemStack.Push(IdentifierTable[nameVar.Pointer]);
                 return;
 

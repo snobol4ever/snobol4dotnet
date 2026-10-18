@@ -192,6 +192,7 @@ public partial class Builder
             Execute?.DisplayVariableValues();
             Execute?.CloseAllStreams();
             ListFileWriter?.Close();
+            ListFileWriter = null;
         }
 
         return true;

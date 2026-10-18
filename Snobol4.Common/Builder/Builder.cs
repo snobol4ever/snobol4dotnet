@@ -28,6 +28,29 @@ public partial class Builder : IDisposable
     internal int StatementCount;
     internal string EntryLabel;
     internal StreamWriter? ListFileWriter;
+    private bool _listingOpened;
+
+    // The listing goes to the -o=file named on the command line (file.lst when it has no extension), as
+    // SPITBOL's does, and otherwise to standard error; a file that cannot be opened falls back there
+    internal TextWriter ListingWriter
+    {
+        get
+        {
+            if (BuildOptions.ListFileName == "")
+                return Console.Error;
+            try
+            {
+                // the first open replaces the file; a reopen after the run's close adds to it
+                ListFileWriter ??= new StreamWriter(BuildOptions.ListFileName, append: _listingOpened) { AutoFlush = true };
+                _listingOpened = true;
+                return ListFileWriter;
+            }
+            catch (Exception)
+            {
+                return Console.Error;
+            }
+        }
+    }
     public List<string> FilesToCompile = new(4);
     internal string[] Arguments = [];
     public SourceCode Code;
@@ -132,6 +155,7 @@ public partial class Builder : IDisposable
             Execute?.DisplayVariableValues();
             Execute?.CloseAllStreams();
             ListFileWriter?.Close();
+            ListFileWriter = null;
         }
     }
 

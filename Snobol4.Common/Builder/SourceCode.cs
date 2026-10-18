@@ -334,7 +334,7 @@ public class SourceCode
     private void ListSource(string line)
     {
         if (_parent.BuildOptions.ListSource)
-            Console.Error.WriteLine($"{LineCountTotal:0000} {LineCountFile:0000} {_includeDepth:00} {line}");
+            _parent.ListingWriter.WriteLine($"{LineCountTotal:0000} {LineCountFile:0000} {_includeDepth:00} {line}");
     }
 
     #endregion

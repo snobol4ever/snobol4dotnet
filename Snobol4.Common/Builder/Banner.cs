@@ -11,7 +11,7 @@ public partial class Builder
     public void DisplayListingBanner()
     {
         if ((BuildOptions.ShowListing || BuildOptions.ListFileName != "") && !BuildOptions.SuppressListingHeader)
-            DisplayBanner(Console.Error);
+            DisplayBanner(ListingWriter);
     }
 
     private static void DisplayBanner(TextWriter writer)

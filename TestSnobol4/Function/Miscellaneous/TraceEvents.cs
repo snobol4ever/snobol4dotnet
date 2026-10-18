@@ -84,4 +84,26 @@ END").Replace("\r\n", "\n"));
         OUTPUT = &ERRTYPE
 END").Replace("\r\n", "\n"));
     }
+
+    [TestMethod]
+    public void TEST_Trace_Fourth_argument_calls_the_trace_function()
+    {
+        // A trace function replaces the trace line, as in SPITBOL: it is called with the NAME of the traced
+        // item and TRACE's third argument, &TRACE reads 0 inside it, and a name given as a string or as .H works
+        Assert.AreEqual("H L1 lab 0 NAME \nH F fn 0 NAME \nH FNCLEVEL kw 0 NAME \nH FNCLEVEL kw 0 NAME \nH F fn 0 NAME 6\nH V val 0 NAME 6\n7 44", SetupTests.RunWithInput(@"        &TRACE = 50
+        DEFINE('H(N,T)')               :(EH)
+H       OUTPUT = 'H ' N ' ' T ' ' &TRACE ' ' DATATYPE(N) ' ' $N    :(RETURN)
+EH      DEFINE('F(X)')                 :(EF)
+F       F = X * 2                      :(RETURN)
+EF      TRACE('L1', 'LABEL', 'lab', 'H')
+        TRACE('F', 'FUNCTION', 'fn', .H)
+        TRACE('V', 'VALUE', 'val', 'H')
+        TRACE('FNCLEVEL', 'KEYWORD', 'kw', 'H')
+                                       :(L1)
+L1      V = F(3)
+        STOPTR('V', 'VALUE')
+        V = 7
+        OUTPUT = V ' ' &TRACE
+END").Replace("\r\n", "\n"));
+    }
 }

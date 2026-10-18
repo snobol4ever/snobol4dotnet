@@ -68,12 +68,13 @@ public partial class Executive
     internal Dictionary<string, StreamReader> StreamReadersBySymbol;
     internal Dictionary<string, StreamReader> StreamReadersByChannel;
 
-    internal Dictionary<string, string> TraceTableIdentifierAccess;
-    internal Dictionary<string, string> TraceTableIdentifierValue;
-    internal Dictionary<string, string> TraceTableIdentifierKeyword;
-    internal Dictionary<string, string> TraceTableLabel;
-    internal Dictionary<string, string> TraceTableFunctionCall;
-    internal Dictionary<string, string> TraceTableFunctionReturn;
+    // Each traced name maps to its trace function, or to null for a printed trace
+    internal Dictionary<string, TraceHandler?> TraceTableIdentifierAccess;
+    internal Dictionary<string, TraceHandler?> TraceTableIdentifierValue;
+    internal Dictionary<string, TraceHandler?> TraceTableIdentifierKeyword;
+    internal Dictionary<string, TraceHandler?> TraceTableLabel;
+    internal Dictionary<string, TraceHandler?> TraceTableFunctionCall;
+    internal Dictionary<string, TraceHandler?> TraceTableFunctionReturn;
 
     internal Dictionary<string, long> ProfileTotal;
     internal Dictionary<string, long> ProfileCount;

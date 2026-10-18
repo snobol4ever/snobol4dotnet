@@ -722,7 +722,7 @@ done    N = N + 10
 end");
         var exec = b.Execute!;
         exec.AmpTrace = 10;
-        exec.TraceTableLabel[b.FoldCase("done")] = "";
+        exec.TraceTableLabel[b.FoldCase("done")] = null;
         exec.ExecuteLoop(0);
 
         Assert.AreEqual(0, b.ErrorCodeHistory.Count,
@@ -745,7 +745,7 @@ end");
 end");
         var exec = b.Execute!;
         exec.AmpTrace = 10;
-        exec.TraceTableIdentifierAccess[b.FoldCase("N")] = "";
+        exec.TraceTableIdentifierAccess[b.FoldCase("N")] = null;
         exec.ExecuteLoop(0);
 
         Assert.AreEqual(0, b.ErrorCodeHistory.Count,
@@ -768,8 +768,8 @@ end");
         var exec = b.Execute!;
         exec.AmpTrace = 10;
         var sizeName = b.FoldCase("size");
-        exec.TraceTableFunctionCall[sizeName]   = "";
-        exec.TraceTableFunctionReturn[sizeName] = "";
+        exec.TraceTableFunctionCall[sizeName]   = null;
+        exec.TraceTableFunctionReturn[sizeName] = null;
         exec.ExecuteLoop(0);
 
         Assert.AreEqual(0, b.ErrorCodeHistory.Count,
@@ -791,10 +791,10 @@ done    N = N + 1
 end");
         var exec = b.Execute!;
         exec.AmpTrace = 0;   // disabled
-        exec.TraceTableLabel[b.FoldCase("done")]          = "";
-        exec.TraceTableFunctionCall[b.FoldCase("size")]   = "";
-        exec.TraceTableFunctionReturn[b.FoldCase("size")] = "";
-        exec.TraceTableIdentifierAccess[b.FoldCase("N")]  = "";
+        exec.TraceTableLabel[b.FoldCase("done")]          = null;
+        exec.TraceTableFunctionCall[b.FoldCase("size")]   = null;
+        exec.TraceTableFunctionReturn[b.FoldCase("size")] = null;
+        exec.TraceTableIdentifierAccess[b.FoldCase("N")]  = null;
         exec.ExecuteLoop(0);
 
         Assert.AreEqual(0, b.ErrorCodeHistory.Count,

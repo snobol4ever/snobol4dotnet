@@ -219,9 +219,13 @@ public partial class Executive
         entry!.StateStack.Push(saveVars);
 
         // CALL trace, at the calling statement and level: ****11******  F('arg',7)
-        var traceCall = TraceThisCall(TraceTableFunctionCall, functionName);
-        if (traceCall)
-            TraceLine($"{functionName}({string.Join(",", arguments.Take(parametersCount).Select(a => a.DumpString()))})");
+        if (TraceThisCall(TraceTableFunctionCall, functionName, out var callHandler))
+        {
+            if (callHandler != null)
+                CallTraceHandler(callHandler, functionName);
+            else
+                TraceLine($"{functionName}({string.Join(",", arguments.Take(parametersCount).Select(a => a.DumpString()))})");
+        }
 
         // Update keywords
         AmpFunctionLevel++;
@@ -292,17 +296,24 @@ public partial class Executive
         if (returnVar is NameVar)
             returnVar.LvalueMark = StatementSerial;
         SystemStack.Push(returnVar);
-        IdentifierTable[returnVarName] = StringVar.Null(returnVarName); // Clear function name variable
         AmpFunctionLevel--;
 
-        // RETURN and &FNCLEVEL traces, at the returning statement and the caller's level:
-        // ****15******  RETURN F = 1, FRETURN F, NRETURN G = .Z
+        // &FNCLEVEL and then RETURN traces, in SPITBOL's order (retrn: ktrex first), at the returning
+        // statement and the caller's level: ****15******  RETURN F = 1, FRETURN F, NRETURN G = .Z
         var current = AmpCurrentLineNumber;
         AmpCurrentLineNumber = returningStatement;
-        if (TraceThisCall(TraceTableFunctionReturn, functionName))
-            TraceLine(rtnTypeStr == "FRETURN" ? $"FRETURN {functionName}" : $"{rtnTypeStr} {functionName} = {returnVar.DumpString()}");
         TraceKeyword("FNCLEVEL", AmpFunctionLevel);
+        if (TraceThisCall(TraceTableFunctionReturn, functionName, out var returnHandler))
+        {
+            if (returnHandler != null)
+                CallTraceHandler(returnHandler, functionName);
+            else
+                TraceLine(rtnTypeStr == "FRETURN" ? $"FRETURN {functionName}" : $"{rtnTypeStr} {functionName} = {returnVar.DumpString()}");
+        }
         AmpCurrentLineNumber = current;
+
+        // Clear the function name variable once the RETURN trace (whose function may read it) is done
+        IdentifierTable[returnVarName] = StringVar.Null(returnVarName);
 
         // Restore the caller's variables under their own names, last saved first, so a name that
         // is both a parameter and a local unwinds to the caller's value
@@ -323,15 +334,17 @@ public partial class Executive
 
     // A call or return is traced when &FTRACE is on (each line counts it down) or when TRACE named the
     // function for this event and &TRACE is on (each line counts &TRACE down), as in SPITBOL
-    private bool TraceThisCall(Dictionary<string, string> table, string functionName)
+    // An &FTRACE line is always printed; a TRACE'd call or return may name a trace function instead
+    private bool TraceThisCall(Dictionary<string, TraceHandler?> table, string functionName, out TraceHandler? handler)
     {
+        handler = null;
         if (AmpFunctionTrace > 0)
         {
             AmpFunctionTrace--;
             return true;
         }
 
-        if (AmpTrace <= 0 || !table.ContainsKey(functionName))
+        if (AmpTrace <= 0 || !table.TryGetValue(functionName, out handler))
             return false;
 
         AmpTrace--;

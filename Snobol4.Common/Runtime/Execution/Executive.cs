@@ -334,17 +334,8 @@ public partial class Executive
         // NULL is not one of them: it is an ordinary variable whose value is the null string.
         IdentifierTable = new IdentifierTable(this)
         {
-            {"abort", new PatternVar(new AbortPattern(), "abort", false, true)},
-            {"arb", new PatternVar(ArbPattern.Structure(), "arb", false, true)},
-            {"bal", new PatternVar(BalPattern.Structure(), "bal", false, true)},
-            {"fail", new PatternVar(new FailPattern(), "fail", false, true)},
-            {"fence", new PatternVar(new AlternatePattern(new NullPattern(), new AbortPattern()), "fence", false, true)},
-            {"input", new StringVar("","input")},
-            {"output", new StringVar("","output")},
-            {"rem", new PatternVar(new RemPattern(), "rem", false, true)},
-            {"succeed", new PatternVar(new SucceedPattern(), "succeed", false, true)},
-            {"terminal", new StringVar("", "terminal")},
-
+            // The predefined names are upper case only: under -f a lower-case arb or output is an
+            // ordinary variable, as in SPITBOL (sbl -bf); under folding no lower-case name reaches here
             {"ABORT", new PatternVar(new AbortPattern(), "ABORT", false, true)},
             {"ARB", new PatternVar(ArbPattern.Structure(), "ARB", false, true)},
             {"BAL", new PatternVar(BalPattern.Structure(), "BAL", false, true)},
@@ -440,10 +431,6 @@ public partial class Executive
             { "&trim", HandleTrim },
         };
 
-        IdentifierTable["output"].OutputChannel = "+console-output";
-        IdentifierTable["terminal"].OutputChannel = "+terminal-output";
-        IdentifierTable["input"].InputChannel = "+console-input";
-        IdentifierTable["terminal"].InputChannel = "+terminal-input";
         IdentifierTable["OUTPUT"].OutputChannel = "+console-output";
         IdentifierTable["TERMINAL"].OutputChannel = "+terminal-output";
         IdentifierTable["INPUT"].InputChannel = "+console-input";

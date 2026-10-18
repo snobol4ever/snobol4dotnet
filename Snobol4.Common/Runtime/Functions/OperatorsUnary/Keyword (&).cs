@@ -47,7 +47,7 @@ public partial class Executive
     internal long AmpFunctionTrace;
     internal long AmpFullScan = 1;
     internal long AmpInput = 1;
-    internal long AmpMaxLength = 4194304;
+    internal long AmpMaxLength = 16777216;
     internal string AmpOutput;
     internal long AmpProfile;
     internal long AmpStatementLimit = 2147483647;

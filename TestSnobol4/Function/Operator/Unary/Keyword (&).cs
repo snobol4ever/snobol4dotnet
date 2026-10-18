@@ -99,4 +99,15 @@ end
         Assert.AreEqual(1, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Data);
         Assert.AreEqual(208, build.ErrorCodeHistory[0]);
     }
+
+    [TestMethod]
+    public void TEST_MaxLength_starts_at_sixteen_megabytes()
+    {
+        // sbl -b prints &MAXLNGTH as 16777216 (its -m16m default)
+        var build = SetupTests.SetupScript("-b", @"
+        a = &maxlngth
+end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(16777216L, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Data);
+    }
 }

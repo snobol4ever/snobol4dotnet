@@ -26,7 +26,7 @@
 // -j   [UNASSIGNED]
 // -k   StopOnRuntimeError
 // -l   ShowListing
-// -mN  MaxObjectBytes → initialises &MAXLNGTH (default 4m)
+// -mN  MaxObjectBytes → initialises &MAXLNGTH (default 16m, as sbl)
 // -n   SuppressExecution
 // -o   Redirect listing/errors to file
 // -p   PrinterListing — wide titles for printer

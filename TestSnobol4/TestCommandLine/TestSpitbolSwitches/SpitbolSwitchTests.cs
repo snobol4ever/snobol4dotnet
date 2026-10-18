@@ -193,8 +193,9 @@ public class SpitbolSwitchTests
     public void TEST_Switch_m_Default()
     {
         var b = Parse("-b");
-        Assert.AreEqual(4L * 1024 * 1024, b.BuildOptions.MaxObjectBytes,
-            "Default MaxObjectBytes should be 4m");
+        // sbl -h: option defaults ... -m16m; sbl -b prints &MAXLNGTH as 16777216
+        Assert.AreEqual(16L * 1024 * 1024, b.BuildOptions.MaxObjectBytes,
+            "Default MaxObjectBytes should be 16m");
     }
 
     [TestMethod]

@@ -139,7 +139,7 @@ public class BuilderOptions
     /// <summary>
     /// Gets or sets the maximum object size in bytes, initialising &amp;MAXLNGTH. Command line: -mN (default 4m)
     /// </summary>
-    public long MaxObjectBytes { get; set; } = 4 * 1024 * 1024;
+    public long MaxObjectBytes { get; set; } = 16 * 1024 * 1024;   // sbl's -m16m: &MAXLNGTH starts at 16777216
 
     /// <summary>
     /// Gets or sets the maximum stack size in bytes. Command line: -sN (default 32k)

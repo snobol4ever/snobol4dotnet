@@ -131,13 +131,19 @@ public partial class Executive
         }
 
         var channel = (string)channelNameStr;
-        var fileName = (string)fileNameStr;
+        if (!FileSpec.TryParse((string)fileNameStr, out var fileName, out var append))
+        {
+            LogRuntimeException(160);
+            return;
+        }
+
         var symbol = Parent.FoldCase(((StringVar)identifierNameVar).Data);
         var fileModeInt = (long)fileModeObj;
         var fileShareInt = (long)fileShareObj;
 
+        // By default an existing file is replaced, or appended to under the A option, as in SPITBOL
         if (arguments[3] is StringVar { Data: "" })
-            fileModeInt = 4;
+            fileModeInt = append ? (long)FileMode.Append : (long)FileMode.Create;
         if (arguments[4] is StringVar { Data: "" })
             fileShareInt = 3;
 

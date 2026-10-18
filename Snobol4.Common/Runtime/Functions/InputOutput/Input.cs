@@ -112,7 +112,12 @@ public partial class Executive
         }
 
         var channel = (string)channelNameStr;
-        var fileName = (string)fileNameStr;
+        if (!FileSpec.TryParse((string)fileNameStr, out var fileName, out _))
+        {
+            LogRuntimeException(116);
+            return;
+        }
+
         var symbol = Parent.FoldCase(((StringVar)identifierNameVar).Data);
         var fileModeInt = (long)fileModeObj;
         var fileShareInt = (long)fileShareObj;

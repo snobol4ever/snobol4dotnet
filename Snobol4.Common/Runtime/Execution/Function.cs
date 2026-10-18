@@ -24,8 +24,9 @@ public partial class Executive
         }
 
         var functionStringVar = (StringVar)SystemStack.Pop();
-        // Function name must be in the symbol table
-        var functionEntry = FunctionTable[functionStringVar.Data];
+        // Function name must be in the symbol table; a name given as a string folds as any name does
+        // (APPLY('gt', ...) calls GT under case folding, as in SPITBOL)
+        var functionEntry = FunctionTable[Parent.FoldCase(functionStringVar.Data)];
         //if (!FunctionTable.TryGetValue(functionStringVar.Data, out var functionEntry))
         if (functionEntry == null)
         {

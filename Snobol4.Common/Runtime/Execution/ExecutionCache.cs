@@ -226,13 +226,18 @@ public partial class Executive
         if (SymbolToSlotIndex == null) return;
         if (!SymbolToSlotIndex.TryGetValue(symbol, out var idx))
         {
-            // Symbol has no compile-time slot (e.g. first @N assignment at runtime).
-            // Register it now so subsequent PushVar reads are correct.
-            var newSlot = new VariableSlot(Parent.VariableSlots.Count, symbol);
-            Parent.VariableSlots.Add(newSlot);
-            Parent.VariableSlotIndex[symbol] = newSlot.SlotIndex;
+            // A symbol CODE or EVAL slotted after VarSlotArray was sized keeps that slot: a second
+            // slot for the same name would take the value while the compiled code kept reading the
+            // first (a parameter first named in CODE text read as null). A symbol with no slot at
+            // all (e.g. first @N assignment at runtime) gets one now.
+            if (!Parent.VariableSlotIndex.ContainsKey(symbol))
+            {
+                var newSlot = new VariableSlot(Parent.VariableSlots.Count, symbol);
+                Parent.VariableSlots.Add(newSlot);
+                Parent.VariableSlotIndex[symbol] = newSlot.SlotIndex;
+            }
             ExpandVarSlotArray();   // grows VarSlotArray + adds to SymbolToSlotIndex
-            idx = newSlot.SlotIndex;
+            idx = SymbolToSlotIndex[symbol];
         }
         VarSlotArray[idx] = value;
     }

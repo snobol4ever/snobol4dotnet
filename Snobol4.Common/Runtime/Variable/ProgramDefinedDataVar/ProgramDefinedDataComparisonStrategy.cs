@@ -15,10 +15,10 @@ public sealed class ProgramDefinedDataComparisonStrategy : IComparisonStrategy
                 dataSelf.DataName,
                 dataOther.DataName);
 
-            // If same type, compare by creation time
+            // If same type, compare by creation time of the object itself (its field store)
             return typeComparison != 0
                 ? typeComparison
-                : dataSelf.SequenceId.CompareTo(other.SequenceId);
+                : dataSelf.FieldValues.SequenceId.CompareTo(dataOther.FieldValues.SequenceId);
         }
 
         // Different base types compare by type name (ordinal for speed)
@@ -26,16 +26,13 @@ public sealed class ProgramDefinedDataComparisonStrategy : IComparisonStrategy
     }
 
 
-    public bool Equals(Var self, Var other)
-    {
-        // User-defined data is only equal if it's the same instance
-        return self.SequenceId == other.SequenceId;
-    }
+    // A DATA object is its field store: assignment, argument passing and storage copy the Var
+    // wrapper but share FieldValues, and SPITBOL's IDENT sees one object (Budne's atn: IDENT(X, nil))
+    public bool Equals(Var self, Var other) => SameObject(self, other);
+
+    private static bool SameObject(Var self, Var other) =>
+        other is ProgramDefinedDataVar dataOther && ReferenceEquals(((ProgramDefinedDataVar)self).FieldValues, dataOther.FieldValues);
 
 
-    public bool IsIdentical(Var self, Var other)
-    {
-        // User-defined data is identical only if they have the same unique ID
-        return self.SequenceId == other.SequenceId;
-    }
+    public bool IsIdentical(Var self, Var other) => SameObject(self, other);
 }

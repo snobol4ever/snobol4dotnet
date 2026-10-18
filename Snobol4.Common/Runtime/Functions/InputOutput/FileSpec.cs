@@ -6,14 +6,22 @@ namespace Snobol4.Common;
 /// ("out.txt -a", "out.txt[-a]"). The options are letters with an optional leading '-', separated by
 /// blanks, tabs or commas: A (append), B n, C, F n, I, L n, Q n, R n, S followed by DN, DR, DRW or DW,
 /// U, W, X, Y. Anything else makes the specification inappropriate (error 116 for INPUT, 160 for
-/// OUTPUT). Of the options only A changes what snobol4dotnet does; the others are accepted.
+/// OUTPUT). A appends; F 1 or F 2 with no file name writes to standard output or standard error, and C,
+/// Q or R (raw mode) writes no line ends; the others are accepted without effect.
 /// </summary>
 internal static class FileSpec
 {
-    internal static bool TryParse(string spec, out string fileName, out bool append)
+    internal static bool TryParse(string spec, out string fileName, out bool append) =>
+        TryParse(spec, out fileName, out append, out _, out _);
+
+    // descriptor: the F option's file descriptor (1 standard output, 2 standard error), or -1;
+    // raw: the C, Q or R option, character (raw) mode, which writes no line ends
+    internal static bool TryParse(string spec, out string fileName, out bool append, out long descriptor, out bool raw)
     {
         fileName = spec;
         append = false;
+        descriptor = -1;
+        raw = false;
         if (spec.Length == 0)
             return true;
 
@@ -53,13 +61,19 @@ internal static class FileSpec
                     append = true;
                     break;
 
-                case 'B' or 'L' or 'Q' or 'R':
+                case 'B' or 'L':
                     if (ScanInteger(spec, ref i) <= 0)
                         return false;
                     break;
 
+                case 'Q' or 'R':
+                    if (ScanInteger(spec, ref i) <= 0)
+                        return false;
+                    raw = true;
+                    break;
+
                 case 'F':
-                    ScanInteger(spec, ref i);
+                    descriptor = ScanInteger(spec, ref i);
                     break;
 
                 case 'S':
@@ -81,7 +95,11 @@ internal static class FileSpec
                         return false;
                     break;
 
-                case 'C' or 'I' or 'U' or 'W' or 'X' or 'Y':
+                case 'C':
+                    raw = true;
+                    break;
+
+                case 'I' or 'U' or 'W' or 'X' or 'Y':
                     break;
 
                 default:

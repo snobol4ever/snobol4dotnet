@@ -131,9 +131,25 @@ public partial class Executive
         }
 
         var channel = (string)channelNameStr;
-        if (!FileSpec.TryParse((string)fileNameStr, out var fileName, out var append))
+        if (!FileSpec.TryParse((string)fileNameStr, out var fileName, out var append, out var descriptor, out var raw))
         {
             LogRuntimeException(160);
+            return;
+        }
+
+        // -f1 or -f2 with no file name writes to standard output or standard error, and a raw mode (-r, -c)
+        // writes no line ends, as SPITBOL's [-f2 -r1] prompt does
+        if (fileName == "" && descriptor is 1 or 2)
+        {
+            var target = Parent.FoldCase(((StringVar)identifierNameVar).Data);
+            IdentifierTable[target].OutputChannel = (descriptor, raw) switch
+            {
+                (1, false) => "+console-output",
+                (1, true) => "+console-output-nnl",
+                (2, false) => "+terminal-output",
+                _ => "+terminal-output-nnl"
+            };
+            PredicateSuccess();
             return;
         }
 

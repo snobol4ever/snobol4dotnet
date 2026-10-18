@@ -294,6 +294,10 @@ public partial class Executive
                 Console.Error.WriteLine(outputVar.ToString());
                 break;
 
+            case "+terminal-output-nnl":
+                Console.Error.Write(outputVar.ToString());
+                break;
+
             case "+console-output-nnl":
                 Console.Out.Write(outputVar.ToString());
                 break;

@@ -1,4 +1,4 @@
-using Snobol4.Common;
+﻿using Snobol4.Common;
 using Test.TestLexer;
 
 namespace Test.FunctionControl;
@@ -59,6 +59,17 @@ end"));
 H       R = 'inner'                       :(RETURN)
 EH      R = 'outer'
         H('arg')
+end"));
+    }
+
+    [TestMethod]
+    public void TEST_CallerRestore_a_call_during_a_match_keeps_the_callers_pending_assignment()
+    {
+        // *F('L') . R: F's body runs statements mid-match; the outer . must still assign
+        Assert.AreEqual("HE", Result(@"
+        DEFINE('F(X)')                    :(EF)
+F       F = BREAK(X)                      :(RETURN)
+EF      'HELLO' *F('L') . R
 end"));
     }
 }

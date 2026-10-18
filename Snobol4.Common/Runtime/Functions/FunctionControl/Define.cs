@@ -234,7 +234,15 @@ public partial class Executive
         // but we must not let RETURN unconditionally force Failure=false and clobber
         // the pre-call state (e.g. a prior LT() failure that a :F(label) depends on).
         var callerFailure = Failure;
+        // Every statement of the body clears AlphaStack and BetaStack, so a call made during a
+        // match (*F(X) . V) would discard the caller's pending conditional assignments
+        var callerAlphaStack = AlphaStack;
+        var callerBetaStack = BetaStack;
+        AlphaStack = [];
+        BetaStack = [];
         var nextIndex = ExecuteLoop(LabelTable[definition.EntryLabel]);
+        AlphaStack = callerAlphaStack;
+        BetaStack = callerBetaStack;
         var returnVar = IdentifierTable[returnVarName];
 
         string rtnTypeStr;

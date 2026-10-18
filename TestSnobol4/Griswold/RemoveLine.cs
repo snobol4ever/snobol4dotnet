@@ -137,7 +137,8 @@ END";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(" 1234 -1234 +1234 1234.5678 -1234.5678 1234 -1234 1234.5678E-10 -1234.5678E-10", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("RESULT")]).Data);
+        // REAL needs an exponent, so '1234.5678' matches as INTEGER: SPITBOL and CSNOBOL4 both answer 1234
+        Assert.AreEqual(" 1234 -1234 +1234 1234 -1234 1234 -1234 1234.5678E-10 -1234.5678E-10",((StringVar)build.Execute!.IdentifierTable[build.FoldCase("RESULT")]).Data);
     }
 
 

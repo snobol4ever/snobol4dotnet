@@ -121,9 +121,15 @@ internal class AbstractSyntaxTree
             var currentNode = _nodes[currentIndex];
             var parentNode = _nodes[currentNode.ParentIndex];
 
-            if (currentNode.IsLeftChild() && 
+            if (currentNode.IsLeftChild() &&
                 (concatenate ? parentNode.Self is ConcatenatePattern : parentNode.Self is AlternatePattern))
                 break;
+
+            // A node after the first of a concatenation starts no enclosing alternative. The
+            // sequence's first node saved that alternative at the cursor the alternation began
+            // at; saving it again here would retry it from wherever this arm had got to.
+            if (!concatenate && currentNode.IsRightChild() && parentNode.Self is ConcatenatePattern)
+                return -1;
 
             if (parentNode.SelfIndex == 0)
                 return -1;

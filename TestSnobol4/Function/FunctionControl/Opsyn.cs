@@ -156,8 +156,9 @@ public class Opsyn
                 """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
+        // sbl -b: error 156 (an operator OPSYN needs one of the undefined operators as its first argument)
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(154, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(156, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
@@ -184,8 +185,9 @@ public class Opsyn
                 """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
+        // sbl -b: error 156 (an operator OPSYN needs one of the undefined operators as its first argument)
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(153, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(156, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
@@ -226,8 +228,8 @@ public class Opsyn
                 """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(154, build.ErrorCodeHistory[0]);
+        // sbl -b accepts it: any non-null name may be defined or named, an undefined one making an undefined synonym
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -240,8 +242,8 @@ public class Opsyn
                 """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(154, build.ErrorCodeHistory[0]);
+        // sbl -b accepts it: any non-null name may be defined or named, an undefined one making an undefined synonym
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -254,8 +256,8 @@ public class Opsyn
                 """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(155, build.ErrorCodeHistory[0]);
+        // sbl -b accepts it: any non-null name may be defined or named, an undefined one making an undefined synonym
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
 
@@ -283,8 +285,8 @@ public class Opsyn
                 """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(154, build.ErrorCodeHistory[0]);
+        // sbl -b accepts it: any non-null name may be defined or named, an undefined one making an undefined synonym
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -297,8 +299,8 @@ public class Opsyn
                 """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(154, build.ErrorCodeHistory[0]);
+        // sbl -b accepts it: any non-null name may be defined or named, an undefined one making an undefined synonym
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -311,8 +313,8 @@ public class Opsyn
                 """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(155, build.ErrorCodeHistory[0]);
+        // sbl -b accepts it: any non-null name may be defined or named, an undefined one making an undefined synonym
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
 
@@ -341,8 +343,9 @@ public class Opsyn
                 """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
+        // sbl -b: error 156 (an operator OPSYN needs one of the undefined operators as its first argument)
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(154, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(156, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
@@ -355,8 +358,9 @@ public class Opsyn
                 """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
+        // sbl -b: error 156 (an operator OPSYN needs one of the undefined operators as its first argument)
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(154, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(156, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
@@ -400,8 +404,9 @@ public class Opsyn
                 """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
+        // sbl -b: error 156 (an operator OPSYN needs one of the undefined operators as its first argument)
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(154, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(156, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
@@ -414,8 +419,9 @@ public class Opsyn
                 """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
+        // sbl -b: error 156 (an operator OPSYN needs one of the undefined operators as its first argument)
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(154, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(156, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
@@ -457,8 +463,8 @@ public class Opsyn
                 """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(154, build.ErrorCodeHistory[0]);
+        // sbl -b accepts it: any non-null name may be defined or named, an undefined one making an undefined synonym
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -471,8 +477,8 @@ public class Opsyn
                 """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(154, build.ErrorCodeHistory[0]);
+        // sbl -b accepts it: any non-null name may be defined or named, an undefined one making an undefined synonym
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -512,8 +518,8 @@ public class Opsyn
                 """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(154, build.ErrorCodeHistory[0]);
+        // sbl -b accepts it: any non-null name may be defined or named, an undefined one making an undefined synonym
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -526,8 +532,8 @@ public class Opsyn
                 """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(154, build.ErrorCodeHistory[0]);
+        // sbl -b accepts it: any non-null name may be defined or named, an undefined one making an undefined synonym
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -543,7 +549,33 @@ public class Opsyn
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
+    [TestMethod]
+    public void TEST_Opsyn_as_spitbol_resolves_it()
+    {
+        // sbl -b: a count above 2 is binary ('ab' % 2 is abab); a synonym of an undefined function is
+        // undefined, so using it is error 22; a system function cannot be redefined (248)
+        var binary = SetupTests.SetupScript("-b", @"
+        OPSYN('%', 'DUPL', 7)
+        R = 'ab' % 2
+end");
+        Assert.AreEqual(0, binary.ErrorCodeHistory.Count);
+        Assert.AreEqual("abab", binary.Execute!.IdentifierTable["R"].ToString());
 
+        var undefinedOperator = SetupTests.SetupScript("-b", @"
+        OPSYN('%', 'ZZZ', 2)
+        R = 1 % 2
+end");
+        Assert.AreEqual(22, undefinedOperator.ErrorCodeHistory[0]);
+
+        var undefinedFunction = SetupTests.SetupScript("-b", @"
+        OPSYN('PLUS', '+')
+        R = PLUS(1, 2)
+end");
+        Assert.AreEqual(22, undefinedFunction.ErrorCodeHistory[0]);
+
+        var system = SetupTests.SetupScript("-b", @"
+        OPSYN('SIZE', 'DUPL')
+end");
+        Assert.AreEqual(248, system.ErrorCodeHistory[0]);
+    }
 }
-
-

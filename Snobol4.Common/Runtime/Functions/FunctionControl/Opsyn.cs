@@ -63,20 +63,16 @@ public partial class Executive
                 var opsynAllowedRedefs = new HashSet<string> { "INPUT", "OUTPUT" };
                 if (entry != null && entry.IsProtected && !opsynAllowedRedefs.Contains(newFunction))
                 {
-                    LogRuntimeException(155);
-                    return;
-                }
-
-                // First argument cannot be an operator
-                if (UnusedUnary.Contains(newFunction) || UnusedBinary.Contains(newFunction))
-                {
-                    LogRuntimeException(155);
+                    LogRuntimeException(248);
                     return;
                 }
 
                 FunctionTable.Remove(newFunction);
+                UserFunctionTable.Remove(newFunction);
                 var existingFunctionEntry = FunctionTable[existingFunction];
-                FunctionTable.Add(newFunction, new FunctionTableEntry(this, newFunction, existingFunctionEntry!.Handler, existingFunctionEntry.ArgumentCount, false));
+                if (existingFunctionEntry == null)
+                    break;   // an undefined function's synonym is undefined too: a call is error 22
+                FunctionTable.Add(newFunction, new FunctionTableEntry(this, newFunction, existingFunctionEntry.Handler, existingFunctionEntry.ArgumentCount, false));
                 // If aliasing a program-defined function, copy its UserFunctionTableEntry
                 // under the new name. The FunctionName field stays as the ORIGINAL name
                 // so ExecuteProgramDefinedFunction resolves the return variable correctly:
@@ -99,8 +95,8 @@ public partial class Executive
 
                 newFunction = "_" + newFunction;
                 FunctionTable.Remove(newFunction);
-                var unusedUnaryOperator = FunctionTable[existingFunction];
-                FunctionTable.Add(newFunction, new FunctionTableEntry(this, newFunction, unusedUnaryOperator!.Handler, unusedUnaryOperator.ArgumentCount, false));
+                var unusedUnaryOperator = FunctionTable[existingFunction] ?? UndefinedOperator(newFunction, 1);
+                FunctionTable.Add(newFunction, new FunctionTableEntry(this, newFunction, unusedUnaryOperator.Handler, unusedUnaryOperator.ArgumentCount, false));
                 InvalidateOperatorHandler(newFunction);
                 break;
 
@@ -114,8 +110,8 @@ public partial class Executive
 
                 newFunction = "__" + newFunction;
                 FunctionTable.Remove(newFunction);
-                var unusedBinaryOperator = FunctionTable[existingFunction];
-                FunctionTable.Add(newFunction, new FunctionTableEntry(this, newFunction, unusedBinaryOperator!.Handler, unusedBinaryOperator.ArgumentCount, false));
+                var unusedBinaryOperator = FunctionTable[existingFunction] ?? UndefinedOperator(newFunction, 2);
+                FunctionTable.Add(newFunction, new FunctionTableEntry(this, newFunction, unusedBinaryOperator.Handler, unusedBinaryOperator.ArgumentCount, false));
                 // Mirror case 0: copy UserFunctionTableEntry under the operator name so
                 // that ExecuteProgramDefinedFunction can find the definition when the
                 // OPSYN'd binary operator is dispatched via OperatorFast (which bypasses
@@ -142,9 +138,13 @@ public partial class Executive
         if (!arg.Convert(VarType.INTEGER, out _, out var count, exec))
             return 152;
 
-        // Third argument must be 0, 1 or 2
-        operands = (int)(long)count;
-        return operands is > 2 or < 0 ? 153 : 0;
+        // 0 is a function, 1 a unary operator and any larger count a binary one, as in SPITBOL (s_ops);
+        // a negative count is error 153
+        var n = (long)count;
+        if (n < 0)
+            return 153;
+        operands = n > 2 ? 2 : (int)n;
+        return 0;
     }
 
     private int CheckArgument2(Var arg, out string existingFunction, Executive exec)
@@ -157,9 +157,14 @@ public partial class Executive
 
         existingFunction = Parent.FoldCase((string)function);
 
-        // Second argument must be defined function
-        return !FunctionTable.ContainsKey(existingFunction) ? 154 : 0;
+        // Any non-null name will do, as in SPITBOL (gtnvr): a function that is not defined, or an
+        // operator's symbol such as '+', which names no function, makes the synonym undefined
+        return existingFunction == "" ? 154 : 0;
     }
+
+    // An operator made a synonym of an undefined function: using it is error 22, as in SPITBOL
+    private FunctionTableEntry UndefinedOperator(string name, int operands) =>
+        new(this, name, _ => LogRuntimeException(22), operands, false);
 
     private static int CheckArgument1(Var arg, out string newFunction, Executive exec)
     {

@@ -101,8 +101,11 @@ public partial class Executive
         }
         var rightVar = arguments[1]; // Source Var
 
-        // If source has input channels, get input now
+        // If source has input channels, get input now; at end of input the statement fails and nothing
+        // is assigned (OUTPUT = INPUT writes no empty line, X keeps its value), as in SPITBOL
         rightVar = InputArgument(rightVar);
+        if (Failure)
+            return;
 
         //LeftPattern side must have a symbol, be keyed to a collection, or be a NameVar
         if (leftVar is { Symbol: "", Key: null } and not NameVar)

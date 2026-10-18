@@ -126,6 +126,10 @@ public partial class Executive
         ProgramDefinedFunctionStack.Push(functionName);
         var entry = FunctionTable[functionName];
         List<Var> saveVars = [];
+        // The name each saved value is restored under. An array or table argument is bound by
+        // reference and renamed to its parameter, so a saved Var's own Symbol can no longer say
+        // where it came from.
+        List<string> saveSymbols = [];
 
         // Builtin called through user-function dispatch path (e.g. *LEQ in EVAL'd pattern).
         // UserFunctionTable only holds user-DEFINE'd functions; builtins have no Symbol entry there.
@@ -166,6 +170,7 @@ public partial class Executive
 
             var v = IdentifierTable[symbol];
             saveVars.Add(v);
+            saveSymbols.Add(symbol);
 
             // Clone the argument before renaming: the caller may still hold a
             // reference to the same Var object on the SystemStack (e.g. as the
@@ -203,6 +208,7 @@ public partial class Executive
 
             var v = IdentifierTable[symbol];
             saveVars.Add(v);
+            saveSymbols.Add(symbol);
 
             // Set local variables to the new values
             var sVar = StringVar.Null(definition.Locals[i]);
@@ -276,12 +282,14 @@ public partial class Executive
             FunctionTraceExit(functionName);
         }
 
-        // Restore local variables
+        // Restore the caller's variables under their own names, last saved first, so a name that
+        // is both a parameter and a local unwinds to the caller's value
         saveVars = entry.StateStack.Pop();
 
-        foreach (var saveVar in saveVars)
+        for (var i = saveVars.Count - 1; i >= 0; --i)
         {
-            IdentifierTable[saveVar.Symbol] = saveVar;
+            saveVars[i].Symbol = saveSymbols[i];
+            IdentifierTable[saveSymbols[i]] = saveVars[i];
         }
 
         // Pop ProgramDefinedFunctionStack — balances the Push at the top of this method.

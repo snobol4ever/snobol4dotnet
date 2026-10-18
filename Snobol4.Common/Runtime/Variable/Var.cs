@@ -218,24 +218,152 @@ public abstract class Var : IEquatable<Var>
     }
 
 
+    /// <summary>
+    /// A string read as a real, as SPITBOL reads it (sbl.min gtnum, the real circuit): blanks or tabs
+    /// around it, an optional sign, digits with at most one point, an optional exponent (e, E, d or D). The
+    /// digits before any point accumulate as an integer; from there each digit is acc * 10.0 + digit in
+    /// doubles; the scale (digits after the point less the exponent) is applied in steps of 10**10 and
+    /// then once from the powers-of-ten table. The double arithmetic is SPITBOL's own, step for step, so
+    /// the value read is SPITBOL's, not a correctly rounded one; results below the smallest normal double
+    /// flush to zero, as SPITBOL runs with flush-to-zero set. The null string or blanks alone read 0.0.
+    /// </summary>
     internal static bool ToReal(ReadOnlySpan<char> inString, out double realOut)
     {
-        // The null string, or one of blanks and tabs only, is 0.0, as in SPITBOL
-        if (inString.Trim(" \t").IsEmpty)
-        {
-            realOut = 0.0;
+        realOut = 0.0;
+        var i = 0;
+        var n = inString.Length;
+        while (i < n && inString[i] is ' ' or '\t') i++;
+        if (i == n)
             return true;
-        }
 
-        if (!double.TryParse(inString, NumberStyles.Float | NumberStyles.AllowThousands,
-            CultureInfo.InvariantCulture, out realOut))
+        var negative = false;
+        if (inString[i] is '+' or '-')
         {
-            return false;
+            negative = inString[i] == '-';
+            if (++i == n)
+                return false;
         }
 
-        // Simplified: IsFinite checks both NaN and Infinity in one call
-        return double.IsFinite(realOut);
+        // the integer circuit: a negative accumulator, as SPITBOL's cvm keeps it
+        long integer = 0;
+        var digits = false;
+        double acc;
+        while (true)
+        {
+            if (i == n || inString[i] is ' ' or '\t')
+            {
+                for (; i < n; i++)
+                    if (inString[i] is not (' ' or '\t'))
+                        return false;
+                if (!digits)
+                    return false;
+                realOut = negative ? integer : -(double)integer;
+                return true;
+            }
+
+            var c = inString[i];
+            if (c is < '0' or > '9')
+            {
+                acc = -(double)integer;
+                break;
+            }
+
+            if (integer < (long.MinValue + (c - '0')) / 10)
+            {
+                acc = -(double)integer;   // overflow: the digits so far, as a real, and this digit in the real circuit
+                break;
+            }
+
+            integer = integer * 10 - (c - '0');
+            digits = true;
+            i++;
+        }
+
+        // the real circuit
+        var scale = 0;
+        var point = false;
+        long exponent = 0;
+        while (i < n)
+        {
+            var c = inString[i];
+            if (c is >= '0' and <= '9')
+            {
+                acc = FlushToZero(FlushToZero(acc * 10.0) + (c - '0'));
+                if (double.IsInfinity(acc))
+                    return false;
+                if (point)
+                    scale++;
+                digits = true;
+                i++;
+                continue;
+            }
+
+            if (c == '.')
+            {
+                if (point)
+                    return false;
+                point = true;
+                i++;
+                continue;
+            }
+
+            if (c is 'e' or 'E' or 'd' or 'D')
+            {
+                point = true;
+                if (++i == n)
+                    return false;
+                var exponentNegative = false;
+                if (inString[i] is '+' or '-')
+                {
+                    exponentNegative = inString[i] == '-';
+                    if (++i == n)
+                        return false;
+                }
+
+                for (; i < n && inString[i] is >= '0' and <= '9'; i++)
+                {
+                    exponent = exponent * 10 + (inString[i] - '0');
+                    if (exponent > int.MaxValue)
+                        return false;
+                }
+
+                if (exponentNegative)
+                    exponent = -exponent;
+            }
+
+            for (; i < n; i++)
+                if (inString[i] is not (' ' or '\t'))
+                    return false;
+        }
+
+        if (!digits || !point)
+            return false;
+
+        var net = scale - exponent;
+        if (net >= 0)
+        {
+            for (; net > 10; net -= 10)
+                acc = FlushToZero(acc / 1e10);
+            if (net > 0)
+                acc = FlushToZero(acc / _powersOfTen[net]);
+        }
+        else
+        {
+            for (net = -net; net > 10; net -= 10)
+                acc *= 1e10;
+            if (net > 0)
+                acc *= _powersOfTen[net];
+            if (double.IsInfinity(acc))
+                return false;
+        }
+
+        realOut = negative ? -acc : acc;
+        return true;
     }
+
+    private static readonly double[] _powersOfTen = [1.0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10];
+
+    private static double FlushToZero(double x) => Math.Abs(x) < 2.2250738585072014E-308 ? 0.0 : x;
 
     internal static bool ToNumeric(Var varIn, out bool isInteger, out long l, out double d, Executive exec)
     {

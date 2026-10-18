@@ -429,7 +429,9 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(3.14159e200, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Data);
+        // The literal is read as SPITBOL reads it (one unit in the last place below .NET's correctly
+        // rounded parse); sbl -b prints it as 0.314159e+201 and CONVERT to INTEGER fails
+        Assert.AreEqual("0.314159e+201", build.Execute!.IdentifierTable[build.FoldCase("a")].ToString());
         Assert.AreEqual("failure", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("d")]).Data);
     }
 

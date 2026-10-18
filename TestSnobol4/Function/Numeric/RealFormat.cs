@@ -48,4 +48,16 @@ end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("0.414435207575804", build.Execute!.IdentifierTable["R"].ToString());
     }
+
+    [TestMethod]
+    public void TEST_RealFormat_a_real_is_read_as_spitbol_reads_it()
+    {
+        // SPITBOL reads these with its own arithmetic, not a correctly rounded parse, and so prints
+        // ...064e+32 for 9.478653606090631e+31; the D exponent and surrounding blanks are SPITBOL's too
+        var build = SetupTests.SetupScript("-b", @"
+        R = 9.478653606090631e+31 ' ' ('1.8049542451833431e-278' + 0) ' ' ('  -2.5D2 ' + 0)
+end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("0.947865360609064e+32 0.180495424518334e-277 -250.", build.Execute!.IdentifierTable["R"].ToString());
+    }
 }

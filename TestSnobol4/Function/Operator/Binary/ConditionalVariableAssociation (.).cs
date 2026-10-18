@@ -1,4 +1,4 @@
-using Snobol4.Common;
+﻿using Snobol4.Common;
 using Test.TestLexer;
 
 // ReSharper disable StringLiteralTypo
@@ -112,5 +112,37 @@ end";
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("no-match", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("result")]).Data);
         Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("captured")]).Data);
+    }
+
+    // *X . V defers X to match time, as SPITBOL does (sbl -b; Budne's uneval2)
+    private static string Captured(string body)
+    {
+        var build = SetupTests.SetupScript("-b", body + "\nend");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        return ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("str")]).Data;
+    }
+
+    [TestMethod]
+    public void TEST_ConditionalVariableAssociation_of_a_deferred_pattern()
+    {
+        Assert.AreEqual("HEL", Captured(@"
+        'HELLO' *LEN(3) . str"));
+    }
+
+    [TestMethod]
+    public void TEST_ConditionalVariableAssociation_of_a_deferred_pattern_reads_its_variables_at_match_time()
+    {
+        Assert.AreEqual("HE", Captured(@"
+        p = *BREAK(q)
+        q = 'L'
+        'HELLO' p . str"));
+    }
+
+    [TestMethod]
+    public void TEST_ConditionalVariableAssociation_of_a_deferred_argument_set_earlier_in_the_same_match()
+    {
+        Assert.AreEqual("HELLO HELLO", Captured(@"
+        line = 'say ""HELLO HELLO"" now'
+        line (""'"" | '""') $ quote *BREAK(quote) . str *quote"));
     }
 }

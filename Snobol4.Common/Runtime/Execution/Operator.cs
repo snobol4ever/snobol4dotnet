@@ -19,8 +19,10 @@ public partial class Executive
             return;
         }
 
-        // If any arguments have input channels, get input now
-        InputArguments(arguments);
+        // If any arguments have input channels, get input now; the name operator takes its operand's
+        // name, so .INPUT reads no line, as in SPITBOL
+        if (functionName != "_.")
+            InputArguments(arguments);
 
         FunctionTable[functionName]!.Handler(arguments);
     }

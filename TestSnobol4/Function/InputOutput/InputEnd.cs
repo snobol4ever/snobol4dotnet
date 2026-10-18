@@ -21,4 +21,17 @@ D       X = INPUT        :S(END)
         OUTPUT = 'X=' X
 END", "x").Replace("\r\n", "\n"));
     }
+
+    [TestMethod]
+    public void TEST_InputEnd_the_name_of_input_reads_no_line()
+    {
+        // sbl -b with input one/two answers NAME INPUT, L=one, via=two: .INPUT is INPUT's name and reads
+        // nothing (Gimpel's INPUT(.INPUT, 8, , file)); snobol4dotnet read a line and refused with error 212
+        Assert.AreEqual("NAME INPUT\nL=one\nvia=two", SetupTests.RunWithInput(@"        N = .INPUT
+        OUTPUT = DATATYPE(N) ' ' N
+        L = INPUT
+        OUTPUT = 'L=' L
+        OUTPUT = 'via=' $N
+END", "one\ntwo").Replace("\r\n", "\n"));
+    }
 }

@@ -220,11 +220,16 @@ public partial class Executive
 
         // The function's own variable is saved and set null on entry like a local, and the caller's value
         // comes back on return, as in SPITBOL: F = F(N + 1) inside F keeps F's value across the inner call
+        // A protected variable (BAL, ARB) is nulled too but stays protected, so assigning it in the body
+        // is still error 42
         if (!saveSymbols.Contains(returnVarName))
         {
-            saveVars.Add(IdentifierTable[returnVarName]);
+            var callerValue = IdentifierTable[returnVarName];
+            saveVars.Add(callerValue);
             saveSymbols.Add(returnVarName);
-            IdentifierTable[returnVarName] = StringVar.Null(returnVarName);
+            var entryValue = StringVar.Null(returnVarName);
+            entryValue.IsReadOnly = callerValue.IsReadOnly;
+            IdentifierTable[returnVarName] = entryValue;
         }
 
         // Save value of local variables on the stack

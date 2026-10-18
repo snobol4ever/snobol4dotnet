@@ -300,4 +300,20 @@ end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("kept", build.Execute!.IdentifierTable["R"].ToString());
     }
+
+    [TestMethod]
+    public void TEST_Define_a_protected_function_variable_stays_protected()
+    {
+        // sbl -b answers 42 [] PATTERN: a function named BAL may be defined, but assigning BAL in its body
+        // is error 42; the call returns null and BAL is the pattern again afterwards
+        var build = SetupTests.SetupScript("-b", @"
+        DEFINE('BAL()')                :(BAL_END)
+BAL     BAL = 'x'                      :(RETURN)
+BAL_END &ERRLIMIT = 1
+        R = BAL()
+        S = &ERRTYPE ' [' R '] ' DATATYPE(BAL)
+end");
+        Assert.AreEqual(42, build.ErrorCodeHistory[0]);
+        Assert.AreEqual("42 [] PATTERN", build.Execute!.IdentifierTable["S"].ToString());
+    }
 }

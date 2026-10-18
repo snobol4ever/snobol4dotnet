@@ -257,4 +257,26 @@ end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("DUMMY NAME", build.Execute!.IdentifierTable["R"].ToString());
     }
+
+    [TestMethod]
+    public void TEST_Define_the_function_variable_survives_a_recursive_call()
+    {
+        // sbl -b: inside F(1), F keeps v1 across the inner F(2) call, F(1) returns v1, and the global F is
+        // global again after the call
+        var build = SetupTests.SetupScript("-b", @"
+        DEFINE('F(N)')                 :(F_END)
+F       F = 'v' N
+        LT(N, 2)                       :F(RETURN)
+        X = F(N + 1)
+        INNER = F ' ' X                :(RETURN)
+F_END
+        F = 'global'
+        R = F(1)
+        S = F
+end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("v1 v2", build.Execute!.IdentifierTable["INNER"].ToString());
+        Assert.AreEqual("v1", build.Execute!.IdentifierTable["R"].ToString());
+        Assert.AreEqual("global", build.Execute!.IdentifierTable["S"].ToString());
+    }
 }

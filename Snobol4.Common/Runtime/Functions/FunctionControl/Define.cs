@@ -218,6 +218,15 @@ public partial class Executive
             IdentifierTable[sVar.Symbol] = sVar;
         }
 
+        // The function's own variable is saved and set null on entry like a local, and the caller's value
+        // comes back on return, as in SPITBOL: F = F(N + 1) inside F keeps F's value across the inner call
+        if (!saveSymbols.Contains(returnVarName))
+        {
+            saveVars.Add(IdentifierTable[returnVarName]);
+            saveSymbols.Add(returnVarName);
+            IdentifierTable[returnVarName] = StringVar.Null(returnVarName);
+        }
+
         // Save value of local variables on the stack
         entry!.StateStack.Push(saveVars);
 

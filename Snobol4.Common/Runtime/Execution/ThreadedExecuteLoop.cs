@@ -65,6 +65,7 @@ public partial class Executive
                 }
                 // instr.Op == OpCode.CallMsil (guaranteed by ThreadIsMsilOnly)
                 var next = msilDelegates[instr.IntOperand](this);
+                if (_trapTaken) { _trapTaken = false; thread = Thread!; continue; }   // the SETEXIT trap wins over the statement's goto
                 if (next == int.MinValue) continue;       // fall through
                 if (next < 0) { exitCode = next; goto Done; }
                 thread = Thread!;                         // AppendCompile may have extended Thread
@@ -212,6 +213,7 @@ public partial class Executive
                 case OpCode.CallMsil:
                 {
                     var next = Parent.MsilDelegates[instr.IntOperand](this);
+                    if (_trapTaken) { _trapTaken = false; thread = Thread!; break; }   // the SETEXIT trap wins over the statement's goto
                     if (next == int.MinValue) break;          // fall through — IP already advanced
                     if (next < 0) { exitCode = next; goto Done; } // halt / RETURN / FRETURN etc.
                     thread = Thread!;                         // AppendCompile may have extended Thread
@@ -296,7 +298,10 @@ public partial class Executive
         // can re-apply it after the restore.
         LastExpressionFailure = Failure;
         InstructionPointer    = savedIP;
-        OnErrorGoto             = savedErrorJump;
+        // A sub-expression (EVAL, a deferred *X) has no statement end of its own: a trap its error armed
+        // stays pending for the calling statement, as SPITBOL takes it (SETEXIT around EVAL)
+        if (overrideThread == null || OnErrorGoto == 0)
+            OnErrorGoto = savedErrorJump;
         Failure               = savedFailure;
         return exitCode;
     }
@@ -313,5 +318,10 @@ public partial class Executive
         var target = OnErrorGoto;
         OnErrorGoto  = 0;
         InstructionPointer = StatementIndexToInstrIndex(target);
+        _trapTaken = true;
     }
+
+    // An error trapped by SETEXIT transfers to its label when the statement ends; a goto the statement's
+    // MSIL delegate then returns (:F(OOPS) after a failed EVAL) must not override it, as in SPITBOL
+    private bool _trapTaken;
 }

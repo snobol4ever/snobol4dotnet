@@ -305,15 +305,10 @@ public partial class Lexer
             // anything except blank or tab.
             // [Emmer & Quillen 2000, pg. 29]
             case 2: // LABEL
-                // Sub-lines produced by semicolon splitting (LineCountSubLine > 1)
-                // cannot carry a label — column 1 is not the start of a physical line.
-                // Skip label extraction entirely; transition to IDENTIFIER state (3).
-                if (sourceLine.LineCountSubLine > 1)
-                {
-                    state = 3;
-                    return FindLexeme(sourceLine, ref state);
-                }
-
+                // A sub-line produced by semicolon splitting begins as if in column 1,
+                // as in SPITBOL: a name written right after the semicolon is its label
+                // (`:(EN);EN OUTPUT = 'B'`), and a blank there sends START to state 4,
+                // so `a = 1 ; b = 2` carries none.
                 m = LabelPattern().Match(sourceLine.Text);
 
                 if (!m.Success)

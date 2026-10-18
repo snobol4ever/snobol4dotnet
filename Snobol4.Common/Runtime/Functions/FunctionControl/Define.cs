@@ -295,10 +295,9 @@ public partial class Executive
         // GOAL-NET-BEAUTY-SELF S-2-bridge-7-fullscan.
         MonitorIpc.EmitReturn(functionName, rtnTypeStr);
 
-        // A NAME an NRETURN hands back is an assignment target in this statement (F() = V)
-        if (returnVar is NameVar)
-            returnVar.LvalueMark = StatementSerial;
-        SystemStack.Push(returnVar);
+        // A NAME an NRETURN hands back gives the named variable's value, which the statement may also
+        // assign (F() = V) or name (.F()), as in SPITBOL
+        SystemStack.Push(returnVar is NameVar returnedName ? NameReturnValue(returnedName) : returnVar);
         AmpFunctionLevel--;
 
         // &FNCLEVEL and then RETURN traces, in SPITBOL's order (retrn: ktrex first), at the returning

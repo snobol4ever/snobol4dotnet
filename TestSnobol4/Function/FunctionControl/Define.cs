@@ -213,4 +213,33 @@ end");
         Assert.AreEqual(1, build.ErrorCodeHistory.Count);
         Assert.AreEqual(286, build.ErrorCodeHistory[0]);
     }
+
+    [TestMethod]
+    public void TEST_Define_an_nreturn_gives_the_named_value()
+    {
+        // sbl -b: N = TOP() copies V's value (a STRING), TOP() 'x' and SIZE(TOP()) use the value, TOP() = Y
+        // sets V even when V holds a NAME, .TOP() is V's name, and an element's NAME works the same way
+        var build = SetupTests.SetupScript("-b", @"
+        DEFINE('TOP()')                :(TOP_END)
+TOP     TOP = .V                       :(NRETURN)
+TOP_END
+        V = 'val'
+        N = TOP()
+        R = N ' ' DATATYPE(N) ' ' TOP() 'x ' SIZE(TOP())
+        X = .TOP()
+        V = .Z
+        TOP() = 'set'
+        S = V ' ' Z ' ' DATATYPE(X)
+        A = ARRAY(2)
+        DEFINE('EL()')                 :(EL_END)
+EL      EL = .A<2>                     :(NRETURN)
+EL_END
+        EL() = 'two'
+        T = A<2> ' ' EL()
+end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("val STRING valx 3", build.Execute!.IdentifierTable["R"].ToString());
+        Assert.AreEqual("set  NAME", build.Execute!.IdentifierTable["S"].ToString());
+        Assert.AreEqual("two two", build.Execute!.IdentifierTable["T"].ToString());
+    }
 }

@@ -19,7 +19,6 @@ public partial class Executive
         // IdentifierTable indexer path that the threaded PushVar opcode takes.
         var varName = Parent.VariableSlots[slotIdx].Symbol;
         TraceIdentifierAccess(varName);
-        TraceIdentifierValue(varName);
         SystemStack.Push(VarSlotArray[slotIdx]);
     }
 

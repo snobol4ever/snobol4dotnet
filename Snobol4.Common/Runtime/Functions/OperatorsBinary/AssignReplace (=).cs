@@ -209,6 +209,7 @@ public partial class Executive
                 newVar.OutputChannel = leftVar.OutputChannel;
                 newVar.InputChannel = leftVar.InputChannel;
                 IdentifierTable[newVar.Symbol] = newVar;
+                TraceIdentifierValue(newVar.Symbol, newVar);
                 SystemStack.Push(newVar);
                 break;
         }

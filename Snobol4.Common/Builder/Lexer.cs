@@ -233,8 +233,24 @@ public partial class Lexer
     /// </remarks>
     internal bool Lex()
     {
+        // Each line folds its names as -CASE stood when it was read; the folding left by the last -CASE
+        // is restored for what follows
+        var finalFolding = _parent.BuildOptions.CaseFolding;
+        try
+        {
+            return LexLines();
+        }
+        finally
+        {
+            _parent.BuildOptions.CaseFolding = finalFolding;
+        }
+    }
+
+    private bool LexLines()
+    {
         foreach (var sourceLine in _parent.Code.SourceLines.Where(line => !line.Compiled))
         {
+            _parent.BuildOptions.CaseFolding = sourceLine.CaseFolding;
             if (!LexLine(sourceLine))
                 return false;
             ConvertUnaryStarOperatorsToDeferredExpressions(sourceLine.LexBody);

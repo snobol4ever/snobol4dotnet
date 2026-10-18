@@ -4,6 +4,8 @@ public class SourceLine
 {
     // Whether statement has already been compiled
     internal bool Compiled { get; set; }
+    // Case folding as it stood when the line was read: a -CASE control acts from its own line on
+    internal bool CaseFolding { get; }
 
     // Handler of -FAIL/-NOFAIL on ***current*** line
     internal bool ErrorOnUnhandledFail { get; init; }
@@ -85,6 +87,7 @@ public class SourceLine
         LineCountSubLine = code.SubLineCount;
         LineCountList = code.LineCountTotal;
         PathName = pathName;
+        CaseFolding = code.CaseFoldingNow;
         Text = text.TrimEnd();
 
         // Mutable collections initialized during parsing

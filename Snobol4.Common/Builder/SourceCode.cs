@@ -17,7 +17,6 @@ public class SourceCode
     // Magic numbers for parsing
     private const int _endStatementLength = 3;
     private const int _endStatementOffset = 3;
-    private const int _caseDirectiveMinLength = 6;
     private const int _caseDirectiveValueOffset = 5;
 
     // Counter for number of lines in a file
@@ -413,6 +412,11 @@ public class SourceCode
     /// <param name="pathName">Path to the source file</param>
     private void ParseDirective(string match, string directive, string pathName)
     {
+        // A control in lower case is a control only while names fold, as sbl reads it (Budne's case1:
+        // -case 1 after -case is ignored)
+        if (!_parent.BuildOptions.CaseFolding && match.Any(char.IsLower))
+            return;
+
         var keyword = match.ToLower().Trim();
         
         switch (keyword)
@@ -467,8 +471,8 @@ public class SourceCode
                 Console.Error.WriteLine($"WARNING: Directive -{match.Trim()} in {pathName} ignored");
                 break;
 
+            // SPITBOL ignores a control it does not know (the manual; sbl is silent on -HIDE, -PLUSOPS)
             default:
-                _parent.LogCompilerException(247);
                 break;
         }
     }
@@ -561,11 +565,12 @@ public class SourceCode
     /// Processes a CASE directive for case-folding control
     /// </summary>
     /// <param name="directive">The directive text</param>
+    // -CASE N: N nonzero folds names from this line on; N zero or absent keeps upper and lower apart
     private void ProcessCaseDirective(string directive)
     {
-        if (directive.Length < _caseDirectiveMinLength || 
-            !long.TryParse(directive[_caseDirectiveValueOffset..], out var value) || 
-            value < 0)
+        var value = 0L;
+        if (directive.Trim().Length > _caseDirectiveValueOffset - 1 &&
+            (!long.TryParse(directive[(_caseDirectiveValueOffset - 1)..].Trim(), out value) || value < 0))
         {
             _parent.LogCompilerException(247);
             return;
@@ -573,6 +578,8 @@ public class SourceCode
 
         _parent.BuildOptions.CaseFolding = value != 0;
     }
+
+    internal bool CaseFoldingNow => _parent.BuildOptions.CaseFolding;
 
     #endregion
 

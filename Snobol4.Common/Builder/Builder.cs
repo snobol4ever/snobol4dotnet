@@ -97,6 +97,13 @@ public partial class Builder : IDisposable
             _timerBuild ??= new Stopwatch();
             _timerBuild.Restart();
             Lex(this);
+
+            // When -CASE changed folding part way, the lexer already folded each line's names as its
+            // line required, so the passes after it take the names as spelled; the program then runs
+            // with the folding the last -CASE left
+            var finalFolding = BuildOptions.CaseFolding;
+            if (Code.SourceLines.Any(line => line.CaseFolding != finalFolding))
+                BuildOptions.CaseFolding = false;
             Parse(this);
             ResolveSlots();
 
@@ -106,6 +113,7 @@ public partial class Builder : IDisposable
             CompileStarFunctions(tc);
             PopulateMainMetadata();
             ComputeThreadIsMsilOnly();
+            BuildOptions.CaseFolding = finalFolding;
             if (BuildOptions.WriteDll) SaveDll();
             _timerBuild.Stop();
             PrintCompilationStatistics();
@@ -295,7 +303,7 @@ public partial class Builder : IDisposable
         {
             if (line.Label.Length > 0 && !line.Compiled)
             {
-                var lbl = BuildOptions.CaseFolding ? line.Label.ToUpper() : line.Label;
+                var lbl = line.CaseFolding ? line.Label.ToUpper() : line.Label;
                 if (lbl is not "END" and not "end")
                     Execute.LabelTable[lbl] = stmtNumber;
             }
@@ -331,7 +339,7 @@ public partial class Builder : IDisposable
                 Execute.SourceStno.Add((long)(stmtNumber + 1 + line.BlankLineCount));
                 if (line.Label.Length > 0)
                 {
-                    var folded = BuildOptions.CaseFolding ? line.Label.ToUpper() : line.Label;
+                    var folded = line.CaseFolding ? line.Label.ToUpper() : line.Label;
                     if (folded is not "END")
                         Execute.LabelTable[folded] = stmtNumber;
                 }

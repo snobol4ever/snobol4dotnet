@@ -1,0 +1,39 @@
+using Snobol4.Common;
+using Test.TestLexer;
+
+namespace Test.Numeric;
+
+/// <summary>
+/// A real's string form is SPITBOL's: 15 significant digits, trailing zeros dropped, the point always
+/// present; fixed notation from 0.1 up to below 1e15, otherwise 0.ddd and a signed exponent. The
+/// expectation is sbl -b's output for the same values.
+/// </summary>
+[TestClass]
+public class RealFormat
+{
+    [TestMethod]
+    public void TEST_RealFormat_edges_of_both_forms()
+    {
+        var build = SetupTests.SetupScript("-b", @"
+        R = R ' ' 0.0015
+        R = R ' ' 0.0999
+        R = R ' ' 0.1
+        R = R ' ' 999999999999999.0
+        R = R ' ' 1.0E14
+        R = R ' ' 12345678901234567.0
+        R = R ' ' -1.0E-20
+        R = R ' ' 1.0E100
+        R = R ' ' 2.5E-300
+        R = R ' ' 0.0
+        R = R ' ' 3.0
+        R = R ' ' 1.25
+        R = R ' ' 7.0E-1
+        R = R ' ' 123.456
+        R = R ' ' 9.99999999999999E14
+        R = R ' ' 0.999999999999999
+        R = R ' ' 0.9999999999999999
+end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(" 0.15e-2 0.999e-1 0.1 999999999999999. 100000000000000. 0.123456789012346e+17 -0.1e-19 0.1e+101 0.25e-299 0. 3. 1.25 0.7 123.456 999999999999999. 0.999999999999999 1.", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
+    }
+}

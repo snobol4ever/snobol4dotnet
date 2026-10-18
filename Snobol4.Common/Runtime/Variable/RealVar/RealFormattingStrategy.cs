@@ -6,9 +6,7 @@ public sealed class RealFormattingStrategy : IFormattingStrategy
 {
     public string ToString(Var self)
     {
-        var realSelf = (RealVar)self;
-        var str = realSelf.Data.ToString(CultureInfo.CurrentCulture);
-        return RealConversionStrategy.TweakRealString(str);
+        return RealConversionStrategy.SpitbolRealString(((RealVar)self).Data);
     }
 
     public string DumpString(Var self)

@@ -300,7 +300,7 @@ end";
             Assert.AreEqual(0, build.ErrorCodeHistory.Count);
             Assert.AreEqual("-123", build.Execute!.IdentifierTable[build.FoldCase("a")].ToString());
             Assert.AreEqual("-93", build.Execute!.IdentifierTable[build.FoldCase("b")].ToString());
-            Assert.AreEqual("1.1902899496825317", build.Execute!.IdentifierTable[build.FoldCase("c")].ToString());
+            Assert.AreEqual("1.19028994968253", build.Execute!.IdentifierTable[build.FoldCase("c")].ToString());
         }
         finally { File.Delete(testFile); }
     }
@@ -1039,7 +1039,7 @@ END
         // SNOBOL4 spec (confirmed against SPITBOL sbl.min:gts27 and CSNOBOL4 lib/realst.c):
         // whole-number reals print with a trailing dot only — "1." not "1.0".
         // Values that already contain a '.' or 'E' are left as-is.
-        Assert.AreEqual("1. -1. 1. -1. 1000. 1E-05 10000. 0.0001", build.Execute!.IdentifierTable[build.FoldCase("R1")].ToString());
+        Assert.AreEqual("1. -1. 1. -1. 1000. 0.1e-4 10000. 0.1e-3", build.Execute!.IdentifierTable[build.FoldCase("R1")].ToString());
 
     }
 

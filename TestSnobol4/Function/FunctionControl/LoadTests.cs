@@ -34,7 +34,7 @@ public class LoadTests
         unload('{dll}')
 end");
         Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual("63.61725123519331", Str("r1", b));
+        Assert.AreEqual("63.6172512351933", Str("r1", b));
         Assert.AreEqual("252.81", Str("r2", b));
     }
 

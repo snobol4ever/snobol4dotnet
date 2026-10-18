@@ -25,50 +25,42 @@ public sealed class RealConversionStrategy : IConversionStrategy
 
     private static bool ConvertToString(RealVar realSelf, out Var varOut, out object valueOut)
     {
-        var strOut = realSelf.Data.ToString(CultureInfo.InvariantCulture);
-        strOut = TweakRealString(strOut);
+        var strOut = SpitbolRealString(realSelf.Data);
         varOut = new StringVar(strOut);
         valueOut = strOut;
         return true;
     }
 
     /// <summary>
-    /// Ensures that the string form of a real value is always distinguishable
-    /// from an integer by guaranteeing a decimal point or exponent marker is present.
-    ///
-    /// <para>
-    /// .NET's <c>double.ToString()</c> drops the decimal point for whole-number
-    /// values — e.g. <c>25.0</c> becomes <c>"25"</c> — which would make it
-    /// indistinguishable from the integer 25.  When neither a <c>'.'</c> nor an
-    /// <c>'E'</c> is already present we append a single trailing dot.
-    /// </para>
-    ///
-    /// <para>
-    /// The correct suffix is <c>"."</c> (trailing dot only), <b>not</b> <c>".0"</c>.
-    /// This was verified against both reference implementations:
-    /// <list type="bullet">
-    ///   <item>
-    ///     <b>CSNOBOL4</b> (<c>lib/realst.c</c>): formats with <c>%lg</c>, then
-    ///     walks the result; if no <c>'.'</c> or exponent character is found it
-    ///     appends a single <c>'.'</c>.  The source comment reads: <i>"%g format
-    ///     can print an integer for exact values — make sure we have an exponent
-    ///     or a dot."</i>
-    ///   </item>
-    ///   <item>
-    ///     <b>SPITBOL</b> (<c>sbl.min</c>, label <c>gts27</c>): after suppressing
-    ///     all trailing fractional zeros (label <c>gts24</c> loop), it unconditionally
-    ///     emits a single decimal point character.  The MINIMAL spec comment states:
-    ///     <i>"there are never any trailing zeros in the fractional part."</i>
-    ///   </item>
-    /// </list>
-    /// Both oracles therefore produce <c>"25."</c> for the real value 25.0, and the
-    /// LoadTests assertions have been updated to match.
-    /// </para>
+    /// A real's string form, as SPITBOL writes it: 15 significant digits with trailing zeros dropped
+    /// and the decimal point always present (100., 0.333333333333333); fixed notation from 0.1 up to
+    /// below 1e15, otherwise 0.ddd followed by e and the signed exponent (0.1e-2, 0.123456789012346e+17).
+    /// Measured against sbl -b on 19 values at the edges of both forms.
     /// </summary>
-    public static string TweakRealString(string str)
+    public static string SpitbolRealString(double value)
     {
-        return str.Contains('.') || str.Contains('E') ? str : str + ".";
+        if (value == 0)
+            return "0.";
+
+        var sign = value < 0 ? "-" : "";
+        var scientific = Math.Abs(value).ToString("E14", CultureInfo.InvariantCulture);   // d.ddddddddddddddE+xxx
+        var exponentAt = scientific.IndexOf('E');
+        var digits = scientific[..exponentAt].Replace(".", "").TrimEnd('0');
+        if (digits.Length == 0)
+            digits = "0";
+        var exponent = int.Parse(scientific[(exponentAt + 1)..], CultureInfo.InvariantCulture) + 1;   // value = 0.digits x 10^exponent
+
+        if (exponent is < 0 or > 15)
+            return $"{sign}0.{digits}e{(exponent >= 0 ? "+" : "-")}{Math.Abs(exponent)}";
+
+        if (exponent == 0)
+            return $"{sign}0.{digits}";
+
+        var integerPart = digits.Length >= exponent ? digits[..exponent] : digits.PadRight(exponent, '0');
+        var fractionPart = digits.Length > exponent ? digits[exponent..] : "";
+        return $"{sign}{integerPart}.{fractionPart}";
     }
+
 
     private static bool ConvertToInteger(RealVar realSelf, out Var varOut, out object valueOut)
     {

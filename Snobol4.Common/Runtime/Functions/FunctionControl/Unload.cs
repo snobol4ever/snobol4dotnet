@@ -87,6 +87,23 @@ public partial class Executive
             return;
         }
 
+        // ── A bare function name no library claims: undefine it, as SPITBOL's UNLOAD does (s_unl,
+        // dffnc); a system function cannot be (error 248), and a name with no function is no error ──
+        if (!looksLikePath)
+        {
+            var existing = FunctionTable[fnameKey];
+            if (existing is not null && existing.IsProtected)
+            {
+                LogRuntimeException(248);
+                return;
+            }
+
+            FunctionTable.Remove(fnameKey);
+            UserFunctionTable.Remove(fnameKey);
+            PredicateSuccess();
+            return;
+        }
+
         // ── .NET-native path: UNLOAD(path) ───────────────────────────────
         // Resolve path the same way Load does
         var resolvedPath = Path.IsPathRooted(arg)

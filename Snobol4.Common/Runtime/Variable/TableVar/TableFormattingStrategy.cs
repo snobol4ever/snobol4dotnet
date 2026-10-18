@@ -5,14 +5,14 @@ public sealed class TableFormattingStrategy : IFormattingStrategy
             
     public string ToString(Var self)
     {
-        return "table";
+        return "TABLE";
     }
 
                 
     public string DumpString(Var self)
     {
         var tableSelf = (TableVar)self;
-        return $"table({tableSelf.Count})";
+        return $"TABLE({tableSelf.Count})";
     }
 
                             public string DebugVar(Var self)

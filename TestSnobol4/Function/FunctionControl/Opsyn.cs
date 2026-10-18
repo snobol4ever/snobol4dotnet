@@ -54,11 +54,11 @@ public class Opsyn
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(6, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("r1")]).Data);
-        Assert.AreEqual("string", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r2")]).Data);
+        Assert.AreEqual("STRING", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r2")]).Data);
         Assert.AreEqual(6, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("r3")]).Data);
-        Assert.AreEqual("string", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r4")]).Data);
+        Assert.AreEqual("STRING", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r4")]).Data);
         Assert.AreEqual(6, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("r5")]).Data);
-        Assert.AreEqual("string", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r6")]).Data);
+        Assert.AreEqual("STRING", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r6")]).Data);
     }
 
     [TestMethod]

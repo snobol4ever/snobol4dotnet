@@ -147,7 +147,7 @@ public class NameConversionStrategy : IConversionStrategy
 
     public string GetDataType(Var self)
     {
-        return "name";
+        return "NAME";
     }
 
 

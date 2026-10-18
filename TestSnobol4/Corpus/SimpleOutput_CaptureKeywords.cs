@@ -235,9 +235,9 @@ end";
         var build = Run(s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         // DOTNET DATATYPE returns lowercase type names
-        Assert.AreEqual("string",  ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
-        Assert.AreEqual("integer", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R2")]).Data);
-        Assert.AreEqual("real",    ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R3")]).Data);
+        Assert.AreEqual("STRING",  ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
+        Assert.AreEqual("INTEGER", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R2")]).Data);
+        Assert.AreEqual("REAL",    ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R3")]).Data);
     }
 
     [TestMethod]

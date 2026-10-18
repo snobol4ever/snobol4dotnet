@@ -81,8 +81,8 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        // SPITBOL MINIMAL folds DATA type names to lowercase (flstg at sdat1 in sbl.min)
-        Assert.AreEqual("product", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
+        // Under case folding the type name is folded to upper case, as sbl -b answers
+        Assert.AreEqual("PRODUCT", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
     }
 
     [TestMethod]

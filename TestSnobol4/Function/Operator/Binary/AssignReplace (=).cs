@@ -773,7 +773,7 @@ end
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("pattern", build.Execute!.IdentifierTable[build.FoldCase("c")].ToString());
+        Assert.AreEqual("PATTERN", build.Execute!.IdentifierTable[build.FoldCase("c")].ToString());
     }
 
 
@@ -877,7 +877,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("pattern", build.Execute!.IdentifierTable[build.FoldCase("a")].ToString());
+        Assert.AreEqual("PATTERN", build.Execute!.IdentifierTable[build.FoldCase("a")].ToString());
     }
 
 
@@ -941,7 +941,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("array", build.Execute!.IdentifierTable[build.FoldCase("a")].ToString());
+        Assert.AreEqual("ARRAY", build.Execute!.IdentifierTable[build.FoldCase("a")].ToString());
     }
 
     [TestMethod]
@@ -971,7 +971,7 @@ end
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("table", build.Execute!.IdentifierTable[build.FoldCase("a")].ToString());
+        Assert.AreEqual("TABLE", build.Execute!.IdentifierTable[build.FoldCase("a")].ToString());
     }
 
     [TestMethod]
@@ -997,7 +997,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("pattern", build.Execute!.IdentifierTable[build.FoldCase("a")].ToString());
+        Assert.AreEqual("PATTERN", build.Execute!.IdentifierTable[build.FoldCase("a")].ToString());
     }
 
     [TestMethod]

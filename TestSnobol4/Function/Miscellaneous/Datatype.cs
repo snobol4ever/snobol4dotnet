@@ -16,7 +16,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("array", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
+        Assert.AreEqual("ARRAY", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
     }
 
     [TestMethod]
@@ -30,7 +30,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("array", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
+        Assert.AreEqual("ARRAY", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
     }
 
     [TestMethod]
@@ -44,7 +44,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("string", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
+        Assert.AreEqual("STRING", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
     }
 
     [TestMethod]
@@ -57,7 +57,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("code", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
+        Assert.AreEqual("CODE", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
     }
 
     [TestMethod]
@@ -70,7 +70,7 @@ end";
         var directives = "-b -cs";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("expression", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
+        Assert.AreEqual("EXPRESSION", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
     }
 
     [TestMethod]
@@ -83,7 +83,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("integer", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
+        Assert.AreEqual("INTEGER", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
     }
 
     [TestMethod]
@@ -96,7 +96,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("name", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
+        Assert.AreEqual("NAME", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
     }
 
     [TestMethod]
@@ -109,7 +109,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("pattern", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
+        Assert.AreEqual("PATTERN", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
     }
 
     [TestMethod]
@@ -122,7 +122,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("real", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
+        Assert.AreEqual("REAL", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
     }
 
     [TestMethod]
@@ -135,7 +135,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("string", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
+        Assert.AreEqual("STRING", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
     }
 
     [TestMethod]
@@ -148,7 +148,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("table", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
+        Assert.AreEqual("TABLE", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
     }
 
     [TestMethod]
@@ -162,7 +162,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("table", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
+        Assert.AreEqual("TABLE", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
     }
 
     [TestMethod]
@@ -176,7 +176,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("integer", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
+        Assert.AreEqual("INTEGER", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
     }
 
     [TestMethod]
@@ -191,7 +191,21 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        // SPITBOL MINIMAL folds DATA type names to lowercase (flstg at sdat1 in sbl.min)
-        Assert.AreEqual("product", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
+        // Under case folding the type name is folded to upper case, as sbl -b answers
+        Assert.AreEqual("PRODUCT", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
+    }
+
+    [TestMethod]
+    public void TEST_DataType_UserDefinedData_keeps_its_spelling_without_case_folding()
+    {
+        // sbl -bf answers node and Pair; sbl -b answers NODE and PAIR
+        var s = @"
+        DATA('node(val,nxt)')
+        DATA('Pair(a,b)')
+        R = DATATYPE(node(1,2)) ' ' DATATYPE(Pair(1,2)) ' ' DATATYPE(1)
+END";
+        var build = SetupTests.SetupScript("-b -f", s);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("node Pair INTEGER", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
     }
 }

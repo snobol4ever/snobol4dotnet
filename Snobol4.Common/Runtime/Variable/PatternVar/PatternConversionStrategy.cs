@@ -23,7 +23,7 @@ public class PatternConversionStrategy : IConversionStrategy
 
     public string GetDataType(Var self)
     {
-        return "pattern";
+        return "PATTERN";
     }
 
 

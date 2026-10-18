@@ -5,7 +5,7 @@ public sealed class ExpressionFormattingStrategy : IFormattingStrategy
 
     public string ToString(Var self)
     {
-        return "expression";
+        return "EXPRESSION";
     }
 
 

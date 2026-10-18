@@ -40,7 +40,7 @@ public class LoadObjectLifecycleTests
         result = DATATYPE(a)
 end");
         Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual("array", Str("result", b));
+        Assert.AreEqual("ARRAY", Str("result", b));
     }
 
     [TestMethod]
@@ -164,7 +164,7 @@ end");
         result = DATATYPE(t)
 end");
         Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual("table", Str("result", b));
+        Assert.AreEqual("TABLE", Str("result", b));
     }
 
     // ── TABLE: TablePut / TableGet ────────────────────────────────────────
@@ -289,7 +289,7 @@ end");
         result = DATATYPE(p)
 end");
         Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual("array", Str("result", b));
+        Assert.AreEqual("ARRAY", Str("result", b));
     }
 
     [TestMethod]
@@ -381,7 +381,7 @@ end");
         Assert.AreEqual(0, b.ErrorCodeHistory.Count);
         // This passes only if CallReflectFunction preserves the ArrayVar
         Assert.AreNotEqual("string", Str("result", b));
-        Assert.AreEqual("array", Str("result", b));
+        Assert.AreEqual("ARRAY", Str("result", b));
     }
 
     [TestMethod]
@@ -394,7 +394,7 @@ end");
 end");
         Assert.AreEqual(0, b.ErrorCodeHistory.Count);
         Assert.AreNotEqual("string", Str("result", b));
-        Assert.AreEqual("table", Str("result", b));
+        Assert.AreEqual("TABLE", Str("result", b));
     }
 
     // ── Full lifecycle: create → populate → use → clear ───────────────────

@@ -358,7 +358,7 @@ END";
         OUTPUT = DATATYPE(N)
         OUTPUT = N
 END";
-        Assert.AreEqual("string"+ Environment.NewLine + "255", SetupTests.RunWithInput(s));
+        Assert.AreEqual("STRING"+ Environment.NewLine + "255", SetupTests.RunWithInput(s));
     }
 
     // ── OPSYN alias (Gimpel REDEFINE.sno idiom) ─────────────────────────────

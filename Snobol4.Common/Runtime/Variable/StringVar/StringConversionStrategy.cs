@@ -109,7 +109,7 @@ public class StringConversionStrategy : IConversionStrategy
 
     public string GetDataType(Var self)
     {
-        return "string";
+        return "STRING";
     }
 
 

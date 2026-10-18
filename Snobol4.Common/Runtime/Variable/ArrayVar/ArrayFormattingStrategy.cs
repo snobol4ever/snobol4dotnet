@@ -2,7 +2,7 @@
 
 public class ArrayFormattingStrategy : IFormattingStrategy
 {
-    private const string _arrayTypeName = "array";
+    private const string _arrayTypeName = "ARRAY";
     private const string _anonymousSymbol = "<anonymous>";
 
 

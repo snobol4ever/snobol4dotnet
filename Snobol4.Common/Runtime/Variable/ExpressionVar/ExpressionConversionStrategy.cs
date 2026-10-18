@@ -21,7 +21,7 @@ public sealed class ExpressionConversionStrategy : IConversionStrategy
 
     public string GetDataType(Var self)
     {
-        return "expression";
+        return "EXPRESSION";
     }
 
 

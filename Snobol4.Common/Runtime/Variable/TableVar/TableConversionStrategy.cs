@@ -75,7 +75,7 @@ public sealed class TableConversionStrategy : IConversionStrategy
 
     public string GetDataType(Var self)
     {
-        return "table";
+        return "TABLE";
     }
 
 

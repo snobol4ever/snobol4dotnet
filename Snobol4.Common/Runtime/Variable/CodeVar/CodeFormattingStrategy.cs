@@ -2,7 +2,7 @@
 
 public sealed class CodeFormattingStrategy : IFormattingStrategy
 {
-    private const string _codeTypeString = "code";
+    private const string _codeTypeString = "CODE";
 
 
     public string ToString(Var self)

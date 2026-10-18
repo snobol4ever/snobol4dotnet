@@ -2,7 +2,7 @@
 
 public sealed class CodeConversionStrategy : IConversionStrategy
 {
-    private const string _codeTypeString = "code";
+    private const string _codeTypeString = "CODE";
 
 
     public bool TryConvert(Var self, Executive.VarType targetType, out Var varOut, out object valueOut, Executive exec)

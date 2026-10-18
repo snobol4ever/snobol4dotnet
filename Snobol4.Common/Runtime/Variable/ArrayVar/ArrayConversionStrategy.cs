@@ -76,7 +76,7 @@ public class ArrayConversionStrategy : IConversionStrategy
 
     public string GetDataType(Var self)
     {
-        return "array";
+        return "ARRAY";
     }
 
     public object GetTableKey(Var self)

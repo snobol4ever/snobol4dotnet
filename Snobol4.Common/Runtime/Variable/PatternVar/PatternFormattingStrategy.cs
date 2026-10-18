@@ -4,7 +4,7 @@ public class PatternFormattingStrategy : IFormattingStrategy
 {
     public string ToString(Var self)
     {
-        return "pattern";
+        return "PATTERN";
     }
 
     public string DumpString(Var self)

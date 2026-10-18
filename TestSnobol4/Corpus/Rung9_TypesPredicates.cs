@@ -62,19 +62,18 @@ end";
     [TestMethod]
     public void TEST_Corpus_911_datatype()
     {
-        // DOTNET DATATYPE returns lowercase ('string', 'integer', 'real')
-        // Adjust corpus program to use lowercase comparisons
+        // DATATYPE answers in upper case, as SPITBOL does
         var s = @"
-        differ(datatype('hello'), 'string')                   :f(e001)
+        differ(datatype('hello'), 'STRING')                   :f(e001)
         output = 'FAIL 911/001: string literal datatype' :(end)
 e001
-        differ(datatype(12), 'integer')                   :f(e002)
+        differ(datatype(12), 'INTEGER')                   :f(e002)
         output = 'FAIL 911/002: integer datatype'       :(end)
 e002
-        differ(datatype(1.33), 'real')                   :f(e003)
+        differ(datatype(1.33), 'REAL')                   :f(e003)
         output = 'FAIL 911/003: real datatype'          :(end)
 e003
-        differ(datatype(''), 'string')                   :f(e004)
+        differ(datatype(''), 'STRING')                   :f(e004)
         output = 'FAIL 911/004: null is string'         :(end)
 e004
         output = 'PASS 911_datatype (4/4)'

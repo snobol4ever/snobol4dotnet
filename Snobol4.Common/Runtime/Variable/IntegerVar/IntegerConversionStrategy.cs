@@ -93,7 +93,7 @@ public sealed class IntegerConversionStrategy : IConversionStrategy
 
     public string GetDataType(Var self)
     {
-        return "integer";
+        return "INTEGER";
     }
 
 

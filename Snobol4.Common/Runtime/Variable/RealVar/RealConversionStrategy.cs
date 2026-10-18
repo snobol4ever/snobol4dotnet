@@ -144,7 +144,7 @@ public sealed class RealConversionStrategy : IConversionStrategy
 
     public string GetDataType(Var self)
     {
-        return "real";
+        return "REAL";
     }
 
 

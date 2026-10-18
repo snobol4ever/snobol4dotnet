@@ -284,8 +284,8 @@ end";
         var build = Run(s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         // DOTNET DATATYPE: user-defined types are UPPERCASE, builtins are lowercase
-        // SPITBOL MINIMAL folds DATA type names to lowercase (flstg at sdat1 in sbl.min)
-        Assert.AreEqual("node",  ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
+        // Under case folding the type name is folded to upper case, as sbl -b answers
+        Assert.AreEqual("NODE",  ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
         Assert.AreEqual("hello", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R2")]).Data);
     }
 }

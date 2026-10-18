@@ -9,7 +9,7 @@ SNOBOL4.NET compiles and runs SNOBOL4 with the SPITBOL extensions in C# on .NET 
 ```bash
 dotnet build Snobol4.sln                                   # whole solution, Debug
 dotnet build Snobol4/Snobol4.csproj -c Release             # just the console compiler
-dotnet test  TestSnobol4/TestSnobol4.csproj                # all unit tests (MSTest)
+bash scripts/test_in_batches.sh                            # all unit tests (MSTest), in batches of 100
 
 # one class, one method, or a name pattern
 dotnet test TestSnobol4/TestSnobol4.csproj --filter "FullyQualifiedName~Test.Pattern.Abort"
@@ -23,6 +23,7 @@ dotnet Snobol4/bin/Release/net10.0/Snobol4.dll prog.dll      # runs a saved prog
 bash build_native.sh                                       # rebuild the committed native .so fixtures (gcc)
 ```
 
+- **Run the suite in batches of 100, never in one `dotnet test` of all 2,500 tests.** Lon, 2026-10-18: *"You better be running tests in batches of 100."* A whole-suite run intermittently hangs or crashes its test host and loses every result. `scripts/test_in_batches.sh` runs each batch in its own bounded host and names any batch that did not complete.
 - `Snobol4W` targets `net10.0-windows` and sets `EnableWindowsTargeting` in its own csproj, so the solution builds on Linux without extra flags.
 - There is no separate linter. `.editorconfig` holds the style rules: file-scoped namespaces, `_camelCase` private fields, `using` outside the namespace.
 - The bridge smokes in `scripts/test_smoke_dot_bridge*.sh` run the Release `Snobol4.dll` against the `beauty` demo. Their defaults (`SNO4_REPO=/home/claude/snobol4dotnet`, `CORPUS=/home/claude/corpus`, `BEAUTY=$CORPUS/programs/snobol4/beauty`) usually need overriding. In the current corpus layout, beauty lives at `corpus/demos/snobol4/beauty`.
@@ -75,7 +76,7 @@ The old Roslyn C#-codegen engine is gone, even though `PR_DESCRIPTION.md`, some 
 
 Don't take these as truth. Measure instead.
 
-- `BUILDING.md` says xUnit, about 1,876 tests and a required `-p:EnableWindowsTargeting=true`. The suite is MSTest with more than 2,000 tests, and the flag isn't needed.
+- `BUILDING.md` says xUnit, about 1,876 tests and a required `-p:EnableWindowsTargeting=true`. The suite is MSTest with 2,510 tests, and the flag isn't needed.
 - `README.jeff.md` claims "zero failures".
 - `PR_DESCRIPTION.md` describes a Roslyn fallback switch that no longer exists.
 - `benchmarks/Program.cs` looks for `corpus/benchmarks/<file>.sno` and ignores the `CORPUS` variable that `BUILDING.md` documents. The current corpus keeps these files under `benchmarks/snobol4/`.

@@ -138,4 +138,26 @@ end";
         Assert.AreEqual(4L, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("p1")]).Data);
         Assert.AreEqual(6L, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("p2")]).Data);
     }
+
+    [TestMethod]
+    public void TEST_At_deferred_and_element_targets()
+    {
+        // sbl -b: @*V with V = .P sets V (3), @*$('CUR' N) sets CUR2 (4), @*F() with F NRETURNing .Q sets
+        // Q (3), @*A<2> and @A<1> set the elements (2, 4)
+        var build = SetupTests.SetupScript("-b", @"
+        DEFINE('F()')                  :(EF)
+F       F = .Q                         :(NRETURN)
+EF      V = .P
+        'ABCDE' 'BC' @*V
+        N = 2
+        'ABCDE' 'CD' @*$('CUR' N)
+        'ABCDE' 'BC' @*F()
+        A = ARRAY(3)
+        'ABCDE' 'B' @*A<2>
+        'ABCDE' 'D' @A<1>
+        R = V ' ' CUR2 ' ' Q ' ' A<2> ' ' A<1>
+end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("3 4 3 2 4", build.Execute!.IdentifierTable["R"].ToString());
+    }
 }

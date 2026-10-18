@@ -38,6 +38,19 @@ internal class AtSign : TerminalPattern
         // named variable. Write directly to IdentifierTable to avoid SystemStack
         // side-effects from the general Assign() path that corrupt pattern matching.
         var symbol = _assignee is NameVar nv ? nv.Pointer : _assignee.Symbol;
+
+        // An element (@A<1>) or a deferred target (@*V, @*$('CUR' N), @*A<2>, @*F() with an NRETURN) is
+        // assigned as any target is, as SPITBOL does; the assignment's own stack effects are undone
+        if (_assignee is ExpressionVar || _assignee.Collection is not null)
+        {
+            var depth = _exec.SystemStack.Count;
+            _exec.Assign([_assignee, new IntegerVar(scan.CursorPosition)]);
+            var failed = _exec.Failure;
+            while (_exec.SystemStack.Count > depth)
+                _exec.SystemStack.Pop();
+            return failed ? MatchResult.Failure(scan) : MatchResult.Success(scan);
+        }
+
         if (symbol != "")
         {
             var cursorVar = new IntegerVar(scan.CursorPosition) { Symbol = symbol };

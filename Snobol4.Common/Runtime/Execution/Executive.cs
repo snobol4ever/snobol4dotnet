@@ -330,6 +330,8 @@ public partial class Executive
         AmpLowerCaseLetters = "abcdefghijklmnopqrstuvwxyz";
         AmpUpperCaseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+        // SPITBOL's predefined pattern variables: ABORT, ARB, BAL, FAIL, FENCE, REM, SUCCEED.
+        // NULL is not one of them: it is an ordinary variable whose value is the null string.
         IdentifierTable = new IdentifierTable(this)
         {
             {"abort", new PatternVar(new AbortPattern(), "abort", false, true)},
@@ -338,7 +340,6 @@ public partial class Executive
             {"fail", new PatternVar(new FailPattern(), "fail", false, true)},
             {"fence", new PatternVar(new AlternatePattern(new NullPattern(), new AbortPattern()), "fence", false, true)},
             {"input", new StringVar("","input")},
-            {"null", new PatternVar(new NullPattern(),"null", false, true)},
             {"output", new StringVar("","output")},
             {"rem", new PatternVar(new RemPattern(), "rem", false, true)},
             {"succeed", new PatternVar(new SucceedPattern(), "succeed", false, true)},
@@ -350,7 +351,6 @@ public partial class Executive
             {"FAIL", new PatternVar(new FailPattern(), "FAIL", false, true)},
             {"FENCE", new PatternVar(new AlternatePattern(new NullPattern(), new AbortPattern()), "FENCE", false, true)},
             {"INPUT", new StringVar("","INPUT")},
-            {"NULL", new PatternVar(new NullPattern(),"NULL", false, true)},
             {"OUTPUT", new StringVar("","OUTPUT")},
             {"REM", new PatternVar(new RemPattern(), "REM", false, true)},
             {"SUCCEED", new PatternVar(new SucceedPattern(), "SUCCEED", false, true)},

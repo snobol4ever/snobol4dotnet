@@ -729,6 +729,7 @@ d", SetupTests.RunWithInput(s));
     }
 
     [TestMethod]
+    [Timeout(30000)]   // atn loops under snobol4dotnet after its 438th line (sbl: 664 lines in 10 ms); a hang fails here, not its batch
     public void TEST_Csnobol4_atn()
     {
         var s = @"*-LIST LEFT

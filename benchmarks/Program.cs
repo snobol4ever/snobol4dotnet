@@ -40,8 +40,6 @@ string benchDir = FindCorpus();
 
 // ── Benchmark table ───────────────────────────────────────────────────────────
 
-record BenchEntry(string Name, string File, string ResultVar, int Reps = 5, int Warmup = 1);
-
 var benchmarks = new List<BenchEntry>
 {
     // Core workloads — mirror of BenchmarkSuite2
@@ -142,3 +140,7 @@ foreach (var entry in benchmarks)
 
 Console.WriteLine(new string('-', 76));
 Console.WriteLine("Done.");
+
+// ── Types (C# requires them after the top-level statements) ──────────────────
+
+record BenchEntry(string Name, string File, string ResultVar, int Reps = 5, int Warmup = 1);

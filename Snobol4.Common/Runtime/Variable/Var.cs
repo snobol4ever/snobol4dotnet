@@ -205,8 +205,8 @@ public abstract class Var : IEquatable<Var>
 
     internal static bool ToInteger(ReadOnlySpan<char> inString, out long integerOut)
     {
-        // Convert empty string to 0 (fast path)
-        if (inString.IsEmpty)
+        // The null string, or one of blanks and tabs only, is 0, as in SPITBOL
+        if (inString.Trim(" \t").IsEmpty)
         {
             integerOut = 0;
             return true;
@@ -218,8 +218,8 @@ public abstract class Var : IEquatable<Var>
 
     internal static bool ToReal(ReadOnlySpan<char> inString, out double realOut)
     {
-        // Convert empty string to 0.0 (fast path)
-        if (inString.IsEmpty)
+        // The null string, or one of blanks and tabs only, is 0.0, as in SPITBOL
+        if (inString.Trim(" \t").IsEmpty)
         {
             realOut = 0.0;
             return true;

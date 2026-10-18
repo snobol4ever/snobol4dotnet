@@ -1,4 +1,4 @@
-using Snobol4.Common;
+﻿using Snobol4.Common;
 using Test.TestLexer;
 
 namespace Test.Miscellaneous;
@@ -1812,6 +1812,39 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("success", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("d")]).Data);
+    }
+
+    #endregion
+
+    #region The type argument, and blank strings (expected results are SPITBOL's, sbl -b; Budne's space)
+
+    private static string Result(string body)
+    {
+        var build = SetupTests.SetupScript("-b", body + "\nend");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        return ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r")]).Data;
+    }
+
+    [TestMethod]
+    public void TEST_Convert_the_type_may_be_a_name()
+    {
+        Assert.AreEqual("0 0. 12", Result(@"
+        r = convert(' ', .integer) ' ' convert(' ', .real) ' ' convert('12', .integer)"));
+    }
+
+    [TestMethod]
+    public void TEST_Convert_a_type_that_names_no_datatype_fails()
+    {
+        Assert.AreEqual("f f", Result(@"
+        r = (convert('12', 'foo'), 'f') ' ' (convert('12', 3), 'f')"));
+    }
+
+    [TestMethod]
+    public void TEST_Convert_a_string_of_blanks_and_tabs_is_zero()
+    {
+        Assert.AreEqual("1 1 1.5 yes", Result(@"
+        t = char(9)
+        r = (' ' + 1) ' ' (t + 1) ' ' (' ' + 1.5) ' ' integer('  ') 'yes'"));
     }
 
     #endregion

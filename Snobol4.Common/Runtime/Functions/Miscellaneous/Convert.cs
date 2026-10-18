@@ -33,7 +33,20 @@ public partial class Executive
     public void Convert(List<Var> arguments)
     {
         var varIn = arguments[0];
-        var vOutType = TranslateType[((StringVar)arguments[1]).Data];
+
+        // The type is any value with a string form -- 'INTEGER', the name .INTEGER, even 3 -- and
+        // a string that names no datatype fails the call, as in SPITBOL
+        if (!arguments[1].Convert(VarType.STRING, out _, out var typeName, this))
+        {
+            LogRuntimeException(74);
+            return;
+        }
+
+        if (!TranslateType.TryGetValue((string)typeName, out var vOutType))
+        {
+            NonExceptionFailure();
+            return;
+        }
 
         if (!varIn.Convert(vOutType, out var varOut, out _, this))
         {

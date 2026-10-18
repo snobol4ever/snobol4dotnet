@@ -106,4 +106,15 @@ L1      V = F(3)
         OUTPUT = V ' ' &TRACE
 END").Replace("\r\n", "\n"));
     }
+
+    [TestMethod]
+    public void TEST_Trace_Value_fires_for_a_cursor_assignment()
+    {
+        // sbl -b: @C in a match is an assignment to C and its VALUE trace prints
+        Assert.AreEqual("****3*******  C = 4\n4", SetupTests.RunWithInput(@"        &TRACE = 10
+        TRACE('C')
+        'WORLD' 'RL' @C
+        OUTPUT = C
+END").Replace("\r\n", "\n"));
+    }
 }

@@ -212,6 +212,9 @@ public partial class Executive
         }
     }
 
+    // &TRIM nonzero removes a record's trailing blanks and tabs, and nothing else, as SPITBOL does
+    internal static string TrimRecord(string record) => record.TrimEnd(' ', '\t');
+
     private Var InputArgument(Var arg)
     {
         string? inputLine;
@@ -240,7 +243,7 @@ public partial class Executive
         }
 
         if (inputLine is not null)
-            return new StringVar(inputLine);
+            return new StringVar(AmpTrim != 0 ? TrimRecord(inputLine) : inputLine);
 
         NonExceptionFailure();
         inputLine = "";

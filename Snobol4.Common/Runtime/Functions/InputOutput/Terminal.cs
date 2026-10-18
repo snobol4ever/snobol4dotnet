@@ -11,7 +11,7 @@ public partial class Executive
             return StringVar.Null();
         
         if (AmpTrim != 0)
-            s = s.TrimEnd();
+            s = TrimRecord(s);
 
         return new StringVar(s, "terminal", true);
 

@@ -27,11 +27,15 @@ public partial class Executive
 
         var skipList = valuesArray.ToList();
 
+        // The null value goes in under any input or output association, as SPITBOL stores it at the end
+        // of the variable's trap chain (s_clr): OUTPUT still writes after CLEAR(), and nothing is written
         foreach (var kvp in IdentifierTable.Where(kvp =>
-                     !skipList.Contains(kvp.Key) && kvp.Key[0] != '&' && !kvp.Value.IsReadOnly))
+                     !skipList.Contains(kvp.Key) && kvp.Key[0] != '&' && !kvp.Value.IsReadOnly).ToList())
         {
-            IdentifierTable[kvp.Key] = StringVar.Null();
-            IdentifierTable[kvp.Key].Symbol = kvp.Key;
+            var cleared = StringVar.Null();
+            cleared.InputChannel = kvp.Value.InputChannel;
+            cleared.OutputChannel = kvp.Value.OutputChannel;
+            IdentifierTable[kvp.Key] = cleared;
         }
 
         SystemStack.Push(StringVar.Null());

@@ -104,8 +104,7 @@ public partial class Executive
 
     internal void TraceIdentifierAccess(string name)
     {
-
-        if (name[0] == '&')
+        if (name.Length == 0 || name[0] == '&')
             return;
 
         if (AmpTrace <= 0)

@@ -117,4 +117,17 @@ END").Replace("\r\n", "\n"));
         OUTPUT = C
 END").Replace("\r\n", "\n"));
     }
+
+    [TestMethod]
+    public void TEST_Trace_Access_check_takes_an_empty_name()
+    {
+        // Growing the variable slot array reads every slot through the identifier table, an empty-named one
+        // included, and the access-trace check indexed name[0]; snoflake's eliza-modernized crashed there
+        // (IndexOutOfRangeException) where sbl -bf runs to the end
+        var build = SetupTests.SetupScript("-b", @"
+        X = 1
+end");
+        build.Execute!.TraceIdentifierAccess("");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+    }
 }

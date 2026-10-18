@@ -1462,6 +1462,9 @@ public partial class Lexer
         return lexBody[^1].TokenType switch
         {
             Token.Type.SPACE or
+            Token.Type.COMMA or
+            Token.Type.L_SQUARE or
+            Token.Type.L_ANGLE or
             Token.Type.L_PAREN_CHOICE or
             Token.Type.L_PAREN_FUNCTION or
             Token.Type.UNARY_OPERATOR or

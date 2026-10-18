@@ -372,5 +372,16 @@ end
         Assert.AreEqual("success", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("result")]).Data);
     }
 
+    [TestMethod]
+    public void TEST_Array_a_parenthesised_subscript_is_grouping()
+    {
+        // A[(I + N) / 2], as Shafto's HSORT writes it: the ( after [, < or a comma groups, it does not call
+        // a function; sbl -b answers 7 7 7 aa, and snobol4dotnet crashed compiling it (Stack empty)
+        var build = SetupTests.SetupScript("-b", @"
+        A = ARRAY('3,3',7)
+        R = A[(1 + 2) / 2, 1] ' ' A<1,(1)> ' ' A[(1),(2)] ' ' DUPL('a',(2))
+end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("7 7 7 aa", build.Execute!.IdentifierTable["R"].ToString());
+    }
 }
-

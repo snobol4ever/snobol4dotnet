@@ -87,6 +87,18 @@ public partial class Executive
         }
 
         var leftVar = arguments[0];  // Destination Var
+
+        // A NAME is an indirect target only when this statement produced it (an NRETURN result); a
+        // variable that merely holds a NAME is itself the target, as in SPITBOL (R = .ONE, then
+        // R = R ' ' .TWO assigns R, not ONE)
+        if (leftVar is NameVar heldName && heldName.Symbol != "" && heldName.LvalueMark != StatementSerial)
+        {
+            leftVar = new StringVar("", heldName.Symbol)
+            {
+                InputChannel = heldName.InputChannel,
+                OutputChannel = heldName.OutputChannel
+            };
+        }
         var rightVar = arguments[1]; // Source Var
 
         // If source has input channels, get input now

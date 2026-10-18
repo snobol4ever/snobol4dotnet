@@ -288,6 +288,9 @@ public partial class Executive
         // GOAL-NET-BEAUTY-SELF S-2-bridge-7-fullscan.
         MonitorIpc.EmitReturn(functionName, rtnTypeStr);
 
+        // A NAME an NRETURN hands back is an assignment target in this statement (F() = V)
+        if (returnVar is NameVar)
+            returnVar.LvalueMark = StatementSerial;
         SystemStack.Push(returnVar);
         IdentifierTable[returnVarName] = StringVar.Null(returnVarName); // Clear function name variable
         AmpFunctionLevel--;

@@ -215,6 +215,8 @@ public partial class Executive
     // &TRIM nonzero removes a record's trailing blanks and tabs, and nothing else, as SPITBOL does
     internal static string TrimRecord(string record) => record.TrimEnd(' ', '\t');
 
+    private int _lineAfterEnd;
+
     private Var InputArgument(Var arg)
     {
         string? inputLine;
@@ -223,6 +225,12 @@ public partial class Executive
         {
             case "":
                 return arg;
+
+            case "+console-input" when Parent.BuildOptions.InputAfterEndStatement:
+                // -r: INPUT reads the source lines after END, and fails after the last, never
+                // falling through to stdin, as SPITBOL does
+                inputLine = _lineAfterEnd < Parent.LinesAfterEnd.Count ? Parent.LinesAfterEnd[_lineAfterEnd++] : null;
+                break;
 
             case "+console-input":
             case "+terminal-input":

@@ -24,6 +24,7 @@ public partial class Builder : IDisposable
     public List<string> MessageHistory = new(16);
 
     internal List<string> IncludeList = new(8);
+    internal List<string> LinesAfterEnd = [];   // the source lines after END, which -r gives to INPUT
     internal int StatementCount;
     internal string EntryLabel;
     internal StreamWriter? ListFileWriter;

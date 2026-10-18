@@ -160,6 +160,13 @@ public class SourceCode
             
             ProcessLineWithSubLines(currentLine, pathName);
         }
+
+        // The lines after END are data: -r gives them to INPUT, as in SPITBOL
+        if (EndFound && _includeDepth == 0 && _parent.LinesAfterEnd.Count == 0)
+        {
+            while (reader.ReadLine() is { } afterEnd)
+                _parent.LinesAfterEnd.Add(afterEnd);
+        }
     }
 
     /// <summary>

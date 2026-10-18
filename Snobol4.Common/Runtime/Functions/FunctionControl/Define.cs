@@ -296,8 +296,8 @@ public partial class Executive
         MonitorIpc.EmitReturn(functionName, rtnTypeStr);
 
         // A NAME an NRETURN hands back gives the named variable's value, which the statement may also
-        // assign (F() = V) or name (.F()), as in SPITBOL
-        SystemStack.Push(returnVar is NameVar returnedName ? NameReturnValue(returnedName) : returnVar);
+        // assign (F() = V) or name (.F()), as in SPITBOL; a RETURN of a NAME gives the NAME itself
+        SystemStack.Push(rtnTypeStr == "NRETURN" && returnVar is NameVar returnedName ? NameReturnValue(returnedName) : returnVar);
         AmpFunctionLevel--;
 
         // &FNCLEVEL and then RETURN traces, in SPITBOL's order (retrn: ktrex first), at the returning

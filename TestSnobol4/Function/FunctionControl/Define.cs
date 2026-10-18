@@ -242,4 +242,19 @@ end");
         Assert.AreEqual("set  NAME", build.Execute!.IdentifierTable["S"].ToString());
         Assert.AreEqual("two two", build.Execute!.IdentifierTable["T"].ToString());
     }
+
+    [TestMethod]
+    public void TEST_Define_a_return_of_a_name_gives_the_name()
+    {
+        // sbl -b (rung user_function_datatype_1): G = .DUMMY :(RETURN) gives the NAME, printed DUMMY
+        var build = SetupTests.SetupScript("-b", @"
+        DEFINE('G()')                  :(GEND)
+G       G = .DUMMY                     :(RETURN)
+GEND    DUMMY = 'VAL'
+        RV = G()
+        R = RV ' ' DATATYPE(RV)
+end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("DUMMY NAME", build.Execute!.IdentifierTable["R"].ToString());
+    }
 }

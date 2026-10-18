@@ -19,8 +19,14 @@ public class StringConversionStrategy : IConversionStrategy
                 return true;
 
             case Executive.VarType.INTEGER:
+                // A string that reads as a real converts too, truncated, as SPITBOL converts
+                // CHAR('65.0') and CONVERT('6.5E1', 'INTEGER'); the INTEGER predicate stays strict
                 if (!Var.ToInteger(stringSelf.Data, out var intValue))
-                    return false;
+                {
+                    if (!Var.ToReal(stringSelf.Data, out var asReal))
+                        return false;
+                    return new RealVar(asReal).Convert(Executive.VarType.INTEGER, out varOut, out valueOut, exec);
+                }
                 varOut = new IntegerVar(intValue);
                 valueOut = intValue;
                 return true;

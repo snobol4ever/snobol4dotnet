@@ -124,11 +124,16 @@ public partial class Executive
                 return;
             }
 
-            // Otherwise, right side must be an integer
-            if (rightVar is not IntegerVar integerVar)
+            // Otherwise, right side must convert to an integer: a real or a numeric string
+            // does, truncated, as in SPITBOL (&TRIM = 1.0, &TRIM = '1.0')
+            if (rightVar is not IntegerVar)
             {
-                LogRuntimeException(208);
-                return;
+                if (!rightVar.Convert(VarType.INTEGER, out var asInteger, out _, this))
+                {
+                    LogRuntimeException(208);
+                    return;
+                }
+                rightVar = asInteger;
             }
 
             if (KeywordTable.TryGetValue(leftVar.Symbol, out var handler))

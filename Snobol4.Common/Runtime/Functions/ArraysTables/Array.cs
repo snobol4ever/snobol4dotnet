@@ -10,7 +10,11 @@ public partial class Executive
 
                     public void CreateArray(List<Var> arguments)
     {
-        if (!arguments[0].Convert(VarType.STRING, out _, out var prototypeString, this))
+        // A real bound is an integer one, truncated: ARRAY(3.5) has three elements, as in SPITBOL
+        var prototype = arguments[0] is RealVar && arguments[0].Convert(VarType.INTEGER, out var bound, out _, this)
+            ? bound
+            : arguments[0];
+        if (!prototype.Convert(VarType.STRING, out _, out var prototypeString, this))
         {
             LogRuntimeException(64);
             return;

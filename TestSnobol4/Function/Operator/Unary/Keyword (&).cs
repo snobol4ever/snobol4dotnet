@@ -86,10 +86,11 @@ end
     [TestMethod]
     public void TEST_Abend()
     {
+        // SPITBOL takes a numeric string such as '1'; a non-numeric one is error 208
         var s = @"
         &abend = 1
         a = &abend
-        &abend = '1'
+        &abend = 'abc'
 end
 ";
         var directives = "-b";

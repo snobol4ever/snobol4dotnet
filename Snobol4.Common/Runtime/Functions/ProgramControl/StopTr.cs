@@ -22,7 +22,7 @@ public partial class Executive
         if (typeArg != null && typeArg.Convert(VarType.STRING, out _, out var tt, this))
             traceTypeStr = ((string)tt).ToUpperInvariant();
 
-        var name = (string)traceName;
+        var name = Parent.FoldCase((string)traceName);
 
         switch (traceTypeStr)
         {

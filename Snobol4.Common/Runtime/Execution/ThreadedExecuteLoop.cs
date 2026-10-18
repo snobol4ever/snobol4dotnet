@@ -107,6 +107,7 @@ public partial class Executive
                         MonitorIpc.EmitLabel(stno);
                     }
                     if (AmpStatementLimit >= 0) AmpStatementCount++;
+                    TraceKeyword("STCOUNT", AmpStatementCount);
                     if (AmpStatementLimit > 0 && AmpStatementCount >= AmpStatementLimit)
                     {
                         LogRuntimeException(244);

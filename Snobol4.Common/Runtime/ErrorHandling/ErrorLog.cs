@@ -7,6 +7,7 @@ public partial class Executive
     public void LogRuntimeException(int code)
     {
         AmpErrorType = code;
+        TraceKeyword("ERRTYPE", code);
         var fileName = Path.GetFileName(SourceFiles[AmpCurrentLineNumber]);
         var codeCount = 1 + Parent.Code.LineCountFile - Parent.Code.BlankLineCount -
                         Parent.Code.CommentContinuationDirectiveCount;

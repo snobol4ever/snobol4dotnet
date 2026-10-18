@@ -13,15 +13,28 @@ public partial class Executive
     internal void Trace(List<Var> arguments)
     {
 
-        if (!arguments[0].Convert(VarType.STRING, out _, out var traceName, this) || FunctionTable.ContainsKey((string)traceName))
+        // The name is folded as any name is (TRACE('bar') traces BAR under case folding)
+        if (!arguments[0].Convert(VarType.STRING, out _, out var traceNameRaw, this) || (string)traceNameRaw == "")
         {
             LogRuntimeException(198);
             return;
         }
 
+        object traceName = Parent.FoldCase((string)traceNameRaw);
+
         if (!arguments[1].Convert(VarType.STRING, out _, out var traceType, this))
         {
             LogRuntimeException(199);
+            return;
+        }
+
+        // CALL, RETURN and FUNCTION traces name a program-defined function (sbl: error 198 for a
+        // builtin or an undefined name); a VALUE trace may name a variable that is also a function's
+        // name, as its return value is
+        var typeLetter = ((string)traceType).ToUpperInvariant();
+        if (typeLetter is "C" or "CALL" or "R" or "RETURN" or "F" or "FUNCTION" && !UserFunctionTable.ContainsKey((string)traceName))
+        {
+            LogRuntimeException(198);
             return;
         }
 
@@ -42,60 +55,50 @@ public partial class Executive
         Assert.IsNotNull(traceName);
         Assert.IsNotNull(traceType);
 
-        switch (((string)traceType).ToUpper(CultureInfo.CurrentCulture))
+        var name = (string)traceName;
+        switch (typeLetter)
         {
             case "A":
             case "ACCESS":
-                if (TraceTableIdentifierAccess.ContainsKey((string)traceName))
-                    TraceTableIdentifierAccess.Remove((string)traceName);
-                TraceTableIdentifierAccess.Add((string)traceName, "");
+                TraceTableIdentifierAccess[name] = "";
                 break;
 
             case "":
             case "V":
             case "VALUE":
-                if (TraceTableIdentifierValue.ContainsKey((string)traceName))
-                    TraceTableIdentifierValue.Remove((string)traceName);
-                TraceTableIdentifierValue.Add((string)traceName, "");
+                TraceTableIdentifierValue[name] = "";
                 break;
 
+            // Only the keywords the system changes may be traced, named without the ampersand
             case "K":
             case "KEYWORD":
-                if (TraceTableIdentifierKeyword.ContainsKey("&" + (string)traceName))
-                    TraceTableIdentifierKeyword.Remove((string)traceName);
-                TraceTableIdentifierKeyword.Add((string)traceName, "");
+                if (name is not ("ERRTYPE" or "FNCLEVEL" or "STCOUNT"))
+                {
+                    LogRuntimeException(198);
+                    return;
+                }
+                TraceTableIdentifierKeyword[name] = "";
                 break;
 
             case "L":
             case "LABEL":
-                if (TraceTableLabel.ContainsKey((string)traceName))
-                    TraceTableLabel.Remove((string)traceName);
-                TraceTableLabel.Add((string)traceName, "");
+                TraceTableLabel[name] = "";
                 break;
 
             case "C":
             case "CALL":
-                if (TraceTableFunctionCall.ContainsKey((string)traceName))
-                    TraceTableFunctionCall.Remove((string)traceName);
-                TraceTableFunctionCall.Add((string)traceName, "");
+                TraceTableFunctionCall[name] = "";
                 break;
 
             case "R":
             case "RETURN":
-                if (TraceTableFunctionReturn.ContainsKey((string)traceName))
-                    TraceTableFunctionReturn.Remove((string)traceName);
-                TraceTableFunctionReturn.Add((string)traceName, "");
+                TraceTableFunctionReturn[name] = "";
                 break;
 
             case "F":
             case "FUNCTION":
-                if (TraceTableFunctionCall.ContainsKey((string)traceName))
-                    TraceTableFunctionCall.Remove((string)traceName);
-                TraceTableFunctionCall.Add((string)traceName, "");
-
-                if (TraceTableFunctionReturn.ContainsKey((string)traceName))
-                    TraceTableFunctionReturn.Remove((string)traceName);
-                TraceTableFunctionReturn.Add((string)traceName, "");
+                TraceTableFunctionCall[name] = "";
+                TraceTableFunctionReturn[name] = "";
                 break;
 
             default:
@@ -143,57 +146,24 @@ public partial class Executive
     }
 
 
-    // ReSharper disable once UnusedMember.Global
+    // A LABEL trace, when a goto (taken, conditional or not) transfers to a traced label, at the goto's
+    // statement: ****5*******  :(L)
     internal void TraceGoto(string name)
     {
-        if (AmpTrace <= 0)
+        if (AmpTrace <= 0 || !TraceTableLabel.ContainsKey(name))
             return;
 
-        if (!TraceTableLabel.ContainsKey(name))
-            return;
-
-        var line = AmpCurrentLineNumber + 1;
-        var linePad = line.ToString().PadRight(8, '*');
-        var r = (int)AmpFunctionLevel;
-
-        Console.Error.WriteLine($@"****{linePad} {new string('i', r)} goto {name}");
-
+        TraceLine($":({name})");
         AmpTrace--;
     }
 
-    // ReSharper disable once UnusedMember.Global
-    internal void TraceFunctionCall(string name)
+    // A KEYWORD trace of &ERRTYPE, &FNCLEVEL or &STCOUNT when the system changes it: ****5*******  &STCOUNT = 5
+    internal void TraceKeyword(string name, long value)
     {
-        if (AmpTrace <= 0)
+        if (AmpTrace <= 0 || !TraceTableIdentifierKeyword.ContainsKey(name))
             return;
 
-        if (!TraceTableFunctionCall.ContainsKey(name))
-            return;
-
-        var line = AmpCurrentLineNumber + 1;
-        var linePad = line.ToString().PadRight(8, '*');
-        var r = (int)AmpFunctionLevel;
-
-        Console.Error.WriteLine($@"****{linePad} {new string('i', r)} call {name}");
-
-        AmpTrace--;
-    }
-
-    // ReSharper disable once UnusedMember.Global
-    internal void TraceFunctionReturn(string name)
-    {
-        if (AmpTrace <= 0)
-            return;
-
-        if (!TraceTableFunctionReturn.ContainsKey(name))
-            return;
-
-        var line = AmpCurrentLineNumber + 1;
-        var linePad = line.ToString().PadRight(8, '*');
-        var r = (int)AmpFunctionLevel;
-
-        Console.Error.WriteLine($@"****{linePad} {new string('i', r)} return {name}");
-
+        TraceLine($"&{name} = {value}");
         AmpTrace--;
     }
 }

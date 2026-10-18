@@ -757,10 +757,11 @@ end");
     }
 
     [TestMethod]
-    public void Step13_TraceFunctionCallAndReturn_FiresThroughMsilPath()
+    public void Step13_BuiltinCallsAreNotTraced_AsInSpitbol()
     {
-        // A program that calls SIZE() via CallFuncBySlot.
-        // Register SIZE for call+return tracing and verify AmpTrace decrements twice.
+        // A program that calls SIZE() via CallFuncBySlot. SPITBOL traces only program-defined
+        // functions (TRACE('SIZE','CALL') is error 198 and &FTRACE ignores builtins), so even with
+        // SIZE in the call and return tables nothing fires and AmpTrace is not decremented.
         var b = Compile(@"
         R = SIZE('hello')
 end");
@@ -773,9 +774,8 @@ end");
 
         Assert.AreEqual(0, b.ErrorCodeHistory.Count,
             "No runtime errors expected");
-        // TraceFunctionCall + TraceFunctionReturn each decrement AmpTrace once.
-        Assert.IsTrue(exec.AmpTrace <= 8,
-            "AmpTrace should be decremented for both function call and return through MSIL path");
+        Assert.AreEqual(10, exec.AmpTrace,
+            "A builtin call must not trace, so AmpTrace stays as it was");
         Assert.AreEqual("5", Str("R", b),
             "Function result must be correct when call/return tracing is active");
     }

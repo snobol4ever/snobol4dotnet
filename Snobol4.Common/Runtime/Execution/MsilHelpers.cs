@@ -61,9 +61,7 @@ public partial class Executive
         // Add the function name as the last argument, matching Function()'s contract.
         _reusableArgList.Add(new StringVar(slot.Symbol));
 
-        TraceFunctionCall(slot.Symbol);
         entry.Handler(_reusableArgList);
-        TraceFunctionReturn(slot.Symbol);
 
         // FRETURN propagation: the handler signals failure by pushing a failure
         // sentinel (NonExceptionFailure) and setting Failure=true. The downstream
@@ -131,6 +129,7 @@ public partial class Executive
         MonitorIpc.EmitLabel(stno);
 
         if (AmpStatementLimit >= 0) AmpStatementCount++;
+        TraceKeyword("STCOUNT", AmpStatementCount);
         if (AmpStatementLimit > 0 && AmpStatementCount >= AmpStatementLimit)
         {
             LogRuntimeException(244);

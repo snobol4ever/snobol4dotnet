@@ -218,13 +218,14 @@ public partial class Executive
         // Save value of local variables on the stack
         entry!.StateStack.Push(saveVars);
 
+        // CALL trace, at the calling statement and level: ****11******  F('arg',7)
+        var traceCall = TraceThisCall(TraceTableFunctionCall, functionName);
+        if (traceCall)
+            TraceLine($"{functionName}({string.Join(",", arguments.Take(parametersCount).Select(a => a.DumpString()))})");
+
         // Update keywords
         AmpFunctionLevel++;
-
-        if (AmpFunctionTrace > 0)
-        {
-            FunctionTraceEntry(arguments, functionName);
-        }
+        TraceKeyword("FNCLEVEL", AmpFunctionLevel);
 
         // Monitor bridge — CALL event (mirrors csn DEFF18 / spl bpf09 predecessor).
         MonitorIpc.EmitCall(functionName);
@@ -245,6 +246,7 @@ public partial class Executive
         var callerStatement = AmpCurrentLineNumber;
         var callerSerial = StatementSerial;
         var nextIndex = ExecuteLoop(LabelTable[definition.EntryLabel]);
+        var returningStatement = AmpCurrentLineNumber;
         AmpCurrentLineNumber = callerStatement;
         StatementSerial = callerSerial;
         AlphaStack = callerAlphaStack;
@@ -290,11 +292,14 @@ public partial class Executive
         IdentifierTable[returnVarName] = StringVar.Null(returnVarName); // Clear function name variable
         AmpFunctionLevel--;
 
-        // Post-processing
-        if (AmpFunctionTrace > 0)
-        {
-            FunctionTraceExit(functionName);
-        }
+        // RETURN and &FNCLEVEL traces, at the returning statement and the caller's level:
+        // ****15******  RETURN F = 1, FRETURN F, NRETURN G = .Z
+        var current = AmpCurrentLineNumber;
+        AmpCurrentLineNumber = returningStatement;
+        if (TraceThisCall(TraceTableFunctionReturn, functionName))
+            TraceLine(rtnTypeStr == "FRETURN" ? $"FRETURN {functionName}" : $"{rtnTypeStr} {functionName} = {returnVar.DumpString()}");
+        TraceKeyword("FNCLEVEL", AmpFunctionLevel);
+        AmpCurrentLineNumber = current;
 
         // Restore the caller's variables under their own names, last saved first, so a name that
         // is both a parameter and a local unwinds to the caller's value
@@ -313,29 +318,20 @@ public partial class Executive
         ProgramDefinedFunctionStack.Pop();
     }
 
-    private void FunctionTraceEntry(List<Var> arguments, string functionName)
+    // A call or return is traced when &FTRACE is on (each line counts it down) or when TRACE named the
+    // function for this event and &TRACE is on (each line counts &TRACE down), as in SPITBOL
+    private bool TraceThisCall(Dictionary<string, string> table, string functionName)
     {
-        var line = (int)SourceLineNumbers[AmpCurrentLineNumber - 1];
-        var linePad = line.ToString().PadRight(8, '*');
-        var r = (int)AmpFunctionLevel;
-        var args = "";
-
-        for (var i = 1; i < arguments.Count; ++i)
+        if (AmpFunctionTrace > 0)
         {
-            args += (i > 1 ? ", " : "") + arguments[i - 1];
+            AmpFunctionTrace--;
+            return true;
         }
 
-        Console.Error.WriteLine($@"****{linePad} {new string('i', r - 1)} {functionName}({args})");
-        AmpFunctionTrace--;
-    }
+        if (AmpTrace <= 0 || !table.ContainsKey(functionName))
+            return false;
 
-    private void FunctionTraceExit(string functionName)
-    {
-        var line = AmpFunctionTrace + 1;
-        var linePad = line.ToString().PadRight(8, '*');
-        var r = (int)AmpFunctionLevel;
-        Console.Error.WriteLine($@"****{linePad} {new string('i', r)} return {functionName} = {SystemStack.Peek()}");
-        AmpFunctionTrace--;
+        AmpTrace--;
+        return true;
     }
-
 }

@@ -348,7 +348,8 @@ public class CompilerException(int error, int column, string? message = null) : 
         "requested maxlngth too large" /* 329 */,
         "date argument is not integer" /* 330 */,
         "goto scontinue with no user interrupt" /* 331 */,
-        "goto continue with error in failure goto" /* 332 */
+        "goto continue with error in failure goto" /* 332 */,
+        "ord argument is not a string" /* 333 */
 ];
 
     #endregion

@@ -162,6 +162,7 @@ public partial class Executive
             { "BREAK", new FunctionTableEntry(this, "break", CreateBreakPattern, 1,true)},
             { "BREAKX", new FunctionTableEntry(this, "breakx", CreateBreakXPattern, 1,true)},
             { "CHAR", new FunctionTableEntry(this, "char", Char, 1,  true) },
+            { "ORD", new FunctionTableEntry(this, "ord", Ord, 1,  true) },
             { "CHOP", new FunctionTableEntry(this, "chop", Chop, 1,  true) },
             { "CLEAR", new FunctionTableEntry(this, "clear", ReinitializeVariables, 1,  true)},
             { "CODE", new FunctionTableEntry(this, "code", CreateCode, 1,  true)},

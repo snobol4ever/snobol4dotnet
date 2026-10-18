@@ -4,6 +4,9 @@ public partial class Executive
 {
     public int OnErrorGoto;
 
+    // The last runtime error's full diagnostic, as printed: file, numbers, message and source line
+    internal string LastDiagnostic = "";
+
     public void LogRuntimeException(int code)
     {
         AmpErrorType = code;
@@ -13,14 +16,17 @@ public partial class Executive
                         Parent.Code.CommentContinuationDirectiveCount;
         var listCount = 1 + Parent.Code.LineCountFile - Parent.Code.CommentContinuationDirectiveCount;
         var lineCount = 1 + Parent.Code.LineCountFile;
-        AmpErrorText =
+        // &ERRTEXT is the message alone, as in SPITBOL; the full diagnostic (file, numbers, source
+        // line) is what is printed and recorded
+        AmpErrorText = CompilerException.ErrorMessage[code];
+        LastDiagnostic =
             $"{fileName}({codeCount}/{listCount}/{lineCount}): error {code} -- {CompilerException.ErrorMessage[code]}{Environment.NewLine}{SourceCode[AmpCurrentLineNumber].Split('\n')[1]}";
         Parent.ErrorCodeHistory.Add(code);
         Parent.ColumnHistory.Add(0);
         Failure = true;
         SystemStack.Push(new StringVar(false));
-        var ce = new CompilerException(code, 0, AmpErrorText);
-        Parent.MessageHistory.Add(AmpErrorText);
+        var ce = new CompilerException(code, 0, LastDiagnostic);
+        Parent.MessageHistory.Add(LastDiagnostic);
         OnErrorGoto = SetExitNumber;
 
         if (AmpErrorLimit > 0)
@@ -29,7 +35,7 @@ public partial class Executive
             return;
         }
 
-        Console.Error.WriteLine(AmpErrorText);
+        Console.Error.WriteLine(LastDiagnostic);
         throw ce;
     }
 

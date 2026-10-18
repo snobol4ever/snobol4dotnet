@@ -35,7 +35,7 @@ public partial class Executive
                 //{
                 //    LogRuntimeException(36);
                 //}
-                throw new CompilerException(Parent.ErrorCodeHistory[^1], 0, AmpErrorText);
+                throw new CompilerException(Parent.ErrorCodeHistory[^1], 0, LastDiagnostic);
 
             case SCONTINUE:
                 //if (ErrorJump <= 0)

@@ -444,7 +444,7 @@ public class SourceCode
         
         try
         {
-            using var reader = new StreamReader(include, Encoding.UTF8);
+            using var reader = new StreamReader(ResolveIncludePath(include), Encoding.UTF8);
             ReadFile(reader, include);
         }
         catch (IOException e)
@@ -456,6 +456,34 @@ public class SourceCode
         {
             _includeDepth--;
         }
+    }
+
+    /// <summary>
+    /// Finds an include file as SPITBOL does: the name as given (relative to the current
+    /// directory), else each directory the SNOLIB environment variable lists, in order
+    /// ("The environment variable SNOLIB may be set to a list of sub-directory paths to be
+    /// searched for files given in an -INCLUDE control statement", SPITBOL manual). LOAD
+    /// searches the same list.
+    /// </summary>
+    /// <param name="include">The include file name as written</param>
+    /// <returns>The path to open; the name itself when no listed directory holds it</returns>
+    private static string ResolveIncludePath(string include)
+    {
+        if (Path.IsPathRooted(include) || File.Exists(include))
+            return include;
+
+        var snolib = Environment.GetEnvironmentVariable("SNOLIB");
+        if (string.IsNullOrEmpty(snolib))
+            return include;
+
+        foreach (var dir in snolib.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries))
+        {
+            var candidate = Path.Combine(dir, include);
+            if (File.Exists(candidate))
+                return candidate;
+        }
+
+        return include;
     }
 
     /// <summary>

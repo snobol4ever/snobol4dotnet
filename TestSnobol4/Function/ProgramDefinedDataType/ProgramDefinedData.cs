@@ -104,4 +104,33 @@ end
         Assert.AreEqual("1PRICE", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("R3")])).Data);
         Assert.AreEqual("", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("R4")])).Data);
     }
+
+    [TestMethod]
+    public void TEST_Data_a_system_function_name_is_refused()
+    {
+        // sbl -b: DATA('ITEM(A,B)') and DATA('NODE(SIZE,B)') are error 248, ITEM and SIZE being system
+        // functions (Knuth's topological sort, ported, defines ITEM)
+        var type = SetupTests.SetupScript("-b", @"
+        DATA('ITEM(A,B)')
+end");
+        Assert.AreEqual(248, type.ErrorCodeHistory[0]);
+
+        var field = SetupTests.SetupScript("-b", @"
+        DATA('NODE(SIZE,B)')
+end");
+        Assert.AreEqual(248, field.ErrorCodeHistory[0]);
+    }
+
+    [TestMethod]
+    public void TEST_Data_a_program_defined_type_may_be_redefined()
+    {
+        // sbl -b: a second DATA('NODE(B)') replaces NODE(A), so B(NODE(5)) is 5
+        var build = SetupTests.SetupScript("-b", @"
+        DATA('NODE(A)')
+        DATA('NODE(B)')
+        R = B(NODE(5))
+end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("5", build.Execute!.IdentifierTable["R"].ToString());
+    }
 }

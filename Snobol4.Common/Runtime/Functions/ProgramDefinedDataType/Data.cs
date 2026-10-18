@@ -72,20 +72,25 @@ public partial class Executive
 
         // datatype name cannot be an existing user-defined function
         // (protected builtins may be shadowed by DATA type names, per SNOBOL4 spec)
-        //if (FunctionTable.ContainsKey(dataName))
+        // A system function cannot be redefined (error 248); a program-defined function or DATA type
+        // can, as in SPITBOL. The same prototype again (EVAL re-running an include's initialisation)
+        // changes nothing.
         var existingDataType = FunctionTable[dataName];
-        if (existingDataType is not null && !existingDataType.IsProtected)
+        if (existingDataType is not null)
         {
-            // SPITBOL silently no-ops when DATA re-defines an already-registered DATA type
-            // (same constructor name). This happens when EVAL re-executes include-level
-            // initialization code (e.g. counter.sno DATA call from inside TX/EVAL chain).
-            if (existingDataType.Handler == CreateProgramDefinedDataInstance)
+            if (existingDataType.IsProtected)
+            {
+                LogRuntimeException(248);
+                return;
+            }
+
+            if (existingDataType.Handler == CreateProgramDefinedDataInstance
+                && UserDataDefinitions.TryGetValue(dataName, out var existingDefinition)
+                && existingDefinition.Prototype == prototype)
             {
                 PredicateSuccess();
                 return;
             }
-            LogRuntimeException(248);
-            return;
         }
 
         // must have a left paren
@@ -117,20 +122,12 @@ public partial class Executive
                 return;
             }
 
-            // field name cannot be an existing user-defined function
-            // (protected builtins may be shadowed by DATA field accessors, per SNOBOL4 spec)
-            //if (FunctionTable.ContainsKey(fields[i]))
+            // nor can a field name be a system function's
             var existingField = FunctionTable[fields[i]];
-            if (existingField is not null && !existingField.IsProtected)
+            if (existingField is not null && existingField.IsProtected)
             {
-                // Allow redefinition of DATA field accessors (polymorphic dispatch by type)
-                // Only block redefinition of user-defined functions (DEFINE'd)
-                if (existingField.Handler != GetProgramDefinedDataField)
-                {
-                    LogRuntimeException(248);
-                    return;
-                }
-                // else: existing field accessor will be overwritten below — that's correct
+                LogRuntimeException(248);
+                return;
             }
         }
 

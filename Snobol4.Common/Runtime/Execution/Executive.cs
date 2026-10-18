@@ -167,7 +167,7 @@ public partial class Executive
             { "CODE", new FunctionTableEntry(this, "code", CreateCode, 1,  true)},
             { "COPY", new FunctionTableEntry(this, "copy", Copy, 1,  true)},
             { "COLLECT", new FunctionTableEntry(this, "collect", GarbageCollect, 1,  true)},
-            { "CONCAT", new FunctionTableEntry(this, "concat", CreateConcatenatePattern,2,  true)},
+            { "CONCAT", new FunctionTableEntry(this, "concat", CreateConcatenatePattern,2,  false)},   // not SPITBOL's: redefinable
             { "CONVERT", new FunctionTableEntry(this, "convert", Convert, 2,true)},
             { "COS", new FunctionTableEntry(this, "cos", Cos, 1,  true) },
             { "DATA", new FunctionTableEntry(this, "data", ProgramDefinedData, 1,  true)},
@@ -224,7 +224,7 @@ public partial class Executive
             { "SETEXIT", new FunctionTableEntry(this, "setexit", SetExit, 1, true)},
             { "SIN", new FunctionTableEntry(this, "sin", Sin, 1,  true) },
             { "SIZE", new FunctionTableEntry(this, "size", Size, 1,true)},
-            { "VALUE", new FunctionTableEntry(this, "value", Value, 1, true)},
+            { "VALUE", new FunctionTableEntry(this, "value", Value, 1, false)},   // not SPITBOL's: redefinable
             { "SORT", new FunctionTableEntry(this, "sort", Sort, 2,true)},
             { "SPAN", new FunctionTableEntry(this, "span", CreateSpanPattern, 1,true)},
             { "SQRT", new FunctionTableEntry(this, "sqrt", Sqrt, 1,  true) },

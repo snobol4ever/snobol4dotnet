@@ -271,9 +271,7 @@ public partial class Executive
 
                 case OpCode.GotoIndirectCode:
                 {
-                    var sym = SystemStack.Peek().Symbol;
-                    SystemStack.Pop();
-                    if (IdentifierTable.ContainsKey(sym) && IdentifierTable[sym] is CodeVar cv)
+                    if (GotoCode(SystemStack.Pop()) is { } cv)
                     {
                         var target = cv.StatementNumber;
                         if (target == -1)                 { exitCode = -1; goto Done; }

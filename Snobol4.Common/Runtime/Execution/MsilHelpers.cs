@@ -217,10 +217,10 @@ public partial class Executive
     /// </summary>
     internal int ResolveCodeLabelFromStack(int errorCode = 24)
     {
-        var sym = SystemStack.Peek().Symbol;
-        SystemStack.Pop();
+        var operand = SystemStack.Pop();
+        var sym = operand.Symbol;
         TraceGoto(sym);
-        if (IdentifierTable.TryGetValue(sym, out var v) && v is CodeVar cv)
+        if (GotoCode(operand) is { } cv)
         {
             var target = cv.StatementNumber;
             if (target == -1)                 return -1;
@@ -245,4 +245,9 @@ public partial class Executive
         SystemStack.Pop();   // pop the StringVar(false) pushed by LogRuntimeException
         return true;
     }
+
+    // The CODE a direct goto (:<X>) transfers to: the operand's value when it is CODE (:<CODE('...')>
+    // has no variable behind it), else the CODE held by the variable it names
+    private CodeVar? GotoCode(Var operand) =>
+        operand as CodeVar ?? (IdentifierTable.TryGetValue(operand.Symbol, out var v) ? v as CodeVar : null);
 }

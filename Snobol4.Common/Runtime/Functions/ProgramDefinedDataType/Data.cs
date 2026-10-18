@@ -222,6 +222,7 @@ public partial class Executive
         var v = raw is ArrayVar or TableVar or ProgramDefinedDataVar ? raw : raw.Clone();
         v.Key = index;
         v.Collection = programDefinedDataVar.FieldValues;
+        v.LvalueMark = StatementSerial;
         SystemStack.Push(v);
     }
 }

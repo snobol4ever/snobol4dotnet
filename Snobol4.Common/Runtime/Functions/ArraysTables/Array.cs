@@ -120,6 +120,7 @@ public partial class Executive
         var v = stored is ArrayVar or TableVar ? stored : stored.Clone();
         v.Key        = arrayKey;
         v.Collection = arrayVar;
+        v.LvalueMark = StatementSerial;
         SystemStack.Push(v);
     }
 }

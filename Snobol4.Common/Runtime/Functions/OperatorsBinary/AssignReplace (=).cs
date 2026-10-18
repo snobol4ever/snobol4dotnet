@@ -146,6 +146,17 @@ public partial class Executive
             }
         }
 
+        // An array, table or DATA object is shared, and every index read marks it with that
+        // element's Key and Collection. A mark left by an earlier statement does not make it this
+        // statement's lvalue: the variable that holds it is the target (TN2 = T<N,2> on a later
+        // pass wrote into the old element; Budne's atn printed one node's properties for every node).
+        if (leftVar is ArrayVar or TableVar or ProgramDefinedDataVar && leftVar.Symbol != ""
+            && leftVar.Collection is not null && leftVar.LvalueMark != StatementSerial)
+        {
+            leftVar.Key = null;
+            leftVar.Collection = null;
+        }
+
         switch (leftVar.Collection)
         {
             case ArrayVar arrayVar:

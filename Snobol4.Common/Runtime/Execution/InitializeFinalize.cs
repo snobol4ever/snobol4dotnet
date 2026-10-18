@@ -59,7 +59,12 @@ public partial class Executive
         AmpLastLineNumber = _statementBegun ? AmpCurrentLineNumber : -1;
         AmpCurrentLineNumber = index;
         _statementBegun = true;
+        StatementSerial++;
     }
 
     private bool _statementBegun;
+
+    // Counts statement starts; an index read stamps its element with it (Var.LvalueMark), so an
+    // assignment can tell an element indexed in this statement from a mark left by an earlier one
+    internal long StatementSerial;
 }

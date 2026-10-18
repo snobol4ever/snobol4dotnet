@@ -38,6 +38,7 @@ public partial class Executive
         }
         value.Key = varIndices[0].GetTableKey();
         value.Collection = tableVar;
+        value.LvalueMark = StatementSerial;
         SystemStack.Push(value);
     }
 }

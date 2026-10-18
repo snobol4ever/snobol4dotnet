@@ -22,6 +22,8 @@ public abstract class Var : IEquatable<Var>
     public long SequenceId { get; } = ++_creationOrder;
     public object? Key { get; internal set; }
     public Var? Collection { get; internal set; }
+    // The statement (Executive.StatementSerial) whose index read last set Key and Collection
+    internal long LvalueMark;
     [MemberNotNullWhen(true, nameof(Key), nameof(Collection))]
     public bool IsCollectionElement => Key is not null && Collection is not null;
 

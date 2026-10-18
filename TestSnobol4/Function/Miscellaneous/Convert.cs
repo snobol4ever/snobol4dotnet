@@ -1,4 +1,4 @@
-﻿using Snobol4.Common;
+using Snobol4.Common;
 using Test.TestLexer;
 
 namespace Test.Miscellaneous;

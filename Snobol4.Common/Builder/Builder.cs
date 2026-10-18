@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
 using System.Text;
@@ -108,8 +108,12 @@ public partial class Builder : IDisposable
             if (BuildOptions.WriteDll) SaveDll();
             _timerBuild.Stop();
             PrintCompilationStatistics();
-            Execute.StartTimer();
-            Execute.ExecuteLoop(0);
+            // -n or -NOEXECUTE: compile (and write -w's file) but do not run, as in SPITBOL
+            if (!BuildOptions.SuppressExecution)
+            {
+                Execute.StartTimer();
+                Execute.ExecuteLoop(0);
+            }
         }
         catch (CompilerException) { }
         catch (Exception e) { ReportProgrammingError(e); }

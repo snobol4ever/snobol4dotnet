@@ -402,6 +402,16 @@ public class SourceCode
                 _parent.BuildOptions.ErrorOnUnhandledFail = false;
                 break;
 
+            // -NOEXECUTE compiles and does not run, as the -n switch; the last of the two in the
+            // program wins, as in SPITBOL
+            case "execute":
+                _parent.BuildOptions.SuppressExecution = false;
+                break;
+
+            case "noexecute":
+                _parent.BuildOptions.SuppressExecution = true;
+                break;
+
             case "list":
                 _parent.BuildOptions.ListSource = true;
                 break;

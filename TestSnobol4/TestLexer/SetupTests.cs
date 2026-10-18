@@ -176,14 +176,14 @@ public class SetupTests
         Executive.ReadLineDelegate = inputLines is null ? null
             : () => inputIdx < inputLines.Length ? inputLines[inputIdx++] : null;
 
-        var old = Console.Error;
+        var old = Console.Out;
         using var ms = new MemoryStream();
         using var sw = new StreamWriter(ms) { AutoFlush = true };
-        Console.SetError(sw);
+        Console.SetOut(sw);
         try   { SetupScript("-b", script); }
         finally
         {
-            Console.SetError(old);
+            Console.SetOut(old);
             Executive.ReadLineDelegate = null;  // always reset — static field, tests run in-process
         }
 

@@ -39,12 +39,12 @@ public class SaveDllTests
     {
         lock (s_lock)
         {
-            var old = Console.Error;
+            var old = Console.Out;
             using var ms  = new MemoryStream();
             using var sw  = new StreamWriter(ms, Encoding.UTF8) { AutoFlush = true };
-            Console.SetError(sw);
+            Console.SetOut(sw);
             try   { SetupTests.SetupScript(flags, script); }
-            finally { Console.SetError(old); }
+            finally { Console.SetOut(old); }
             ms.Position = 0;
             return new StreamReader(ms, Encoding.UTF8).ReadToEnd();
         }
@@ -85,17 +85,17 @@ public class SaveDllTests
     {
         lock (s_lock)
         {
-            var old = Console.Error;
+            var old = Console.Out;
             using var ms  = new MemoryStream();
             using var sw  = new StreamWriter(ms, Encoding.UTF8) { AutoFlush = true };
-            Console.SetError(sw);
+            Console.SetOut(sw);
             try
             {
                 var builder = new Builder();
                 builder.ParseCommandLine(["-b"]);
                 builder.RunDll(dllPath);
             }
-            finally { Console.SetError(old); }
+            finally { Console.SetOut(old); }
             ms.Position = 0;
             return new StreamReader(ms, Encoding.UTF8).ReadToEnd();
         }

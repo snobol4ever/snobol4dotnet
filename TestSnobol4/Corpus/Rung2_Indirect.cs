@@ -24,12 +24,12 @@ public class Rung2_Indirect
         var lines = new List<string>();
         lock (s_consoleLock)
         {
-            var old = Console.Error;
+            var old = Console.Out;
             using var ms = new System.IO.MemoryStream();
             using var sw = new System.IO.StreamWriter(ms) { AutoFlush = true };
-            Console.SetError(sw);
+            Console.SetOut(sw);
             try { SetupTests.SetupScript("-b", script); }
-            finally { Console.SetError(old); }
+            finally { Console.SetOut(old); }
             ms.Position = 0;
             using var sr = new System.IO.StreamReader(ms);
             foreach (var line in sr.ReadToEnd().Split('\n'))

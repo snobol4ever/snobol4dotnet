@@ -250,15 +250,19 @@ public partial class Executive
         // Call output function
         var outputVar = SystemStack.Peek();
 
+        // OUTPUT goes to stdout and TERMINAL to stderr, as in SPITBOL and CSNOBOL4
         switch (outputVar.OutputChannel)
         {
             case "+console-output":
+                Console.Out.WriteLine(outputVar.ToString());
+                break;
+
             case "+terminal-output":
                 Console.Error.WriteLine(outputVar.ToString());
                 break;
 
             case "+console-output-nnl":
-                Console.Error.Write(outputVar.ToString());
+                Console.Out.Write(outputVar.ToString());
                 break;
             
             default:

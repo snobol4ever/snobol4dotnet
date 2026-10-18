@@ -197,7 +197,7 @@ public partial class Builder : IDisposable
             ResolveSlots();
             EmitMsilForAllStatements();
             CompileStarFunctions(new ThreadedCodeCompiler(this));
-            StatementCount += Code.SourceLines.Count;
+            // an EVAL'd expression is no statement: it takes no statement number, as in SPITBOL
         }
         catch (CompilerException) { }
         catch (Exception e) { ReportProgrammingError(e); }
@@ -213,12 +213,12 @@ public partial class Builder : IDisposable
             Parse(this);
             var stmtOffset = StatementCount;
             ResolveSlots();
-            EmitMsilForAllStatements();
+            EmitMsilForAllStatements(stmtOffset);
             var tc = new ThreadedCodeCompiler(this);
             Execute!.Thread = tc.AppendCompile(Execute.Thread!, stmtOffset);
             CompileStarFunctions(tc);
             PopulateCodeMetadata(stmtOffset);
-            StatementCount += Code.SourceLines.Count;
+            StatementCount += Code.SourceLines.Count + 1;   // the block's statements and its implicit end
             ComputeThreadIsMsilOnly();
             return true;
         }
@@ -350,6 +350,9 @@ public partial class Builder : IDisposable
     {
         if (Execute == null) return;
         var stmtNumber = stmtOffset;
+        // CODE's statements are numbered on from the last statement number recorded (the program's END,
+        // or the previous block's implicit end), as SPITBOL numbers them
+        var stno = Execute.SourceStno.Count > 0 ? Execute.SourceStno[^1] : 0;
         foreach (var line in Code.SourceLines)
         {
             if (!line.Compiled)
@@ -360,7 +363,7 @@ public partial class Builder : IDisposable
                 Execute.SourceFiles.Add(line.PathName);
                 Execute.SourceLineNumbers.Add(line.LineCountFile);
                 Execute.SourceStatementNumbers.Add(stmtNumber + 1);
-                Execute.SourceStno.Add((long)(stmtNumber + 1 + line.BlankLineCount));
+                Execute.SourceStno.Add(++stno);
                 if (line.Label.Length > 0)
                 {
                     var folded = line.CaseFolding ? line.Label.ToUpper() : line.Label;
@@ -369,6 +372,19 @@ public partial class Builder : IDisposable
                 }
             }
             stmtNumber++;
+        }
+
+        // SPITBOL ends each CODE block with an implicit statement that takes the next number, so the
+        // following block numbers on after it (CODE(' A = &STNO ; B = &STNO') after a 12-statement program
+        // gives 13 and 14, and the next block starts at 16); its entry keeps the indices aligned
+        if (Code.SourceLines.Count > 0)
+        {
+            var last = Code.SourceLines[^1];
+            Execute.SourceCode.Add($"{Path.GetFileName(last.PathName)}:0/0)\n");
+            Execute.SourceFiles.Add(last.PathName);
+            Execute.SourceLineNumbers.Add(last.LineCountFile);
+            Execute.SourceStatementNumbers.Add(stmtNumber + 1);
+            Execute.SourceStno.Add(++stno);
         }
     }
 

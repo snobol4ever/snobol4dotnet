@@ -152,18 +152,21 @@ public partial class Builder
     /// into a <c>DynamicMethod</c>, and populate <see cref="MsilCache"/> /
     /// <see cref="MsilDelegates"/>.  Idempotent: already-cached lists are skipped.
     /// </summary>
-    internal void EmitMsilForAllStatements()
+    // stmtOffset is the global index of the first line: CODE's statements follow the program's, so the
+    // statement each delegate starts (&STNO, &LASTNO, error locations) is numbered on from it
+    internal void EmitMsilForAllStatements(int stmtOffset = 0)
     {
         for (var si = 0; si < Code.SourceLines.Count; si++)
         {
             var line = Code.SourceLines[si];
+            var stmtIdx = stmtOffset + si;
 
             DetectGotoForms(line,
                 out var directUncondLabel,  out var indirectUncondExpr, out var indirectUncondCode,
                 out var successLabel,       out var successExpr,        out var successExprCode,
                 out var failureLabel,       out var failureExpr,        out var failureExprCode);
 
-            TryCache(line.ParseBody, stmtIdx: si, isBody: true,
+            TryCache(line.ParseBody, stmtIdx: stmtIdx, isBody: true,
                      directGotoLabel:  directUncondLabel,
                      indirectGotoExpr: indirectUncondExpr,
                      indirectGotoCode: indirectUncondCode,
@@ -177,11 +180,11 @@ public partial class Builder
 
             // Only cache goto token lists separately when NOT absorbed into body.
             if (directUncondLabel == null && indirectUncondExpr == null)
-                TryCache(line.ParseUnconditionalGoto, stmtIdx: si, isBody: false);
+                TryCache(line.ParseUnconditionalGoto, stmtIdx: stmtIdx, isBody: false);
             if (successLabel == null && successExpr == null)
-                TryCache(line.ParseSuccessGoto,       stmtIdx: si, isBody: false);
+                TryCache(line.ParseSuccessGoto,       stmtIdx: stmtIdx, isBody: false);
             if (failureLabel == null && failureExpr == null)
-                TryCache(line.ParseFailureGoto,       stmtIdx: si, isBody: false);
+                TryCache(line.ParseFailureGoto,       stmtIdx: stmtIdx, isBody: false);
         }
     }
 

@@ -56,6 +56,12 @@ public class Scanner
     // Cache is cleared at the start of every PatternMatch call.
     private readonly HashSet<(int node, int cursor)> _terminalFailCache = new();
 
+    // *X evaluations since the cursor last moved: a left-recursive pattern (P = *P 'Z' | 'Y') re-enters
+    // itself without consuming anything, which in SPITBOL overflows the stack (error 246)
+    internal int StarCursor = -1;
+    internal int StarRepeats;
+    internal const int StarRepeatLimit = 100_000;
+
     internal Scanner(Executive exec)
     {
         Exec = exec;
@@ -66,6 +72,8 @@ public class Scanner
         _ast = AbstractSyntaxTree.Build(pattern);
         _state = new ScannerState(subject, startPosition);
         _terminalFailCache.Clear(); // S-2-bridge-7-fullscan: reset per-match memoization
+        StarCursor = -1;
+        StarRepeats = 0;
 
         var length = anchor ? 0 : subject.Length;
 

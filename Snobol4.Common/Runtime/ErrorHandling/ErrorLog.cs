@@ -7,7 +7,10 @@ public partial class Executive
     // The last runtime error's full diagnostic, as printed: file, numbers, message and source line
     internal string LastDiagnostic = "";
 
-    public void LogRuntimeException(int code)
+    // fatal: the run ends whatever &ERRLIMIT allows, as SPITBOL ends it on a stack overflow (246)
+    public void LogRuntimeException(int code) => LogRuntimeException(code, fatal: false);
+
+    public void LogRuntimeException(int code, bool fatal)
     {
         AmpErrorType = code;
         TraceKeyword("ERRTYPE", code);
@@ -30,7 +33,7 @@ public partial class Executive
         Parent.MessageHistory.Add(LastDiagnostic);
         OnErrorGoto = SetExitNumber;
 
-        if (AmpErrorLimit > 0)
+        if (AmpErrorLimit > 0 && !fatal)
         {
             AmpErrorLimit--;
             return;

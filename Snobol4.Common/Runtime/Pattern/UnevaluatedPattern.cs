@@ -49,6 +49,21 @@ internal class UnevaluatedPattern : TerminalPattern
     {
         using var profile1 = Profiler.Start4("*", scan.Exec);
 
+        // Left recursion never moves the cursor; past the limit it is SPITBOL's stack overflow
+        if (scan.CursorPosition == scan.StarCursor)
+        {
+            if (++scan.StarRepeats > Scanner.StarRepeatLimit)
+            {
+                scan.Exec.LogRuntimeException(246, fatal: true);
+                return MatchResult.Failure(scan);
+            }
+        }
+        else
+        {
+            scan.StarCursor = scan.CursorPosition;
+            scan.StarRepeats = 0;
+        }
+
         // Evaluate the function to get the actual pattern
         _functionName(scan.Exec);
 

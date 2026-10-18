@@ -18,6 +18,6 @@ public partial class Executive
             return;
         }
 
-        SystemStack.Push(new RealVar(-d));
+        SystemStack.Push(new RealVar(d));
     }
 }

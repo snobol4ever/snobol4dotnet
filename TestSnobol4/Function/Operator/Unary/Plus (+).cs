@@ -103,4 +103,15 @@ public class Plus
         Assert.AreEqual(4, build.ErrorCodeHistory[0]);
     }
 
+    [TestMethod]
+    public void TEST_Real_UnaryPlus_keeps_the_sign()
+    {
+        // sbl -b: +'4.5' is 4.5, +X with X = 6.125 is 6.125, +'-2.5' is -2.5 (affirmation does not negate)
+        var build = SetupTests.SetupScript("-b", @"
+        X = 6.125
+        R = +'4.5' ' ' +X ' ' +'-2.5'
+end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("4.5 6.125 -2.5", build.Execute!.IdentifierTable["R"].ToString());
+    }
 }

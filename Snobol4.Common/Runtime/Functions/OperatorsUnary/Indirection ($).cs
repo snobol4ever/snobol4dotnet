@@ -33,20 +33,36 @@ public partial class Executive
                 return;
 
             case NameVar nameVar:
-                if (nameVar.Pointer == "")
+                // The NAME of an element (.A[J], .T<'k'>, a DATA field) carries its collection: read the
+                // element there, marked as this statement's lvalue as an index read marks it, rather than
+                // look the collection up by the name of whichever variable last held it
+                if (nameVar.Pointer == "" && nameVar.Key is not null)
                 {
-                    var v = IdentifierTable[nameVar.Collection!.Symbol];
-
-                    switch (v)
+                    switch (nameVar.Collection)
                     {
                         case ArrayVar arrayVar:
-                            SystemStack.Push(arrayVar.Data[(int)(long)nameVar.Key!]);
+                        {
+                            var key = (long)nameVar.Key;
+                            var stored = arrayVar.Data[(int)key];
+                            var v = stored is ArrayVar or TableVar or ProgramDefinedDataVar ? stored : stored.Clone();
+                            v.Key = key;
+                            v.Collection = arrayVar;
+                            v.LvalueMark = StatementSerial;
+                            SystemStack.Push(v);
                             return;
+                        }
 
                         case TableVar tableVar:
-                            SystemStack.Push(tableVar.Data[nameVar.Key!]);
+                        {
+                            var v = tableVar.Data.TryGetValue(nameVar.Key, out var stored)
+                                ? stored is ArrayVar or TableVar ? stored : stored.Clone()
+                                : tableVar.Fill.Clone();
+                            v.Key = nameVar.Key;
+                            v.Collection = tableVar;
+                            v.LvalueMark = StatementSerial;
+                            SystemStack.Push(v);
                             return;
-
+                        }
                     }
                 }
 

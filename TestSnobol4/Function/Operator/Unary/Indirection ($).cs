@@ -309,4 +309,29 @@ end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("1 1 1", $"{build.Execute!.IdentifierTable["A"]} {build.Execute!.IdentifierTable["B"]} {build.Execute!.IdentifierTable["C"]}");
     }
+
+    [TestMethod]
+    public void TEST_Indirection_through_an_element_name_after_its_holder_changes()
+    {
+        // sbl -b: $N reaches A<1> (x, then y) and $M reaches T<'k'> (tv) after the variables that last
+        // held the array and table take other values; snobol4dotnet looked the collection up by that name
+        var build = SetupTests.SetupScript("-b", @"
+        A = ARRAY(2)
+        A<1> = 'x'
+        N = .A<1>
+        B = A
+        B = 'gone'
+        R = $N
+        $N = 'y'
+        S = A<1>
+        T = TABLE()
+        T<'k'> = 'tv'
+        M = .T<'k'>
+        U = T
+        U = 'gone'
+        V = $M
+end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("x y tv", $"{build.Execute!.IdentifierTable["R"]} {build.Execute!.IdentifierTable["S"]} {build.Execute!.IdentifierTable["V"]}");
+    }
 }

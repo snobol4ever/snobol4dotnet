@@ -40,7 +40,15 @@ public partial class Executive
     /// </summary>
     internal void CallFuncBySlot(int slotIdx, int argCount)
     {
-        if (Failure) return;
+        // After a failure in this statement the call is not made, but its arguments still leave the stack
+        // and a failure value takes their place, as Function() does; otherwise an outer operator reads a
+        // stray argument (-G(REPLACE(F(), 'a', 'b')) negated 'b' when F failed)
+        if (Failure)
+        {
+            for (var i = 0; i < argCount; ++i) SystemStack.Pop();
+            SystemStack.Push(new StringVar(false) { Succeeded = false });
+            return;
+        }
 
         var slot = Parent.FunctionSlots[slotIdx];
         var entry = FunctionTable[slot.Symbol];

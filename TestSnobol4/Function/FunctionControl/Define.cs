@@ -279,4 +279,25 @@ end");
         Assert.AreEqual("v1", build.Execute!.IdentifierTable["R"].ToString());
         Assert.AreEqual("global", build.Execute!.IdentifierTable["S"].ToString());
     }
+
+    [TestMethod]
+    public void TEST_Define_a_failure_inside_nested_arguments_fails_the_statement()
+    {
+        // sbl -b: F fails inside REPLACE inside G, so X = -G(REPLACE(F(), 'a', 'b')) fails and X keeps its
+        // value; snobol4dotnet negated the stray argument 'b' (error 10)
+        var build = SetupTests.SetupScript("-b", @"
+        DEFINE('F()')                  :(F_END)
+F                                      :(FRETURN)
+F_END
+        DEFINE('G(X)')                 :(G_END)
+G       G = 5                          :(RETURN)
+G_END
+        X = 'kept'
+        X = -G(REPLACE(F(), 'a', 'b'))  :F(L1)
+        X = 'no fail'
+L1      R = X
+end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("kept", build.Execute!.IdentifierTable["R"].ToString());
+    }
 }

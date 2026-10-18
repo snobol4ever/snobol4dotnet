@@ -451,7 +451,8 @@ public class SourceCode
     /// <param name="directive">The directive text</param>
     private void ProcessIncludeDirective(string directive)
     {
-        var include = CompiledRegex.QuotePattern().Match(directive.Replace('\'', '\"')).Value.Replace("\"", "");
+        // A blank before the closing quote is dropped, a leading one kept, as sbl reads the name
+        var include = CompiledRegex.QuotePattern().Match(directive.Replace('\'', '\"')).Value.Replace("\"", "").TrimEnd(' ');
 
         if (_parent.IncludeList.Contains(include))
             return;

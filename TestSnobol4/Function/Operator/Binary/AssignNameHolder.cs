@@ -49,4 +49,23 @@ end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("1 two three el", build.Execute!.IdentifierTable["R"].ToString());
     }
+
+    [TestMethod]
+    public void TEST_Assign_expression_holder_is_the_target()
+    {
+        // sbl -b: a variable holding an expression is itself the target (V = *(X + 1) then V = *Y assigns V),
+        // and so is E in $ E, while . *X assigns X; snobol4dotnet evaluated V's expression as the target (212)
+        var build = SetupTests.SetupScript("-b", """
+                 V = *(X + 1)
+                 V = *Y
+                 E = *X
+                 'abc' LEN(1) . *X
+                 R = X
+                 'abc' LEN(2) $ E
+                 R = R ' ' DATATYPE(V) ' ' E ' ' X
+         END
+         """);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("a EXPRESSION ab a", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R")]).Data);
+    }
 }

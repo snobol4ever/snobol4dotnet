@@ -70,7 +70,9 @@ public partial class Executive
 
     internal void Assign(List<Var> arguments)
     {
-        while (arguments[0] is ExpressionVar expressionVar1)
+        // A deferred target (. *X, $ *X) is evaluated for the name it gives; a variable that merely holds an
+        // expression is itself the target, as in SPITBOL (V = *(X + 1) then V = *Y assigns V)
+        while (arguments[0] is ExpressionVar { Symbol: "" } expressionVar1)
         {
             expressionVar1.FunctionName(this);
             // If the deferred Assignee evaluation FRETURNed (e.g. *match(...)

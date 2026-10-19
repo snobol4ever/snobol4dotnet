@@ -7,6 +7,7 @@ namespace Test.InputOutput;
 /// or in a trailing [...]. An existing output file is replaced unless the A option appends to it, and an
 /// unknown option is error 160 (OUTPUT) or 116 (INPUT). Each expectation is what sbl -b does.
 /// </summary>
+[DoNotParallelize]
 [TestClass]
 public class FileSpecification
 {
@@ -56,5 +57,25 @@ end");
         INPUT('IN', 5, 'some.txt zz')
 end");
         Assert.AreEqual(116, input.ErrorCodeHistory[0]);
+    }
+
+    [TestMethod]
+    public void TEST_FileSpec_endfile_leaves_other_associations()
+    {
+        // sbl -b: ENDFILE(7) closes channel 7 only; OUTPUT still writes (answers after), and the file holds x
+        var dir = Path.Combine(Path.GetTempPath(), "snoendfile_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
+        try
+        {
+            var file = Path.Combine(dir, "o.txt");
+            var output = SetupTests.RunWithInput($@"        OUTPUT('F', 7, '{file}')
+        F = 'x'
+        ENDFILE(7)
+        OUTPUT = 'after'
+END");
+            Assert.AreEqual("after", output);
+            Assert.AreEqual("x\n", File.ReadAllText(file).Replace("\r\n", "\n"));
+        }
+        finally { Directory.Delete(dir, true); }
     }
 }

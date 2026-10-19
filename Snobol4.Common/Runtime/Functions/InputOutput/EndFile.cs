@@ -32,8 +32,11 @@ public partial class Executive
 
         if (StreamInputs.ContainsKey(channel))
         {
+            // only the variables associated with this channel lose their association; OUTPUT, INPUT and
+            // other channels keep theirs
             foreach (var entry in IdentifierTable)
-                entry.Value.InputChannel = "";
+                if (entry.Value.InputChannel == channel)
+                    entry.Value.InputChannel = "";
 
             var streamReader = StreamInputs[channel];
             streamReader.Close();
@@ -42,8 +45,11 @@ public partial class Executive
 
         if (StreamOutputs.ContainsKey(channel))
         {
+            // only the variables associated with this channel lose their association; OUTPUT, INPUT and
+            // other channels keep theirs
             foreach (var entry in IdentifierTable)
-                entry.Value.OutputChannel = "";
+                if (entry.Value.OutputChannel == channel)
+                    entry.Value.OutputChannel = "";
 
             var streamWriter = StreamOutputs[channel];
             streamWriter.Close();

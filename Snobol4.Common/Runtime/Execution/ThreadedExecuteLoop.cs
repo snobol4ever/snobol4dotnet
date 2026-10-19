@@ -352,6 +352,10 @@ public partial class Executive
     {
         var target = OnErrorGoto;
         OnErrorGoto  = 0;
+        // firing the trap disarms SETEXIT: its stored label is reset to null, so the handler is taken once
+        // and SETEXIT then answers the null string, as in SPITBOL
+        SetExitLabel = "";
+        SetExitNumber = 0;
         var errorStatement = AmpCurrentLineNumber;
         _continueStatement = Parent.FailureExits.TryGetValue(errorStatement, out var exitLabel) && exitLabel is not null
             ? LabelTable[Parent.FoldCase(exitLabel)]

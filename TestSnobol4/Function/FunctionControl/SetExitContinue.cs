@@ -1,3 +1,4 @@
+using Snobol4.Common;
 using Test.TestLexer;
 
 namespace Test.FunctionControl;
@@ -50,5 +51,20 @@ END").Replace("\r\n", "\n"));
         A = 1                          :(CONTINUE)
 end");
         Assert.AreEqual(37, bare.ErrorCodeHistory[0]);
+    }
+
+    [TestMethod]
+    public void TEST_SetExit_firing_disarms_the_trap()
+    {
+        // sbl -bf: taking a SETEXIT trap resets its stored label to null, so SETEXIT('') in the handler answers
+        // the null string (the rungs' keyword_replace_1); snobol4dotnet answered H
+        Assert.AreEqual("PREV=[]", SetupTests.RunWithInputDirectives("-bf", @"        SETEXIT(.H)
+        &ERRLIMIT = 10
+        D = 0
+        X = 1 / D
+        :(END)
+H       OUTPUT = 'PREV=[' SETEXIT('') ']'
+        :(END)
+END"));
     }
 }

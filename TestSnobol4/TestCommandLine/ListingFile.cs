@@ -53,4 +53,33 @@ END");
         }
         finally { Directory.Delete(dir, true); }
     }
+
+    [TestMethod]
+    public void TEST_ListingFile_listing_controls_are_silent()
+    {
+        // sbl -b accepts -TITLE, -STITL, -PRINT, -NOPRINT, -DOUBLE, -OPTIMIZE, -NOOPTIMIZE and -EJECT without a
+        // word (testpgms' test6 starts with -TITLE); snobol4dotnet warned on standard error for most of them
+        var oldError = Console.Error;
+        using var error = new StringWriter();
+        Console.SetError(error);
+        try
+        {
+            var output = SetupTests.RunWithInput(@"-TITLE A TITLE
+-STITL SUB
+-PRINT
+-NOPRINT
+-DOUBLE
+-OPTIMIZE
+-NOOPTIMIZE
+-EJECT
+        OUTPUT = 'ok'
+END");
+            Assert.AreEqual("ok", output);
+            Assert.AreEqual("", error.ToString());
+        }
+        finally
+        {
+            Console.SetError(oldError);
+        }
+    }
 }

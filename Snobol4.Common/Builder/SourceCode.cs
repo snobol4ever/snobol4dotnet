@@ -476,18 +476,9 @@ public class SourceCode
                 ProcessLineDirective(directive);
                 break;
 
-            case "print":
-            case "noprint":
-            case "double":
-            case "on":
-            case "nooptimize":
-            case "optimize":
-            case "stitl":
-            case "title":
-                Console.Error.WriteLine($"WARNING: Directive -{match.Trim()} in {pathName} ignored");
-                break;
-
-            // SPITBOL ignores a control it does not know (the manual; sbl is silent on -HIDE, -PLUSOPS)
+            // Listing controls (-TITLE, -STITL, -PRINT, -DOUBLE, -OPTIMIZE, ...) shape only SPITBOL's listing,
+            // which this compiler does not lay out, and SPITBOL ignores a control it does not know (the manual;
+            // sbl is silent on -HIDE, -PLUSOPS): all are accepted silently, as sbl accepts them
             default:
                 break;
         }

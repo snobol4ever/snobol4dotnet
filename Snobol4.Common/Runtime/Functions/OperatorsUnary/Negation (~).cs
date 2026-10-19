@@ -4,6 +4,7 @@ public partial class Executive
 {
                         internal void Negation(List<Var> arguments)
     {
+        ReadInputOperand();
         var v = SystemStack.Peek();
         var operand = SystemStack.Count - 1;
 
@@ -17,5 +18,17 @@ public partial class Executive
         Failure = !Failure;
         v.Succeeded = !Failure;
         FailureOrigin = Failure ? operand : int.MaxValue;
+    }
+
+    // ~ and ? take their operand off the stack themselves, so an input-associated variable there (?INPUT,
+    // ~F) is read here, as any operand would be; end of input is the operand's failure
+    private void ReadInputOperand()
+    {
+        if (Failure || SystemStack.Peek().InputChannel == "")
+            return;
+
+        var read = InputArgument(SystemStack.Pop());
+        if (!Failure)
+            SystemStack.Push(read);
     }
 }

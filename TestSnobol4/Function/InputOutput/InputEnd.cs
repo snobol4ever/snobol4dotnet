@@ -46,4 +46,20 @@ END", "one\ntwo").Replace("\r\n", "\n"));
         OUTPUT = A '|' B
 END", "one\ntwo").Replace("\r\n", "\n"));
     }
+
+    [TestMethod]
+    public void TEST_InputEnd_predicates_read_their_input_operand()
+    {
+        // sbl -b with input a/b/c answers 3 then 2: ?INPUT and ~INPUT read a line each, and end of input fails
+        // ?INPUT and lets ~INPUT succeed (aisnobol's HSORT counts lines with N = ?INPUT N + 1); snobol4dotnet
+        // read nothing and looped forever
+        Assert.AreEqual("3\n2", SetupTests.RunWithInput(@"        N = 0
+C       N = ?INPUT N + 1               :S(C)
+        OUTPUT = N
+END", "a\nb\nc") + "\n" + SetupTests.RunWithInput(@"        N = 0
+C       ~INPUT                         :S(E)
+        N = N + 1                      :(C)
+E       OUTPUT = N
+END", "a\nb"));
+    }
 }

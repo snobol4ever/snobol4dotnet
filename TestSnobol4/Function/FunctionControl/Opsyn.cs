@@ -624,4 +624,24 @@ end");
         Assert.AreEqual("failed", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R")]).Data);
         Assert.AreEqual("", build.Execute!.IdentifierTable[build.FoldCase("CALLS")].ToString());
     }
+
+    [TestMethod]
+    public void TEST_Opsyn_function_to_itself_keeps_it()
+    {
+        // sbl -bf: OPSYN('F','F') leaves F as it is, so after F. is made the old F and F is redefined, F calls
+        // the new body, which calls F. (Gimpel's REDEFINE ends with OPSYN(OP, NAME, N), OP and NAME the same);
+        // snobol4dotnet removed F before looking it up and F became undefined (error 22)
+        var build = SetupTests.SetupScript("-bf", """
+                 DEFINE('F(S)')                 :(FE)
+         F       F = 'old(' S ')'               :(RETURN)
+         F2      F = 'new[' F.(S) ']'           :(RETURN)
+         FE      OPSYN('F.', 'F')
+                 DEFINE('F(S)', 'F2')
+                 OPSYN('F', 'F')
+                 R = F('x') ' ' F.('y')
+         END
+         """);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("new[old(x)] old(y)", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
+    }
 }

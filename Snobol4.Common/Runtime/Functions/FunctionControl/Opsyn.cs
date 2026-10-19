@@ -67,9 +67,12 @@ public partial class Executive
                     return;
                 }
 
+                // the existing function is taken before the new name is cleared, so OPSYN(F, F) keeps F, as in
+                // SPITBOL (Gimpel's REDEFINE ends with one)
+                var existingFunctionEntry = FunctionTable[existingFunction];
+                UserFunctionTable.TryGetValue(existingFunction, out var existingUserEntry);
                 FunctionTable.Remove(newFunction);
                 UserFunctionTable.Remove(newFunction);
-                var existingFunctionEntry = FunctionTable[existingFunction];
                 if (existingFunctionEntry == null)
                     break;   // an undefined function's synonym is undefined too: a call is error 22
                 FunctionTable.Add(newFunction, new FunctionTableEntry(this, newFunction, existingFunctionEntry.Handler, existingFunctionEntry.ArgumentCount, false));
@@ -77,7 +80,7 @@ public partial class Executive
                 // under the new name. The FunctionName field stays as the ORIGINAL name
                 // so ExecuteProgramDefinedFunction resolves the return variable correctly:
                 // e.g. opsyn(.facto,'fact') → facto body still writes to 'fact', not 'facto'.
-                if (UserFunctionTable.TryGetValue(existingFunction, out var existingUserEntry))
+                if (existingUserEntry != null)
                     UserFunctionTable[newFunction] = new UserFunctionTableEntry(
                         existingUserEntry.FunctionName,   // original name = return var name
                         existingUserEntry.Prototype,

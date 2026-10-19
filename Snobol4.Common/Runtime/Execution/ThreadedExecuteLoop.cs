@@ -295,6 +295,21 @@ public partial class Executive
         Done:
         // A SETEXIT handler's :(CONTINUE) resumes at the failure exit of the statement in error, as in
         // SPITBOL: its :F label, else its unconditional goto, else the next statement
+        // :(CONTINUE) with no trapped error pending is itself error 37, which a SETEXIT handler traps
+        if (exitCode == -6 && _continueStatement < 0 && overrideThread == null)
+        {
+            LogRuntimeException(37);
+            SystemStack.Pop();
+            if (OnErrorGoto > 0)
+            {
+                ProcessTrappedErrorThreaded();
+                _trapTaken = false;
+                thread = Thread!;
+                exitCode = -1;
+                goto Restart;
+            }
+        }
+
         if (exitCode == -6 && _continueStatement >= 0 && overrideThread == null)
         {
             var resumeAt = StatementIndexToInstrIndex(_continueStatement);

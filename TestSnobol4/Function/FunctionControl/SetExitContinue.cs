@@ -31,4 +31,24 @@ END").Replace("\r\n", "\n");
         Assert.AreEqual("trace 262\nnext\noops", Run("R = N1 / N0"));
         Assert.AreEqual("trace 262\noops", Run("R = N1 / N0 :(OOPS)"));
     }
+
+    [TestMethod]
+    public void TEST_SetExit_continue_without_an_error_is_error_37()
+    {
+        // sbl -b: :(CONTINUE) with no trapped error is error 37, which the SETEXIT handler traps
+        // (snobol4dotnet's own Test.sno); without a handler it ends the run with 37
+        Assert.AreEqual("2\nError trapped", SetupTests.RunWithInput(@"        SETEXIT(.ERR)
+        &ERRLIMIT = 100
+        A = 2
+        OUTPUT = A
+        A = 1 / 2                      :(CONTINUE)
+        OUTPUT = 'RETURN'              :(END)
+ERR     OUTPUT = 'Error trapped'
+END").Replace("\r\n", "\n"));
+
+        var bare = SetupTests.SetupScript("-b", @"
+        A = 1                          :(CONTINUE)
+end");
+        Assert.AreEqual(37, bare.ErrorCodeHistory[0]);
+    }
 }

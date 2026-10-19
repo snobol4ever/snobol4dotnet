@@ -265,7 +265,9 @@ end";
 end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
-        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        // sbl -b: a goto to CONTINUE with no trapped error is error 37 (goto continue with no preceding error)
+        Assert.AreEqual(1, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(37, build.ErrorCodeHistory[0]);
     }
 
 

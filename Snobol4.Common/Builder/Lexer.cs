@@ -246,20 +246,32 @@ public partial class Lexer
         }
     }
 
+    // A statement in error does not stop the compile: every error is reported and the statements after
+    // it (their labels too) are compiled, as in SPITBOL; the statement itself compiles to nothing and is
+    // marked, so reaching it under -k or -ERRORS is error 7
     private bool LexLines()
     {
+        var allLexed = true;
         foreach (var sourceLine in _parent.Code.SourceLines.Where(line => !line.Compiled))
         {
             _parent.BuildOptions.CaseFolding = sourceLine.CaseFolding;
             if (!LexLine(sourceLine))
-                return false;
+            {
+                allLexed = false;
+                sourceLine.CompileError = true;
+                sourceLine.LexBody.Clear();
+                sourceLine.LexFailureGoto.Clear();
+                sourceLine.LexSuccessGoto.Clear();
+                sourceLine.LexUnconditionalGoto.Clear();
+                continue;
+            }
             ConvertUnaryStarOperatorsToDeferredExpressions(sourceLine.LexBody);
             ConvertUnaryStarOperatorsToDeferredExpressions(sourceLine.LexFailureGoto);
             ConvertUnaryStarOperatorsToDeferredExpressions(sourceLine.LexSuccessGoto);
             ConvertUnaryStarOperatorsToDeferredExpressions(sourceLine.LexUnconditionalGoto);
         }
 
-        return true;
+        return allLexed;
     }
 
 

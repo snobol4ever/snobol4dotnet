@@ -112,7 +112,7 @@ public class SaveDllTests
     [TestMethod]
     public void WriteDll_HelloWorld_DllExists()
     {
-        var script = "  OUTPUT = 'hello world'"+ Environment.NewLine + "  END"+ Environment.NewLine + "";
+        var script = "  OUTPUT = 'hello world'"+ Environment.NewLine + "END"+ Environment.NewLine + "";
         var dllPath = SaveScriptAsDll(script, "hello_world");
 
         Assert.IsTrue(File.Exists(dllPath),
@@ -145,7 +145,7 @@ public class SaveDllTests
     [TestMethod]
     public void WriteDll_HelloWorld_RunProducesOutput()
     {
-        var script  = "  OUTPUT = 'hello world'"+ Environment.NewLine + "  END"+ Environment.NewLine + "";
+        var script  = "  OUTPUT = 'hello world'"+ Environment.NewLine + "END"+ Environment.NewLine + "";
         var dllPath = SaveScriptAsDll(script, "hello_world_run");
 
         Assert.IsTrue(File.Exists(dllPath), $"DLL not found: {dllPath}");
@@ -167,7 +167,7 @@ public class SaveDllTests
             "  N = 6",
             "  RESULT = N * 7",
             "  OUTPUT = 'answer=' RESULT",
-            "  END",
+            "END",   // in column 1: an indented END is no END statement (sbl: "No END statement found")
             "");
 
         // Direct run

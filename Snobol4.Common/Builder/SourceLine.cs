@@ -4,6 +4,9 @@ public class SourceLine
 {
     // Whether statement has already been compiled
     internal bool Compiled { get; set; }
+
+    // The statement did not compile; it keeps its label, and reaching it is error 7 (sbl -k)
+    internal bool CompileError { get; set; }
     // Case folding as it stood when the line was read: a -CASE control acts from its own line on
     internal bool CaseFolding { get; }
 

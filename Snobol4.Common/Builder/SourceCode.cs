@@ -464,6 +464,16 @@ public class SourceCode
                 _parent.BuildOptions.SuppressExecution = true;
                 break;
 
+            // -ERRORS runs the program despite compilation errors, as -k does; -NOERRORS, the default,
+            // does not run it
+            case "errors":
+                _parent.BuildOptions.RunDespiteCompileErrors = true;
+                break;
+
+            case "noerrors":
+                _parent.BuildOptions.RunDespiteCompileErrors = false;
+                break;
+
             case "list":
                 _parent.BuildOptions.ListSource = true;
                 break;

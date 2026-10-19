@@ -24,7 +24,7 @@
 // -h   SuppressListingHeader
 // -iN  HeapIncrementBytes (default 128k) — recorded; .NET GC expands automatically
 // -j   [UNASSIGNED]
-// -k   StopOnRuntimeError
+// -k   RunDespiteCompileErrors — run even with compilation errors (-ERRORS)
 // -l   ShowListing
 // -mN  MaxObjectBytes → initialises &MAXLNGTH (default 16m, as sbl)
 // -n   SuppressExecution
@@ -209,7 +209,7 @@ public partial class Builder
                 break;
 
             case "-k":
-                BuildOptions.StopOnRuntimeError = true;
+                BuildOptions.RunDespiteCompileErrors = true;
                 break;
 
             case "-l":

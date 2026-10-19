@@ -54,6 +54,17 @@ public partial class Executive
 
     // A statement begins: the one that began before it becomes &LASTNO, as in SPITBOL, where a
     // function body's first statement reads the calling statement as its last
+    // Statements that did not compile (indices); reaching one is error 7, as under sbl -k
+    internal readonly HashSet<int> ErroneousStatements = [];
+
+    // Called once a statement's state is reset: a statement that did not compile is error 7, an ordinary
+    // error that SETEXIT can catch and &ERRLIMIT can absorb; the statement then does nothing
+    internal void CheckCompiledStatement(int index)
+    {
+        if (ErroneousStatements.Count > 0 && ErroneousStatements.Contains(index))
+            LogRuntimeException(7);
+    }
+
     internal void BeginStatement(int index)
     {
         AmpLastLineNumber = _statementBegun ? AmpCurrentLineNumber : -1;

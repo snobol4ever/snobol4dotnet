@@ -150,8 +150,9 @@ public partial class Builder : IDisposable
             if (BuildOptions.WriteDll) SaveDll();
             _timerBuild.Stop();
             PrintCompilationStatistics();
-            // -n or -NOEXECUTE: compile (and write -w's file) but do not run, as in SPITBOL
-            if (!BuildOptions.SuppressExecution)
+            // -n or -NOEXECUTE: compile (and write -w's file) but do not run, as in SPITBOL; nor does a
+            // program with compilation errors run, unless -k or -ERRORS asks for it
+            if (!BuildOptions.SuppressExecution && (ErrorCodeHistory.Count == 0 || BuildOptions.RunDespiteCompileErrors))
             {
                 Execute.StartTimer();
                 Execute.ExecuteLoop(0);
@@ -328,6 +329,8 @@ public partial class Builder : IDisposable
                 // SourceLines silently returns 0, producing wrong stno on
                 // the wire.  GOAL-NET-BEAUTY-SELF session #58.
                 Execute.SourceStno.Add((long)(stmtNumber + 1 + line.BlankLineCount));
+                if (line.CompileError)
+                    Execute.ErroneousStatements.Add(stmtNumber);
             }
             stmtNumber++;
         }

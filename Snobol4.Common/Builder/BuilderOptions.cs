@@ -33,9 +33,10 @@ public class BuilderOptions
     public bool SuppressListingHeader { get; set; }
 
     /// <summary>
-    /// Gets or sets whether to stop on runtime errors. Command line: -k
+    /// Gets or sets whether to run a program that has compilation errors. SPITBOL does not by default
+    /// (-NOERRORS); -k or the -ERRORS control runs it anyway.
     /// </summary>
-    public bool StopOnRuntimeError { get; set; }
+    public bool RunDespiteCompileErrors { get; set; }
 
     /// <summary>
     /// Gets or sets whether to show the listing. Command line: -l

@@ -95,6 +95,7 @@ public partial class Executive
                     AlphaStack.Clear();
                     BetaStack.Clear();
                     SystemStack.Push(new StatementSeparator());
+                    CheckCompiledStatement(instr.IntOperand);
                     // Monitor bridge — LABEL event (SN-26-bridge-coverage-f).
                     // Use precomputed Execute.SourceStno — Parent.Code is
                     // replaced by EVAL/CODE at runtime; a BlankLineCount

@@ -100,8 +100,13 @@ public partial class Builder
 
         var ce = new CompilerException(code, cursorCurrent, message);
         SaveExceptionHistory(ce);
-        Console.Error.WriteLine(message);
+        if (!QuietCompile)
+            Console.Error.WriteLine(message);
     }
+
+    // Set while EVAL compiles its argument: a compile error there makes EVAL fail, as in SPITBOL, and
+    // prints nothing
+    internal bool QuietCompile;
 
     /// <summary>
     /// Builds a formatted error message with source context and error location pointer.

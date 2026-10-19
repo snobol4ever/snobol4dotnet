@@ -122,8 +122,10 @@ public partial class Executive
         var fileModeInt = (long)fileModeObj;
         var fileShareInt = (long)fileShareObj;
 
+        // the file must exist, as SPITBOL's INPUT requires (a missing file fails); FileMode.Open, not
+        // OpenOrCreate, which made an empty file and succeeded
         if (arguments[3] is StringVar { Data: "" })
-            fileModeInt = 4;
+            fileModeInt = (long)FileMode.Open;
         if (arguments[4] is StringVar { Data: "" })
             fileShareInt = 3;
 

@@ -127,4 +127,20 @@ END", "apple\nbanana").Replace("\r\n", "\n"));
 BAD     OUTPUT = 'failed'
 END", "one\ntwo\nthree").Replace("\r\n", "\n"));
     }
+
+    [TestMethod]
+    public void TEST_InputEnd_missing_file_fails_and_is_not_created()
+    {
+        // sbl -bf: INPUT of a file that does not exist fails and creates nothing; snobol4dotnet opened it with
+        // OpenOrCreate, made an empty file and succeeded
+        var file = Path.Combine(Path.GetTempPath(), "snomissing_" + Guid.NewGuid().ToString("N") + ".txt");
+        var build = SetupTests.SetupScript("-bf", $"""
+                         INPUT(.X, 7, '{file}')   :F(F)
+                         R = 'opened'             :(END)
+                 F       R = 'failed'
+                 END
+                 """);
+        Assert.AreEqual("failed", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
+        Assert.IsFalse(File.Exists(file));
+    }
 }

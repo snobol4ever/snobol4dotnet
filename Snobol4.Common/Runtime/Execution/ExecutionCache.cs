@@ -195,8 +195,8 @@ public partial class Executive
         if (SystemStack.ExtractArguments(argumentCount, _reusableArgList, this))
             return;
         // the name operator takes its operand's name, so .INPUT reads no line, as in SPITBOL
-        if (op != OpCode.OpName)
-            InputArguments(_reusableArgList);
+        if (op != OpCode.OpName && InputArguments(_reusableArgList))
+            return;
         var handler = OperatorHandlers![(int)op]!;
         // ExecuteProgramDefinedFunction expects arguments[^1] to be a function-name StringVar
         // (appended by Function() in the normal call path). OperatorFast bypasses Function()

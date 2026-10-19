@@ -75,4 +75,19 @@ END", "a\nb"));
         OUTPUT = X ' ' Y ' ' INPUT
 END", "one\ntwo\nthree"));
     }
+
+    [TestMethod]
+    public void TEST_InputEnd_subscripts_and_arguments_fail_at_end_of_input()
+    {
+        // sbl -bf: an input-associated subscript or function argument reads a line, and at end of input the
+        // statement fails, so T[W] = 0 :S(L) and OUTPUT = SIZE(W) :S(L) stop when the input does (the dotnet
+        // package's asgn1 builds its dictionary so); snobol4dotnet never read the subscript and looped forever,
+        // and ran the function on the failed read
+        Assert.AreEqual("0 3,2", SetupTests.RunWithInput(@"        T = TABLE()
+L       T[INPUT] = 0                   :S(L)
+        OUTPUT = T['banana'] ' ' PROTOTYPE(CONVERT(T,'ARRAY'))
+END", "apple\nbanana\ncherry"));
+        Assert.AreEqual("5\n6", SetupTests.RunWithInput(@"L       OUTPUT = SIZE(INPUT)           :S(L)
+END", "apple\nbanana").Replace("\r\n", "\n"));
+    }
 }

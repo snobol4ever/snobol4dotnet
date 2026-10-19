@@ -39,8 +39,9 @@ public partial class Executive
         for (var i = arguments.Count; i < functionEntry.ArgumentCount; ++i)
             arguments.Add(StringVar.Null());
 
-        // If any arguments have input channels, get input now
-        InputArguments(arguments);
+        // If any arguments have input channels, get input now; at end of input the call fails
+        if (InputArguments(arguments))
+            return;
 
         // Add argument for name of function
         arguments.Add(functionStringVar);
@@ -93,7 +94,8 @@ public partial class Executive
         for (var i = arguments.Count; i < functionEntry.ArgumentCount; ++i)
             arguments.Add(StringVar.Null());
 
-        InputArguments(arguments);
+        if (InputArguments(arguments))
+            return;
         arguments.Add(functionStringVar);
 
         functionEntry.Handler(arguments);

@@ -28,8 +28,8 @@ public partial class Executive
 
         // If any arguments have input channels, get input now; the name operator takes its operand's
         // name, so .INPUT reads no line, as in SPITBOL
-        if (functionName != "_.")
-            InputArguments(arguments);
+        if (functionName != "_." && InputArguments(arguments))
+            return;
 
         var handler = FunctionTable[functionName]!.Handler;
         // a program-defined function reads its name from the last argument, which Function() appends on

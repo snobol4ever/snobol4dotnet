@@ -64,7 +64,8 @@ public partial class Executive
         for (var i = _reusableArgList.Count; i < entry.ArgumentCount; i++)
             _reusableArgList.Add(StringVar.Null());
 
-        InputArguments(_reusableArgList);
+        if (InputArguments(_reusableArgList))
+            return;
 
         // Add the function name as the last argument, matching Function()'s contract.
         _reusableArgList.Add(new StringVar(slot.Symbol));

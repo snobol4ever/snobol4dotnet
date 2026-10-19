@@ -64,7 +64,14 @@ public partial class Executive
             varIndices.Add(SystemStack.Pop());
         }
 
-        switch (SystemStack.Pop())
+        var collection = SystemStack.Pop();
+
+        // An input-associated subscript reads a line, and at end of input the statement fails, as in
+        // SPITBOL (T[W] = 0 :S(L) loops until W's file ends)
+        if (InputArguments(varIndices))
+            return;
+
+        switch (collection)
         {
             case ArrayVar arrayVar:
                 IndexArray(arrayVar, varIndices);

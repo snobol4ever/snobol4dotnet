@@ -207,7 +207,10 @@ public partial class Executive
         return filePath;
     }
 
-    private void InputArguments(List<Var> arguments)
+    // Reads each input-associated argument; at end of input the read fails, as in SPITBOL, and true comes
+    // back with the failure already pushed as the operation's result, so the caller does not run it
+    // (T[W] = 0 :S(L) ends when W's file does)
+    private bool InputArguments(List<Var> arguments)
     {
         for (var i = 0; i < arguments.Count; ++i)
         {
@@ -215,7 +218,11 @@ public partial class Executive
                 continue;
 
             arguments[i] = InputArgument(arguments[i]);
+            if (!arguments[i].Succeeded)
+                return true;
         }
+
+        return false;
     }
 
     // &TRIM nonzero removes a record's trailing blanks and tabs, and nothing else, as SPITBOL does
@@ -266,7 +273,6 @@ public partial class Executive
         }
 
         NonExceptionFailure();
-        inputLine = "";
-        return new StringVar(inputLine);
+        return new StringVar("") { Succeeded = false };
     }
 }

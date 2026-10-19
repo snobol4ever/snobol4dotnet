@@ -59,7 +59,8 @@ public partial class Executive
         if (isIntegerRight)
             dRight = lRight;
 
-        var dResult = realBinaryOperator(dLeft, dRight);
+        // SPITBOL's SSE flags: a subnormal operand counts as zero and a subnormal result becomes zero
+        var dResult = RealVar.Sse(realBinaryOperator(RealVar.Sse(dLeft), RealVar.Sse(dRight)));
 
         if (realBinaryOperator.Method.Name == "RealPower")
         {

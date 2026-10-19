@@ -10,6 +10,13 @@ public sealed class RealVar : Var
 
     public double Data;
 
+    /// <summary>
+    /// A double as SPITBOL's SSE arithmetic leaves it: SPITBOL runs with flush-to-zero and
+    /// denormals-are-zero set (mxcsr 0x9fc0), so a subnormal operand counts as zero and a subnormal result
+    /// becomes zero (2.6e-307 / 2024 is 0., not 1.3e-310).
+    /// </summary>
+    internal static double Sse(double x) => double.IsSubnormal(x) ? (double.IsNegative(x) ? -0.0 : 0.0) : x;
+
     #endregion
 
     #region Strategy Instances (Lazy-loaded singletons for performance)
@@ -66,13 +73,13 @@ public sealed class RealVar : Var
 
     protected internal override Var AddInteger(IntegerVar left, Executive executive)
     {
-        return new RealVar(left.Data + Data);
+        return new RealVar(Sse(Sse(left.Data) + Sse(Data)));
     }
 
 
     protected internal override Var AddReal(RealVar left, Executive executive)
     {
-        var result = left.Data + Data;
+        var result = Sse(Sse(left.Data) + Sse(Data));
 
         if (!double.IsFinite(result))
         {
@@ -86,13 +93,13 @@ public sealed class RealVar : Var
 
     protected internal override Var SubtractInteger(IntegerVar left, Executive executive)
     {
-        return new RealVar(left.Data - Data);
+        return new RealVar(Sse(Sse(left.Data) - Sse(Data)));
     }
 
 
     protected internal override Var SubtractReal(RealVar left, Executive executive)
     {
-        var result = left.Data - Data;
+        var result = Sse(Sse(left.Data) - Sse(Data));
 
         if (!double.IsFinite(result))
         {
@@ -106,13 +113,13 @@ public sealed class RealVar : Var
 
     protected internal override Var MultiplyInteger(IntegerVar left, Executive executive)
     {
-        return new RealVar(left.Data * Data);
+        return new RealVar(Sse(Sse(left.Data) * Sse(Data)));
     }
 
 
     protected internal override Var MultiplyReal(RealVar left, Executive executive)
     {
-        var result = left.Data * Data;
+        var result = Sse(Sse(left.Data) * Sse(Data));
 
         if (!double.IsFinite(result))
         {
@@ -126,25 +133,25 @@ public sealed class RealVar : Var
 
     protected internal override Var DivideInteger(IntegerVar left, Executive executive)
     {
-        if (Data == 0.0)
+        if (Sse(Data) == 0.0)
         {
             executive.LogRuntimeException(14);
             return StringVar.Null();
         }
 
-        return new RealVar(left.Data / Data);
+        return new RealVar(Sse(Sse(left.Data) / Sse(Data)));
     }
 
 
     protected internal override Var DivideReal(RealVar left, Executive executive)
     {
-        if (Data == 0.0)
+        if (Sse(Data) == 0.0)
         {
             executive.LogRuntimeException(14);
             return StringVar.Null();
         }
 
-        var result = left.Data / Data;
+        var result = Sse(Sse(left.Data) / Sse(Data));
 
         if (!double.IsFinite(result))
         {

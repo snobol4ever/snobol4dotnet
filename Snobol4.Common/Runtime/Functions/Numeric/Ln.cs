@@ -8,5 +8,5 @@ public partial class Executive
 {
     internal void Ln(List<Var> arguments) => UnaryNumericOperation(arguments, Ln0, 306, 307, 315);
 
-    internal double Ln0(double dOperand) => Math.Log(dOperand);
+    internal double Ln0(double dOperand) => RealVar.Sse(Math.Log(RealVar.Sse(dOperand)));   // an underflow gives 0., as SPITBOL's f_* routines
 }

@@ -7,5 +7,5 @@ public partial class Executive
 {
     internal void Tan(List<Var> arguments) => UnaryNumericOperation(arguments, Tan0, 309, 310, 0);
 
-    internal double Tan0(double dOperand) => Math.Tan(dOperand);            
+    internal double Tan0(double dOperand) => RealVar.Sse(Math.Tan(RealVar.Sse(dOperand)));   // an underflow gives 0., as SPITBOL's f_* routines            
 }

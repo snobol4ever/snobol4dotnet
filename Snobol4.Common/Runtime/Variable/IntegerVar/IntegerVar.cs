@@ -95,7 +95,7 @@ public sealed class IntegerVar : Var
 
     protected internal override Var AddReal(RealVar left, Executive executive)
     {
-        return new RealVar(left.Data + Data);
+        return new RealVar(RealVar.Sse(RealVar.Sse(left.Data) + Data));
     }
 
 
@@ -120,7 +120,7 @@ public sealed class IntegerVar : Var
 
     protected internal override Var SubtractReal(RealVar left, Executive executive)
     {
-        return new RealVar(left.Data - Data);
+        return new RealVar(RealVar.Sse(RealVar.Sse(left.Data) - Data));
     }
 
 
@@ -160,7 +160,7 @@ public sealed class IntegerVar : Var
 
     protected internal override Var MultiplyReal(RealVar left, Executive executive)
     {
-        return new RealVar(left.Data * Data);
+        return new RealVar(RealVar.Sse(RealVar.Sse(left.Data) * Data));
     }
 
 
@@ -195,7 +195,7 @@ public sealed class IntegerVar : Var
             return StringVar.Null();
         }
 
-        return new RealVar(left.Data / Data);
+        return new RealVar(RealVar.Sse(RealVar.Sse(left.Data) / Data));
     }
 
     #endregion

@@ -7,5 +7,5 @@ public partial class Executive
 {
     internal void Exp(List<Var> arguments) => UnaryNumericOperation(arguments, Exp0, 304, 305, 0);
 
-    internal double Exp0(double dOperand) => Math.Exp(dOperand);
+    internal double Exp0(double dOperand) => RealVar.Sse(Math.Exp(RealVar.Sse(dOperand)));   // an underflow gives 0., as SPITBOL's f_* routines
 }

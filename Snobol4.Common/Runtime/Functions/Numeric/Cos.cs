@@ -7,5 +7,5 @@ public partial class Executive
 {
     internal void Cos(List<Var> arguments) => UnaryNumericOperation(arguments, Cos0, 303, 322, 0);
 
-    internal double Cos0(double dOperand) => Math.Cos(dOperand);
+    internal double Cos0(double dOperand) => RealVar.Sse(Math.Cos(RealVar.Sse(dOperand)));   // an underflow gives 0., as SPITBOL's f_* routines
 }

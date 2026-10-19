@@ -60,4 +60,21 @@ end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("0.947865360609064e+32 0.180495424518334e-277 -250.", build.Execute!.IdentifierTable["R"].ToString());
     }
+
+    [TestMethod]
+    public void TEST_RealFormat_subnormals_flush_to_zero()
+    {
+        // SPITBOL runs SSE with flush-to-zero and denormals-are-zero: a subnormal result is 0. and a
+        // subnormal operand counts as 0 (sbl -b answers 0. -0.246348323958318e-299 0. 0. 0.)
+        var build = SetupTests.SetupScript("-b", @"
+        A = 2.6308364999025599e-307 / 2024.5
+        B = 2.6308364999025777e-310 - 2.4634832395831848e-300
+        C = EXP(-745.0)
+        D = 2.6308364999025602e-300 * 1.2856668694779960e-20
+        E = 1.0e-200 * 1.0e-200
+        R = A ' ' B ' ' C ' ' D ' ' E
+end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("0. -0.246348323958318e-299 0. 0. 0.", build.Execute!.IdentifierTable["R"].ToString());
+    }
 }

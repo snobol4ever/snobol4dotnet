@@ -41,6 +41,7 @@ public partial class Executive
             var streamReader = StreamInputs[channel];
             streamReader.Close();
             StreamInputs.Remove(channel);
+            DropChannelReaders(channel);
         }
 
         if (StreamOutputs.ContainsKey(channel))
@@ -57,5 +58,14 @@ public partial class Executive
         }
 
         PredicateSuccess();
+    }
+
+    // The readers made for a channel go with its stream, so a channel opened again reads its new file
+    internal void DropChannelReaders(string channel)
+    {
+        if (!StreamReadersByChannel.Remove(channel, out var reader))
+            return;
+        foreach (var symbol in StreamReadersBySymbol.Where(kv => ReferenceEquals(kv.Value, reader)).Select(kv => kv.Key).ToList())
+            StreamReadersBySymbol.Remove(symbol);
     }
 }

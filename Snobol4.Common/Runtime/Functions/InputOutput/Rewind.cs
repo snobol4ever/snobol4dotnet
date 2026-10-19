@@ -11,7 +11,10 @@ public partial class Executive
     internal void Rewind(List<Var> arguments)
     {
         if (!arguments[0].Convert(VarType.STRING, out _, out var channelStr, this))
+        {
             LogRuntimeException(172);
+            return;
+        }
 
         var channel = (string)channelStr;
 
@@ -21,7 +24,9 @@ public partial class Executive
             return;
         }
 
-        if (!StreamReadersByChannel.TryGetValue(channel, out var stream))
+        // an input channel rewinds through its reader, made now if nothing has read it yet
+        var stream = ChannelReader(channel);
+        if (stream is null)
         {
             if (!StreamOutputs.TryGetValue(channel, out var streamOut))
             {
@@ -31,16 +36,11 @@ public partial class Executive
 
             streamOut.Position = 0;
             PredicateSuccess();
-        }
-
-        if (stream is not null)
-        {
-            stream.BaseStream.Position = 0;
-            stream.DiscardBufferedData();
-            PredicateSuccess();
             return;
         }
 
-        NonExceptionFailure();
+        stream.BaseStream.Position = 0;
+        stream.DiscardBufferedData();
+        PredicateSuccess();
     }
 }

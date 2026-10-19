@@ -175,6 +175,7 @@ public partial class Executive
         try
         {
             var stream = new FileStream(Path.GetFullPath(fileName), (FileMode)fileModeInt, FileAccess.Read, (FileShare)fileShareInt);
+            DropChannelReaders(channel);
             StreamInputs[channel] = stream;
             IdentifierTable[symbol].InputChannel = channel;
         }

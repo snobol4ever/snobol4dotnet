@@ -194,6 +194,9 @@ public partial class Executive
             {
                 paramVar = arguments[i].Clone();
                 paramVar.Symbol = symbol;
+                // an input or output association belongs to the variable, not its value, as in SPITBOL
+                paramVar.InputChannel = v.InputChannel;
+                paramVar.OutputChannel = v.OutputChannel;
             }
             IdentifierTable[symbol] = paramVar;
         }
@@ -213,8 +216,11 @@ public partial class Executive
             saveVars.Add(v);
             saveSymbols.Add(symbol);
 
-            // Set local variables to the new values
+            // Set local variables to the new values, keeping the variable's input or output association
+            // (a local LIB.FILE still reads its file, as SPITBOL's LOADEX expects)
             var sVar = StringVar.Null(definition.Locals[i]);
+            sVar.InputChannel = v.InputChannel;
+            sVar.OutputChannel = v.OutputChannel;
             IdentifierTable[sVar.Symbol] = sVar;
         }
 
@@ -229,6 +235,8 @@ public partial class Executive
             saveSymbols.Add(returnVarName);
             var entryValue = StringVar.Null(returnVarName);
             entryValue.IsReadOnly = callerValue.IsReadOnly;
+            entryValue.InputChannel = callerValue.InputChannel;
+            entryValue.OutputChannel = callerValue.OutputChannel;
             IdentifierTable[returnVarName] = entryValue;
         }
 

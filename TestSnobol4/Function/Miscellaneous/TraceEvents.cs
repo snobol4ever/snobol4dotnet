@@ -1,3 +1,4 @@
+using Snobol4.Common;
 using Test.TestLexer;
 
 namespace Test.Miscellaneous;
@@ -142,5 +143,23 @@ end");
         B P =
         OUTPUT = B
 END").Replace("\r\n", "\n"));
+    }
+
+    [TestMethod]
+    public void TEST_Stoptr_returns_null()
+    {
+        // sbl -b: STOPTR returns the null string, so STOPTR(F,'CALL') STOPTR(F,'RETURN') concatenates to ''
+        // (aisnobol's LTRACE does this); snobol4dotnet pushed nothing and crashed with an empty stack
+        var build = SetupTests.SetupScript("-b", """
+                 DEFINE('F()')                  :(FE)
+         F                                      :(RETURN)
+         FE      TRACE('F','CALL')
+                 TRACE('F','RETURN')
+                 X = STOPTR('F','CALL') STOPTR('F','RETURN')
+                 R = DATATYPE(X) '[' X ']'
+         end
+         """);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("STRING[]", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R")]).Data);
     }
 }

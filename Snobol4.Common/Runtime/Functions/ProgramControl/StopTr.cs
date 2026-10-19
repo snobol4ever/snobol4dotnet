@@ -61,5 +61,8 @@ public partial class Executive
                 LogRuntimeException(191);
                 return;
         }
+
+        // STOPTR returns the null string, as in SPITBOL
+        PredicateSuccess();
     }
 }

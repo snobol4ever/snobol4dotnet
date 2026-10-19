@@ -22,7 +22,7 @@
 // -F   CaseFolding ON
 // -gN  LinesPerPage for listings (default 60)
 // -h   SuppressListingHeader
-// -iN  HeapIncrementBytes (default 128k) — recorded; .NET GC expands automatically
+// -iN  HeapIncrementBytes (default 1m, as sbl) — HOST(-1,0); .NET GC expands automatically
 // -j   [UNASSIGNED]
 // -k   RunDespiteCompileErrors — run even with compilation errors (-ERRORS)
 // -l   ShowListing
@@ -32,7 +32,7 @@
 // -p   PrinterListing — wide titles for printer
 // -q   [UNASSIGNED]
 // -r   InputAfterEndStatement
-// -sN  StackSizeBytes (default 32k)
+// -sN  StackSizeBytes (default 4m, as sbl)
 // -tN  PageWidth for listings (default 120)
 // -u   Host Parameter string (HOST(0))
 // -v   Generate Debug Symbols

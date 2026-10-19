@@ -129,13 +129,13 @@ public class BuilderOptions
     /// Gets or sets the maximum dynamic heap size in bytes. Command line: -dN (default 64m)
     /// Under .NET the GC manages the heap; this value is recorded and exposed via HOST().
     /// </summary>
-    public long HeapMaxBytes { get; set; } = 64 * 1024 * 1024;
+    public long HeapMaxBytes { get; set; } = 128 * 1024 * 1024;   // sbl's default -d, HOST(-1,1)
 
     /// <summary>
     /// Gets or sets the heap increment size in bytes. Command line: -iN (default 128k)
     /// Under .NET the GC expands automatically; recorded for compatibility.
     /// </summary>
-    public long HeapIncrementBytes { get; set; } = 128 * 1024;
+    public long HeapIncrementBytes { get; set; } = 1024 * 1024;   // sbl's default -i, HOST(-1,0)
 
     /// <summary>
     /// Gets or sets the maximum object size in bytes, initialising &amp;MAXLNGTH. Command line: -mN (default 4m)
@@ -146,7 +146,7 @@ public class BuilderOptions
     /// Gets or sets the maximum stack size in bytes. Command line: -sN (default 32k)
     /// Used as the thread stack size when creating the execution thread.
     /// </summary>
-    public int StackSizeBytes { get; set; } = 32 * 1024;
+    public int StackSizeBytes { get; set; } = 4 * 1024 * 1024;   // sbl's default -s
 
     // ── SPITBOL switches: save files ────────────────────────────────────────
 

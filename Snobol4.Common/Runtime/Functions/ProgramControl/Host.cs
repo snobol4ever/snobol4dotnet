@@ -12,6 +12,8 @@ using System.Management;
 //   HOST(2, i)    word i of the command line (0 is the program's own path); fails past the end
 //   HOST(3)       the index of the first word after the program's files
 //   HOST(4, name) the environment variable name; fails when it is not set
+//   HOST(-1, n)   storage figures: 0 the -i increment, 1 the -d heap, 2 and 3 the heap's base and top,
+//                 4 the -s stack, 5 and 7 the stack in use and its high-water mark, 6 the word size
 //   anything else is error 254
 
 public partial class Executive
@@ -46,6 +48,10 @@ public partial class Executive
 
                 case 4:
                     HostEnvironment(arguments[1]);
+                    return;
+
+                case -1:
+                    HostStorage(arguments[1]);
                     return;
 
                 default:
@@ -150,5 +156,37 @@ public partial class Executive
         {
             LogRuntimeException(255);
         }
+    }
+
+    // HOST(-1, n): the storage figures sbl answers; the heap's addresses and the stack's use are this
+    // runtime's own (sbl's are addresses in its own space), the switches' figures are the switches'
+    private void HostStorage(Var selector)
+    {
+        if (!selector.Convert(VarType.INTEGER, out _, out var n, this))
+        {
+            LogRuntimeException(254);
+            return;
+        }
+
+        var options = Parent.BuildOptions;
+        long? figure = (long)n switch
+        {
+            0 => options.HeapIncrementBytes,
+            1 => options.HeapMaxBytes,
+            2 => 0,
+            3 => options.HeapMaxBytes,
+            4 => options.StackSizeBytes,
+            5 or 7 => 0,
+            6 => IntPtr.Size,
+            _ => null
+        };
+
+        if (figure is null)
+        {
+            LogRuntimeException(254);
+            return;
+        }
+
+        SystemStack.Push(new IntegerVar(figure.Value));
     }
 }

@@ -138,8 +138,9 @@ public class SpitbolSwitchTests
     public void TEST_Switch_d_Default()
     {
         var b = Parse("-b");
-        Assert.AreEqual(64L * 1024 * 1024, b.BuildOptions.HeapMaxBytes,
-            "Default HeapMaxBytes should be 64m");
+        // sbl -h: "option defaults: -F -d128m -i1m -m16m -s4m"
+        Assert.AreEqual(128L * 1024 * 1024, b.BuildOptions.HeapMaxBytes,
+            "Default HeapMaxBytes should be 128m, as sbl's");
     }
 
     [TestMethod]
@@ -169,8 +170,9 @@ public class SpitbolSwitchTests
     public void TEST_Switch_i_Default()
     {
         var b = Parse("-b");
-        Assert.AreEqual(128L * 1024, b.BuildOptions.HeapIncrementBytes,
-            "Default HeapIncrementBytes should be 128k");
+        // sbl -h: "option defaults: -F -d128m -i1m -m16m -s4m"
+        Assert.AreEqual(1024L * 1024, b.BuildOptions.HeapIncrementBytes,
+            "Default HeapIncrementBytes should be 1m, as sbl's");
     }
 
     [TestMethod]
@@ -233,8 +235,9 @@ public class SpitbolSwitchTests
     public void TEST_Switch_s_Default()
     {
         var b = Parse("-b");
-        Assert.AreEqual(32 * 1024, b.BuildOptions.StackSizeBytes,
-            "Default StackSizeBytes should be 32k");
+        // sbl -h: "option defaults: -F -d128m -i1m -m16m -s4m"
+        Assert.AreEqual(4 * 1024 * 1024, b.BuildOptions.StackSizeBytes,
+            "Default StackSizeBytes should be 4m, as sbl's");
     }
 
     [TestMethod]

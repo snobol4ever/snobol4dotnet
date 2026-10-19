@@ -199,7 +199,7 @@ public partial class Executive
             { "FIELD", new FunctionTableEntry(this, "field", Field, 2,true)},
             { "GE", new FunctionTableEntry(this, "ge", Ge, 2,  true) },
             { "GT", new FunctionTableEntry(this, "gt", Gt, 2,  true) },
-            { "HOST", new FunctionTableEntry(this, "host", Host, 1,  true) },
+            { "HOST", new FunctionTableEntry(this, "host", Host, 2,  true) },
             { "IDENT", new FunctionTableEntry(this, "ident", Ident, 2,  true) },
             { "INPUT", new FunctionTableEntry(this, "input", InputFileOpen, 5,  true)},
             { "INTEGER", new FunctionTableEntry(this, "integer", Integer, 1,  true)},

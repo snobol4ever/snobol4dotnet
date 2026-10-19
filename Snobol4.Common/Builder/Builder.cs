@@ -53,6 +53,13 @@ public partial class Builder : IDisposable
     }
     public List<string> FilesToCompile = new(4);
     internal string[] Arguments = [];
+    // The command line as given (without the program's own path), the index in it of the first source
+    // file, and the words after the files that held the program, which are the program's arguments
+    internal string[] CommandWords = [];
+    internal int FirstFileWord = -1;
+    internal List<string> ProgramArguments = [];
+    internal int FilesRead;
+    internal bool HostParameterGiven;
     public SourceCode Code;
     public Executive? Execute;
     internal List<DeferredExpression> ExpressionList = new(32);

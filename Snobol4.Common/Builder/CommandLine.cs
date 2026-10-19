@@ -51,14 +51,17 @@ public partial class Builder
         var count = 0;
         var hostParameterIsNext = false;
 
-        // Default value of HOST(0) is the concatenationof all command line arguments.
-        BuildOptions.HostParameter = string.Join(" ", commandLine);
+        // HOST(0) is the -u string, or else the words after the program's files (set once they are read)
+        BuildOptions.HostParameter = "";
+        CommandWords = commandLine;
 
-        foreach (var arg in commandLine)
+        for (var word = 0; word < commandLine.Length; word++)
         {
+            var arg = commandLine[word];
             if (hostParameterIsNext)
             {
                 BuildOptions.HostParameter = arg;
+                HostParameterGiven = true;
                 hostParameterIsNext = false;
                 continue;
             }
@@ -75,6 +78,8 @@ public partial class Builder
                 continue;
             }
 
+            if (commandMode)
+                FirstFileWord = word;
             commandMode = false;
             FilesToCompile.Add(arg);
         }

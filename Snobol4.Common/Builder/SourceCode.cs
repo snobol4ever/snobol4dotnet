@@ -75,6 +75,9 @@ public class SourceCode
 
         try
         {
+            // Files are read until one holds END; the words after it are the program's arguments
+            // (HOST(0), HOST(2,n)), as SPITBOL takes them
+            var used = 0;
             foreach (var fileName in _parent.FilesToCompile.Select(AdjustFileExtension))
             {
                 var directoryName = Path.GetDirectoryName(fileName);
@@ -85,7 +88,16 @@ public class SourceCode
                 PathList.Add(fullPath);
                 using StreamReader sourceFileReader = new(fullPath, Encoding.UTF8);
                 ReadFile(sourceFileReader, fullPath);
+                used++;
+                if (EndFound)
+                    break;
             }
+
+            _parent.FilesRead = used;
+            _parent.ProgramArguments = _parent.FilesToCompile.Skip(used).ToList();
+            _parent.FilesToCompile.RemoveRange(used, _parent.FilesToCompile.Count - used);
+            if (!_parent.HostParameterGiven)
+                _parent.BuildOptions.HostParameter = string.Join(" ", _parent.ProgramArguments);
         }
         catch (IOException e)
         {

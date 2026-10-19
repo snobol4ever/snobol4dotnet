@@ -80,10 +80,8 @@ public class SourceCode
             var used = 0;
             foreach (var fileName in _parent.FilesToCompile.Select(AdjustFileExtension))
             {
-                var directoryName = Path.GetDirectoryName(fileName);
-                if (!string.IsNullOrEmpty(directoryName))
-                    Directory.SetCurrentDirectory(directoryName);
-
+                // the working directory stays where the program was started: relative file names and
+                // includes resolve from there, as in SPITBOL, not from the source file's directory
                 var fullPath = Path.GetFullPath(fileName);
                 PathList.Add(fullPath);
                 using StreamReader sourceFileReader = new(fullPath, Encoding.UTF8);

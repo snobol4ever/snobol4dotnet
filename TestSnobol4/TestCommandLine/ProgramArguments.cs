@@ -64,4 +64,38 @@ END
             Directory.Delete(dir, true);
         }
     }
+
+    [TestMethod]
+    public void TEST_ProgramArguments_relative_files_resolve_from_the_working_directory()
+    {
+        // sbl -b ../src/p.sno run from run/: the include and the output file both resolve in run/, not in the
+        // source's directory
+        var root = Path.Combine(Path.GetTempPath(), "snocwd_" + Guid.NewGuid().ToString("N"));
+        var src = Path.Combine(root, "src");
+        var run = Path.Combine(root, "run");
+        Directory.CreateDirectory(src);
+        Directory.CreateDirectory(run);
+        File.WriteAllText(Path.Combine(src, "p.sno"), @"        OUTPUT('F', 7, 'out.txt')
+        F = 'hello'
+        ENDFILE(7)
+-INCLUDE 'inc.inc'
+END
+");
+        File.WriteAllText(Path.Combine(src, "inc.inc"), "        WHERE = 'src'\n");
+        File.WriteAllText(Path.Combine(run, "inc.inc"), "        WHERE = 'run'\n");
+        var oldCwd = Directory.GetCurrentDirectory();
+        try
+        {
+            Directory.SetCurrentDirectory(run);
+            var build = Run("-b", Path.Combine("..", "src", "p.sno"));
+            Assert.AreEqual("run", build.Execute!.IdentifierTable["WHERE"].ToString());
+            Assert.IsTrue(File.Exists(Path.Combine(run, "out.txt")));
+            Assert.IsFalse(File.Exists(Path.Combine(src, "out.txt")));
+        }
+        finally
+        {
+            Directory.SetCurrentDirectory(oldCwd);
+            Directory.Delete(root, true);
+        }
+    }
 }

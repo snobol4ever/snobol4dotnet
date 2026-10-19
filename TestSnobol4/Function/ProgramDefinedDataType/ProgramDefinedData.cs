@@ -154,4 +154,26 @@ end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("3 4 PT 9 9", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R")]).Data);
     }
+
+    [TestMethod]
+    public void TEST_ProgramDefinedData_field_of_wrong_datatype_is_error_41()
+    {
+        // sbl -b: a field function applied to a string, an object of another DATA type, a pattern or null is
+        // error 41 (four errors, each caught and resumed); snobol4dotnet failed quietly or crashed
+        var build = SetupTests.SetupScript("-b", """
+                 &ERRLIMIT = 10
+                 SETEXIT(.H)
+                 DATA('P(F)')
+                 DATA('Q(G)')
+                 X = F('x')
+                 X = F(Q(1))
+                 X = F(LEN(1))
+                 X = F()
+                 R = R 'end'                    :(END)
+         H       R = R &ERRTYPE ' '
+                 SETEXIT(.H)                    :(CONTINUE)
+         END
+         """);
+        Assert.AreEqual("41 41 41 41 end", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R")]).Data);
+    }
 }

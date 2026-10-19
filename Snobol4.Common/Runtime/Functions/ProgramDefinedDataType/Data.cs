@@ -208,17 +208,24 @@ public partial class Executive
         {
             for (int g = 0; g < 8 && arg0 is NameVar nvX; g++)
                 arg0 = nvX.Dereference(this);
-            if (arg0 is not ProgramDefinedDataVar pdFallback) {
-                // arg0 is not a DATA instance (e.g. PatternVar during build-time pattern
-                // construction). Signal FRETURN — caller must handle failure branch.
-                Failure = true;
-                FailureOrigin = SystemStack.Count;
-                SystemStack.Push(StringVar.Null());
+            // A field function applied to anything but a DATA object is error 41, as in SPITBOL
+            if (arg0 is not ProgramDefinedDataVar pdFallback)
+            {
+                LogRuntimeException(41);
                 return;
             }
             programDefinedDataVar = pdFallback;
         }
-        object index = (long)programDefinedDataVar.Definition.FieldNames.IndexOf(fieldName);
+
+        // so is one applied to an object of a type without that field (F(Q(1)) with F a field of P)
+        var fieldIndex = programDefinedDataVar.Definition.FieldNames.IndexOf(fieldName);
+        if (fieldIndex < 0)
+        {
+            LogRuntimeException(41);
+            return;
+        }
+
+        object index = (long)fieldIndex;
         var raw = programDefinedDataVar.FieldValues.Data[(int)(long)index];
         // Clone the field-slot value before stamping lvalue bookkeeping (Key/Collection) onto
         // it. Without this, the live field-slot object accumulates bookkeeping from each caller,

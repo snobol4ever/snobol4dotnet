@@ -265,9 +265,11 @@ e002
 e003
         output = 'PASS 1116_data_overlap (3/3)'
 end";
+        // sbl -b ends this program at value('b') with error 41: once clunk defines a field value, value is
+        // that field function, and a string is the wrong datatype for it (SPITBOL has no VALUE builtin), so
+        // neither PASS nor FAIL is printed
         var lines = RunGetOutput(s);
-        Assert.IsTrue(lines.Count > 0);
-        Assert.IsTrue(lines[^1].StartsWith("PASS"), $"Expected PASS, got: {lines[^1]}");
+        Assert.AreEqual(0, lines.Count, string.Join(" | ", lines));
     }
 
     [TestMethod]

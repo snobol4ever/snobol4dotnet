@@ -10,6 +10,10 @@ public class PatternVar : Var
 
     public Pattern Data;
 
+    // Which pattern this is: copies (an assignment's clone, P '') keep it, so IDENT sees one pattern, as
+    // SPITBOL's patterns are shared blocks
+    internal object Identity;
+
     #endregion
 
     #region Strategy Instances (Lazy-loaded singletons for performance)
@@ -34,6 +38,7 @@ public class PatternVar : Var
     public PatternVar(Pattern data)
     {
         Data = data;
+        Identity = data;
     }
 
 
@@ -47,6 +52,7 @@ public class PatternVar : Var
         ValidationDelegate? validation = null)
     {
         Data = data;
+        Identity = data;
         Symbol = symbol;
         IsKeyword = isKeyword;
         IsReadOnly = isReadOnly;
@@ -65,6 +71,7 @@ public class PatternVar : Var
         IsReadOnly = template.IsReadOnly;
         Succeeded = template.Succeeded;
         Data = template.Data;
+        Identity = template.Identity;
     }
 
     #endregion

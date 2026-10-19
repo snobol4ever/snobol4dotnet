@@ -10,6 +10,7 @@ public class PatternCloningStrategy : ICloningStrategy
         // Clone the underlying pattern structure
         return new PatternVar(patternSelf.Data.Clone())
         {
+            Identity = patternSelf.Identity,
             Symbol = patternSelf.Symbol,
             InputChannel = patternSelf.InputChannel,
             OutputChannel = patternSelf.OutputChannel,

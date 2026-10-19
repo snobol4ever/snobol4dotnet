@@ -26,6 +26,7 @@ end";
     [TestMethod]
     public void TEST_Ident_AnyPattern()
     {
+        // sbl -b: b = a is the same pattern, so IDENT(a,b) succeeds and DIFFER(a,b) fails
         var s = @"
         a = any('abc')
         b = a
@@ -37,7 +38,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("out")]).Data);
+        Assert.AreEqual("identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("out")]).Data);
     }
 
     [TestMethod]
@@ -60,6 +61,7 @@ end";
     [TestMethod]
     public void TEST_Ident_ArbNoPattern()
     {
+        // sbl -b: b = a is the same pattern, so IDENT(a,b) succeeds and DIFFER(a,b) fails
         var s = @"
         a = arbno(any('abc'))
         b = a
@@ -71,7 +73,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("out")]).Data);
+        Assert.AreEqual("identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("out")]).Data);
     }
 
     [TestMethod]
@@ -649,5 +651,29 @@ end";
          """);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("aefil", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R")]).Data);
+    }
+
+    [TestMethod]
+    public void TEST_Ident_patterns_keep_identity_through_copies()
+    {
+        // sbl -bf: a pattern is one object however it is copied (Q = P, P '', '' P, an array element, BAL NULL
+        // is BAL), while two constructions are two patterns; testpgms' test1 checks DIFFER(BAL NULL,BAL).
+        // snobol4dotnet cloned the pattern on every copy, so no copy was identical
+        var build = SetupTests.SetupScript("-bf", """
+                 P = LEN(1)
+                 Q = P
+                 R = R IDENT(Q, P) 'a'
+                 R = R IDENT(P '', P) 'b'
+                 R = R IDENT('' P, P) 'c'
+                 A = ARRAY(2)
+                 A<1> = P
+                 R = R IDENT(A<1>, P) 'd'
+                 R = R IDENT(BAL NULL, BAL) 'e'
+                 R = R IDENT(LEN(1), LEN(1)) 'f'
+                 R = R IDENT(P, LEN(1)) 'g'
+         END
+         """);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("abcde", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R")]).Data);
     }
 }

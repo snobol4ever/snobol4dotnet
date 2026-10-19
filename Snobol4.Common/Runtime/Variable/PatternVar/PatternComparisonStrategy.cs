@@ -35,8 +35,8 @@ public class PatternComparisonStrategy : IComparisonStrategy
         if (ReferenceEquals(self, other))
             return true;
 
-        // Patterns are identical only if they have the same unique ID
+        // Patterns are identical only if they are one pattern, however copied (Q = P, P '')
         // (Pattern structure equality would be complex and is not needed)
-        return other.SequenceId == self.SequenceId;
+        return other is PatternVar otherPattern && ReferenceEquals(otherPattern.Identity, ((PatternVar)self).Identity);
     }
 }

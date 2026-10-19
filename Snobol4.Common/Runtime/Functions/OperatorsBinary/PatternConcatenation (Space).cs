@@ -11,16 +11,18 @@ public partial class Executive
         // Clone to prevent aliasing: the caller (e.g. a shift assignment A<K+1>=A<K>)
         // stores the result directly into an array slot, so returning the original
         // Var object would make two array slots point to the same object.
+        // A pattern comes back as a new Var over the same pattern, so IDENT(P '', P) succeeds, as in SPITBOL
+        // (BAL NULL is BAL).
         if (arguments[0] is StringVar { Data: "" })
         {
-            SystemStack.Push(arguments[1].Clone());
+            SystemStack.Push(SameValue(arguments[1]));
             return;
         }
 
         // If right argument is null, return the left argument unchanged (cloned).
         if (arguments[1] is StringVar { Data: "" })
         {
-            SystemStack.Push(arguments[0].Clone());
+            SystemStack.Push(SameValue(arguments[0]));
             return;
         }
 
@@ -56,4 +58,6 @@ public partial class Executive
 
         SystemStack.Push(new PatternVar(new ConcatenatePattern((Pattern)leftPattern, (Pattern)rightPattern)));
     }
+
+    private static Var SameValue(Var operand) => operand is PatternVar pattern ? new PatternVar(pattern) : operand.Clone();
 }

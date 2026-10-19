@@ -26,6 +26,7 @@ end";
     [TestMethod]
     public void TEST_Differ_AnyPattern()
     {
+        // sbl -b: b = a is the same pattern, so IDENT(a,b) succeeds and DIFFER(a,b) fails
         var s = @"
         a = any('abc')
         b = a
@@ -37,7 +38,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("differ", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("out")]).Data);
+        Assert.AreEqual("not differ", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("out")]).Data);
     }
 
     [TestMethod]
@@ -60,6 +61,7 @@ end";
     [TestMethod]
     public void TEST_Differ_ArbNoPattern()
     {
+        // sbl -b: b = a is the same pattern, so IDENT(a,b) succeeds and DIFFER(a,b) fails
         var s = @"
         a = arbno(any('abc'))
         b = a
@@ -71,7 +73,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("differ", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("out")]).Data);
+        Assert.AreEqual("not differ", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("out")]).Data);
     }
 
     [TestMethod]

@@ -18,6 +18,10 @@ public partial class Executive
         // Found: GOAL-NET-BEAUTY-SELF session #81 — *mypat() returning LEN(5) matched
         // subject "5" (= coerced IntegerVar from LEN's arg) instead of "hello".
         var savedSubject = arguments[0];
+        // A deferred pattern that calls a program-defined function (*ONCE(N)) runs a body whose calls clear
+        // _reusableArgList, the list arguments may be, outright; the match works on its own copy
+        if (arguments[1] is ExpressionVar)
+            arguments = [.. arguments];
         while (arguments[1] is ExpressionVar expressionVar1)
         {
             expressionVar1.FunctionName(this);

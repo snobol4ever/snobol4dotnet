@@ -356,6 +356,11 @@ public partial class Builder : IDisposable
         })
             Execute.LabelTable[key] = val;
 
+        // :(END) goes to the END statement, which runs like any other: it is counted in &STCOUNT and is the
+        // statement &STNO and &LINE name at the end of the run, as in SPITBOL (falling into END did so already)
+        if (Code.EndFound && Code.SourceLines.Count > 0)
+            Execute.LabelTable["END"] = Execute.LabelTable["end"] = StatementCount + Code.SourceLines.Count - 1;
+
         StatementCount += Code.SourceLines.Count;
     }
 

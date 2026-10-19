@@ -69,4 +69,18 @@ END").Replace("\r\n", "\n"));
             " C2 = CODE(' ; A = &STNO :(R2)')  :<C2>\nR2 OUTPUT = A\n" +
             " C3 = CODE(' A = &STNO :(R3) ;')  :<C3>\nR3 OUTPUT = A\nEND").Replace("\r\n", "\n").Replace("\n", " "));
     }
+
+    [TestMethod]
+    public void TEST_CodeStatementNumbers_goto_end_runs_the_end_statement()
+    {
+        // sbl -bf: :(END), in the program or inside a function, runs the END statement, which is counted and
+        // stays the current statement for the end-of-run dump (testpgms' test1 dumps its keywords after :(END));
+        // snobol4dotnet stopped at the statement that jumped
+        static string Keywords(string output) => string.Join(" ", output.Replace("\r\n", "\n").Split('\n')
+            .Where(l => l.StartsWith("&STNO ") || l.StartsWith("&LASTNO ") || l.StartsWith("&LINE ") || l.StartsWith("&STCOUNT ")));
+        Assert.AreEqual("&LASTNO = 2 &LINE = 4 &STCOUNT = 3 &STNO = 3", Keywords(SetupTests.RunWithInputDirectives("-bf",
+            " &DUMP = 2\n X = 1  :(END)\n* c\nEND")));
+        Assert.AreEqual("&LASTNO = 3 &LINE = 7 &STCOUNT = 5 &STNO = 6", Keywords(SetupTests.RunWithInputDirectives("-bf",
+            " &DUMP = 2\n DEFINE('F()')  :(FE)\nF :(END)\nFE F()\n Z = 3\n* c\nEND")));
+    }
 }

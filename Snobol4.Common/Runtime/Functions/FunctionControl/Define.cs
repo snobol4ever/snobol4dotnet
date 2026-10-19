@@ -275,16 +275,18 @@ public partial class Executive
         var callerStatement = AmpCurrentLineNumber;
         var callerSerial = StatementSerial;
         var nextIndex = ExecuteLoop(LabelTable[definition.EntryLabel]);
+
+        // A goto to END inside the body ends the whole program, as in SPITBOL, not just the call; the END
+        // statement stays the current one (&STNO, &LINE) for the end-of-run dump
+        if (nextIndex == -1)
+            throw new ProgramEndException();
+
         var returningStatement = AmpCurrentLineNumber;
         AmpCurrentLineNumber = callerStatement;
         StatementSerial = callerSerial;
         AlphaStack = callerAlphaStack;
         BetaStack = callerBetaStack;
         var returnVar = IdentifierTable[returnVarName];
-
-        // A goto to END inside the body ends the whole program, as in SPITBOL, not just the call
-        if (nextIndex == -1)
-            throw new ProgramEndException();
 
         string rtnTypeStr;
         switch (nextIndex)

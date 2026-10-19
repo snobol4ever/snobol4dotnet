@@ -4,17 +4,19 @@
 
 public partial class Executive
 {
-    public static Dictionary<string, VarType> TranslateType = new(StringComparer.OrdinalIgnoreCase) // Always case-insensitive
+    // Type names are upper case; a lower-case name is folded only while &CASE folds, as in SPITBOL, where
+    // CONVERT(X,'integer') fails under -f
+    public static Dictionary<string, VarType> TranslateType = new(StringComparer.Ordinal)
     {
-        { "string", VarType.STRING },
-        { "integer", VarType.INTEGER },
-        { "real", VarType.REAL },
-        { "array", VarType.ARRAY },
-        { "table", VarType.TABLE },
-        { "pattern", VarType.PATTERN },
-        { "name", VarType.NAME },
-        { "expression", VarType.EXPRESSION },
-        { "code", VarType.CODE }
+        { "STRING", VarType.STRING },
+        { "INTEGER", VarType.INTEGER },
+        { "REAL", VarType.REAL },
+        { "ARRAY", VarType.ARRAY },
+        { "TABLE", VarType.TABLE },
+        { "PATTERN", VarType.PATTERN },
+        { "NAME", VarType.NAME },
+        { "EXPRESSION", VarType.EXPRESSION },
+        { "CODE", VarType.CODE }
     };
 
     public enum VarType
@@ -36,14 +38,16 @@ public partial class Executive
 
         // The type is any value with a string form -- 'INTEGER', the name .INTEGER, even 3 -- and
         // a string that names no datatype fails the call, as in SPITBOL
-        if (!arguments[1].Convert(VarType.STRING, out _, out var typeName, this))
+        if (!arguments[1].Convert(VarType.STRING, out _, out var typeArgument, this))
         {
             LogRuntimeException(74);
             return;
         }
 
+        var typeName = AmpCaseFolding != 0 ? ((string)typeArgument).ToUpperInvariant() : (string)typeArgument;
+
         // NUMERIC converts as arithmetic does, to an INTEGER or a REAL, as in SPITBOL: '1.0' gives 1., '' gives 0
-        if (string.Equals((string)typeName, "numeric", StringComparison.OrdinalIgnoreCase))
+        if (typeName == "NUMERIC")
         {
             if (varIn is ArrayVar or TableVar || !Var.ToNumeric(varIn, out var isInteger, out var l, out var d, this))
             {
@@ -55,7 +59,7 @@ public partial class Executive
             return;
         }
 
-        if (!TranslateType.TryGetValue((string)typeName, out var vOutType))
+        if (!TranslateType.TryGetValue(typeName, out var vOutType))
         {
             NonExceptionFailure();
             return;

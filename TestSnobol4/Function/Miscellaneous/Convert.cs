@@ -1868,4 +1868,25 @@ end";
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("REAL 1. INTEGER 0 INTEGER -15.9999 1000.", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R")]).Data);
     }
+
+    [TestMethod]
+    public void TEST_Convert_type_name_case_follows_folding()
+    {
+        // sbl -bf fails CONVERT for every lower-case type name and takes NUMERIC; sbl -b folds them all (Budne's
+        // spit converts with .numeric under -bf and expects the conversions to fail). snobol4dotnet matched
+        // type names ignoring case, whatever &CASE said
+        const string script = """
+                 R = R DIFFER(CONVERT('17','numeric')) 'a'
+                 R = R DIFFER(CONVERT('17','integer')) 'b'
+                 R = R DIFFER(CONVERT('17','Integer')) 'c'
+                 R = R DIFFER(CONVERT('17','string')) 'd'
+                 R = R DIFFER(CONVERT('17','NUMERIC')) 'e'
+                 R = R DIFFER(CONVERT(17,'real')) 'f'
+         END
+         """;
+        var folded = SetupTests.SetupScript("-b", script);
+        Assert.AreEqual("abcdef", ((StringVar)folded.Execute!.IdentifierTable[folded.FoldCase("R")]).Data);
+        var exact = SetupTests.SetupScript("-bf", script);
+        Assert.AreEqual("e", ((StringVar)exact.Execute!.IdentifierTable[exact.FoldCase("R")]).Data);
+    }
 }

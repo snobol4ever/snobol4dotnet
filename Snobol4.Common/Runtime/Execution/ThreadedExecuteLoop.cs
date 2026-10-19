@@ -110,8 +110,12 @@ public partial class Executive
                             : (idx + 1);
                         MonitorIpc.EmitLabel(stno);
                     }
-                    if (AmpStatementLimit >= 0) AmpStatementCount++;
-                    TraceKeyword("STCOUNT", AmpStatementCount);
+                    // with &STLIMIT negative statements are not counted, so &STCOUNT neither changes nor traces, as in SPITBOL
+                    if (AmpStatementLimit >= 0)
+                    {
+                        AmpStatementCount++;
+                        TraceKeyword("STCOUNT", AmpStatementCount);
+                    }
                     if (AmpStatementLimit > 0 && AmpStatementCount >= AmpStatementLimit)
                     {
                         LogRuntimeException(244);

@@ -238,4 +238,17 @@ END").Replace("\r\n", "\n"));
         OUTPUT = 'trace=' &TRACE
 END").Replace("\r\n", "\n"));
     }
+
+    [TestMethod]
+    public void TEST_Trace_Stcount_silent_without_a_statement_limit()
+    {
+        // sbl -bf: with &STLIMIT = -1 statements are not counted, so a KEYWORD trace on &STCOUNT never fires and
+        // &TRACE stays 100 (the rungs' keyword_36); snobol4dotnet traced &STCOUNT on every statement
+        Assert.AreEqual("a\ndone 100", SetupTests.RunWithInputDirectives("-bf", @"        &TRACE = 100
+        &STLIMIT = -1
+        TRACE('STCOUNT', 'KEYWORD')
+        OUTPUT = 'a'
+        OUTPUT = 'done ' &TRACE
+END").Replace("\r\n", "\n"));
+    }
 }

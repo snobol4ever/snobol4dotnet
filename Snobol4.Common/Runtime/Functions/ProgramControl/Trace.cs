@@ -134,7 +134,7 @@ public partial class Executive
         if (handler != null)
             CallTraceHandler(handler, name);
         else
-            TraceLine($"{name} = {value.DumpString()}");
+            TraceLine($"{name} = {PrintValue(value)}");
     }
 
     // SPITBOL's trace line: **** and the statement number padded with * to 8, a blank, an i for each

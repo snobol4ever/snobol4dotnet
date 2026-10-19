@@ -33,6 +33,9 @@ public partial class Executive
     public List<long> SourceStno;
     public SystemStack SystemStack;
     public List<DeferredCode> StarFunctionList;
+
+    // The variable each simple deferred expression (*X) defers, which prtvl prints as *X
+    internal readonly Dictionary<DeferredCode, string> SimpleExpressionNames = [];
     public int PreviousStarFunctionCount;
     public delegate int StatementCode(Executive x);
     public delegate void DeferredCode(Executive x);

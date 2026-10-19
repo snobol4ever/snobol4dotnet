@@ -432,7 +432,10 @@ public partial class Builder : IDisposable
         for (int i = Execute.StarFunctionList.Count; i < ParseExpression.Count; i++)
         {
             var subThread = tc.CompileSubExpression(ParseExpression[i]);
-            Execute.StarFunctionList.Add(x => x.RunExpressionThread(subThread));
+            Executive.DeferredCode function = x => x.RunExpressionThread(subThread);
+            Execute.StarFunctionList.Add(function);
+            if (ParseExpression[i] is [{ TokenType: Token.Type.IDENTIFIER } variable])
+                Execute.SimpleExpressionNames[function] = FoldCase(variable.MatchedString);
         }
         Execute.PreviousStarFunctionCount = Execute.StarFunctionList.Count;
     }

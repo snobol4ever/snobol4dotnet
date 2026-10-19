@@ -249,7 +249,7 @@ public partial class Executive
             if (callHandler != null)
                 CallTraceHandler(callHandler, functionName);
             else
-                TraceLine($"{functionName}({string.Join(",", arguments.Take(parametersCount).Select(a => a.DumpString()))})");
+                TraceLine($"{returnVarName}({string.Join(",", arguments.Take(parametersCount).Select(PrintValue))})");
         }
 
         // Update keywords
@@ -337,7 +337,7 @@ public partial class Executive
             if (returnHandler != null)
                 CallTraceHandler(returnHandler, functionName);
             else
-                TraceLine(rtnTypeStr == "FRETURN" ? $"FRETURN {functionName}" : $"{rtnTypeStr} {functionName} = {returnVar.DumpString()}");
+                TraceLine(rtnTypeStr == "FRETURN" ? $"FRETURN {returnVarName}" : $"{rtnTypeStr} {returnVarName} = {PrintValue(returnVar)}");
         }
         AmpCurrentLineNumber = current;
 

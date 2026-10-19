@@ -162,4 +162,52 @@ END").Replace("\r\n", "\n"));
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("STRING[]", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R")]).Data);
     }
+
+    [TestMethod]
+    public void TEST_TraceEvents_values_print_as_prtvl()
+    {
+        // sbl -b: a trace line prints a value as prtvl does (CONS #1, ARRAY(2,3) #2, TABLE(11) #3, PATTERN, .X,
+        // NAME for a keyword's name, *X for a simple expression, EXPRESSION, CODE), and a function OPSYN'd as G
+        // traces under F, its own name. snobol4dotnet printed <CONS:CONS>, TABLE(0), <len>, <expression>,
+        // <code@n> and the called name G
+        Assert.AreEqual("""
+            ****6*******  F(CONS #1)
+            ****3*******  RETURN F = CONS #1
+            ****7*******  F(ARRAY(2,3) #2)
+            ****3*******  RETURN F = ARRAY(2,3) #2
+            ****8*******  F(TABLE(11) #3)
+            ****3*******  RETURN F = TABLE(11) #3
+            ****9*******  F(PATTERN)
+            ****3*******  RETURN F = PATTERN
+            ****10******  F(.X)
+            ****3*******  RETURN F = .X
+            ****11******  F(NAME)
+            ****3*******  RETURN F = NAME
+            ****12******  F(*X)
+            ****3*******  RETURN F = *X
+            ****13******  F(EXPRESSION)
+            ****3*******  RETURN F = EXPRESSION
+            ****14******  F(CODE)
+            ****3*******  RETURN F = CODE
+            ****15******  F('via g')
+            ****3*******  RETURN F = 'via g'
+            """, SetupTests.RunWithInput("""
+                    DATA('CONS(CAR,CDR)')
+                    DEFINE('F(X)')                 :(FE)
+            F       F = X                          :(RETURN)
+            FE      OPSYN('G', 'F')
+                    &FTRACE = 1000
+                    F(CONS(1,2))
+                    F(ARRAY('2,3'))
+                    F(TABLE())
+                    F(LEN(1))
+                    F(.X)
+                    F(.&ANCHOR)
+                    F(*X)
+                    F(*(X + 1))
+                    F(CODE(' X = 1'))
+                    G('via g')
+            END
+            """).Replace("\r\n", "\n"));
+    }
 }

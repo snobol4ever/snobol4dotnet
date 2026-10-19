@@ -234,8 +234,8 @@ public partial class Executive
         _ => key.ToString() ?? ""
     };
 
-    /// <summary>SPITBOL's prtvl: how DUMP and the dump of names print a value.</summary>
-    private string PrintValue(Var value)
+    /// <summary>SPITBOL's prtvl: how DUMP, the dump of names and the trace lines print a value.</summary>
+    internal string PrintValue(Var value)
     {
         switch (value)
         {
@@ -253,6 +253,9 @@ public partial class Executive
                 return $"TABLE({t.Buckets}) #{BlockIdOf(t)}";
             case ProgramDefinedDataVar d:
                 return $"{d.DataName} #{BlockIdOf(d)}";
+            // a simple expression *X prints as such; any other is just EXPRESSION
+            case ExpressionVar e when SimpleExpressionNames.TryGetValue(e.FunctionName, out var variable):
+                return "*" + variable;
             default:
                 return value.DataType().ToUpperInvariant();
         }

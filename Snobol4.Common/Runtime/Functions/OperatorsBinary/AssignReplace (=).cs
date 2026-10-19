@@ -51,6 +51,8 @@ public partial class Executive
         // Perform the replacement
         var resultsVar = subjectVar.MatchReplace((string)subject);
         var v = IdentifierTable[resultsVar.Symbol] = resultsVar;
+        // a replacement assigns the subject, so its VALUE trace fires, as in SPITBOL
+        TraceIdentifierValue(v.Symbol, v);
         SystemStack.Push(v);
 
         // Sync-step monitor fire-point: emit VALUE record on the destructive

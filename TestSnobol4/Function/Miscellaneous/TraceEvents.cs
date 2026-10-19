@@ -130,4 +130,17 @@ end");
         build.Execute!.TraceIdentifierAccess("");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
+
+    [TestMethod]
+    public void TEST_Trace_Value_fires_for_a_replacement()
+    {
+        // sbl -b: B P = replaces the matched part of B, an assignment to B, and its VALUE trace prints
+        Assert.AreEqual("****3*******  B = 'yes!!'\n****5*******  B = '!!'\n!!", SetupTests.RunWithInput(@"        &TRACE = 10
+        TRACE('B')
+        B = 'yes!!'
+        P = 'yes'
+        B P =
+        OUTPUT = B
+END").Replace("\r\n", "\n"));
+    }
 }

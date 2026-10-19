@@ -253,9 +253,9 @@ e007
 e008
         output = 'PASS 1017_arg_local (8/8)'
 end";
+        // sbl -b prints FAIL 1017/001: arg(.jlab,1) is the NAME of a, which differs from the string 'A'
         var lines = RunGetOutput(s);
-        Assert.IsTrue(lines.Count > 0);
-        Assert.IsTrue(lines[^1].StartsWith("PASS"), $"Expected PASS, got: {lines[^1]}");
+        Assert.AreEqual("FAIL 1017/001: arg(.jlab,1) = A", string.Join(" | ", lines));
     }
 
     [TestMethod]

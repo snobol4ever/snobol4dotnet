@@ -34,6 +34,7 @@ public partial class Executive
             return;
         }
 
-        SystemStack.Push(new StringVar(entry.Parameters[(int)(long)i - 1]));
+        // the parameter's NAME, as in SPITBOL (DATATYPE(ARG(.F,1)) is NAME)
+        SystemStack.Push(new NameVar(entry.Parameters[(int)(long)i - 1], null, null));
     }
 }

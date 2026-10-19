@@ -24,8 +24,9 @@ end
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(build.FoldCase("a"), ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r1")]).Data);
-        Assert.AreEqual(build.FoldCase("b"), ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r2")]).Data);
+        // sbl -b: ARG gives the parameter's NAME (DATATYPE NAME, printing as A and B)
+        Assert.AreEqual(build.FoldCase("a"), ((NameVar)build.Execute!.IdentifierTable[build.FoldCase("r1")]).Pointer);
+        Assert.AreEqual(build.FoldCase("b"), ((NameVar)build.Execute!.IdentifierTable[build.FoldCase("r2")]).Pointer);
     }
 
     [TestMethod]
@@ -100,5 +101,25 @@ end
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(62, build.ErrorCodeHistory[0]);
+    }
+
+    [TestMethod]
+    public void TEST_Arg_and_Local_return_names()
+    {
+        // sbl -b: ARG and LOCAL return the NAME of the parameter or local, so $ARG(.F,2) reads B, IDENT(ARG(.F,2),
+        // .B) succeeds and $LOCAL(.F,1) = 'lv' assigns L; testpgms' test1 checks DIFFER(ARG(.JLAB,1),'A').
+        // snobol4dotnet returned the name as a string
+        var build = SetupTests.SetupScript("-b", """
+                 DEFINE('F(A,B)L')
+                 N = ARG(.F,2)
+                 B = 'bval'
+                 R = DATATYPE(N) ' ' $N
+                 R = R IDENT(N, .B) ' same'
+                 $LOCAL(.F,1) = 'lv'
+                 R = R ' ' L ' ' DATATYPE(LOCAL(.F,1)) ' ' ARG(.F,1)
+         END
+         """);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("NAME bval same lv NAME A", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R")]).Data);
     }
 }

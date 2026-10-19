@@ -35,6 +35,7 @@ public partial class Executive
             return;
         }
 
-        SystemStack.Push(new StringVar(entry.Locals[j]));
+        // the local's NAME, as in SPITBOL (DATATYPE(LOCAL(.F,1)) is NAME)
+        SystemStack.Push(new NameVar(entry.Locals[j], null, null));
     }
 }

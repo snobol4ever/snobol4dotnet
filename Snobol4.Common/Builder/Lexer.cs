@@ -416,7 +416,7 @@ public partial class Lexer
             // A numeric constant is a sequence of digits, optionally
             // followed by a decimal point and another sequence of
             // digits, and optionally followed by an exponent. The
-            // exponent is the letter e or E followed by an optional
+            // exponent is the letter e, E, d or D followed by an optional
             // sign and a sequence of digits. The exponent is a power
             // of 10 by which the number is multiplied. The number
             // may be an integer or a real number. If the number is a

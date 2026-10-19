@@ -77,4 +77,14 @@ end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("0. -0.246348323958318e-299 0. 0. 0.", build.Execute!.IdentifierTable["R"].ToString());
     }
+
+    [TestMethod]
+    public void TEST_RealFormat_d_exponent_literals()
+    {
+        // sbl -b and -bf read d or D as an exponent letter in a real literal as in a numeric string (1.0D2 and
+        // '1D2' + 0 are 100.; testpgms' test1 adds 1.0D2 + 2.0D2); snobol4dotnet refused the literals (error 231)
+        var build = SetupTests.SetupScript("-b", " R = 1.0D2 ' ' 1.0d2 ' ' 1D2 ' ' 1.5D-1 ' ' 1.0D+2 ' ' 1.D2 ' ' ('1D2' + 0)\nEND");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("100. 100. 100. 0.15 100. 100. 100.", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R")]).Data);
+    }
 }

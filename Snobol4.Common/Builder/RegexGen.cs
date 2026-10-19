@@ -136,9 +136,9 @@ internal partial class CompiledRegex
     /// A regex that captures:
     /// Group 1: Integer part.
     /// Group 2: Optional decimal part.
-    /// Group 3: Optional exponent (with sign).
+    /// Group 3: Optional exponent (with sign), introduced by e, E, d or D as in SPITBOL (1.0D2 is 100.).
     /// </returns>
-    [GeneratedRegex(@"^([0-9]+)(\.[0-9]*)?(([eE][+-]?[0-9]+))?")]
+    [GeneratedRegex(@"^([0-9]+)(\.[0-9]*)?(([eEdD][+-]?[0-9]+))?")]
     internal static partial Regex NumericPattern();
 
     /// <summary>

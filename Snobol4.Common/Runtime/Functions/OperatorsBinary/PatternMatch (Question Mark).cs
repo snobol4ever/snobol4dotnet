@@ -117,6 +117,13 @@ public partial class Executive
         {
             Symbol = subject.Symbol
         };
+
+        // an element this statement read (A[K] P = R) is the replacement's target, as in SPITBOL
+        if (savedSubject is { Key: not null, Collection: ArrayVar or TableVar } && savedSubject.LvalueMark == StatementSerial)
+        {
+            subjectVar.Key = savedSubject.Key;
+            subjectVar.Collection = savedSubject.Collection;
+        }
         SystemStack.Push(subjectVar);
     }
 }

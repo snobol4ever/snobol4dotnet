@@ -50,6 +50,15 @@ public partial class Executive
 
         // Perform the replacement
         var resultsVar = subjectVar.MatchReplace((string)subject);
+
+        // an element subject is replaced in its array or table, as an assignment to it would be
+        if (subjectVar is { Key: not null, Collection: ArrayVar or TableVar })
+        {
+            Assign([new StringVar("") { Key = subjectVar.Key, Collection = subjectVar.Collection, LvalueMark = StatementSerial },
+                    new StringVar(resultsVar.Data)]);
+            return;
+        }
+
         var v = IdentifierTable[resultsVar.Symbol] = resultsVar;
         // a replacement assigns the subject, so its VALUE trace fires, as in SPITBOL
         TraceIdentifierValue(v.Symbol, v);

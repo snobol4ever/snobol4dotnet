@@ -53,4 +53,27 @@ public class AssignTarget
         T<1,2> = 'new'
         R = T<1,2> ' ' X<'k1'>"));
     }
+
+    [TestMethod]
+    public void TEST_AssignTarget_replacement_into_elements()
+    {
+        // sbl -bf: a pattern-match replacement whose subject is an array element, a table element or a DATA
+        // field replaces it in place (Gimpel's PERMS rotates FIRST_OP[K] so); snobol4dotnet lost the result
+        var build = SetupTests.SetupScript("-bf", """
+                 A = ARRAY(3, 'abc')
+                 A[1] 'a' = 'z'
+                 K = 2
+                 A[K] LEN(1) . S1 TAB(2) . S2 = S2 S1
+                 T = TABLE()
+                 T['k'] = 'abc'
+                 T['k'] 'a' = 'w'
+                 DATA('P(F)')
+                 X = P('abc')
+                 F(X) 'b' = 'y'
+                 R = A[1] ' ' A[2] ' ' A[3] ' ' T['k'] ' ' F(X)
+         END
+         """);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("zbc bac abc wbc ayc", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
+    }
 }

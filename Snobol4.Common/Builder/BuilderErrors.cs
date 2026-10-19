@@ -82,8 +82,15 @@ public partial class Builder
     /// <param name="code">The error code.</param>
     /// <param name="cursorCurrent">The current cursor position in the source line.</param>
     /// <param name="source">The source line where the error occurred.</param>
-    public void LogCompilerException(int code, int cursorCurrent, SourceLine source) =>
+    public void LogCompilerException(int code, int cursorCurrent, SourceLine source)
+    {
+        FirstErrorSource ??= source;
         LogCompilerExceptionCore(code, cursorCurrent, BuildErrorMessage(code, cursorCurrent, source));
+    }
+
+    // The first statement a compile found in error, reset by whoever needs it (CODE numbers only the
+    // statements before it)
+    internal SourceLine? FirstErrorSource;
 
     /// <summary>
     /// Core logic for logging a compiler exception.

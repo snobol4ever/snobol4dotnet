@@ -1,3 +1,4 @@
+using Snobol4.Common;
 using Test.TestLexer;
 
 namespace Test.Miscellaneous;
@@ -26,5 +27,31 @@ R2      OUTPUT = D ' ' &STNO ' ' &LASTNO
         :<C3>
 R3      OUTPUT = F
 END").Replace("\r\n", "\n"));
+    }
+
+    [TestMethod]
+    public void TEST_CodeStatementNumbers_failed_compile_is_quiet()
+    {
+        // sbl -b answers "13 226 syntax error: missing right paren 233 226 16": CODE and CONVERT to CODE or
+        // EXPRESSION of text that does not compile fail, printing nothing, with &ERRTYPE and &ERRTEXT set, and
+        // a failed block numbers only the statements before the one in error (B = 1 takes 15, so the next
+        // block starts at 16). snobol4dotnet printed each diagnostic, left &ERRTYPE 0 and numbered every
+        // statement of the failed block and its implicit end (aisnobol's TEST)
+        var build = SetupTests.SetupScript("-b", """
+                 C1 = CODE(' A = &STNO :(R1)')  :<C1>
+         R1      R = A
+                 X = CODE(' B = 1 ; Y = (')     :S(END)
+                 R = R ' ' &ERRTYPE ' ' &ERRTEXT
+                 X = CONVERT('a=b+c?','EXPRESSION')  :S(END)
+                 R = R ' ' &ERRTYPE
+                 X = CONVERT(' Y = (','CODE')   :S(END)
+                 R = R ' ' &ERRTYPE
+                 C2 = CODE(' A = &STNO :(R2)')  :<C2>
+         R2      R = R ' ' A
+                 TERMINAL = R
+         END
+         """);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("13 226 syntax error: missing right paren 233 226 16", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R")]).Data);
     }
 }

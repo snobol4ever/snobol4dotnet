@@ -28,24 +28,14 @@ public partial class Executive
                 Parent.Code = new SourceCode(Parent);
                 Parent.Code.ReadCodeInString($" *({stringVar.Data.Trim()})", Parent.FilesToCompile[^1]);
                 Parent.Code.SourceLines[0].DeferredExpression = true;
-                var errorsBefore = Parent.ErrorCodeHistory.Count;
-                Parent.QuietCompile = true;
-                try { Parent.BuildEval(); }
-                finally { Parent.QuietCompile = false; }
-                Parent.BuildOptions.CaseFolding = previousCaseFolding;
-
                 // A string that does not compile makes EVAL fail with &ERRTYPE set to the compile error
                 // (EVAL('1 +') is 221, an out-of-range real 231), printing nothing and counting as no
                 // run-time error, as in SPITBOL
-                if (Parent.ErrorCodeHistory.Count > errorsBefore)
+                var compiled = CompileQuietly(() => { Parent.BuildEval(); return true; });
+                Parent.BuildOptions.CaseFolding = previousCaseFolding;
+                if (!compiled)
                 {
-                    var code = Parent.ErrorCodeHistory[^1];
-                    var added = Parent.ErrorCodeHistory.Count - errorsBefore;
-                    Parent.ErrorCodeHistory.RemoveRange(errorsBefore, added);
-                    Parent.ColumnHistory.RemoveRange(Parent.ColumnHistory.Count - added, added);
-                    Parent.MessageHistory.RemoveRange(Parent.MessageHistory.Count - added, added);
                     Parent.CodeMode = false;
-                    AmpErrorType = code;
                     NonExceptionFailure();
                     return;
                 }

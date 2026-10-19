@@ -74,9 +74,17 @@ public class StringConversionStrategy : IConversionStrategy
         exec.Parent.CodeMode = true;
         exec.Parent.Code = new SourceCode(exec.Parent);
         exec.Parent.Code.ReadCodeInString($" A_ = *({stringSelf.Data.Trim()})", exec.Parent.FilesToCompile[^1]);
-        exec.Parent.BuildEval();
+        // text that does not compile fails the conversion with &ERRTYPE set, printing nothing, as in SPITBOL
+        var compiled = exec.CompileQuietly(() => { exec.Parent.BuildEval(); return true; });
         exec.Parent.BuildOptions.CaseFolding = previousCaseFolding;
         exec.Parent.CodeMode = false;
+        if (!compiled)
+        {
+            varOut = StringVar.Null();
+            valueOut = string.Empty;
+            return false;
+        }
+
         varOut = new ExpressionVar(exec.StarFunctionList[^1]);
         valueOut = ((ExpressionVar)varOut).FunctionName;
         return true;
@@ -85,16 +93,8 @@ public class StringConversionStrategy : IConversionStrategy
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static bool ConvertToCode(StringVar stringSelf, Executive exec, out Var varOut, out object valueOut)
     {
-        CodeVar code = new()
-        {
-            StatementNumber = exec.Parent.StatementCount,
-            Data = stringSelf.Data
-        };
-
-        exec.Parent.Code = new SourceCode(exec.Parent);
-        exec.Parent.Code.ReadCodeInString(code.Data, exec.Parent.FilesToCompile[^1]);
-
-        if (!exec.Parent.BuildCode())
+        var code = exec.CompileCodeText(stringSelf.Data);
+        if (code is null)
         {
             varOut = StringVar.Null();
             valueOut = string.Empty;

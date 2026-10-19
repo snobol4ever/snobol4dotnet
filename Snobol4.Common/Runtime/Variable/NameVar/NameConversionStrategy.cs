@@ -123,16 +123,8 @@ public class NameConversionStrategy : IConversionStrategy
             return false;
         }
 
-        CodeVar code = new()
-        {
-            StatementNumber = exec.Parent.StatementCount,
-            Data = stringVarCode.Symbol
-        };
-
-        exec.Parent.Code = new SourceCode(exec.Parent);
-        exec.Parent.Code.ReadCodeInString(code.Data, exec.Parent.FilesToCompile[^1]);
-
-        if (!exec.Parent.BuildCode())
+        var code = exec.CompileCodeText(stringVarCode.Symbol);
+        if (code is null)
         {
             varOut = StringVar.Null();
             valueOut = "";

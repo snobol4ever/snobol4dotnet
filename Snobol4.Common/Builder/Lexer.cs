@@ -1628,6 +1628,20 @@ public partial class Lexer
                 }
                 return;
 
+            // *T[C], *A<I,J>, *T['a']['b']: the subscripted element is deferred whole, as in SPITBOL, so the
+            // subscript is evaluated at match time (Gimpel's hyphenat matches *DIGRAM_TBL[C] after $ C)
+            case Token.Type.IDENTIFIER_ARRAY_OR_TABLE:
+                currentPos++;
+                while (currentPos < lexLine.Count && lexLine[currentPos].TokenType is Token.Type.L_SQUARE or Token.Type.L_ANGLE)
+                {
+                    var closing = lexLine[currentPos].TokenType == Token.Type.L_SQUARE ? Token.Type.R_SQUARE : Token.Type.R_ANGLE;
+                    if (!FindMatchingBracket(lexLine, ref currentPos, closing))
+                        return;
+                    currentPos++;
+                }
+                CreateStarExpression(lexLine, starPos, currentPos - 1);
+                return;
+
             default:
                 // For any other token type, we can't create a star expression
                 return;

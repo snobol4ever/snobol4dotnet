@@ -34,4 +34,28 @@ public class DeferredFunctionPattern
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("a", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
     }
+
+    [TestMethod]
+    public void TEST_DeferredFunctionPattern_subscripted_element_is_deferred()
+    {
+        // sbl -bf: *T[C], *A<1,2> and *T['a']['b'] defer the whole element, so EVAL reads it later and a match
+        // reads T[C] after $ C has set C ('abycz' LEN(1) $ C *T[C] matches at 'b', with T['b'] = 'y'; Gimpel's
+        // hyphenat matches *DIGRAM_TBL[C] so); snobol4dotnet dropped the star and read the element at once
+        var build = SetupTests.SetupScript("-bf", """
+                 T = TABLE()
+                 T['a'] = 'x'
+                 T['b'] = 'y'
+                 T['n'] = TABLE()
+                 T['n']['m'] = 'deep'
+                 A = ARRAY('2,2')
+                 A<1,2> = 'el'
+                 E = *T['a']
+                 R = EVAL(E) ' ' EVAL(*A<1,2>) ' ' EVAL(*T['n']['m'])
+                 'abycz' LEN(1) $ C *T[C] @K
+                 R = R ' ' C K
+         END
+         """);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("x el deep b3", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
+    }
 }

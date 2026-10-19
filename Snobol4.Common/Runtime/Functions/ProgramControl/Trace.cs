@@ -102,7 +102,9 @@ public partial class Executive
         }
     }
 
-    internal void TraceIdentifierAccess(string name)
+    // An ACCESS trace line, when the program fetches a traced variable's value: ****4*******  N = 5, as
+    // sbl prints it
+    internal void TraceIdentifierAccess(string name, Var value)
     {
         if (name.Length == 0 || name[0] == '&')
             return;
@@ -117,7 +119,7 @@ public partial class Executive
         if (handler != null)
             CallTraceHandler(handler, name);
         else
-            TraceLine(name);
+            TraceLine($"{name} = {PrintValue(value)}");
     }
 
     // A VALUE trace line, after the program assigns a traced variable (never for the binding of a

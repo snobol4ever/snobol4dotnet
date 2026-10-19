@@ -128,7 +128,7 @@ END").Replace("\r\n", "\n"));
         var build = SetupTests.SetupScript("-b", @"
         X = 1
 end");
-        build.Execute!.TraceIdentifierAccess("");
+        build.Execute!.TraceIdentifierAccess("", StringVar.Null());
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
@@ -209,5 +209,18 @@ END").Replace("\r\n", "\n"));
                     G('via g')
             END
             """).Replace("\r\n", "\n"));
+    }
+
+    [TestMethod]
+    public void TEST_Trace_Access_line_carries_the_value()
+    {
+        // sbl -bf: an ACCESS trace prints the variable and the value fetched, ****4*******  N = 5; snobol4dotnet
+        // printed the name alone (the ladder's rung22 access programs)
+        Assert.AreEqual("****4*******  N = 5\nx=5 trace=9", SetupTests.RunWithInputDirectives("-bf", @"        &TRACE = 10
+        N = 5
+        TRACE('N', 'ACCESS')
+        X = N
+        OUTPUT = 'x=' X ' trace=' &TRACE
+END").Replace("\r\n", "\n"));
     }
 }

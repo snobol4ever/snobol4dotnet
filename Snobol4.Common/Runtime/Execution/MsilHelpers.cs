@@ -18,7 +18,7 @@ public partial class Executive
         // Fire trace hooks for identifier access and value — mirrors the
         // IdentifierTable indexer path that the threaded PushVar opcode takes.
         var varName = Parent.VariableSlots[slotIdx].Symbol;
-        TraceIdentifierAccess(varName);
+        TraceIdentifierAccess(varName, VarSlotArray[slotIdx]);
         SystemStack.Push(VarSlotArray[slotIdx]);
     }
 

@@ -13,7 +13,7 @@ public class IdentifierTable(Executive exec) : Dictionary<string, Var>
                 base[symbol] = value = StringVar.Null(symbol);
             }
 
-            Exec.TraceIdentifierAccess(symbol);
+            Exec.TraceIdentifierAccess(symbol, value);
             return value;
         }
         set

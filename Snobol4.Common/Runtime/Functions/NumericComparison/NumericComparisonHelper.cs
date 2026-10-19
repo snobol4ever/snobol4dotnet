@@ -38,7 +38,7 @@ public partial class Executive
                 return;
             }
             case true:
-                dLeft = System.Convert.ToDouble(lRight);
+                dLeft = System.Convert.ToDouble(lLeft);
                 break;
         }
 

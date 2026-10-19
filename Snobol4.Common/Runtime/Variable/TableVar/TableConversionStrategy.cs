@@ -27,8 +27,9 @@ public sealed class TableConversionStrategy : IConversionStrategy
             
     private static bool ConvertToArray(TableVar tableSelf, out Var varOut, out object valueOut)
     {
-        // Cannot convert empty table to array
-        var count = tableSelf.Count;
+        // Only entries with non-null values become rows, and a table with none cannot convert, as in SPITBOL
+        // (a key assigned the null string is no entry: SORT of such a table fails)
+        var count = tableSelf.Data.Values.Count(value => value is not StringVar { Data: "" });
         if (count == 0)
         {
             varOut = StringVar.Null();
@@ -46,6 +47,9 @@ public sealed class TableConversionStrategy : IConversionStrategy
         // Faster enumeration using foreach on dictionary
         foreach (var kvp in tableSelf.Data)
         {
+            if (kvp.Value is StringVar { Data: "" })
+                continue;
+
             // Store key in first column
             arrayData[arrayIndex++] = ConvertKeyToVar(kvp.Key, tableSelf);
 

@@ -361,4 +361,25 @@ end";
             ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r")]).Data);
     }
 
+    [TestMethod]
+    public void TEST_Sort_table_without_entries_fails()
+    {
+        // sbl -bf: SORT and RSORT of an empty table, or of one whose keys were only assigned the null string,
+        // fail, and CONVERT to ARRAY keeps only non-null entries (the dotnet package's asgn1 prints 'No words' on
+        // empty input); snobol4dotnet raised error 256, or sorted the null entries
+        var build = SetupTests.SetupScript("-bf", """
+                 R = R DIFFER(SORT(TABLE())) 'a'
+                 T = TABLE()
+                 T<'x'> = ''
+                 R = R DIFFER(SORT(T)) 'b'
+                 R = R DIFFER(RSORT(TABLE())) 'c'
+                 T<'a'> = 1
+                 T<'c'> = 3
+                 A = CONVERT(T,'ARRAY')
+                 R = R PROTOTYPE(A)
+         END
+         """);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("2,2", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R")]).Data);
+    }
 }

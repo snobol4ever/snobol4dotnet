@@ -15,6 +15,13 @@ public partial class Executive
         // First argument must be an array or table
         if (!arguments[0].Convert(VarType.ARRAY, out var a, out _, this))
         {
+            // a table with no non-null entries has no array to sort, and SORT fails, as in SPITBOL
+            if (arguments[0] is TableVar)
+            {
+                NonExceptionFailure();
+                return;
+            }
+
             LogRuntimeException(256);
             return;
         }

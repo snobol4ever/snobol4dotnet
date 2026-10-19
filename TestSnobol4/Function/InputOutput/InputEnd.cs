@@ -115,4 +115,16 @@ END", "apple\nbanana").Replace("\r\n", "\n"));
         }
         finally { File.Delete(file); }
     }
+
+    [TestMethod]
+    public void TEST_InputEnd_f0_option_reads_standard_input()
+    {
+        // sbl -bf: INPUT(.X,5,' -f0'), no file name and the F 0 option, associates X with standard input
+        // (Gimpel's poker reads its answers so); snobol4dotnet refused the specification (error 116)
+        Assert.AreEqual("got one\ngot two", SetupTests.RunWithInputDirectives("-bf", @"        INPUT(.X,5,' -f0')   :F(BAD)
+        OUTPUT = 'got ' X
+        OUTPUT = 'got ' X   :(END)
+BAD     OUTPUT = 'failed'
+END", "one\ntwo\nthree").Replace("\r\n", "\n"));
+    }
 }

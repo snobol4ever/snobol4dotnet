@@ -112,7 +112,7 @@ public partial class Executive
         }
 
         var channel = (string)channelNameStr;
-        if (!FileSpec.TryParse((string)fileNameStr, out var fileName, out _))
+        if (!FileSpec.TryParse((string)fileNameStr, out var fileName, out _, out var descriptor, out _))
         {
             LogRuntimeException(116);
             return;
@@ -137,6 +137,14 @@ public partial class Executive
         if (channel == "" && fileName == "")
         {
             IdentifierTable[symbol].InputChannel = "+console-input";   // standard input, as INPUT reads it
+            return;
+        }
+
+        // No file name and the F 0 option (' -f0') reads standard input, as in SPITBOL
+        if (fileName == "" && descriptor == 0)
+        {
+            IdentifierTable[symbol].InputChannel = "+console-input";
+            PredicateSuccess();
             return;
         }
 

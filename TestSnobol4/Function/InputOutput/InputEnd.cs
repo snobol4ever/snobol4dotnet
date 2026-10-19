@@ -1,3 +1,4 @@
+using Snobol4.Common;
 using Test.TestLexer;
 
 namespace Test.InputOutput;
@@ -89,5 +90,29 @@ L       T[INPUT] = 0                   :S(L)
 END", "apple\nbanana\ncherry"));
         Assert.AreEqual("5\n6", SetupTests.RunWithInput(@"L       OUTPUT = SIZE(INPUT)           :S(L)
 END", "apple\nbanana").Replace("\r\n", "\n"));
+    }
+
+    [TestMethod]
+    public void TEST_InputEnd_a_files_byte_order_mark_is_read()
+    {
+        // sbl -bf reads a file's bytes as they are: a UTF-8 byte-order mark stays part of the first line, so
+        // the first line's key differs from the same name later (the dotnet package's 1brc counts station001
+        // twice); snobol4dotnet's reader dropped the mark
+        var file = Path.Combine(Path.GetTempPath(), "snobom_" + Guid.NewGuid().ToString("N") + ".txt");
+        File.WriteAllBytes(file, [0xEF, 0xBB, 0xBF, (byte)'a', (byte)'b', (byte)'\n', (byte)'a', (byte)'b', (byte)'\n']);
+        try
+        {
+            var build = SetupTests.SetupScript("-bf", $"""
+                         INPUT(.F, 3, '{file}')
+                         X = F
+                         Y = F
+                         R = DIFFER(X, Y) 'differ'
+                 END
+                 """);
+            Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+            Assert.AreEqual("differ", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
+            Assert.AreEqual("\uFEFFab", ((StringVar)build.Execute!.IdentifierTable["X"]).Data);
+        }
+        finally { File.Delete(file); }
     }
 }

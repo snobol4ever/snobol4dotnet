@@ -75,7 +75,9 @@ public partial class Executive
             return reader;
         if (!StreamInputs.TryGetValue(channel, out var stream))
             return null;
-        reader = new StreamReader(stream, Encoding.UTF8, true);
+        // the file's bytes are read as they are, a byte-order mark included, as SPITBOL reads them (a BOM
+        // stays part of the first line); an encoding with no preamble keeps StreamReader from dropping it
+        reader = new StreamReader(stream, new UTF8Encoding(false), false);
         StreamReadersByChannel[channel] = reader;
         return reader;
     }

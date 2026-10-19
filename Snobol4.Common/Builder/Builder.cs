@@ -361,8 +361,9 @@ public partial class Builder : IDisposable
         if (Execute == null) return;
         var stmtNumber = stmtOffset;
         // CODE's statements are numbered on from the last statement number recorded (the program's END,
-        // or the previous block's implicit end), as SPITBOL numbers them
-        var stno = Execute.SourceStno.Count > 0 ? Execute.SourceStno[^1] : 0;
+        // or the previous block's implicit end), as SPITBOL numbers them; a blank statement (CODE(' A ; ; B'))
+        // takes a number too, though it compiles to nothing
+        var stnoBase = Execute.SourceStno.Count > 0 ? Execute.SourceStno[^1] : 0;
         foreach (var line in Code.SourceLines)
         {
             if (!line.Compiled)
@@ -373,7 +374,7 @@ public partial class Builder : IDisposable
                 Execute.SourceFiles.Add(line.PathName);
                 Execute.SourceLineNumbers.Add(line.LineCountFile);
                 Execute.SourceStatementNumbers.Add(stmtNumber + 1);
-                Execute.SourceStno.Add(++stno);
+                Execute.SourceStno.Add(stnoBase + (stmtNumber - stmtOffset) + 1 + line.BlankLineCount);
                 if (line.Label.Length > 0)
                 {
                     var folded = line.CaseFolding ? line.Label.ToUpper() : line.Label;
@@ -394,7 +395,7 @@ public partial class Builder : IDisposable
             Execute.SourceFiles.Add(last.PathName);
             Execute.SourceLineNumbers.Add(last.LineCountFile);
             Execute.SourceStatementNumbers.Add(stmtNumber + 1);
-            Execute.SourceStno.Add(++stno);
+            Execute.SourceStno.Add(stnoBase + Code.SourceLines.Count + Code.BlankLineCount + 1);
         }
     }
 

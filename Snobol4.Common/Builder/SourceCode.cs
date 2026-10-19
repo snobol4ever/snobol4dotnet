@@ -145,12 +145,13 @@ public class SourceCode
     internal void ReadCodeInString(string source, string pathName)
     {
         InitializeLineCounters();
+        // CODE text keeps its trailing blanks: CODE(' A = 1 ; ') ends in a blank statement, as in SPITBOL
         var lines = SplitLineByDelimiter(source, '\r', '\n');
 
         foreach (var line in lines)
         {
             LineCountFile++;
-            ProcessLineWithSubLines(line, pathName);
+            ProcessLineWithSubLines(line, pathName, true);
         }
     }
 
@@ -267,7 +268,7 @@ public class SourceCode
     /// </summary>
     /// <param name="line">The line to process</param>
     /// <param name="pathName">Path to the source file</param>
-    private void ProcessLineWithSubLines(string line, string pathName)
+    private void ProcessLineWithSubLines(string line, string pathName, bool codeText = false)
     {
         SubLineCount = 0;
 
@@ -280,11 +281,16 @@ public class SourceCode
             return;
         }
 
+        // Each segment between semicolons is a statement, a blank one included, but nothing after a final
+        // semicolon is none; a source line's trailing blanks are trimmed first (X = 1 ;  ends at X = 1), while
+        // CODE text keeps them (CODE(' X = 1 ; ') has a blank second statement), as SPITBOL numbers them
         var subLines = SplitLineByDelimiter(line, _semicolonChar);
+        if (subLines.Count > 1 && (codeText ? subLines[^1].Length == 0 : string.IsNullOrWhiteSpace(subLines[^1])))
+            subLines.RemoveAt(subLines.Count - 1);
 
         foreach (var subLine in subLines)
         {
-            ProcessSubLine(subLine, pathName);
+            ProcessSubLine(subLine.TrimEnd(), pathName);
         }
     }
 
@@ -609,7 +615,8 @@ public class SourceCode
     /// </summary>
     /// <param name="line">The line to split</param>
     /// <param name="delimiters">The delimiter characters</param>
-    /// <returns>List of split segments</returns>
+    /// <returns>List of split segments, each keeping its trailing blanks (whether a blank last segment is a
+    /// statement depends on the caller)</returns>
     private static List<string> SplitLineByDelimiter(string line, params char[] delimiters)
     {
         List<string> splitLine = [];
@@ -627,14 +634,14 @@ public class SourceCode
                 default:
                     if (delimiters.Contains(line[index]))
                     {
-                        splitLine.Add(line[baseIndex..index].TrimEnd());
+                        splitLine.Add(line[baseIndex..index]);
                         baseIndex = index + 1;
                     }
                     break;
             }
         }
 
-        splitLine.Add(line[baseIndex..].TrimEnd());
+        splitLine.Add(line[baseIndex..]);
         return splitLine;
     }
 

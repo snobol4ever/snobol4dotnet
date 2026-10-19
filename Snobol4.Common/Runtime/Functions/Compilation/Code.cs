@@ -56,9 +56,9 @@ public partial class Executive
         // statements before it, and no implicit end, so the next block numbers on from there
         // (CODE(' B = 1 ; Y = (') takes one number, CODE(' Y = ( ; B = 1') none)
         var good = Parent.FirstErrorSource is { } erring ? Math.Max(0, Parent.Code.SourceLines.IndexOf(erring)) : 0;
-        var last = numbered > 0 ? SourceStno[numbered - 1] : 0;
-        for (var k = numbered; k < SourceStno.Count; k++)
-            SourceStno[k] = last + Math.Min(k - numbered + 1, good);
+        var last = good > 0 ? SourceStno[numbered + good - 1] : numbered > 0 ? SourceStno[numbered - 1] : 0;
+        for (var k = numbered + good; k < SourceStno.Count; k++)
+            SourceStno[k] = last;
         return null;
     }
 

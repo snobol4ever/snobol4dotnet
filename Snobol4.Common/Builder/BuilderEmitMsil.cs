@@ -166,6 +166,9 @@ public partial class Builder
                 out var successLabel,       out var successExpr,        out var successExprCode,
                 out var failureLabel,       out var failureExpr,        out var failureExprCode);
 
+            // the statement's failure exit, where a SETEXIT handler's :(CONTINUE) resumes after an error in it
+            FailureExits[stmtIdx] = failureLabel ?? directUncondLabel;
+
             TryCache(line.ParseBody, stmtIdx: stmtIdx, isBody: true,
                      directGotoLabel:  directUncondLabel,
                      indirectGotoExpr: indirectUncondExpr,

@@ -67,6 +67,9 @@ public partial class Builder : IDisposable
     internal Dictionary<string, int> FunctionSlotIndex = new(64, StringComparer.Ordinal);
     internal ConstantPool Constants = new();
     internal int[]? StatementInstructionStarts;
+    // Each statement's failure exit (its :F label, else its unconditional label; null for none or an
+    // indirect goto), by global statement index
+    internal Dictionary<int, string?> FailureExits = new();
 
     /// <summary>
     /// True when the compiled thread contains only <c>CallMsil</c> and <c>Halt</c>

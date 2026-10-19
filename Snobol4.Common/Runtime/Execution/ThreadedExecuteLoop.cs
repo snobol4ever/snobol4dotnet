@@ -46,6 +46,8 @@ public partial class Executive
         int  exitCode        = -1;
         bool localSavedFailure = false; // local SaveFailure/RestoreFailure state
 
+        Restart:
+
         // ── Fast path: all instructions are CallMsil or Halt ────────────────
         // When every opcode in the thread is either CallMsil or Halt, skip the
         // full switch dispatch and spin in a tight loop.  Sub-expression threads
@@ -291,6 +293,21 @@ public partial class Executive
         }
 
         Done:
+        // A SETEXIT handler's :(CONTINUE) resumes at the failure exit of the statement in error, as in
+        // SPITBOL: its :F label, else its unconditional goto, else the next statement
+        if (exitCode == -6 && _continueStatement >= 0 && overrideThread == null)
+        {
+            var resumeAt = StatementIndexToInstrIndex(_continueStatement);
+            _continueStatement = -1;
+            if (resumeAt >= 0)
+            {
+                thread = Thread!;
+                InstructionPointer = resumeAt;
+                exitCode = -1;
+                goto Restart;
+            }
+        }
+
         // Restore all fields saved at entry so the caller's context is intact.
         // Save the expression's final Failure state first so RunExpressionThread
         // can re-apply it after the restore.
@@ -315,9 +332,16 @@ public partial class Executive
     {
         var target = OnErrorGoto;
         OnErrorGoto  = 0;
+        var errorStatement = AmpCurrentLineNumber;
+        _continueStatement = Parent.FailureExits.TryGetValue(errorStatement, out var exitLabel) && exitLabel is not null
+            ? LabelTable[Parent.FoldCase(exitLabel)]
+            : errorStatement + 1;
         InstructionPointer = StatementIndexToInstrIndex(target);
         _trapTaken = true;
     }
+
+    // Where :(CONTINUE) resumes after the trapped error, by statement index; -1 when no trap is pending
+    private int _continueStatement = -1;
 
     // An error trapped by SETEXIT transfers to its label when the statement ends; a goto the statement's
     // MSIL delegate then returns (:F(OOPS) after a failed EVAL) must not override it, as in SPITBOL

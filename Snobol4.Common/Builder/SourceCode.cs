@@ -232,7 +232,11 @@ public class SourceCode
 
         var currentLine = line;
 
-        while (!reader.EndOfStream && reader.Peek() is _continuationChar or _alternateContinuationChar)
+        // A continuation joins a statement still open: not a comment or control line, nor one a final
+        // semicolon has closed, as in SPITBOL, where a continuation after those is misplaced (error 214)
+        while (!reader.EndOfStream && reader.Peek() is _continuationChar or _alternateContinuationChar
+               && !IsCommentOrContinuation(currentLine) && !IsCommand(currentLine)
+               && !currentLine.TrimEnd().EndsWith(_semicolonChar))
         {
             currentLine += reader.ReadLine()?[1..];
             continuationLines++;
@@ -278,6 +282,18 @@ public class SourceCode
         if (line.Length > 0 && line[0] == '*')
         {
             CommentContinuationDirectiveCount++;
+            return;
+        }
+
+        // A continuation line with no open statement to continue is a statement in error, as in SPITBOL
+        if (!codeText && line.Length > 0 && line[0] is _continuationChar or _alternateContinuationChar)
+        {
+            var misplaced = new SourceLine(pathName, _includeDepth, line, this, _parent.BuildOptions.ErrorOnUnhandledFail)
+            {
+                CompileError = true
+            };
+            SourceLines.Add(misplaced);
+            _parent.LogCompilerException(214, 0, misplaced);
             return;
         }
 

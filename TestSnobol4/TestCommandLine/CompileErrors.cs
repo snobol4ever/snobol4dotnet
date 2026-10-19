@@ -57,4 +57,24 @@ public class CompileErrors
          END
          """).Replace("\r\n", "\n"));
     }
+
+    [TestMethod]
+    public void TEST_CompileErrors_misplaced_continuation_is_214()
+    {
+        // sbl -b: a continuation line after a line closed by a semicolon, after a comment, or with nothing
+        // before it is error 214 (testpgms' test2 has one after "... :S(D77) ;"), while one after an open
+        // statement continues it; snobol4dotnet joined the first two and skipped the third as a comment
+        foreach (var program in new[]
+                 {
+                     " X = 'a' ;\n+ 'b'\n OUTPUT = X\nEND",
+                     "* comment\n+ 'b'\n OUTPUT = 'x'\nEND",
+                     "+ 'b'\n OUTPUT = 'x'\nEND"
+                 })
+        {
+            var build = SetupTests.SetupScript("-b", program);
+            CollectionAssert.AreEqual(new[] { 214 }, build.ErrorCodeHistory.ToArray(), program);
+        }
+
+        Assert.AreEqual("ab", SetupTests.RunWithInput(" X = 'a'\n+ 'b'\n OUTPUT = X\nEND"));
+    }
 }

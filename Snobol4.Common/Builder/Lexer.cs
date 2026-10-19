@@ -255,6 +255,12 @@ public partial class Lexer
         foreach (var sourceLine in _parent.Code.SourceLines.Where(line => !line.Compiled))
         {
             _parent.BuildOptions.CaseFolding = sourceLine.CaseFolding;
+            if (sourceLine.CompileError)
+            {
+                allLexed = false;
+                continue;
+            }
+
             if (!LexLine(sourceLine))
             {
                 allLexed = false;

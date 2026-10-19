@@ -182,13 +182,11 @@ public partial class Executive
 
         // ── General path (reuses pre-allocated list) ──────────────────────────
         _reusableArgList.Clear();
-        // BUG-4: drain arithmetic/concat operands and propagate failure when
-        // Failure is already set (e.g. preceding NE/GT predicate failed).
-        // Only applies to non-predicate operators — predicates (Negation,
-        // Interrogation, Tilde, Question) must run to flip the Failure flag.
-        if (Failure && argumentCount > 0 && op is
-            OpCode.OpAdd or OpCode.OpSubtract or OpCode.OpMultiply or
-            OpCode.OpDivide or OpCode.OpPower or OpCode.OpConcat)
+        // An operand that already failed (a predicate, or a FRETURN, whose null value is still marked
+        // succeeded) fails the statement before the operator runs, as in SPITBOL, where evaluation stops
+        // at the first failure: F() ~ X with ~ OPSYN'd to a function does not call it. ~ and ? take no
+        // extracted operands (argumentCount 0), so they still run and may flip the failure.
+        if (Failure && argumentCount > 0)
         {
             for (var i = 0; i < argumentCount; ++i) SystemStack.Pop();
             SystemStack.Push(new StringVar(false) { Succeeded = false });

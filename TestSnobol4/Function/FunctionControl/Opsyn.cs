@@ -599,4 +599,29 @@ end");
         Assert.AreEqual("<a> <b> <c>", string.Join(" ", new[] { "R1", "R2", "R3" }
             .Select(n => ((StringVar)build.Execute!.IdentifierTable[build.FoldCase(n)]).Data)));
     }
+
+    [TestMethod]
+    public void TEST_Opsyn_operator_not_called_after_failed_operand()
+    {
+        // sbl -b: F() ~ 'b' and 'a' ~ F(), with F FRETURNing and ~ OPSYN'd to L, fail without calling L,
+        // since evaluation stops at the first failure (aisnobol's APPEND = POP(.L) ~ APPEND); snobol4dotnet
+        // called L with F's null value, and SIR answered INSUFFICIENT INFORMATION where sbl says YES
+        var build = SetupTests.SetupScript("-b", """
+                 DEFINE('L(X,Y)')               :(LE)
+         L       CALLS = CALLS + 1 ; L = X Y    :(RETURN)
+         LE      OPSYN('~', .L, 2)
+                 OPSYN('|', .L, 1)
+                 DEFINE('F()')                  :(FE)
+         F                                      :(FRETURN)
+         FE      Z = F() ~ 'b'                  :S(BAD)
+                 Z = 'a' ~ F()                  :S(BAD)
+                 Z = |F()                       :S(BAD)
+                 R = 'failed'                   :(END)
+         BAD     R = 'succeeded'
+         end
+         """);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("failed", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R")]).Data);
+        Assert.AreEqual("", build.Execute!.IdentifierTable[build.FoldCase("CALLS")].ToString());
+    }
 }

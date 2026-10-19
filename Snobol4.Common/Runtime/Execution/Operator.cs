@@ -12,8 +12,15 @@ public partial class Executive
             Console.Error.WriteLine($@"Operator {functionName} {argumentCount}");
         }
 
-        // Get all arguments and check for prior failure
+        // Get all arguments and check for prior failure; an operand that already failed (a FRETURN's
+        // null value is still marked succeeded) fails the statement before the operator runs
         List<Var> arguments = [];
+        if (Failure && argumentCount > 0)
+        {
+            for (var i = 0; i < argumentCount; ++i) SystemStack.Pop();
+            SystemStack.Push(new StringVar(false) { Succeeded = false });
+            return;
+        }
         if (SystemStack.ExtractArguments(argumentCount, arguments, this))
         {
             return;

@@ -71,7 +71,6 @@ public class SourceCode
     public void ReadAllFiles()
     {
         EndFound = false;
-        _parent.DisplayListingBanner();
 
         try
         {
@@ -174,11 +173,14 @@ public class SourceCode
         {
             LineCountFile += _continuation;
             LineCountTotal++;
-            var currentLine = ReadLineAndContinuations(reader, out var continuation);
+            var currentLine = ReadLineAndContinuations(reader, out var continuation, out var physicalLines);
             _continuation = continuation;
-            ListSource(currentLine);
-            
+            var statementsBefore = SourceLines.Count + BlankLineCount;
+
             ProcessLineWithSubLines(currentLine, _staleIncludeName ?? _lineFileName ?? pathName);
+
+            // listed after it is read, so -LIST lists itself and -NOLIST does not
+            ListSource(physicalLines, SourceLines.Count + BlankLineCount > statementsBefore ? statementsBefore + 1 : 0);
 
             // A comment or control line leaves a carried-over included name in place for the next
             // statement; a statement or a blank (null statement) line uses it up
@@ -222,10 +224,11 @@ public class SourceCode
     /// <param name="reader">Stream reader to read from</param>
     /// <param name="continuationLines">Output: number of lines concatenated</param>
     /// <returns>The complete line including any continuations</returns>
-    private static string ReadLineAndContinuations(StreamReader reader, out int continuationLines)
+    private static string ReadLineAndContinuations(StreamReader reader, out int continuationLines, out List<string> physicalLines)
     {
         var line = reader.ReadLine();
         continuationLines = 1;
+        physicalLines = [line ?? ""];
 
         if (line is null)
             return string.Empty;
@@ -238,7 +241,9 @@ public class SourceCode
                && !IsCommentOrContinuation(currentLine) && !IsCommand(currentLine)
                && !currentLine.TrimEnd().EndsWith(_semicolonChar))
         {
-            currentLine += reader.ReadLine()?[1..];
+            var continued = reader.ReadLine() ?? "";
+            physicalLines.Add(continued);
+            currentLine += continued.Length > 0 ? continued[1..] : "";
             continuationLines++;
         }
 
@@ -363,10 +368,19 @@ public class SourceCode
     /// Displays source line in listing output if enabled
     /// </summary>
     /// <param name="line">The line to display</param>
-    private void ListSource(string line)
+    // SPITBOL's listing line: a line that begins a statement carries its number in an eight-column field,
+    // any other line (comment, control, continuation) eight blanks
+    private void ListSource(List<string> physicalLines, int statementNumber)
     {
-        if (_parent.BuildOptions.ListSource)
-            _parent.ListingWriter.WriteLine($"{LineCountTotal:0000} {LineCountFile:0000} {_includeDepth:00} {line}");
+        if (!_parent.BuildOptions.ListSource)
+            return;
+
+        for (var i = 0; i < physicalLines.Count; i++)
+        {
+            var field = i == 0 && statementNumber > 0 ? statementNumber.ToString(CultureInfo.InvariantCulture) : "";
+            // a source line's trailing blanks are trimmed, as SPITBOL reads it
+            _parent.WriteListingLine($"{field,-8}{physicalLines[i].TrimEnd(' ', '\t')}");
+        }
     }
 
     #endregion

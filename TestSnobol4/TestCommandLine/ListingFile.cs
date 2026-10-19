@@ -82,4 +82,29 @@ END");
             Console.SetError(oldError);
         }
     }
+
+    [TestMethod]
+    public void TEST_ListingFile_spitbol_listing_on_standard_output()
+    {
+        // sbl -bh: with no -o the -LIST listing goes to standard output in SPITBOL's layout: three blank lines,
+        // "page 1" after 112 blanks, a blank line, then each line with its first statement's number in an
+        // eight-column field (comments, controls and continuations eight blanks), blank lines numbered, trailing
+        // blanks trimmed, -NOLIST regions left out (the dotnet package's SourceLines001-003). snobol4dotnet
+        // wrote its own layout to standard error
+        var expected = string.Join("\n", "", "", "", new string(' ', 112) + "page 1", "",
+            "        -LIST",
+            "        * a comment",
+            "1        X = 1 ; Y = 2",
+            "3       LBL Z = 3",
+            "        + 4",
+            "4       ",
+            "5       ",
+            "6        R = 5",
+            "        -LIST",
+            "8        U = 8",
+            "9       END");
+        var output = SetupTests.RunWithInputDirectives("-b -h", "-LIST\n* a comment\n X = 1 ; Y = 2\nLBL Z = 3\n+ 4\n \n\n R = 5\n" +
+                                                                 "-NOLIST\n T = 7\n-LIST\n U = 8\nEND");
+        Assert.AreEqual(expected.TrimEnd(), output.Replace("\r\n", "\n"));
+    }
 }

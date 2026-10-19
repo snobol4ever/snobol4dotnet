@@ -31,13 +31,14 @@ public partial class Builder : IDisposable
     private bool _listingOpened;
 
     // The listing goes to the -o=file named on the command line (file.lst when it has no extension), as
-    // SPITBOL's does, and otherwise to standard error; a file that cannot be opened falls back there
+    // SPITBOL's does, and otherwise to standard output, as SPITBOL's does; a file that cannot be opened
+    // falls back to standard error
     internal TextWriter ListingWriter
     {
         get
         {
             if (BuildOptions.ListFileName == "")
-                return Console.Error;
+                return Console.Out;
             try
             {
                 // the first open replaces the file; a reopen after the run's close adds to it

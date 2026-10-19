@@ -54,6 +54,12 @@ public partial class Builder
             null, [typeof(int)], null)
         ?? throw new MissingMethodException(nameof(Executive), "PushVarBySlot");
 
+    private static readonly MethodInfo _pushTargetBySlot =
+        typeof(Executive).GetMethod("PushTargetBySlot",
+            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
+            null, [typeof(int)], null)
+        ?? throw new MissingMethodException(nameof(Executive), "PushTargetBySlot");
+
     private static readonly MethodInfo _pushConstByIndex =
         typeof(Executive).GetMethod("PushConstByIndex",
             BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
@@ -382,10 +388,24 @@ public partial class Builder
         // (FRETURN propagation). FinalizeStatementMsil will clean the stack.
         Label? earlyExit = isBody ? il.DefineLabel() : (Label?)null;
 
+        // The variable a plain assignment assigns (N in N = 9) is a name, not a fetch of its value, so it
+        // fires no ACCESS trace, as in SPITBOL
+        var assignedTarget = isBody && IsPlainAssignmentTarget(tokens)
+                             && VariableSlotIndex.TryGetValue(FoldCase(tokens[0].MatchedString), out var targetSlot)
+            ? targetSlot : -1;
+
         for (int ti = 0; ti < tokens.Count; ++ti)
         {
             var t        = tokens[ti];
             var nextTok  = ti + 1 < tokens.Count ? tokens[ti + 1] : (Token?)null;
+            if (ti == 0 && assignedTarget >= 0)
+            {
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldc_I4, assignedTarget);
+                il.Emit(OpCodes.Call, _pushTargetBySlot);
+                anyEmitted = true;
+                continue;
+            }
             if (!EmitSingleToken(il, t, pendingFunctionNames, choiceLabels, earlyExit, nextTok))
                 return false;  // unhandled token → fall back to threaded path
             if (t.TokenType != Token.Type.IDENTIFIER_FUNCTION)  // IDENTIFIER_FUNCTION emits nothing
@@ -744,6 +764,47 @@ public partial class Builder
     // EmitIndirectGotoIL for goto expression tokens.
     // Returns false for any token type that is unhandled (caller should bail).
     // -----------------------------------------------------------------------
+
+    // A body N <rhs> = in postfix is a plain assignment to N when <rhs> is one complete value by itself, so
+    // the = takes N as its left operand (in S P = R the left operand is the match, not S). Any token whose
+    // stack effect is not modelled here answers no, and the target is fetched as before
+    private static bool IsPlainAssignmentTarget(List<Token> tokens)
+    {
+        if (tokens.Count < 3 || tokens[0].TokenType != Token.Type.IDENTIFIER || tokens[^1].TokenType != Token.Type.BINARY_EQUAL)
+            return false;
+
+        var depth = 0;
+        for (var i = 1; i < tokens.Count - 1; i++)
+        {
+            switch (tokens[i].TokenType)
+            {
+                case Token.Type.IDENTIFIER or Token.Type.INTEGER or Token.Type.REAL or Token.Type.STRING
+                    or Token.Type.NULL or Token.Type.EXPRESSION:
+                    depth++;
+                    break;
+                case Token.Type.UNARY_OPERATOR:
+                    if (depth < 1) return false;
+                    break;
+                case Token.Type.IDENTIFIER_FUNCTION:
+                    break;
+                case Token.Type.R_PAREN_FUNCTION:
+                    var arguments = (int)tokens[i].IntegerValue;
+                    if (depth < arguments) return false;
+                    depth += 1 - arguments;
+                    break;
+                case Token.Type.BINARY_EQUAL:
+                    return false;
+                case var binary when binary <= Token.Type.BINARY_TILDE:
+                    if (depth < 2) return false;
+                    depth--;
+                    break;
+                default:
+                    return false;
+            }
+        }
+
+        return depth == 1;
+    }
 
     private bool EmitSingleToken(ILGenerator il, Token t,
                                   Stack<string> pendingFunctionNames,

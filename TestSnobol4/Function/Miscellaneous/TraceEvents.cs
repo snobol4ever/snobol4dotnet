@@ -223,4 +223,19 @@ END").Replace("\r\n", "\n"));
         OUTPUT = 'x=' X ' trace=' &TRACE
 END").Replace("\r\n", "\n"));
     }
+
+    [TestMethod]
+    public void TEST_Trace_Access_is_silent_on_an_assignment_target()
+    {
+        // sbl -bf: N = 9 names N without fetching it, so an ACCESS trace on N stays silent and &TRACE stays 10,
+        // while N = N + 1 traces the N on the right once; snobol4dotnet traced the target too
+        Assert.AreEqual("trace=10\n****6*******  N = 9\ntrace=9", SetupTests.RunWithInputDirectives("-bf", @"        &TRACE = 10
+        N = 5
+        TRACE('N', 'ACCESS')
+        N = 9
+        OUTPUT = 'trace=' &TRACE
+        N = N + 1
+        OUTPUT = 'trace=' &TRACE
+END").Replace("\r\n", "\n"));
+    }
 }

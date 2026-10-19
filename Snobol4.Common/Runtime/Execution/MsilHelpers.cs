@@ -22,6 +22,13 @@ public partial class Executive
         SystemStack.Push(VarSlotArray[slotIdx]);
     }
 
+    // The target of a plain assignment, pushed as PushVarBySlot does but as a name: it fires no ACCESS trace
+    internal void PushTargetBySlot(int slotIdx)
+    {
+        if (slotIdx >= VarSlotArray.Length) ExpandVarSlotArray();
+        SystemStack.Push(VarSlotArray[slotIdx]);
+    }
+
     /// <summary>
     /// Push a clone of the constant at <paramref name="poolIdx"/> onto the
     /// system stack.  Mirrors the <c>OpCode.PushConst</c> case.

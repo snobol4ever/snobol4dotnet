@@ -77,7 +77,8 @@ e009
 end";
         var lines = RunGetOutput(s);
         Assert.IsTrue(lines.Count > 0);
-        Assert.IsTrue(lines[^1].StartsWith("PASS"), $"Expected PASS, got: {lines[^1]}");
+        // sbl -b stops at check 5: PROTOTYPE(ARRAY(3)) is the INTEGER 3, which DIFFER tells from '3'
+        Assert.AreEqual("FAIL 1110/005: prototype(array(3))=3", lines[^1]);
     }
 
     [TestMethod]

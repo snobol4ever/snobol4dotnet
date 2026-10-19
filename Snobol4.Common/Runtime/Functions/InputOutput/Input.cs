@@ -253,7 +253,17 @@ public partial class Executive
         }
 
         if (inputLine is not null)
-            return new StringVar(AmpTrim != 0 ? TrimRecord(inputLine) : inputLine);
+        {
+            var read = new StringVar(AmpTrim != 0 ? TrimRecord(inputLine) : inputLine);
+            // the line read becomes the variable's value, as in SPITBOL (DUMP lists INPUT = the last line)
+            if (arg.Symbol != "" && IdentifierTable.TryGetValue(arg.Symbol, out var variable) && variable.InputChannel == arg.InputChannel)
+                IdentifierTable[arg.Symbol] = new StringVar(read.Data, arg.Symbol)
+                {
+                    InputChannel = variable.InputChannel,
+                    OutputChannel = variable.OutputChannel
+                };
+            return read;
+        }
 
         NonExceptionFailure();
         inputLine = "";

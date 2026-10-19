@@ -16,7 +16,7 @@ public class Detach
         try
         {
             // After 3 reads, 'a' holds the 3rd line.
-            // After detach, READ is unassociated so reading it gives empty string.
+            // After detach, READ is unassociated and keeps the last line it read (sbl -b).
             File.WriteAllLines(testFile, new[]
             {
                 "Line 1: intro",
@@ -39,7 +39,8 @@ end
             Assert.AreEqual(0, build.ErrorCodeHistory.Count);
             Assert.AreEqual("This ebook is for the use of anyone anywhere in the United States and",
                 ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Data);
-            Assert.AreEqual("",
+            // sbl -b: the detached variable keeps the last line it read, so b is that line, not null
+            Assert.AreEqual("This ebook is for the use of anyone anywhere in the United States and",
                 ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
         }
         finally { File.Delete(testFile); }
@@ -76,7 +77,8 @@ end
             Assert.AreEqual(0, build.ErrorCodeHistory.Count);
             Assert.AreEqual("This ebook is for the use of anyone anywhere in the United States and",
                 ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Data);
-            Assert.AreEqual("",
+            // sbl -b: the detached variable keeps the last line it read, so b is that line, not null
+            Assert.AreEqual("This ebook is for the use of anyone anywhere in the United States and",
                 ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
         }
         finally { File.Delete(testFile); }

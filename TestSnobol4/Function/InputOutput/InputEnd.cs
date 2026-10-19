@@ -62,4 +62,17 @@ C       ~INPUT                         :S(E)
 E       OUTPUT = N
 END", "a\nb"));
     }
+
+    [TestMethod]
+    public void TEST_InputEnd_the_line_read_is_the_variables_value()
+    {
+        // sbl -bf: each line read becomes the input variable's value, so after X = INPUT and Y = INPUT the
+        // detached variable INPUT holds 'two' and DUMP lists it (testpgms' test6 dumps INPUT at the end);
+        // snobol4dotnet left the variable null
+        Assert.AreEqual("one two two", SetupTests.RunWithInput(@"        X = INPUT
+        Y = INPUT
+        DETACH(.INPUT)
+        OUTPUT = X ' ' Y ' ' INPUT
+END", "one\ntwo\nthree"));
+    }
 }

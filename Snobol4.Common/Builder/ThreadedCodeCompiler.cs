@@ -277,7 +277,7 @@ internal sealed class ThreadedCodeCompiler
     {
         Emit(isDirect
             ? new Instruction(OpCode.GotoIndirectCode, 24)
-            : new Instruction(OpCode.GotoIndirect,     23));
+            : new Instruction(OpCode.GotoIndirect,     38));
     }
 
     // -----------------------------------------------------------------------

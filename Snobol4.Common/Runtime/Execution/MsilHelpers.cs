@@ -171,7 +171,7 @@ public partial class Executive
     ///   -2 .. -7    = RETURN / FRETURN / NRETURN / etc. exit codes
     ///   int.MinValue = label not found (error already logged)
     /// </summary>
-    internal int ResolveLabel(string sym, int errorCode = 23)
+    internal int ResolveLabel(string sym, int errorCode = 38)
     {
         TraceGoto(sym);
         var target = LabelTable[sym];
@@ -193,7 +193,7 @@ public partial class Executive
     /// <see cref="LabelTable"/>, and return the target instruction pointer.
     /// Mirrors <c>OpCode.GotoIndirect</c> exactly.
     /// </summary>
-    internal int ResolveLabelFromStack(int errorCode = 23)
+    internal int ResolveLabelFromStack(int errorCode = 38)
     {
         var sym    = SystemStack.Peek().Symbol;
         var target = LabelTable[sym];

@@ -420,7 +420,7 @@ public partial class Builder
                 // Unconditional :(LABEL) — resolve label by name, return IP.
                 il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Ldstr, directGotoLabel);
-                il.Emit(OpCodes.Ldc_I4, 23);
+                il.Emit(OpCodes.Ldc_I4, 38);   // goto undefined label, as in SPITBOL
                 il.Emit(OpCodes.Call, _resolveLabel);
                 il.Emit(OpCodes.Ret);
                 return true;
@@ -548,7 +548,7 @@ public partial class Builder
 
         // Resolve label from stack and return IP.
         il.Emit(OpCodes.Ldarg_0);
-        il.Emit(OpCodes.Ldc_I4, isCode ? 24 : 23);
+        il.Emit(OpCodes.Ldc_I4, isCode ? 24 : 38);
         il.Emit(OpCodes.Call, isCode ? _resolveCodeLabelFromStack : _resolveLabelFromStack);
         il.Emit(OpCodes.Ret);
 
@@ -627,7 +627,7 @@ public partial class Builder
                 }
                 il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Ldstr, directLabel);
-                il.Emit(OpCodes.Ldc_I4, 23);
+                il.Emit(OpCodes.Ldc_I4, 38);   // goto undefined label, as in SPITBOL
                 il.Emit(OpCodes.Call, _resolveLabel);
                 il.Emit(OpCodes.Ret);
                 il.MarkLabel(skip);
@@ -667,7 +667,7 @@ public partial class Builder
         {
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ldstr, label);
-            il.Emit(OpCodes.Ldc_I4, 23);
+            il.Emit(OpCodes.Ldc_I4, 38);   // goto undefined label, as in SPITBOL
             il.Emit(OpCodes.Call, _resolveLabel);
             il.Emit(OpCodes.Ret);
         }

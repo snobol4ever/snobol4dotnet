@@ -136,7 +136,7 @@ public partial class Executive
         // If both channel and file name are blank, associate the identifier with standard input  
         if (channel == "" && fileName == "")
         {
-            IdentifierTable[symbol].InputChannel = "+input";
+            IdentifierTable[symbol].InputChannel = "+console-input";   // standard input, as INPUT reads it
             return;
         }
 

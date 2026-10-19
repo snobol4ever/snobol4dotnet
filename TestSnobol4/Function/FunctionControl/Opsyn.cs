@@ -578,4 +578,25 @@ end");
 end");
         Assert.AreEqual(248, system.ErrorCodeHistory[0]);
     }
+
+    [TestMethod]
+    public void TEST_Opsyn_unary_operator_to_program_defined_function()
+    {
+        // sbl -b answers <a> <b> <c>: a unary operator OPSYN'd to a DEFINEd function calls it, whether in the
+        // program (%), in CODE text (|) or in EVAL (|); aisnobol's SIR prints through |X. snobol4dotnet
+        // lost the function's name and called the operand's value instead (error 22)
+        var build = SetupTests.SetupScript("-b", """
+                 DEFINE('Q(X)')                 :(QE)
+         Q       Q = '<' X '>'                  :(RETURN)
+         QE      OPSYN('%', .Q, 1)
+                 OPSYN('|', .Q, 1)
+                 R1 = %'a'
+                 C = CODE(" R2 = |'b' ; :(DONE)")   :<C>
+         DONE    R3 = EVAL("|'c'")
+         end
+         """);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("<a> <b> <c>", string.Join(" ", new[] { "R1", "R2", "R3" }
+            .Select(n => ((StringVar)build.Execute!.IdentifierTable[build.FoldCase(n)]).Data)));
+    }
 }

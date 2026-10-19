@@ -97,6 +97,13 @@ public partial class Executive
                 FunctionTable.Remove(newFunction);
                 var unusedUnaryOperator = FunctionTable[existingFunction] ?? UndefinedOperator(newFunction, 1);
                 FunctionTable.Add(newFunction, new FunctionTableEntry(this, newFunction, unusedUnaryOperator.Handler, unusedUnaryOperator.ArgumentCount, false));
+                // a program-defined function needs its definition under the operator's key too, as in the binary case
+                if (UserFunctionTable.TryGetValue(existingFunction, out var existingUnaryUserEntry))
+                    UserFunctionTable[newFunction] = new UserFunctionTableEntry(
+                        existingUnaryUserEntry.FunctionName,
+                        existingUnaryUserEntry.Prototype,
+                        existingUnaryUserEntry.Parameters, existingUnaryUserEntry.Locals,
+                        existingUnaryUserEntry.EntryLabel);
                 InvalidateOperatorHandler(newFunction);
                 break;
 

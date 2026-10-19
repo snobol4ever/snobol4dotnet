@@ -35,4 +35,22 @@ END");
             Directory.Delete(dir, true);
         }
     }
+
+    [TestMethod]
+    public void TEST_ListingFile_takes_the_end_of_run_dump()
+    {
+        // sbl -bf -o=dir/prog with &DUMP = 1 writes the end-of-run dump to prog.lst, not standard output,
+        // as its end-of-run report goes; an explicit DUMP(1) still writes to standard output
+        var dir = Path.Combine(Path.GetTempPath(), "snolisting_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
+        try
+        {
+            var output = SetupTests.RunWithInputDirectives($"-b -o={Path.Combine(dir, "prog")}", @"        A = 1
+        &DUMP = 1
+END");
+            Assert.IsFalse(output.Contains("dump of natural variables"), output);
+            StringAssert.Contains(File.ReadAllText(Path.Combine(dir, "prog.lst")), "dump of natural variables");
+        }
+        finally { Directory.Delete(dir, true); }
+    }
 }

@@ -169,7 +169,11 @@ public class SetupTests
     ///
     /// Used by corpus ref tests that compare against .ref oracle files.
     /// </summary>
-    internal static string RunWithInput(string script, string? inputText = null)
+    internal static string RunWithInput(string script, string? inputText = null) =>
+        RunWithInputDirectives("-b", script, inputText);
+
+    // RunWithInput with the command-line switches given (e.g. "-b -o=dir/prog")
+    internal static string RunWithInputDirectives(string directives, string script, string? inputText = null)
     {
         var inputLines = inputText?.Split('\n').Select(l => l.TrimEnd('\r')).ToArray();
         var inputIdx   = 0;
@@ -180,7 +184,7 @@ public class SetupTests
         using var ms = new MemoryStream();
         using var sw = new StreamWriter(ms) { AutoFlush = true };
         Console.SetOut(sw);
-        try   { SetupScript("-b", script); }
+        try   { SetupScript(directives, script); }
         finally
         {
             Console.SetOut(old);

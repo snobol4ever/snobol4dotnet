@@ -27,12 +27,14 @@ public partial class Executive
             return;
         }
 
-        DisplayVariableValues((long)value);
+        DisplayVariableValues((long)value, Console.Out);
     }
 
+    // The end-of-run dump that &DUMP asks for goes where SPITBOL's end-of-run report goes (stopr prints
+    // on the listing channel): the -o file when one is named, else standard output
     internal void DisplayVariableValues()
     {
-        DisplayVariableValues(AmpDump);
+        DisplayVariableValues(AmpDump, Parent.BuildOptions.ListFileName != "" ? Parent.ListingWriter : Console.Out);
     }
 
     /// <summary>
@@ -42,7 +44,7 @@ public partial class Executive
     /// headed by its value line (ARRAY(3) #1) and its elements named through a variable that holds it;
     /// three blank lines end the dump. 0 does nothing, and so does a larger count (SPITBOL's core dump).
     /// </summary>
-    private void DisplayVariableValues(long level)
+    private void DisplayVariableValues(long level, TextWriter writer)
     {
         if (level < 0)
         {
@@ -70,8 +72,8 @@ public partial class Executive
             DumpBlocks(w, level == 3);
 
         w.Append("\n\n\n");
-        Console.Out.Write(w.ToString());
-        Console.Out.Flush();
+        writer.Write(w.ToString());
+        writer.Flush();
     }
 
     // The program's natural variables: every name but the keywords; a protected one (ARB, REM, ...)

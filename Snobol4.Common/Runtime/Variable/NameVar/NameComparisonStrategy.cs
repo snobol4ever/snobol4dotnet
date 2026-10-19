@@ -39,10 +39,9 @@ public class NameComparisonStrategy : IComparisonStrategy
     }
 
 
-    public bool IsIdentical(Var self, Var other)
-    {
-        // From original: always returns true
-        // This is intentional - names are considered identical based on what they reference
-        return true;
-    }
+    // Two names are identical when they name the same variable or element (SPITBOL's ident compares the
+    // name blocks' base and offset); a name and any other value differ, so IDENT(.X) fails. Each .&KEYWORD
+    // builds a new keyword block in SPITBOL, so two keyword names are identical only as one value
+    public bool IsIdentical(Var self, Var other) =>
+        ReferenceEquals(self, other) || (!((NameVar)self).Pointer.StartsWith('&') && Equals(self, other));
 }

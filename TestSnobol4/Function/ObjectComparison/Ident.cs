@@ -623,5 +623,31 @@ end";
         Assert.AreEqual("not identical", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("out")]).Data);
     }
 
-
+    [TestMethod]
+    public void TEST_Ident_names_compare_by_what_they_name()
+    {
+        // sbl -b: a name is identical only to a name of the same variable or element; IDENT(.X) fails and
+        // DIFFER(.X) succeeds, and each .&KEYWORD is a new name (aisnobol's IN tests IDENT(IN...N) to see
+        // whether a name was passed). snobol4dotnet called every name identical to everything
+        var build = SetupTests.SetupScript("-b", """
+                 N = .X
+                 A = ARRAY(3) ; B = ARRAY(3) ; T = TABLE()
+                 R = R IDENT(N, .X) 'a'
+                 R = R IDENT(N, .Y) 'b'
+                 R = R IDENT(N, 'X') 'c'
+                 R = R IDENT(N) 'd'
+                 R = R DIFFER(N) 'e'
+                 R = R IDENT(.A<1>, .A<1>) 'f'
+                 R = R IDENT(.A<1>, .A<2>) 'g'
+                 R = R IDENT(.A<1>, .B<1>) 'h'
+                 R = R IDENT(.T<'k'>, .T<'k'>) 'i'
+                 R = R IDENT(.T<'k'>, .T<'j'>) 'j'
+                 R = R IDENT(.&ANCHOR, .&ANCHOR) 'k'
+                 K = .&ANCHOR
+                 R = R IDENT(K, K) 'l'
+         end
+         """);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("aefil", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R")]).Data);
+    }
 }

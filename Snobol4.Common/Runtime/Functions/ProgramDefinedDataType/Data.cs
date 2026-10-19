@@ -84,7 +84,7 @@ public partial class Executive
                 return;
             }
 
-            if (existingDataType.Handler == CreateProgramDefinedDataInstance
+            if (DataConstructors.TryGetValue(dataName, out var constructor) && existingDataType.Handler == constructor
                 && UserDataDefinitions.TryGetValue(dataName, out var existingDefinition)
                 && existingDefinition.Prototype == prototype)
             {
@@ -132,7 +132,11 @@ public partial class Executive
         }
 
 
-        FunctionTable[dataName] = new FunctionTableEntry(this, dataName, CreateProgramDefinedDataInstance, fields.Count, false);
+        // The constructor and field functions carry their own names, so a synonym OPSYN makes (QLINK for
+        // COUNT) still builds that type and reads that field, as in SPITBOL
+        FunctionTableEntry.FunctionHandler create = a => CreateProgramDefinedDataInstance(a, dataName);
+        DataConstructors[dataName] = create;
+        FunctionTable[dataName] = new FunctionTableEntry(this, dataName, create, fields.Count, false);
         var userDataDefinition = new UserDataDefinition(prototype, fields);
         UserDataDefinitions[dataName] = userDataDefinition;
 
@@ -144,16 +148,18 @@ public partial class Executive
                 // Only register if no protected builtin owns this name.
                 // Protected builtins (e.g. VALUE) keep their slot; GetProgramDefinedDataField
                 // dispatches by argument type at runtime so field access still works.
-                FunctionTable[fieldName] = new FunctionTableEntry(this, fieldName, GetProgramDefinedDataField, 1, false);
+                FunctionTable[fieldName] = new FunctionTableEntry(this, fieldName, a => GetProgramDefinedDataField(a, fieldName), 1, false);
             }
         }
 
         PredicateSuccess();
     }
 
-    internal void CreateProgramDefinedDataInstance(List<Var> arguments)
+    // Each DATA type's constructor, to tell a repeated identical DATA call from a redefinition
+    private readonly Dictionary<string, FunctionTableEntry.FunctionHandler> DataConstructors = [];
+
+    internal void CreateProgramDefinedDataInstance(List<Var> arguments, string dataName)
     {
-        var dataName = ((StringVar)arguments[^1]).Data;
         var dataDefinition = UserDataDefinitions[dataName];
         arguments = arguments[..^1];
         var userDefinedDataVar = new ProgramDefinedDataVar(dataName, dataDefinition.Prototype, dataDefinition.FieldNames);
@@ -179,9 +185,11 @@ public partial class Executive
         SystemStack.Push(userDefinedDataVar);
     }
 
-    internal void GetProgramDefinedDataField(List<Var> arguments)
+    internal void GetProgramDefinedDataField(List<Var> arguments) =>
+        GetProgramDefinedDataField(arguments, ((StringVar)arguments[1]).Data);
+
+    internal void GetProgramDefinedDataField(List<Var> arguments, string fieldName)
     {
-        var fieldName = ((StringVar)arguments[1]).Data;
         // Resolve argument to ProgramDefinedDataVar, handling the Top()/NRETURN NameVar chain.
         // Top() returns .value($'@S') — a pointer NameVar. Deref gives value-field contents,
         // which may itself be a collection-backed NameVar (Collection=tree ProgramDefinedDataVar,

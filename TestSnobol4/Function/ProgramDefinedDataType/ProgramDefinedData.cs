@@ -133,4 +133,25 @@ end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("5", build.Execute!.IdentifierTable["R"].ToString());
     }
+
+    [TestMethod]
+    public void TEST_ProgramDefinedData_opsyn_synonyms()
+    {
+        // sbl -b answers "3 4 PT 9 9": a constructor or field function OPSYN'd to a new name (MK for PT, GX for
+        // XC, GX2 for GX) still builds that type and reads and sets that field (testpgms' test6 queues through
+        // QLINK, OPSYN'd to COUNT). snobol4dotnet looked the called name up as the type or field name and crashed
+        var build = SetupTests.SetupScript("-b", """
+                 DATA('PT(XC,YC)')
+                 OPSYN('MK','PT')
+                 OPSYN('GX','XC')
+                 P = MK(3,4)
+                 R = GX(P) ' ' YC(P) ' ' DATATYPE(P)
+                 GX(P) = 9
+                 OPSYN('GX2','GX')
+                 R = R ' ' XC(P) ' ' GX2(P)
+         END
+         """);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("3 4 PT 9 9", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R")]).Data);
+    }
 }

@@ -1850,4 +1850,22 @@ end";
     }
 
     #endregion
+
+    [TestMethod]
+    public void TEST_Convert_numeric()
+    {
+        // sbl -b: CONVERT(X,'NUMERIC') gives an INTEGER or a REAL as arithmetic would ('1.0' is REAL 1.,
+        // '' is INTEGER 0, '1e3' is 1000.) and fails for an array; aisnobol's NUMBER(X) is ?CONVERT(X,"NUMERIC").
+        // snobol4dotnet had no NUMERIC and always failed
+        var build = SetupTests.SetupScript("-b", """
+                 R = DATATYPE(CONVERT('1.0','NUMERIC')) ' ' CONVERT('1.0','NUMERIC')
+                 R = R ' ' DATATYPE(CONVERT('','NUMERIC')) ' ' CONVERT('','NUMERIC')
+                 R = R ' ' DATATYPE(CONVERT(' 12 ','numeric')) ' ' CONVERT(-15.9999,'NUMERIC')
+                 R = R ' ' CONVERT('1e3','NUMERIC')
+                 R = R DIFFER(CONVERT(ARRAY(1),'NUMERIC')) ' array converted'
+         end
+         """);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("REAL 1. INTEGER 0 INTEGER -15.9999 1000.", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R")]).Data);
+    }
 }

@@ -42,6 +42,19 @@ public partial class Executive
             return;
         }
 
+        // NUMERIC converts as arithmetic does, to an INTEGER or a REAL, as in SPITBOL: '1.0' gives 1., '' gives 0
+        if (string.Equals((string)typeName, "numeric", StringComparison.OrdinalIgnoreCase))
+        {
+            if (varIn is ArrayVar or TableVar || !Var.ToNumeric(varIn, out var isInteger, out var l, out var d, this))
+            {
+                NonExceptionFailure();
+                return;
+            }
+
+            SystemStack.Push(isInteger ? new IntegerVar(l) : new RealVar(d));
+            return;
+        }
+
         if (!TranslateType.TryGetValue((string)typeName, out var vOutType))
         {
             NonExceptionFailure();

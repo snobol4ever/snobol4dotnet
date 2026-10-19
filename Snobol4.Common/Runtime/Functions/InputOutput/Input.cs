@@ -243,13 +243,9 @@ public partial class Executive
                 break;
 
             default:
-                if (!StreamReadersBySymbol.ContainsKey(arg.Symbol))
-                {
-                    StreamReadersBySymbol[arg.Symbol] = new StreamReader(StreamInputs[arg.InputChannel], Encoding.UTF8, true);
-                    StreamReadersByChannel[arg.InputChannel] = StreamReadersBySymbol[arg.Symbol];
-                }
-
-                var reader = StreamReadersBySymbol[arg.Symbol];
+                // the channel's one reader, so a SET on the channel moves what the variable reads next
+                var reader = ChannelReader(arg.InputChannel)!;
+                StreamReadersBySymbol[arg.Symbol] = reader;
                 inputLine = reader.ReadLine();
 
                 break;

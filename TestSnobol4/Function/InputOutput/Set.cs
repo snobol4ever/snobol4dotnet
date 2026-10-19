@@ -98,7 +98,7 @@ end
         finally { File.Delete(testFile); }
     }
 
-    // Set_294: whence=2 is not supported → error 294
+    // Set_294: origin 2 (from the end) is accepted, as sbl accepts it
     [TestMethod]
     public void Set_294()
     {
@@ -120,8 +120,8 @@ end
 ";
             var directives = "-b";
             var build = SetupTests.SetupScript(directives, s);
-            Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-            Assert.AreEqual(294, build.ErrorCodeHistory[0]);
+            // sbl -b accepts origin 2 (from the end); the read after it fails at end of file
+            Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         }
         finally { File.Delete(testFile); }
     }
@@ -177,7 +177,8 @@ end
             var directives = "-b";
             var build = SetupTests.SetupScript(directives, s);
             Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-            Assert.AreEqual("Record 5", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Data);
+            // sbl -b: SET moves by bytes, so offset 4 lands inside "Record 1"
+            Assert.AreEqual("rd 1", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Data);
         }
         finally { File.Delete(testFile); }
     }
@@ -229,7 +230,8 @@ end
             var directives = "-b";
             var build = SetupTests.SetupScript(directives, s);
             Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-            Assert.AreEqual("Record 7", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Data);
+            // sbl -b: 4 bytes on from the start of "Record 3"
+            Assert.AreEqual("rd 3", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Data);
         }
         finally { File.Delete(testFile); }
     }
@@ -258,7 +260,8 @@ end
             var directives = "-b";
             var build = SetupTests.SetupScript(directives, s);
             Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-            Assert.AreEqual("Record 5", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Data);
+            // sbl -b: one byte back is the newline ending "Record 5", read as an empty line
+            Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Data);
         }
         finally { File.Delete(testFile); }
     }

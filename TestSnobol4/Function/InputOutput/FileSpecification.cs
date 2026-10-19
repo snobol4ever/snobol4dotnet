@@ -78,4 +78,30 @@ END");
         }
         finally { Directory.Delete(dir, true); }
     }
+
+    [TestMethod]
+    public void TEST_FileSpec_set_moves_by_bytes()
+    {
+        // sbl -b on a 13-byte file (abc, defgh, ij): SET answers byte positions 0, 4, 2, 10 and reads resume there
+        // (c, ij); the position is kept within the file (SET(1,100,0) is 13); aisnobol's BUILDLIB indexes by it
+        var dir = Path.Combine(Path.GetTempPath(), "snoset_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
+        try
+        {
+            var file = Path.Combine(dir, "s.txt");
+            File.WriteAllText(file, "abc\ndefgh\nij\n");
+            var output = SetupTests.RunWithInput($@"        INPUT(.IN, 1, '{file}')
+        OUTPUT = SET(1,0,1)
+        L = IN
+        OUTPUT = SET(1,0,1) ' ' L
+        OUTPUT = SET(1,2,0)
+        OUTPUT = IN
+        OUTPUT = SET(1,-3,2)
+        OUTPUT = IN
+        OUTPUT = SET(1,100,0)
+END").Replace("\r\n", "\n");
+            Assert.AreEqual("0\n4 abc\n2\nc\n10\nij\n13", output);
+        }
+        finally { Directory.Delete(dir, true); }
+    }
 }

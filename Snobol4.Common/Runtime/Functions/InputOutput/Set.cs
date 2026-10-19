@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Text;
+using System.Reflection;
 
 namespace Snobol4.Common;
 
@@ -12,25 +13,13 @@ namespace Snobol4.Common;
 
 public partial class Executive
 {
+    /// <summary>
+    /// SET(channel, offset, origin), as SPITBOL's: moves an input channel's file pointer to offset bytes
+    /// from the start (origin 0), the current position (1) or the end (2), kept within the file, and
+    /// answers the new byte position; reading resumes there.
+    /// </summary>
     internal void Set(List<Var> arguments)
     {
-        // DIFFERENCE
-        // Unicode support provided by StreamReader/StreamWriter classes does not support seeking by bytes.
-        // Therefore, to seek to a positions requires getting the current byte position, rewinding to the beginning
-        // of the stream, and then reading forward to the desired position. An alternative is to modify the
-        // StreamReader/StreamWriter classes to support seeking by bytes, but research indicated that there may
-        // not be possible. 
-        //
-        // In SPITBOL documentation (Emmer and Quillen), indicates that SET works only on files with a fixed
-        // record length which is not possible with UNICODE files.
-        //
-        // whence = 2 is not supported
-
-        // arguments[0]: string channel
-        // arguments[1]: integer offset
-        // arguments[2]: integer origin (0 = offset applies to beginning of file; 1 = offset is from current position
-
-        // Channel must be a string
         if (!arguments[0].Convert(VarType.STRING, out _, out var channelObj, this))
         {
             LogRuntimeException(291);
@@ -38,15 +27,12 @@ public partial class Executive
         }
 
         var channel = (string)channelObj;
-
-        // Channel cannot be a null string
         if (channel == "")
         {
             LogRuntimeException(292);
             return;
         }
 
-        // Offset must be an integer
         if (!arguments[1].Convert(VarType.INTEGER, out _, out var offsetObj, this))
         {
             LogRuntimeException(293);
@@ -54,33 +40,47 @@ public partial class Executive
         }
 
         var offset = (long)offsetObj;
-
-        // Whence must be an integer
-        if (!arguments[2].Convert(VarType.INTEGER, out _, out var whenceObj, this))
-        {
-            LogRuntimeException(294);
-        }
-
-        var whence = (long)whenceObj;
-
-        // Whence must be 0 or 1
-        if (whence is < 0 or > 1)
+        if (!arguments[2].Convert(VarType.INTEGER, out _, out var whenceObj, this) || (long)whenceObj is < 0 or > 2)
         {
             LogRuntimeException(294);
             return;
         }
 
-        // Channel must have an associated stream
-        if (!StreamReadersByChannel.TryGetValue(channel, out var sr))
+        var whence = (long)whenceObj;
+        var sr = ChannelReader(channel);
+        if (sr is null)
         {
             LogRuntimeException(295);
             return;
         }
 
-        Seek(sr, offset, whence);
-        PredicateSuccess();
+        var target = whence switch
+        {
+            0 => offset,
+            1 => GetActualPosition(sr) + offset,
+            _ => sr.BaseStream.Length + offset
+        };
+        // the position stays within the file, as sbl keeps it (SET(1,100,0) on a 13-byte file is 13)
+        target = Math.Clamp(target, 0, sr.BaseStream.Length);
+        sr.BaseStream.Position = target;
+        sr.DiscardBufferedData();
+        SystemStack.Push(new IntegerVar(target));
     }
 
+    // The reader an input channel is read through, made on first use and shared by every variable
+    // associated with the channel
+    internal StreamReader? ChannelReader(string channel)
+    {
+        if (StreamReadersByChannel.TryGetValue(channel, out var reader))
+            return reader;
+        if (!StreamInputs.TryGetValue(channel, out var stream))
+            return null;
+        reader = new StreamReader(stream, Encoding.UTF8, true);
+        StreamReadersByChannel[channel] = reader;
+        return reader;
+    }
+
+    // Record-based repositioning, which BACKSPACE uses
     private static void Seek(StreamReader sr, long offset, long whence)
     {
         // Get current position (in bytes)

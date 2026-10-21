@@ -5525,22 +5525,43 @@ s	output = 'S' &LASTNO	:(return)
 
 end
 ";
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        // sbl prints a report or listing page here; the run's time, regenerations, memory and the head's identity and clock are masked
         Assert.AreEqual(@"S8
 a
 S9
 S13
-err: 7 (Unknown keyword) @S9
+err: 251 (keyword operand is not name of defined keyword) @S18
 S14
 S15
 S16
-S10
-b
-S11
-c
-err: 0 () @S11
+S13
+err: 331 (goto scontinue with no user interrupt) @S18
 S14
 S15
-S16", SetupTests.RunWithInput(s));
+S16
+S13
+err: 331 (goto scontinue with no user interrupt) @S18
+S14
+S15
+S16
+
+
+
+Test.sno(16) : ERROR 331 -- goto scontinue with no user interrupt
+
+
+
+
+
+in file              Test.sno
+in line              16
+in statement         16
+stmts executed       34
+execution time msec  -
+REGENERATIONS        -
+memory used (bytes)  -
+memory left (bytes)  -", SetupTests.MaskOracle(SetupTests.RunWithInput(s)));
     }
 
     [TestMethod]

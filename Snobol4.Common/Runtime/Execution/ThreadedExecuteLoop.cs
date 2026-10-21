@@ -315,10 +315,44 @@ public partial class Executive
             }
         }
 
+        // :(SCONTINUE) resumes only after a user interrupt (error 320), which this run has none of: with an error pending it is
+        // error 331, with none error 321. Both are fatal, as in SPITBOL (l_scn counts them in errft): a SETEXIT handler still
+        // takes them, but the third fatal error ends the run whatever the handler and &ERRLIMIT say
+        if (exitCode == -7 && overrideThread == null)
+        {
+            var code = _trapPending ? 331 : 321;
+            _trapPending = false;
+            _continueStatement = -1;
+            LogRuntimeException(code, fatal: ++_fatalErrors >= 3);
+            SystemStack.Pop();
+            if (OnErrorGoto > 0)
+            {
+                ProcessTrappedErrorThreaded();
+                _trapTaken = false;
+                thread = Thread!;
+                exitCode = -1;
+                goto Restart;
+            }
+
+            // no handler is armed: the statement fails and takes its failure exit, which for a goto is the goto again
+            goto Done;
+        }
+
+        // :(CONTINUE) resumes at the failure exit of the statement in error, which can be a special label (SCONTINUE, RETURN):
+        // that label is then taken as the goto it is
+        if (exitCode == -6 && _continueStatement is <= -2 and >= -7 && overrideThread == null)
+        {
+            exitCode = _continueStatement;
+            _continueStatement = -1;
+            _trapPending = false;
+            goto Done;
+        }
+
         if (exitCode == -6 && _continueStatement >= 0 && overrideThread == null)
         {
             var resumeAt = StatementIndexToInstrIndex(_continueStatement);
             _continueStatement = -1;
+            _trapPending = false;
             if (resumeAt >= 0)
             {
                 thread = Thread!;
@@ -362,7 +396,15 @@ public partial class Executive
             : errorStatement + 1;
         InstructionPointer = StatementIndexToInstrIndex(target);
         _trapTaken = true;
+        _trapPending = true;
     }
+
+    // An error is waiting for :(CONTINUE) or :(SCONTINUE) (SPITBOL's r_cnt); the failure exit it resumes at can itself be a
+    // special label, so the statement index above cannot say
+    private bool _trapPending;
+
+    // The fatal errors so far (SPITBOL's errft): a bad SCONTINUE counts as one, and the third ends the run
+    private int _fatalErrors;
 
     // Where :(CONTINUE) resumes after the trapped error, by statement index; -1 when no trap is pending
     private int _continueStatement = -1;

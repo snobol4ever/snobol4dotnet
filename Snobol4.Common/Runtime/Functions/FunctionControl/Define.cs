@@ -282,6 +282,9 @@ public partial class Executive
             throw new ProgramEndException();
 
         var returningStatement = AmpCurrentLineNumber;
+        // The call's last statement is the last executed, so the rest of the calling statement (and a statement a trace call
+        // interrupts) reads it as &LASTNO, as in SPITBOL; the calling statement is the current one again
+        AmpLastLineNumber = returningStatement;
         AmpCurrentLineNumber = callerStatement;
         StatementSerial = callerSerial;
         AlphaStack = callerAlphaStack;

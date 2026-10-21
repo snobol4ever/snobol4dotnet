@@ -40,8 +40,45 @@ public partial class Executive
             return;
         }
 
-        Console.Error.WriteLine(LastDiagnostic);
+        PrintFatalReport(code);
         throw ce;
+    }
+
+    // The report of a fatal run-time error as sbl writes it (CEO-1858): on the listing stream, which is standard output unless
+    // -o names a file. Three empty lines, the error line, five empty lines, the position and run summary labelled to column 21,
+    // and an empty line; sbl hard-wraps every line at 120 columns, mid-word.
+    private void PrintFatalReport(int code)
+    {
+        const int width = 120;
+        var file = StatementFile(AmpCurrentLineNumber);
+        var line = StatementLine(AmpCurrentLineNumber);
+        var memoryUsed = System.Diagnostics.Process.GetCurrentProcess().WorkingSet64;
+        var memoryLeft = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
+        string Row(string label, object value) => label.PadRight(21) + value;
+        string[] report =
+        [
+            "", "", "",
+            $"{file}({line}) : ERROR {code:D3} -- {CompilerException.ErrorMessage[code]}",
+            "", "", "", "", "",
+            Row("in file", file),
+            Row("in line", line),
+            Row("in statement", StatementNumber(AmpCurrentLineNumber)),
+            Row("stmts executed", AmpStatementCount),
+            Row("execution time msec", _timerExecute.ElapsedMilliseconds),
+            Row("REGENERATIONS", GC.CollectionCount(2)),
+            Row("memory used (bytes)", memoryUsed),
+            Row("memory left (bytes)", memoryLeft),
+            ""
+        ];
+        var listing = Parent.ListingWriter;
+        foreach (var text in report)
+        {
+            var rest = text;
+            for (; rest.Length > width; rest = rest[width..])
+                listing.WriteLine(rest[..width]);
+            listing.WriteLine(rest);
+        }
+        listing.Flush();
     }
 
     public StringVar NonExceptionFailure()

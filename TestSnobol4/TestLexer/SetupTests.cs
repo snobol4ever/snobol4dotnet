@@ -172,6 +172,14 @@ public class SetupTests
     internal static string RunWithInput(string script, string? inputText = null) =>
         RunWithInputDirectives("-b", script, inputText);
 
+    // The harness's mask for the run summary of a fatal-error report (ALL.mask): a run's time, regenerations and memory are never
+    // equal between two engines, so each number becomes "-". stmts executed is deterministic in sbl and stays exact.
+    private static readonly System.Text.RegularExpressions.Regex ReportVolatile = new(
+        @"^(execution time msec|REGENERATIONS|memory used \(bytes\)|memory left \(bytes\))( +)\d+",
+        System.Text.RegularExpressions.RegexOptions.Multiline);
+
+    internal static string MaskReport(string output) => ReportVolatile.Replace(output.Replace("\r\n", "\n"), "$1$2-");
+
     // RunWithInput with the command-line switches given (e.g. "-b -o=dir/prog")
     internal static string RunWithInputDirectives(string directives, string script, string? inputText = null)
     {

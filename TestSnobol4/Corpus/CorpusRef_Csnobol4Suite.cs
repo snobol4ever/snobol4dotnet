@@ -4533,7 +4533,13 @@ END", SetupTests.RunWithInput(s));
 	FOO = ""world""
 END
 ";
-        Assert.AreEqual(@"", SetupTests.RunWithInput(s));
+        // sbl -b ends this program at OUTPUT with error 160 (a CSNOBOL4 file option sbl refuses) and prints its report; the
+        // expectation here was CSNOBOL4's empty output, which dotnet matched only while its report went to standard error
+        Assert.AreEqual(
+            "\n\n\nTest.sno(1) : ERROR 160 -- inappropriate file specification for output\n\n\n\n\n\n" +
+            "in file              Test.sno\nin line              1\nin statement         1\nstmts executed       1\n" +
+            "execution time msec  -\nREGENERATIONS        -\nmemory used (bytes)  -\nmemory left (bytes)  -",
+            SetupTests.MaskReport(SetupTests.RunWithInput(s)));
     }
 
     [TestMethod]

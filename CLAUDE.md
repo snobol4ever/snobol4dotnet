@@ -2,7 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-SNOBOL4.NET compiles and runs SNOBOL4 with the SPITBOL extensions in C# on .NET 10. It follows SPITBOL: *"any statement about SPITBOL in the SPITBOL manual applies to SNOBOL4.NET"* (README). When behaviour is in question, SPITBOL is the reference, not CSNOBOL4 or the original SNOBOL4.
+SNOBOL4.NET compiles and runs SNOBOL4 with the SPITBOL extensions in C# on .NET 10. It follows SPITBOL: *"any statement about SPITBOL in the SPITBOL manual applies to SNOBOL4.NET"* (README). When behaviour is in question, SPITBOL is the reference, not CSNOBOL4 or the original SNOBOL4. Lon, 2026-10-18: *"The snobol4dotnet is meant to mimic SPITBOL exactly."* Where the manual is silent, Dewar and Emmer's source decides.
+
+- **Ask the oracle, don't guess.** Run the same program through `/home/resources/x64/bin/sbl` and through `Snobol4.dll`, with the same switches (`-b`, `-f`/`-F` mean the same in both), and diff the output. A test whose expectation is not SPITBOL's answer is corrected only after `sbl` has run that exact program.
+- **One defect per commit**, red test first. Subjects read `dotnet-<slug>: <what now happens>, as in SPITBOL` (see `git log`).
 
 ## Commands
 
@@ -21,9 +24,13 @@ dotnet Snobol4/bin/Release/net10.0/Snobol4.dll -w prog.sno   # also saves prog.d
 dotnet Snobol4/bin/Release/net10.0/Snobol4.dll prog.dll      # runs a saved program
 
 bash build_native.sh                                       # rebuild the committed native .so fixtures (gcc)
+
+# wall-clock benchmarks; finds corpus/benchmarks/snobol4/ above the runner, or the folder CORPUS names
+dotnet run --project benchmarks/Benchmarks.csproj -c Release
 ```
 
-- **Run the suite in batches of 100, never in one `dotnet test` of all 2,500 tests.** Lon, 2026-10-18: *"You better be running tests in batches of 100."* A whole-suite run intermittently hangs or crashes its test host and loses every result. `scripts/test_in_batches.sh` runs each batch in its own bounded host and names any batch that did not complete.
+- **The suite is not all green.** A known set of tests fails on SPITBOL answers that wait on Lon's rulings (recorded in `.github/GOAL-HQ-DOTNET.md`). Run the affected batch before you change anything and compare failures after, rather than expecting zero.
+- **Run the suite in batches of 100, never in one `dotnet test` of the whole suite.** Lon, 2026-10-18: *"You better be running tests in batches of 100."* A whole-suite run intermittently hangs or crashes its test host and loses every result. `scripts/test_in_batches.sh` runs each batch in its own bounded host and names any batch that did not complete.
 - `Snobol4W` targets `net10.0-windows` and sets `EnableWindowsTargeting` in its own csproj, so the solution builds on Linux without extra flags.
 - There is no separate linter. `.editorconfig` holds the style rules: file-scoped namespaces, `_camelCase` private fields, `using` outside the namespace.
 - The bridge smokes in `scripts/test_smoke_dot_bridge*.sh` run the Release `Snobol4.dll` against the `beauty` demo. Their defaults (`SNO4_REPO=/home/claude/snobol4dotnet`, `CORPUS=/home/claude/corpus`, `BEAUTY=$CORPUS/programs/snobol4/beauty`) usually need overriding. In the current corpus layout, beauty lives at `corpus/demos/snobol4/beauty`.
@@ -46,6 +53,8 @@ Variants of the same pipeline:
 - `BuildCode` compiles for `CODE` and appends to the live thread (`AppendCompile`).
 - Deferred `*expr` compiles to "star functions" (`CompileStarFunctions`, `DeferredExpression.cs`).
 - `-w` writes a DLL (`BuilderSaveDll.cs`), and `RunDll` reloads one.
+
+A statement in error does not stop the compile: it is listed on the page `sbl` prints (`BuilderErrors.WriteStatementInError`), marked `SourceLine.CompileError`, compiles to nothing, and the program does not run unless `-k` or `-ERRORS` asks. Two things raise such errors, both per statement in `Lexer.LexLines`, so they list in source order: the lexer itself, and `PreEvaluator`, which does what SPITBOL does to an arithmetic operator or an `svpre` function (`LEN`, `TAB`, `CHAR`, `REMDR`, …) whose operands are all constants. It calls the real builtin with `Executive.PreEvaluating` set, so `1 / 0` or `LEN(-1)` is a compile error with the run-time error's number.
 
 The old Roslyn C#-codegen engine is gone, even though `PR_DESCRIPTION.md`, some comments and the `-cs` option still mention it.
 
@@ -76,8 +85,8 @@ The old Roslyn C#-codegen engine is gone, even though `PR_DESCRIPTION.md`, some 
 
 Don't take these as truth. Measure instead.
 
-- `BUILDING.md` says xUnit, about 1,876 tests and a required `-p:EnableWindowsTargeting=true`. The suite is MSTest with 2,510 tests, and the flag isn't needed.
+- `BUILDING.md` says xUnit, about 1,876 tests and a required `-p:EnableWindowsTargeting=true`. The suite is MSTest with over 2,500 tests, and the flag isn't needed. Its `CORPUS=.../snobol4corpus/benchmarks` example names the old corpus layout; the runner now wants the folder holding the `.sno` files, `corpus/benchmarks/snobol4/`.
 - `README.jeff.md` claims "zero failures".
 - `PR_DESCRIPTION.md` describes a Roslyn fallback switch that no longer exists.
-- `benchmarks/Program.cs` looks for `corpus/benchmarks/<file>.sno` and ignores the `CORPUS` variable that `BUILDING.md` documents. The current corpus keeps these files under `benchmarks/snobol4/`.
-- The `corpus` submodule (`.gitmodules` → `SNOBOL4-plus/SNOBOL4-corpus`) is empty, and the `Makefile` includes a `../SNOBOL4-corpus/run/sno.mk` that doesn't exist.
+- The `corpus` submodule (`.gitmodules` → `SNOBOL4-plus/SNOBOL4-corpus`) is a gitlink to an empty folder, and the `Makefile` includes a `../SNOBOL4-corpus/run/sno.mk` that doesn't exist. The corpus is the sibling checkout `../corpus` (`snobol4ever/corpus`).
+- Six `.dll` files are tracked in git: the four `CustomFunction/Spitbol*Lib/libspitbol_*.dll` fixtures, `Snobol4/Test Files/Init.dll` and `TestSnobol4/test2.dll`. `.gitignore` covers `bin/` and `obj/`, so don't add to them.

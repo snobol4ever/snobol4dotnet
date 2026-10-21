@@ -5,7 +5,7 @@ public partial class Executive
     //"array first argument is not integer or string" /* 64 */,
     //"array first argument lower bound is not integer" /* 65 */,
     //"array first argument upper bound is not integer" /* 66 */,
-    //"array dimension is zero negative or out of range" /* 67 */,
+    //"array dimension is zero, negative or out of range" /* 67 */,
     //"array size exceeds maximum permitted" /* 68 UNUSED*/,
 
                     public void CreateArray(List<Var> arguments)

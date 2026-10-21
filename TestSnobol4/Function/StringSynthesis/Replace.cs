@@ -6,7 +6,7 @@ namespace Test.StringSynthesis;
 //"replace third argument is not a string" /* 168 */,
 //"replace second argument is not a string" /* 169 */,
 //"replace first argument is not a string" /* 170 */,
-//"null or unequally long 2nd 3rd args to replace" /* 171 */,
+//"null or unequally long 2nd, 3rd args to replace" /* 171 */,
 
 [TestClass]
 public class Replace

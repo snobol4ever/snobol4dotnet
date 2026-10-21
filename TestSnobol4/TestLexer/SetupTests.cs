@@ -190,6 +190,10 @@ public class SetupTests
     internal static string MaskListingHead(string output) =>
         ListingClock.Replace(ListingIdentity.Replace(output.Replace("\r\n", "\n"), "<identity>"), "<clock>");
 
+    // Both masks: the run summary of a fatal-error report and the head of a listing page, for an expectation re-cut from sbl's
+    // answer where that answer is one of those
+    internal static string MaskOracle(string output) => MaskListingHead(MaskReport(output));
+
     // RunWithInput with the command-line switches given (e.g. "-b -o=dir/prog")
     internal static string RunWithInputDirectives(string directives, string script, string? inputText = null)
     {

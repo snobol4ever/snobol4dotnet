@@ -430,6 +430,7 @@ END
     }
 
     [TestMethod]
+    [Ignore("LON_UNICODE_BY_DESIGN (CEO-1859): sbl writes the bytes 80 FF as 2 bytes, snobol4dotnet the characters U+0080 U+00FF as 4 UTF-8 bytes (20 bytes against 22)")]
     public void TEST_Csnobol4__8bit()
     {
         var s = @"* 6/1/94 -plb
@@ -451,6 +452,7 @@ hello world", SetupTests.RunWithInput(s));
     }
 
     [TestMethod]
+    [Ignore("LON_UNICODE_BY_DESIGN (CEO-1859): the source holds raw 8-bit bytes; sbl reads bytes and stops at error 230 (exit 231), snobol4dotnet reads the source as UTF-8 characters")]
     public void TEST_Csnobol4__8bit2()
     {
         var s = @"	�tude = 'fran�ais'
@@ -471,37 +473,42 @@ end
 	&DUMP = 1
 END
 ";
-        Assert.AreEqual(@"Dump of variables at termination
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        Assert.AreEqual(@"
 
-Natural variables
+
+dump of natural variables
 
 A = 1
-ABORT = PATTERN
-ARB = PATTERN
-BAL = PATTERN
-FAIL = PATTERN
-FENCE = PATTERN
-REM = PATTERN
-SUCCEED = PATTERN
 
-Unprotected keywords
 
-&ABEND = 0
+dump of keyword values
+
 &ANCHOR = 0
 &CASE = 1
 &CODE = 0
 &DUMP = 1
 &ERRLIMIT = 0
-&FATALLIMIT = 0
+&ERRTEXT = ''
+&ERRTYPE = 0
+&FILE = 'Test.sno'
+&FNCLEVEL = 0
 &FTRACE = 0
-&FULLSCAN = 0
-&GTRACE = 0
+&FULLSCAN = 1
 &INPUT = 1
-&MAXLNGTH = xxx
+&LASTFILE = 'Test.sno'
+&LASTLINE = 2
+&LASTNO = 2
+&LINE = 3
+&MAXLNGTH = 16777216
 &OUTPUT = 1
-&STLIMIT = -1
+&PROFILE = 0
+&RTNTYPE = ''
+&STCOUNT = 3
+&STLIMIT = 2147483647
+&STNO = 3
 &TRACE = 0
-&TRIM = 0", SetupTests.RunWithInput(s));
+&TRIM = 1", SetupTests.RunWithInput(s));
     }
 
     [TestMethod]
@@ -592,26 +599,29 @@ L	I	=  LT(I,K)  I + 1		:F(END)
 	OUTPUT	=  I  ': '  OUT(P)		:(L)
 END
 ";
-        Assert.AreEqual(@"POWERS OF 256
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        // sbl prints a report or listing page here; the run's time, regenerations, memory and the head's identity and clock are masked
+        Assert.AreEqual(@"
 
-1: 256
-2: 65536
-3: 16777216
-4: 4294967296
-5: 1099511627776
-6: 281474976710656
-7: 72057594037927936
-8: 18446744073709551616
-9: 4722366482869645213696
-10: 1208925819614629174706176
-11: 309485009821345068724781056
-12: 79228162514264337593543950336
-13: 20282409603651670423947251286016
-14: 5192296858534827628530496329220096
-15: 1329227995784915872903807060280344576", SetupTests.RunWithInput(s));
+
+<identity>
+<clock>
+
+
+
+                                                                                                                page 1
+
+29      LINK	LINK	=  \INTEGER(I)  L(I)		:(RETURN)
+            	    	   !
+Test.sno(57,14) : ERROR 230 -- syntax error: illegal character
+
+30      VAL	VAL	=  \INTEGER(VAL)  V(VAL)		:(RETURN)
+           	   	   !
+Test.sno(59,12) : ERROR 230 -- syntax error: illegal character", SetupTests.MaskOracle(SetupTests.RunWithInput(s)));
     }
 
     [TestMethod]
+    [Ignore("LON_UNICODE_BY_DESIGN (CEO-1859): sbl writes the bytes 80-FF as 128 bytes, snobol4dotnet the characters U+0080-U+00FF as 256 UTF-8 bytes (320 bytes against 448)")]
     public void TEST_Csnobol4_alph()
     {
         var s = @"* 5/29/94 -plb
@@ -2219,10 +2229,11 @@ esame
 * test END label!!
 END
 ";
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
         Assert.AreEqual(@"ONE
 TWO
 three
-FOUR
+four
 FIVE
 SIX
 seven
@@ -2772,68 +2783,120 @@ errors	 eq(&errtype,0)                     :(continue)
 	 setexit(.errors)		    :(continue)
 end
 ";
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
         Assert.AreEqual(@"************************************************
 ****	s n o b o l	 d i a g n o s t i c s ****
 ****		 p h a s e    o	n e	       ****
 ************************************************
 ****	 any trace output indicates an error   ****
 ************************************************
+****102*****  TEST = '	error detected		***'
+****222*****  TEST = '	error detected		***'
+****223*****  TEST = '	error detected		***'
+****226*****  TEST = '	error detected		***'
+****227*****  TEST = '	error detected		***'
 ************************************************
-**** n o	 e r r o r s	d e t e	c t e d	****
+****	   number of errors detected  5	   ****
 ****	e n d	 o f	 d i a g n o s t i c s ****
 ************************************************
-Dump of variables at termination
 
-Natural variables
 
-A = ARRAY('3')
+
+dump of natural variables
+
+A = ARRAY(3) #9
 AA = 'a'
-AAA = ARRAY('10')
-ABORT = PATTERN
-AMA = ARRAY('2,2,2,2')
-ARB = PATTERN
-ATA = TABLE(2,10)
-B = NODE
+AAA = ARRAY(10) #13
+AMA = ARRAY(2,2,2,2) #14
+ATA = TABLE(2) #12
+B = NODE #7
 BAL = PATTERN
 BB = 'b'
-C = CLUNK
+C = CLUNK #8
 CC = 'c'
-D = ARRAY('-1:1,2')
-DIAGNOSTICS = 0
+D = ARRAY(-1:1,2) #5
+DIAGNOSTICS = 5
 E = 'e'
 EXPR = EXPRESSION
 F = 'f'
-FAIL = PATTERN
-FENCE = PATTERN
 FEXP = EXPRESSION
 OUTPUT = '************************************************'
 Q = 'qqq'
 QQ = 'x'
-REM = PATTERN
-SEXP = EXPRESSION
+SEXP = *Q
 STARS = '	error detected		***'
-SUCCEED = PATTERN
-T = TABLE(10,10)
-TA = ARRAY('2,2')
+T = TABLE(10) #10
+TA = ARRAY(2,2) #11
+TEST = '	error detected		***'
 
-Unprotected keywords
 
-&ABEND = 0
+dump of keyword values
+
 &ANCHOR = 0
 &CASE = 1
 &CODE = 0
 &DUMP = 2
-&ERRLIMIT = 999
-&FATALLIMIT = 0
+&ERRLIMIT = 998
+&ERRTEXT = 'field function argument is wrong datatype'
+&ERRTYPE = 41
+&FILE = 'Test.sno'
+&FNCLEVEL = 0
 &FTRACE = 0
-&FULLSCAN = 0
-&GTRACE = 0
+&FULLSCAN = 1
 &INPUT = 1
-&MAXLNGTH = xxx
+&LASTFILE = 'Test.sno'
+&LASTLINE = 343
+&LASTNO = 239
+&LINE = 358
+&MAXLNGTH = 16777216
 &OUTPUT = 1
-&STLIMIT = -1
-&TRACE = 1000000
-&TRIM = 0", SetupTests.RunWithInput(s));
+&PROFILE = 0
+&RTNTYPE = 'FRETURN'
+&STCOUNT = 268
+&STLIMIT = 2147483647
+&STNO = 248
+&TRACE = 999995
+&TRIM = 1
+
+ARRAY(-1:1,2) #5
+D<-1,1> = 0
+
+NODE #6
+VAL(NODE #6) = 'x'
+LSON(NODE #6) = 'y'
+RSON(NODE #6) = 'z'
+
+NODE #7
+LSON(B) = NODE #6
+
+CLUNK #8
+VALUE(C) = 'a'
+LSON(C) = 'b'
+
+ARRAY(3) #9
+A<2> = 'x'
+
+TABLE(10) #10
+T<'cat'> = 'dog'
+T<7> = 45
+
+ARRAY(2,2) #11
+TA<1,1> = 'cat'
+TA<1,2> = 'dog'
+TA<2,1> = 7
+TA<2,2> = 45
+
+TABLE(2) #12
+ATA<'cat'> = 'dog'
+ATA<7> = 45
+
+ARRAY(10) #13
+AAA<1> = 5
+AAA<2> = 22
+
+ARRAY(2,2,2,2) #14
+AMA<1,2,1,2> = 1212
+AMA<2,1,2,1> = 2121", SetupTests.RunWithInput(s));
     }
 
     [TestMethod]
@@ -3094,56 +3157,21 @@ alldone
 	 output	= '**********************************************'
 end
 ";
-        Assert.AreEqual(@"**********************************************
-****	snobol	diagnostics -- phase two     ****
-**********************************************
-****		  &fullscan = 0		****
-****** error	detected at 67	********
-***** resuming execution *******
-**********************************************
-****		  &fullscan = 1		****
-****		  no errors detected	     ****
-**********************************************
-****		  end of diagnostics	     ****
-**********************************************
-Dump of variables at termination
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        // sbl prints a report or listing page here; the run's time, regenerations, memory and the head's identity and clock are masked
+        Assert.AreEqual(@"
 
-Natural variables
 
-ABORT = PATTERN
-ARB = PATTERN
-BAL = PATTERN
-ERRCOUNT = 0
-FAIL = PATTERN
-FENCE = PATTERN
-OUTPUT = '**********************************************'
-REM = PATTERN
-SUCCEED = PATTERN
-TEST = 'abcdefghijklmnopqrstuvwxyz'
-VAR = 'abc'
-VARA = 'i'
-VARD = 'abc'
-VARL = 'abc'
-VART = 'abc'
+<identity>
+<clock>
 
-Unprotected keywords
 
-&ABEND = 0
-&ANCHOR = 0
-&CASE = 1
-&CODE = 0
-&DUMP = 2
-&ERRLIMIT = 99
-&FATALLIMIT = 0
-&FTRACE = 0
-&FULLSCAN = 1
-&GTRACE = 0
-&INPUT = 1
-&MAXLNGTH = xxx
-&OUTPUT = 1
-&STLIMIT = -1
-&TRACE = 1000
-&TRIM = 0", SetupTests.RunWithInput(s));
+
+                                                                                                                page 1
+
+242     .							   error()
+
+Test.sno(232) : ERROR 214 -- bad label or misplaced continuation line", SetupTests.MaskOracle(SetupTests.RunWithInput(s)));
     }
 
     [TestMethod]
@@ -3154,9 +3182,27 @@ Unprotected keywords
 	OUTPUT = &DIGITS
 END
 ";
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        // sbl prints a report or listing page here; the run's time, regenerations, memory and the head's identity and clock are masked
         Assert.AreEqual(@"ABCDEFGHIJKLMNOPQRSTUVWXYZ
 abcdefghijklmnopqrstuvwxyz
-0123456789", SetupTests.RunWithInput(s));
+
+
+
+Test.sno(3) : ERROR 251 -- keyword operand is not name of defined keyword
+
+
+
+
+
+in file              Test.sno
+in line              3
+in statement         3
+stmts executed       3
+execution time msec  -
+REGENERATIONS        -
+memory used (bytes)  -
+memory left (bytes)  -", SetupTests.MaskOracle(SetupTests.RunWithInput(s)));
     }
 
     [TestMethod]
@@ -3167,38 +3213,43 @@ abcdefghijklmnopqrstuvwxyz
 	&DUMP = 1
 END
 ";
-        Assert.AreEqual(@"Dump of variables at termination
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        Assert.AreEqual(@"
 
-Natural variables
+
+dump of natural variables
 
 A = 1
-ABORT = PATTERN
-ARB = PATTERN
 B = 'hello world'
-BAL = PATTERN
-FAIL = PATTERN
-FENCE = PATTERN
-REM = PATTERN
-SUCCEED = PATTERN
 
-Unprotected keywords
 
-&ABEND = 0
+dump of keyword values
+
 &ANCHOR = 0
 &CASE = 1
 &CODE = 0
 &DUMP = 1
 &ERRLIMIT = 0
-&FATALLIMIT = 0
+&ERRTEXT = ''
+&ERRTYPE = 0
+&FILE = 'Test.sno'
+&FNCLEVEL = 0
 &FTRACE = 0
-&FULLSCAN = 0
-&GTRACE = 0
+&FULLSCAN = 1
 &INPUT = 1
-&MAXLNGTH = xxx
+&LASTFILE = 'Test.sno'
+&LASTLINE = 3
+&LASTNO = 3
+&LINE = 4
+&MAXLNGTH = 16777216
 &OUTPUT = 1
-&STLIMIT = -1
+&PROFILE = 0
+&RTNTYPE = ''
+&STCOUNT = 4
+&STLIMIT = 2147483647
+&STNO = 4
 &TRACE = 0
-&TRIM = 0", SetupTests.RunWithInput(s));
+&TRIM = 1", SetupTests.RunWithInput(s));
     }
 
     [TestMethod]
@@ -3220,9 +3271,10 @@ Unprotected keywords
 	output = &errtype
 end
 ";
-        Assert.AreEqual(@"3
-Erroneous array or table reference
-3", SetupTests.RunWithInput(s));
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        Assert.AreEqual(@"235
+subscripted operand is not table or array
+235", SetupTests.RunWithInput(s));
     }
 
     [TestMethod]
@@ -3370,14 +3422,25 @@ ETEST2
 	TEST(""FILE_ABSPATH"")
 END
 ";
-        Assert.AreEqual(@"FILE .
-FILE file.sno
-FILE aa
-FILE /
-FILE_ISDIR .
-FILE_ISDIR aa
-FILE_ISDIR /
-FILE_ABSPATH /", SetupTests.RunWithInput(s));
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        // sbl prints a report or listing page here; the run's time, regenerations, memory and the head's identity and clock are masked
+        Assert.AreEqual(@"
+
+
+Test.sno(9) : ERROR 022 -- undefined function called
+
+
+
+
+
+in file              Test.sno
+in line              9
+in statement         9
+stmts executed       7
+execution time msec  -
+REGENERATIONS        -
+memory used (bytes)  -
+memory left (bytes)  -", SetupTests.MaskOracle(SetupTests.RunWithInput(s)));
     }
 
     [TestMethod]
@@ -3390,11 +3453,12 @@ FILE_ABSPATH /", SetupTests.RunWithInput(s));
 	OUTPUT = 1.0 / 1000000000
 END
 ";
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
         Assert.AreEqual(@"3.14159
 1.
-0.001
-1e-06
-1e-09", SetupTests.RunWithInput(s));
+0.1e-2
+0.1e-5
+0.1e-8", SetupTests.RunWithInput(s));
     }
 
     [TestMethod]
@@ -3417,11 +3481,28 @@ END
 DOUBLE	OUTPUT = IDENT(THIRD,""0.333333333333333"") ""OK""
 END
 ";
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        // sbl prints a report or listing page here; the run's time, regenerations, memory and the head's identity and clock are masked
         Assert.AreEqual(@"0.1
 0.2
 0.3
-1.
-OK", SetupTests.RunWithInput(s));
+
+
+
+Test.sno(9) : ERROR 254 -- erroneous argument for host
+
+
+
+
+
+in file              Test.sno
+in line              9
+in statement         130
+stmts executed       60
+execution time msec  -
+REGENERATIONS        -
+memory used (bytes)  -
+memory left (bytes)  -", SetupTests.MaskOracle(SetupTests.RunWithInput(s)));
     }
 
     [TestMethod]
@@ -3445,16 +3526,17 @@ D							:(RETURN)
 BEGIN	A(""hello"")
 END
 ";
-        Assert.AreEqual(@"ftrace.sno:16 stmt 16: level 0 call of A(), time = xxx
-ftrace.sno:10 stmt 10: level 1 call of B(), time = xxx
-ftrace.sno:11 stmt 11: level 2 call of C(), time = xxx
-ftrace.sno:12 stmt 12: level 3 call of D(), time = xxx
-ftrace.sno:14 stmt 14: level 3 RETURN of D = '', time = xxx
-ftrace.sno:13 stmt 13: level 3 call of D(), time = xxx
-ftrace.sno:14 stmt 14: level 3 RETURN of D = '', time = xxx
-ftrace.sno:13 stmt 13: level 2 RETURN of C = '', time = xxx
-ftrace.sno:11 stmt 11: level 1 RETURN of B = '', time = xxx
-ftrace.sno:10 stmt 10: level 0 RETURN of A = '', time = xxx", SetupTests.RunWithInput(s));
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        Assert.AreEqual(@"****16******  A()
+****10****** i B()
+****11****** ii C()
+****12****** iii D()
+****14****** iii RETURN D = ''
+****13****** iii D()
+****14****** iii RETURN D = ''
+****13****** ii RETURN C = ''
+****11****** i RETURN B = ''
+****10******  RETURN A = ''", SetupTests.RunWithInput(s));
     }
 
     [TestMethod]
@@ -3577,16 +3659,25 @@ EBAR
 END
 
 ";
-        Assert.AreEqual(@"foo
-BAR
-TEST
-DEFINE
-BAR
-bar
-TEST
-test
-DEFINE
-define", SetupTests.RunWithInput(s));
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        // sbl prints a report or listing page here; the run's time, regenerations, memory and the head's identity and clock are masked
+        Assert.AreEqual(@"
+
+
+Test.sno(2) : ERROR 022 -- undefined function called
+
+
+
+
+
+in file              Test.sno
+in line              2
+in statement         2
+stmts executed       8
+execution time msec  -
+REGENERATIONS        -
+memory used (bytes)  -
+memory left (bytes)  -", SetupTests.MaskOracle(SetupTests.RunWithInput(s)));
     }
 
     [TestMethod]
@@ -3610,14 +3701,26 @@ END
 	output = &stno
 end
 ";
-        Assert.AreEqual(@"        -LIST
-1       	OUTPUT = &STNO
-2       	OUTPUT = &STNO
-3       END
-0
-0
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        // sbl prints a report or listing page here; the run's time, regenerations, memory and the head's identity and clock are masked
+        Assert.AreEqual(@"
+
+
+<identity>
+<clock>
+
+
+
+                                                                                                                page 1
+
+        -list
+3       	output = &stno
+4       	output = &stno
+5       end
 1
-2", SetupTests.RunWithInput(s));
+2
+3
+4", SetupTests.MaskOracle(SetupTests.RunWithInput(s)));
     }
 
     [TestMethod]
@@ -3632,14 +3735,15 @@ end
 	output = &file ':' &line
 end
 ";
-        Assert.AreEqual(@"include.sno:1
-include.sno:1 (last)
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        Assert.AreEqual(@"Test.sno:1
+Test.sno:1 (last)
 line2.sno:2 (line2)
-include.sno:3
-include.sno:3 (last)
+line2.sno:3
+line2.sno:3 (last)
 line2.sno:2 (line2)
-include.sno:5
-include.sno:7", SetupTests.RunWithInput(s));
+line2.sno:5
+Test.sno:7", SetupTests.RunWithInput(s));
     }
 
     [TestMethod]
@@ -3768,33 +3872,25 @@ e.loadump
 *	OUTPUT = JSON_ENCODE(ARRAY('1:10'))
 END
 ";
-        Assert.AreEqual(@"""hello world""
-""\b\t\n\f\r\""\\""
-""\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\b\t\n\u000b\f\r\u000e\u000f\u0010\u0011\u0012\u0013\u0014\u0015\u0016\u0017\u0018\u0019\u001a\u001b\u001c\u001d\u001e\u001f""
-OK: 1
-OK: -1
-OK: 1.
-OK: 2.0
-OK: 3e2
-OK: 1.234e3
-OK: -1234e-3
-OK: null
-OK: ""foo""
-OK: [""foo""]
-OK: [null]
-OK: [1,2,3]
-OK: {""a"":""hello"",""z"":""goodbye""}
-OK: [{""a"":1.,""b"":-2},{""c"":3,""d"":[4,5,6]}]
-OK: {}
-OK: ""\b\t\n\f\r\""\\""
-OK: ""hello\nworld""
-OK: ""hello\u000Aworld""
-OK: ""\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\b\t\n\u000b\f\r\u000e\u000f\u0010\u0011\u0012\u0013\u0014\u0015\u0016\u0017\u0018\u0019\u001a\u001b\u001c\u001d\u001e\u001f""
-OK: ""hello world""
-OK: ""Καλημέρα κόσμε""
-OK: ""こんにちは 世界""
-OK: ""👍😊🥺😉😍😘😚😜😂😝😳😁😣😢😭😰🥰🥴😏🍆🍑""
-OK: ""\U0001F44D""", SetupTests.RunWithInput(s));
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        // sbl prints a report or listing page here; the run's time, regenerations, memory and the head's identity and clock are masked
+        Assert.AreEqual(@"
+
+
+json.sno(104) : ERROR 022 -- undefined function called
+
+
+
+
+
+in file              json.sno
+in line              104
+in statement         138
+stmts executed       73
+execution time msec  -
+REGENERATIONS        -
+memory used (bytes)  -
+memory left (bytes)  -", SetupTests.MaskOracle(SetupTests.RunWithInput(s)));
     }
 
     [TestMethod]
@@ -4072,11 +4168,25 @@ ETEST
 
 END
 ";
-        Assert.AreEqual(@"foo
-TEST
-END
-BAR
-bar", SetupTests.RunWithInput(s));
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        // sbl prints a report or listing page here; the run's time, regenerations, memory and the head's identity and clock are masked
+        Assert.AreEqual(@"
+
+
+Test.sno(5) : ERROR 022 -- undefined function called
+
+
+
+
+
+in file              Test.sno
+in line              5
+in statement         4
+stmts executed       6
+execution time msec  -
+REGENERATIONS        -
+memory used (bytes)  -
+memory left (bytes)  -", SetupTests.MaskOracle(SetupTests.RunWithInput(s)));
     }
 
     [TestMethod]
@@ -4088,8 +4198,25 @@ bar", SetupTests.RunWithInput(s));
 FOO	OUTPUT = 'HERE'
 END
 ";
-        Assert.AreEqual(@"CODE
-HERE", SetupTests.RunWithInput(s));
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        // sbl prints a report or listing page here; the run's time, regenerations, memory and the head's identity and clock are masked
+        Assert.AreEqual(@"
+
+
+Test.sno(1) : ERROR 022 -- undefined function called
+
+
+
+
+
+in file              Test.sno
+in line              1
+in statement         1
+stmts executed       1
+execution time msec  -
+REGENERATIONS        -
+memory used (bytes)  -
+memory left (bytes)  -", SetupTests.MaskOracle(SetupTests.RunWithInput(s)));
     }
 
     [TestMethod]
@@ -4106,9 +4233,10 @@ hello
 world
 this is a longer line
 ";
+        // the data after END is read under -r, as sbl reads it (CSNOBOL4 reads it by default): this expectation is sbl -b -r's answer
         Assert.AreEqual(@"5 hello
 5 world
-21 this is a longer line", SetupTests.RunWithInput(s));
+21 this is a longer line", SetupTests.RunWithInputDirectives("-b -r", s));
     }
 
     [TestMethod]
@@ -4244,15 +4372,16 @@ end
 	output = &file ':' &line
 end
 ";
-        Assert.AreEqual(@"line.sno:1
-line.sno:1 (last)
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        Assert.AreEqual(@"Test.sno:1
+Test.sno:1 (last)
 line2.sno:2 (line2)
-line.sno:3
+line2.sno:3
 foo:1234
 foo:2000
 foo:2000 (last)
 line2.sno:2 (line2)
-foo:2002
+line2.sno:2002
 foo:2005", SetupTests.RunWithInput(s));
     }
 
@@ -4405,9 +4534,25 @@ END
 	OUTPUT = &MAXINT * 2
 END
 ";
-        Assert.AreEqual(@"OK
--2
--2", SetupTests.RunWithInput(s));
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        // sbl prints a report or listing page here; the run's time, regenerations, memory and the head's identity and clock are masked
+        Assert.AreEqual(@"
+
+
+Test.sno(1) : ERROR 251 -- keyword operand is not name of defined keyword
+
+
+
+
+
+in file              Test.sno
+in line              1
+in statement         1
+stmts executed       1
+execution time msec  -
+REGENERATIONS        -
+memory used (bytes)  -
+memory left (bytes)  -", SetupTests.MaskOracle(SetupTests.RunWithInput(s)));
     }
 
     [TestMethod]
@@ -4518,10 +4663,25 @@ Q----
 LOOP	OUTPUT = FOO			:S(LOOP)
 END
 ";
-        Assert.AreEqual(@"	INPUT(.FOO,10,,""openi.sno"")
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        // sbl prints a report or listing page here; the run's time, regenerations, memory and the head's identity and clock are masked
+        Assert.AreEqual(@"
 
-LOOP	OUTPUT = FOO			:S(LOOP)
-END", SetupTests.RunWithInput(s));
+
+Test.sno(1) : ERROR 116 -- inappropriate file specification for input
+
+
+
+
+
+in file              Test.sno
+in line              1
+in statement         1
+stmts executed       1
+execution time msec  -
+REGENERATIONS        -
+memory used (bytes)  -
+memory left (bytes)  -", SetupTests.MaskOracle(SetupTests.RunWithInput(s)));
     }
 
     [TestMethod]
@@ -4550,8 +4710,25 @@ END
 LOOP	OUTPUT = FOO			:S(LOOP)
 END
 ";
-        Assert.AreEqual(@"hello
-world", SetupTests.RunWithInput(s));
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        // sbl prints a report or listing page here; the run's time, regenerations, memory and the head's identity and clock are masked
+        Assert.AreEqual(@"
+
+
+Test.sno(1) : ERROR 116 -- inappropriate file specification for input
+
+
+
+
+
+in file              Test.sno
+in line              1
+in statement         1
+stmts executed       1
+execution time msec  -
+REGENERATIONS        -
+memory used (bytes)  -
+memory left (bytes)  -", SetupTests.MaskOracle(SetupTests.RunWithInput(s)));
     }
 
     [TestMethod]
@@ -4661,7 +4838,25 @@ long", SetupTests.RunWithInput(s));
 	output = i
 end
 ";
-        Assert.AreEqual(@"hello", SetupTests.RunWithInput(s));
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        // sbl prints a report or listing page here; the run's time, regenerations, memory and the head's identity and clock are masked
+        Assert.AreEqual(@"
+
+
+Test.sno(3) : ERROR 116 -- inappropriate file specification for input
+
+
+
+
+
+in file              Test.sno
+in line              3
+in statement         2
+stmts executed       1
+execution time msec  -
+REGENERATIONS        -
+memory used (bytes)  -
+memory left (bytes)  -", SetupTests.MaskOracle(SetupTests.RunWithInput(s)));
     }
 
     [TestMethod]
@@ -4679,7 +4874,25 @@ end
 	delete(""popen2.dat"")
 end
 ";
-        Assert.AreEqual(@"Hello World", SetupTests.RunWithInput(s));
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        // sbl prints a report or listing page here; the run's time, regenerations, memory and the head's identity and clock are masked
+        Assert.AreEqual(@"
+
+
+Test.sno(2) : ERROR 160 -- inappropriate file specification for output
+
+
+
+
+
+in file              Test.sno
+in line              2
+in statement         1
+stmts executed       1
+execution time msec  -
+REGENERATIONS        -
+memory used (bytes)  -
+memory left (bytes)  -", SetupTests.MaskOracle(SetupTests.RunWithInput(s)));
     }
 
     [TestMethod]
@@ -4741,6 +4954,7 @@ EPOW
 
 END
 ";
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
         Assert.AreEqual(@"0^1 = 0
 1^0 = 1
 2^0 = 1
@@ -4751,7 +4965,7 @@ END
 1^2 = 1
 2^2 = 4
 3^2 = 9
-9^-1 = 0
+9^-1 = 0.111111111111111
 0.^1 = 0.
 1.^0 = 1.
 2.^0 = 1.
@@ -4769,6 +4983,7 @@ END
     }
 
     [TestMethod]
+    [Ignore("NO_ORACLE_ANSWER (CEO-1696, CEO-1858 item 5): sbl -b prints nothing for this program, so there is no answer to hold snobol4dotnet to")]
     public void TEST_Csnobol4_preload1()
     {
         var s = @"end
@@ -4777,6 +4992,7 @@ END
     }
 
     [TestMethod]
+    [Ignore("NO_ORACLE_ANSWER (CEO-1696, CEO-1858 item 5): sbl -b prints nothing for this program, so there is no answer to hold snobol4dotnet to")]
     public void TEST_Csnobol4_preload2()
     {
         var s = @"end
@@ -4786,6 +5002,7 @@ bb", SetupTests.RunWithInput(s));
     }
 
     [TestMethod]
+    [Ignore("NO_ORACLE_ANSWER (CEO-1696, CEO-1858 item 5): sbl -b prints nothing for this program, so there is no answer to hold snobol4dotnet to")]
     public void TEST_Csnobol4_preload3()
     {
         var s = @"end
@@ -4795,6 +5012,7 @@ pb", SetupTests.RunWithInput(s));
     }
 
     [TestMethod]
+    [Ignore("NO_ORACLE_ANSWER (CEO-1696, CEO-1858 item 5): sbl -b prints nothing for this program, so there is no answer to hold snobol4dotnet to")]
     public void TEST_Csnobol4_preload4()
     {
         var s = @"end
@@ -4949,9 +5167,10 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ
 FOUR SCORE AND SEVEN YEARS AGO
 HELLO WORLD
 ";
+        // the data after END is read under -r, as sbl reads it (CSNOBOL4 reads it by default): this expectation is sbl -b -r's answer
         Assert.AreEqual(@"abcdefghijklmnopqrstuvwxyz
 four score and seven years ago
-hello world", SetupTests.RunWithInput(s));
+hello world", SetupTests.RunWithInputDirectives("-b -r", s));
     }
 
     [TestMethod]
@@ -4977,10 +5196,28 @@ end";
         var input = @"hello
 world
 ";
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        // sbl prints a report or listing page here; the run's time, regenerations, memory and the head's identity and clock are masked
         Assert.AreEqual(@"hello
 world
-hello
-world", SetupTests.RunWithInput(s, input));
+
+
+
+
+Test.sno(2) : ERROR 174 -- rewind file does not exist
+
+
+
+
+
+in file              Test.sno
+in line              2
+in statement         2
+stmts executed       5
+execution time msec  -
+REGENERATIONS        -
+memory used (bytes)  -
+memory left (bytes)  -", SetupTests.MaskOracle(SetupTests.RunWithInput(s, input)));
     }
 
     [TestMethod]
@@ -5467,6 +5704,7 @@ Negative number in illegal context", SetupTests.RunWithInput(s));
     }
 
     [TestMethod]
+    [Ignore("NO_ORACLE_ANSWER (CEO-1696, CEO-1858 item 5): sbl -b prints nothing for this program, so there is no answer to hold snobol4dotnet to")]
     public void TEST_Csnobol4_setexit2()
     {
         var s = @"* test SETEXIT trap on END
@@ -5706,9 +5944,25 @@ eh24	output = 'S' &LASTNO ' ' &ERRTEXT ' (' &ERRTYPE ')'
 
 end
 ";
-        Assert.AreEqual(@"S4 Not in a SETEXIT handler (35)
-S10 Failure during goto evaluation (19)
-S15 Undefined or erroneous goto (24)", SetupTests.RunWithInput(s));
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        // sbl prints a report or listing page here; the run's time, regenerations, memory and the head's identity and clock are masked
+        Assert.AreEqual(@"
+
+
+Test.sno(1) : ERROR 251 -- keyword operand is not name of defined keyword
+
+
+
+
+
+in file              Test.sno
+in line              1
+in statement         1
+stmts executed       1
+execution time msec  -
+REGENERATIONS        -
+memory used (bytes)  -
+memory left (bytes)  -", SetupTests.MaskOracle(SetupTests.RunWithInput(s)));
     }
 
     [TestMethod]
@@ -5730,7 +5984,9 @@ end
 	output = convert("" "", .real)
 end
 ";
-        Assert.AreEqual(@"", SetupTests.RunWithInput(s));
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        Assert.AreEqual(@"0
+0.", SetupTests.RunWithInput(s));
     }
 
     [TestMethod]
@@ -5817,29 +6073,30 @@ ez
 
 end
 ";
-        Assert.AreEqual(@"spit.sno:8 stmt 7: C = 'yes', time = xxx
-spit.sno:14 stmt 10: B = 'yes!!', time = xxx
-spit.sno:14 stmt 10: A = 'yes!!', time = xxx
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        Assert.AreEqual(@"****7*******  C = 'yes'
+****10******  B = 'yes!!'
+****10******  A = 'yes!!'
 yes!!
 yes!!
 42.
-0.05
+0.5e-1
 cyan
 INTEGER: 17
 REAL: 3.14159
 TOO BIG
 too small
 Just Right
-spit.sno:53 stmt 38: B = 'yes!!', time = xxx
-spit.sno:53 stmt 38: A = 'yes!!', time = xxx
-spit.sno:55 stmt 40: C = 'yes!!', time = xxx
-spit.sno:56 stmt 41: C = 'yes!!', time = xxx
-spit.sno:60 stmt 43: C = 'yes!!', time = xxx
-spit.sno:61 stmt 44: C = 'yes!!', time = xxx
-spit.sno:62 stmt 45: C = 'yes!!', time = xxx
-spit.sno:63 stmt 46: C = 'yes!!', time = xxx
-spit.sno:70 stmt 50: B = '!!', time = xxx
-spit.sno:74 stmt 52: A = 'yes', time = xxx
+****38******  B = 'yes!!'
+****38******  A = 'yes!!'
+****40******  C = 'yes!!'
+****41******  C = 'yes!!'
+****43******  C = 'yes!!'
+****44******  C = 'yes!!'
+****45******  C = 'yes!!'
+****46******  C = 'yes!!'
+****50******  B = '!!'
+****52******  A = 'yes'
 all done", SetupTests.RunWithInput(s));
     }
 
@@ -6242,27 +6499,25 @@ ef
 	f(4)
 end
 ";
-        Assert.AreEqual(@"t.sno:7 stmt 6: &STCOUNT = 4, time = xxx
-t.sno:11 stmt 10: &STCOUNT = 5, time = xxx
-t.sno:11 stmt 10: level 0 call of F(1), time = xxx
-t.sno:8 stmt 7: &STCOUNT = 6, time = xxx
-t.sno:8 stmt 7: XXX = 1, time = xxx
-t.sno:8 stmt 7: level 0 RETURN of F = '', time = xxx
-t.sno:12 stmt 11: &STCOUNT = 7, time = xxx
-t.sno:12 stmt 11: level 0 call of F(2), time = xxx
-t.sno:8 stmt 7: &STCOUNT = 8, time = xxx
-t.sno:8 stmt 7: XXX = 2, time = xxx
-t.sno:8 stmt 7: level 0 RETURN of F = '', time = xxx
-t.sno:13 stmt 12: &STCOUNT = 9, time = xxx
-t.sno:13 stmt 12: level 0 call of F(3), time = xxx
-t.sno:8 stmt 7: &STCOUNT = 10, time = xxx
-t.sno:8 stmt 7: XXX = 3, time = xxx
-t.sno:8 stmt 7: level 0 RETURN of F = '', time = xxx
-t.sno:14 stmt 13: &STCOUNT = 11, time = xxx
-t.sno:14 stmt 13: level 0 call of F(4), time = xxx
-t.sno:8 stmt 7: &STCOUNT = 12, time = xxx
-t.sno:8 stmt 7: XXX = 4, time = xxx
-t.sno:8 stmt 7: level 0 RETURN of F = '', time = xxx", SetupTests.RunWithInput(s));
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        // sbl prints a report or listing page here; the run's time, regenerations, memory and the head's identity and clock are masked
+        Assert.AreEqual(@"
+
+
+Test.sno(3) : ERROR 198 -- trace first argument is not appropriate name
+
+
+
+
+
+in file              Test.sno
+in line              3
+in statement         2
+stmts executed       2
+execution time msec  -
+REGENERATIONS        -
+memory used (bytes)  -
+memory left (bytes)  -", SetupTests.MaskOracle(SetupTests.RunWithInput(s)));
     }
 
     [TestMethod]
@@ -6324,283 +6579,26 @@ under God, shall have a new birth of freedom--and that government of
 the people, by the people, for the people, shall not perish from the
 earth.
 ";
-        Assert.AreEqual(@"total words: 271
-13   that
-11   the
-10   we
-8    to
-8    here
-7    a
-6    and
-5    nation
-5    can
-5    of
-5    have
-5    for
-5    it
-5    not
-4    this
-4    in
-4    dedicated
-3    are
-3    great
-3    so
-3    who
-3    is
-3    dead
-3    they
-3    us
-3    shall
-3    people
-2    our
-2    on
-2    new
-2    conceived
-2    men
-2    war
-2    or
-2    long
-2    dedicate
-2    gave
-2    but
-2    living
-2    far
-2    what
-2    rather
-2    be
-2    which
-2    from
-2    these
-2    devotion
-1    four
-1    score
-1    seven
-1    years
-1    ago
-1    fathers
-1    brought
-1    forth
-1    continent
-1    liberty
-1    proposition
-1    all
-1    created
-1    equal
-1    now
-1    engaged
-1    civil
-1    testing
-1    whether
-1    any
-1    endure
-1    met
-1    battlefield
-1    come
-1    portion
-1    field
-1    as
-1    final
-1    resting
-1    place
-1    those
-1    their
-1    lives
-1    might
-1    live
-1    altogether
-1    fitting
-1    proper
-1    should
-1    do
-1    larger
-1    sense
-1    consecrate
-1    hallow
-1    ground
-1    brave
-1    struggled
-1    consecrated
-1    above
-1    poor
-1    power
-1    add
-1    detract
-1    world
-1    will
-1    little
-1    note
-1    nor
-1    remember
-1    say
-1    never
-1    forget
-1    did
-1    unfinished
-1    work
-1    fought
-1    thus
-1    nobly
-1    advanced
-1    task
-1    remaining
-1    before
-1    honored
-1    take
-1    increased
-1    cause
-1    last
-1    full
-1    measure
-1    highly
-1    resolve
-1    died
-1    vain
-1    under
-1    god
-1    birth
-1    freedom
-1    government
-1    by
-1    perish
-1    earth
-a              7
-above          1
-add            1
-advanced       1
-ago            1
-all            1
-altogether     1
-and            6
-any            1
-are            3
-as             1
-battlefield    1
-be             2
-before         1
-birth          1
-brave          1
-brought        1
-but            2
-by             1
-can            5
-cause          1
-civil          1
-come           1
-conceived      2
-consecrate     1
-consecrated    1
-continent      1
-created        1
-dead           3
-dedicate       2
-dedicated      4
-detract        1
-devotion       2
-did            1
-died           1
-do             1
-earth          1
-endure         1
-engaged        1
-equal          1
-far            2
-fathers        1
-field          1
-final          1
-fitting        1
-for            5
-forget         1
-forth          1
-fought         1
-four           1
-freedom        1
-from           2
-full           1
-gave           2
-god            1
-government     1
-great          3
-ground         1
-hallow         1
-have           5
-here           8
-highly         1
-honored        1
-in             4
-increased      1
-is             3
-it             5
-larger         1
-last           1
-liberty        1
-little         1
-live           1
-lives          1
-living         2
-long           2
-measure        1
-men            2
-met            1
-might          1
-nation         5
-never          1
-new            2
-nobly          1
-nor            1
-not            5
-note           1
-now            1
-of             5
-on             2
-or             2
-our            2
-people         3
-perish         1
-place          1
-poor           1
-portion        1
-power          1
-proper         1
-proposition    1
-rather         2
-remaining      1
-remember       1
-resolve        1
-resting        1
-say            1
-score          1
-sense          1
-seven          1
-shall          3
-should         1
-so             3
-struggled      1
-take           1
-task           1
-testing        1
-that           13
-the            11
-their          1
-these          2
-they           3
-this           4
-those          1
-thus           1
-to             8
-under          1
-unfinished     1
-us             3
-vain           1
-war            2
-we             10
-what           2
-whether        1
-which          2
-who            3
-will           1
-work           1
-world          1
-years          1", SetupTests.RunWithInput(s));
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        // sbl prints a report or listing page here; the run's time, regenerations, memory and the head's identity and clock are masked
+        Assert.AreEqual(@"total words: 
+
+
+
+Test.sno(18) : ERROR 256 -- sort/rsort 1st arg not suitable array or table
+
+
+
+
+
+in file              Test.sno
+in line              18
+in statement         14
+stmts executed       7
+execution time msec  -
+REGENERATIONS        -
+memory used (bytes)  -
+memory left (bytes)  -", SetupTests.MaskOracle(SetupTests.RunWithInput(s)));
     }
 
     [TestMethod]
@@ -6614,10 +6612,11 @@ years          1", SetupTests.RunWithInput(s));
         FOO = 4
 END
 ";
-        Assert.AreEqual(@"trace1.sno:3 stmt 3: FOO = 1, time = xxx
-trace1.sno:4 stmt 4: FOO = 2, time = xxx
-trace1.sno:5 stmt 5: FOO = 3, time = xxx
-trace1.sno:6 stmt 6: FOO = 4, time = xxx", SetupTests.RunWithInput(s));
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        Assert.AreEqual(@"****3*******  FOO = 1
+****4*******  FOO = 2
+****5*******  FOO = 3
+****6*******  FOO = 4", SetupTests.RunWithInput(s));
     }
 
     [TestMethod]
@@ -6632,8 +6631,9 @@ trace1.sno:6 stmt 6: FOO = 4, time = xxx", SetupTests.RunWithInput(s));
         FOO = 4
 END
 ";
-        Assert.AreEqual(@"trace2.sno:4 stmt 3: foo = 1, time = xxx
-trace2.sno:6 stmt 5: foo = 3, time = xxx", SetupTests.RunWithInput(s));
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        Assert.AreEqual(@"****3*******  foo = 1
+****5*******  foo = 3", SetupTests.RunWithInput(s));
     }
 
     [TestMethod]
@@ -6673,14 +6673,15 @@ F	F = 1	:(RETURN)
 
 END
 ";
-        Assert.AreEqual(@"trfunc.sno:18 stmt 18: level 0 call of A(), time = xxx
-trfunc.sno:26 stmt 26: level 0 RETURN of A = 1, time = xxx
-trfunc.sno:19 stmt 19: level 0 call of B(), time = xxx
-trfunc.sno:28 stmt 28: level 0 RETURN of C = 1, time = xxx
-trfunc.sno:21 stmt 21: level 0 call of D(), time = xxx
-trfunc.sno:29 stmt 29: level 0 RETURN of D = 1, time = xxx
-trfunc.sno:22 stmt 22: level 0 call of E(), time = xxx
-trfunc.sno:31 stmt 31: level 0 RETURN of F = 1, time = xxx", SetupTests.RunWithInput(s));
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        Assert.AreEqual(@"****18******  A()
+****26******  RETURN A = 1
+****19******  B()
+****28******  RETURN C = 1
+****21******  D()
+****29******  RETURN D = 1
+****22******  E()
+****31******  RETURN F = 1", SetupTests.RunWithInput(s));
     }
 
     [TestMethod]
@@ -6898,10 +6899,25 @@ YYYYY", SetupTests.RunWithInput(s));
 	OUTPUT = VDIFFER(1, 'A')
 END
 ";
-        Assert.AreEqual(@"A
-A
-A
-1", SetupTests.RunWithInput(s));
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        // sbl prints a report or listing page here; the run's time, regenerations, memory and the head's identity and clock are masked
+        Assert.AreEqual(@"
+
+
+Test.sno(1) : ERROR 022 -- undefined function called
+
+
+
+
+
+in file              Test.sno
+in line              1
+in statement         1
+stmts executed       1
+execution time msec  -
+REGENERATIONS        -
+memory used (bytes)  -
+memory left (bytes)  -", SetupTests.MaskOracle(SetupTests.RunWithInput(s)));
     }
 
     [TestMethod]
@@ -6945,7 +6961,8 @@ is
 a
 test
 ";
-        Assert.AreEqual(@"9 words", SetupTests.RunWithInput(s));
+        // the data after END is read under -r, as sbl reads it (CSNOBOL4 reads it by default): this expectation is sbl -b -r's answer
+        Assert.AreEqual(@"9 words", SetupTests.RunWithInputDirectives("-b -r", s));
     }
 
     [TestMethod]
@@ -6984,7 +7001,8 @@ is
 a
 test
 ";
-        Assert.AreEqual(@"9 words", SetupTests.RunWithInput(s));
+        // the data after END is read under -r, as sbl reads it (CSNOBOL4 reads it by default): this expectation is sbl -b -r's answer
+        Assert.AreEqual(@"9 words", SetupTests.RunWithInputDirectives("-b -r", s));
     }
 
 }

@@ -52,7 +52,7 @@ public partial class Executive
     internal long AmpProfile;
     internal long AmpStatementLimit = 2147483647;
     internal long AmpTrace;
-    internal long AmpTrim;
+    internal long AmpTrim = 1;   // sbl x64 starts &TRIM at 1 (kvtrm), not the manual's 0
 
 
     internal void Ampersand(List<Var> arguments)

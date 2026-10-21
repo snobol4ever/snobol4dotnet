@@ -80,13 +80,17 @@ public partial class Executive
             }
         }
 
-        // Sort matrix
-        matrix.Sort((row1, row2) =>
+        // Sort matrix. Rows with equal keys keep the order they had, in SORT and RSORT alike: SPITBOL compares the offsets of equal
+        // keys (sortc), and List.Sort is not stable
+        var ranked = matrix.Select((row, position) => (row, position)).ToList();
+        ranked.Sort((first, second) =>
         {
-            var v1 = row1[(int)sortColumn];
-            var v2 = row2[(int)sortColumn];
-            return ascending ? v1.Compare(v2) : -v1.Compare(v2);
+            var v1 = first.row[(int)sortColumn];
+            var v2 = second.row[(int)sortColumn];
+            var order = ascending ? v1.Compare(v2) : -v1.Compare(v2);
+            return order != 0 ? order : first.position.CompareTo(second.position);
         });
+        matrix = ranked.Select(entry => entry.row).ToList();
 
         //Transfer sorted matrix back to new array
         var index = 0;

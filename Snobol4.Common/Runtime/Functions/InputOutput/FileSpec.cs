@@ -7,7 +7,8 @@ namespace Snobol4.Common;
 /// blanks, tabs or commas: A (append), B n, C, F n, I, L n, Q n, R n, S followed by DN, DR, DRW or DW,
 /// U, W, X, Y. Anything else makes the specification inappropriate (error 116 for INPUT, 160 for
 /// OUTPUT). A appends; F 1 or F 2 with no file name writes to standard output or standard error, and C,
-/// Q or R (raw mode) writes no line ends; the others are accepted without effect.
+/// Q or R (raw mode) writes no line ends; L n is the longest record INPUT returns (the rest of a longer line is ignored); the
+/// others are accepted without effect.
 /// </summary>
 internal static class FileSpec
 {
@@ -16,12 +17,17 @@ internal static class FileSpec
 
     // descriptor: the F option's file descriptor (1 standard output, 2 standard error), or -1;
     // raw: the C, Q or R option, character (raw) mode, which writes no line ends
-    internal static bool TryParse(string spec, out string fileName, out bool append, out long descriptor, out bool raw)
+    internal static bool TryParse(string spec, out string fileName, out bool append, out long descriptor, out bool raw) =>
+        TryParse(spec, out fileName, out append, out descriptor, out raw, out _);
+
+    // recordLength: the L option's n, the longest record INPUT returns, or 0 when there is none
+    internal static bool TryParse(string spec, out string fileName, out bool append, out long descriptor, out bool raw, out long recordLength)
     {
         fileName = spec;
         append = false;
         descriptor = -1;
         raw = false;
+        recordLength = 0;
         if (spec.Length == 0)
             return true;
 
@@ -61,8 +67,14 @@ internal static class FileSpec
                     append = true;
                     break;
 
-                case 'B' or 'L':
+                case 'B':
                     if (ScanInteger(spec, ref i) <= 0)
+                        return false;
+                    break;
+
+                case 'L':
+                    recordLength = ScanInteger(spec, ref i);
+                    if (recordLength <= 0)
                         return false;
                     break;
 

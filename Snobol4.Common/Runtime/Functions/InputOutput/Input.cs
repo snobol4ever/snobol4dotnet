@@ -112,7 +112,7 @@ public partial class Executive
         }
 
         var channel = (string)channelNameStr;
-        if (!FileSpec.TryParse((string)fileNameStr, out var fileName, out _, out var descriptor, out _))
+        if (!FileSpec.TryParse((string)fileNameStr, out var fileName, out _, out var descriptor, out _, out var recordLength))
         {
             LogRuntimeException(116);
             return;
@@ -187,6 +187,7 @@ public partial class Executive
             var stream = new FileStream(Path.GetFullPath(fileName), (FileMode)fileModeInt, FileAccess.Read, (FileShare)fileShareInt);
             DropChannelReaders(channel);
             StreamInputs[channel] = stream;
+            InputRecordLengths[channel] = recordLength > 0 ? (int)Math.Min(recordLength, int.MaxValue) : DefaultInputRecordLength;
             IdentifierTable[symbol].InputChannel = channel;
         }
         catch (Exception)
@@ -240,6 +241,14 @@ public partial class Executive
 
     private int _lineAfterEnd;
 
+    // SPITBOL's line mode returns at most 1,024 characters of a record unless the L option says otherwise, and ignores the rest
+    // of the line up to its end (the manual's -ln; the default of INPUT is 1,024); standard input has the default
+    internal const int DefaultInputRecordLength = 1024;
+    private readonly Dictionary<string, int> InputRecordLengths = [];
+
+    private int InputRecordLength(string channel) =>
+        InputRecordLengths.TryGetValue(channel, out var length) ? length : DefaultInputRecordLength;
+
     private Var InputArgument(Var arg)
     {
         string? inputLine;
@@ -271,6 +280,9 @@ public partial class Executive
 
         if (inputLine is not null)
         {
+            var limit = InputRecordLength(arg.InputChannel);
+            if (inputLine.Length > limit)
+                inputLine = inputLine[..limit];
             var read = new StringVar(AmpTrim != 0 ? TrimRecord(inputLine) : inputLine);
             // the line read becomes the variable's value, as in SPITBOL (DUMP lists INPUT = the last line)
             if (arg.Symbol != "" && IdentifierTable.TryGetValue(arg.Symbol, out var variable) && variable.InputChannel == arg.InputChannel)

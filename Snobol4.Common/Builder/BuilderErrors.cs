@@ -85,7 +85,7 @@ public partial class Builder
     public void LogCompilerException(int code, int cursorCurrent, SourceLine source)
     {
         FirstErrorSource ??= source;
-        LogCompilerExceptionCore(code, cursorCurrent, BuildErrorMessage(code, cursorCurrent, source));
+        LogCompilerExceptionCore(code, cursorCurrent, BuildErrorMessage(code, cursorCurrent, source), source);
     }
 
     // The first statement a compile found in error, reset by whoever needs it (CODE numbers only the
@@ -98,7 +98,7 @@ public partial class Builder
     /// <param name="code">The error code.</param>
     /// <param name="cursorCurrent">The current cursor position.</param>
     /// <param name="message">The formatted error message.</param>
-    private void LogCompilerExceptionCore(int code, int cursorCurrent, string message)
+    private void LogCompilerExceptionCore(int code, int cursorCurrent, string message, SourceLine? source = null)
     {
         if (Execute is not null)
         {
@@ -107,8 +107,66 @@ public partial class Builder
 
         var ce = new CompilerException(code, cursorCurrent, message);
         SaveExceptionHistory(ce);
-        if (!QuietCompile)
+        if (QuietCompile)
+            return;
+        // an error in a statement is reported on the listing page, as sbl does; one with no statement stays on standard error
+        // as sbl's does ("No END statement found")
+        if (source is null)
             Console.Error.WriteLine(message);
+        else
+            WriteStatementInError(code, cursorCurrent, source);
+    }
+
+    // SPITBOL's report of a statement in error, on the listing page as sbl writes it (CEO-1858): the physical line the error was
+    // found at, with the number of its statement in an eight-column field and its tabs kept; a line that keeps the tabs and puts
+    // ! under the error column (empty when the error has none); "file(line,col) : ERROR nnn -- text"; and an empty line. A line
+    // that -LIST has already listed is not listed again. The joined text of a continued statement drops the first character of
+    // each continuation line, and an error found at the end of the text is reported at its last character, as sbl does.
+    private void WriteStatementInError(int code, int cursor, SourceLine source)
+    {
+        var lines = source.PhysicalLines;
+        if (lines.Count == 0)
+            lines = [source.Text];
+        var index = 0;
+        var column = 0;
+        if (cursor > 0)
+        {
+            if (source.DeferredExpression)
+                cursor -= 2;
+            var total = lines[0].Length;
+            for (var i = 1; i < lines.Count; i++)
+                total += Math.Max(0, lines[i].Length - 1);
+            var at = Math.Clamp(source.SubLineOffset + cursor, 0, Math.Max(0, total - 1));
+            var start = 0;
+            var length = lines[0].Length;
+            while (at >= start + length && index + 1 < lines.Count)
+            {
+                start += length;
+                index++;
+                length = Math.Max(0, lines[index].Length - 1);
+            }
+            column = index == 0 ? at - start + 1 : at - start + 2;
+        }
+
+        var physical = lines[index];
+        var file = Path.GetFileName(source.PathName);
+        var line = 1 + source.LineCountFile + index;
+        if (!BuildOptions.ListSource)
+            WriteListingLine($"{source.FirstStatementNumber,-8}{physical.TrimEnd(' ', '\t')}");
+
+        var pointer = new StringBuilder();
+        if (column > 0)
+        {
+            pointer.Append(' ', 8);
+            for (var i = 0; i < column - 1; i++)
+                pointer.Append(i < physical.Length && physical[i] == '\t' ? '\t' : ' ');
+            pointer.Append('!');
+        }
+        WriteListingLine(pointer.ToString());
+        var where = column > 0 ? $"{line},{column}" : $"{line}";
+        WriteListingLine($"{file}({where}) : ERROR {code:D3} -- {CompilerException.ErrorMessage[code]}");
+        WriteListingLine("");
+        ListingWriter.Flush();
     }
 
     // Set while EVAL compiles its argument: a compile error there makes EVAL fail, as in SPITBOL, and

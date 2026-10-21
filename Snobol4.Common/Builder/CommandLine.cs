@@ -210,6 +210,7 @@ public partial class Builder
 
             case "-k":
                 BuildOptions.RunDespiteCompileErrors = true;
+                BuildOptions.ListingPageFlushLeft = true;
                 break;
 
             case "-l":

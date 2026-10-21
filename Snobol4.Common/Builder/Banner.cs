@@ -50,7 +50,7 @@ public partial class Builder
     private void StartListingPage(TextWriter writer, int used)
     {
         _listingPage++;
-        writer.Write($"{new string(' ', 112)}page {_listingPage}\n\n");
+        writer.Write($"{(BuildOptions.ListingPageFlushLeft ? "" : new string(' ', 112))}page {_listingPage}\n\n");
         _listingLinesOnPage = used;
     }
 

@@ -34,6 +34,13 @@ public class SourceCode
     // Counter for semicolon delimited lines
     internal int SubLineCount { get; set; }
 
+    // The unit being read, for the report of a statement in error: its physical lines (a continued statement has several), the
+    // number SPITBOL gives the first statement on them, and where the current semicolon-delimited statement begins in the
+    // joined text of those lines
+    internal List<string> CurrentPhysicalLines { get; set; } = [];
+    internal int CurrentFirstStatementNumber { get; set; }
+    internal int CurrentSubLineOffset { get; set; }
+
     // List of source lines
     internal List<SourceLine> SourceLines { get; set; } = [];
 
@@ -150,6 +157,8 @@ public class SourceCode
         foreach (var line in lines)
         {
             LineCountFile++;
+            CurrentPhysicalLines = [line];
+            CurrentFirstStatementNumber = 0;
             ProcessLineWithSubLines(line, pathName, true);
         }
     }
@@ -176,6 +185,8 @@ public class SourceCode
             var currentLine = ReadLineAndContinuations(reader, out var continuation, out var physicalLines);
             _continuation = continuation;
             var statementsBefore = SourceLines.Count + BlankLineCount;
+            CurrentPhysicalLines = physicalLines;
+            CurrentFirstStatementNumber = statementsBefore + 1;
 
             ProcessLineWithSubLines(currentLine, _staleIncludeName ?? _lineFileName ?? pathName);
 
@@ -293,6 +304,7 @@ public class SourceCode
         // A continuation line with no open statement to continue is a statement in error, as in SPITBOL
         if (!codeText && line.Length > 0 && line[0] is _continuationChar or _alternateContinuationChar)
         {
+            CurrentSubLineOffset = 0;
             var misplaced = new SourceLine(pathName, _includeDepth, line, this, _parent.BuildOptions.ErrorOnUnhandledFail)
             {
                 CompileError = true
@@ -309,9 +321,12 @@ public class SourceCode
         if (subLines.Count > 1 && (codeText ? subLines[^1].Length == 0 : string.IsNullOrWhiteSpace(subLines[^1])))
             subLines.RemoveAt(subLines.Count - 1);
 
+        var offset = 0;
         foreach (var subLine in subLines)
         {
+            CurrentSubLineOffset = offset;
             ProcessSubLine(subLine.TrimEnd(), pathName);
+            offset += subLine.Length + 1;
         }
     }
 

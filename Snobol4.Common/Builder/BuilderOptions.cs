@@ -39,6 +39,13 @@ public class BuilderOptions
     public bool RunDespiteCompileErrors { get; set; }
 
     /// <summary>
+    /// Gets or sets whether the page number of a listing page is flush left. sbl prints "page 1" at the left margin when the
+    /// -k switch is on the command line, and right-justified at column 113 otherwise, also under the -ERRORS control that
+    /// runs the program the same way (measured on compile-error pages).
+    /// </summary>
+    public bool ListingPageFlushLeft { get; set; }
+
+    /// <summary>
     /// Gets or sets whether to show the listing. Command line: -l
     /// </summary>
     public bool ShowListing { get; set; }

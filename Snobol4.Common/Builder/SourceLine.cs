@@ -34,6 +34,13 @@ public class SourceLine
     // Count of comments and directives
     internal int CommentContinuationDirectiveCount { get; init; }
 
+    // The physical lines this statement was read from, the number SPITBOL gives the first statement on them, and where this
+    // semicolon-delimited statement begins in the joined text of those lines (the report of a statement in error names the
+    // physical line and column it was found at)
+    internal List<string> PhysicalLines { get; init; }
+    internal int FirstStatementNumber { get; init; }
+    internal int SubLineOffset { get; init; }
+
     // Path to file
     internal string PathName { get; init; }
 
@@ -89,6 +96,9 @@ public class SourceLine
         CommentContinuationDirectiveCount = code.CommentContinuationDirectiveCount;
         LineCountSubLine = code.SubLineCount;
         LineCountList = code.LineCountTotal;
+        PhysicalLines = code.CurrentPhysicalLines;
+        FirstStatementNumber = code.CurrentFirstStatementNumber;
+        SubLineOffset = code.CurrentSubLineOffset;
         PathName = pathName;
         CaseFolding = code.CaseFoldingNow;
         Text = text.TrimEnd();

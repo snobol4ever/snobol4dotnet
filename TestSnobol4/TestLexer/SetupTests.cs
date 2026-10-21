@@ -180,6 +180,16 @@ public class SetupTests
 
     internal static string MaskReport(string output) => ReportVolatile.Replace(output.Replace("\r\n", "\n"), "$1$2-");
 
+    // The head of a listing page names the engine and the clock: each engine keeps its own name (CEO-1859 and CEO-1858: the harness
+    // masks the identity line), and the clock is never equal, so both become placeholders
+    private static readonly System.Text.RegularExpressions.Regex ListingIdentity = new(
+        @"^(snobol4dotnet|macro spitbol) version .*$", System.Text.RegularExpressions.RegexOptions.Multiline);
+    private static readonly System.Text.RegularExpressions.Regex ListingClock = new(
+        @"^\S+  [A-Z][a-z]{2} [A-Z][a-z]{2} [ \d]\d \d{2}:\d{2}:\d{2} \d{4}$", System.Text.RegularExpressions.RegexOptions.Multiline);
+
+    internal static string MaskListingHead(string output) =>
+        ListingClock.Replace(ListingIdentity.Replace(output.Replace("\r\n", "\n"), "<identity>"), "<clock>");
+
     // RunWithInput with the command-line switches given (e.g. "-b -o=dir/prog")
     internal static string RunWithInputDirectives(string directives, string script, string? inputText = null)
     {

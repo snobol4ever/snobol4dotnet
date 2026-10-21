@@ -6642,22 +6642,25 @@ END
 
 end
 ";
-        Assert.AreEqual(@"hello
-world
-test1
-test2
------
-world
-test2
-test2
-test2
-world
-XXXXX
------
-Hello
-World
-XXXXX
-YYYYY", SetupTests.RunWithInput(s));
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        // sbl prints a report or listing page here; the run's time, regenerations, memory and the head's identity and clock are masked
+        Assert.AreEqual(@"
+
+
+Test.sno(3) : ERROR 289 -- input channel currently in use
+
+
+
+
+
+in file              Test.sno
+in line              3
+in statement         2
+stmts executed       2
+execution time msec  -
+REGENERATIONS        -
+memory used (bytes)  -
+memory left (bytes)  -", SetupTests.MaskOracle(SetupTests.RunWithInput(s)));
     }
 
     [TestMethod]

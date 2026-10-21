@@ -109,6 +109,8 @@ public partial class Executive
             return;
         }
 
+        IgnoreInvalidExtraArguments(arguments, (3, 1, 6), (4, 0, 4), (5, 0, 1));
+
         // file mode has to be an integer
         if (!arguments[3].Convert(VarType.INTEGER, out _, out var fileModeObj, this))
         {
@@ -176,6 +178,13 @@ public partial class Executive
         //    return;
         //}
 
+        // A file name needs a channel to open it on, as in SPITBOL (error 160)
+        if (fileName != "" && channel == "")
+        {
+            LogRuntimeException(160);
+            return;
+        }
+
         if (fileName == "")
         {
             // Get the path associated with the specified channel
@@ -195,12 +204,16 @@ public partial class Executive
                 return;
             }
 
+            // A channel with nothing open on it has no file to associate the variable with: error 160, as in SPITBOL. With no
+            // channel at all the variable is standard output.
+            if (channel != "")
+            {
+                LogRuntimeException(160);
+                return;
+            }
+
             IdentifierTable[symbol].OutputChannel = (long)eolMode == 1 ? "+console-output-nnl" : "+console-output";
             return;
-
-            // If the pathname is not valid, return an error
-            // SPITBOL gives different errors depending on whether the channel is in use for input or output
-            //LogRuntimeException(StreamInputs.ContainsKey(channel) ? 161 : 160);
         }
 
         // If the filename is not blank, thw channel cannot be in use

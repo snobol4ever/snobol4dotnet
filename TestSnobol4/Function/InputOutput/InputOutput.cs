@@ -53,8 +53,8 @@ end";
 end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(116, build.ErrorCodeHistory[0]);
+        // sbl -b ignores an argument after the file specification, whatever it is: no error (these asserted 116)
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -65,8 +65,8 @@ end";
 end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(116, build.ErrorCodeHistory[0]);
+        // sbl -b ignores an argument after the file specification, whatever it is: no error (these asserted 116)
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -77,8 +77,8 @@ end";
 end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(116, build.ErrorCodeHistory[0]);
+        // sbl -b ignores an argument after the file specification, whatever it is: no error (these asserted 116)
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
     
     [TestMethod]
@@ -89,8 +89,8 @@ end";
 end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(116, build.ErrorCodeHistory[0]);
+        // sbl -b ignores an argument after the file specification, whatever it is: no error (these asserted 116)
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -101,8 +101,8 @@ end";
 end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(116, build.ErrorCodeHistory[0]);
+        // sbl -b ignores an argument after the file specification, whatever it is: no error (these asserted 116)
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -113,8 +113,8 @@ end";
 end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(116, build.ErrorCodeHistory[0]);
+        // sbl -b ignores an argument after the file specification, whatever it is: no error (these asserted 116)
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -125,8 +125,8 @@ end";
 end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(116, build.ErrorCodeHistory[0]);
+        // sbl -b ignores an argument after the file specification, whatever it is: no error (these asserted 116)
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
     
     [TestMethod]
@@ -137,8 +137,8 @@ end";
 end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(116, build.ErrorCodeHistory[0]);
+        // sbl -b ignores an argument after the file specification, whatever it is: no error (these asserted 116)
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
                 [TestMethod]
@@ -189,8 +189,8 @@ end";
 end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(160, build.ErrorCodeHistory[0]);
+        // sbl -b ignores an argument after the file specification, whatever it is: no error (these asserted 160)
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -201,8 +201,8 @@ end";
 end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(160, build.ErrorCodeHistory[0]);
+        // sbl -b ignores an argument after the file specification, whatever it is: no error (these asserted 160)
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -213,8 +213,8 @@ end";
 end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(160, build.ErrorCodeHistory[0]);
+        // sbl -b ignores an argument after the file specification, whatever it is: no error (these asserted 160)
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -225,8 +225,8 @@ end";
 end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(160, build.ErrorCodeHistory[0]);
+        // sbl -b ignores an argument after the file specification, whatever it is: no error (these asserted 160)
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -237,8 +237,8 @@ end";
 end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(160, build.ErrorCodeHistory[0]);
+        // sbl -b ignores an argument after the file specification, whatever it is: no error (these asserted 160)
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -249,8 +249,8 @@ end";
 end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(160, build.ErrorCodeHistory[0]);
+        // sbl -b ignores an argument after the file specification, whatever it is: no error (these asserted 160)
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -261,8 +261,8 @@ end";
 end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(160, build.ErrorCodeHistory[0]);
+        // sbl -b ignores an argument after the file specification, whatever it is: no error (these asserted 160)
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -273,8 +273,8 @@ end";
 end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(160, build.ErrorCodeHistory[0]);
+        // sbl -b ignores an argument after the file specification, whatever it is: no error (these asserted 160)
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     // Hardcoded Windows file path replaced with temp file containing known numeric data.
@@ -677,8 +677,8 @@ end
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("+console-output", build.Execute!.IdentifierTable[build.FoldCase("a")].OutputChannel);
+        // sbl -b: OUTPUT of a channel nothing is open on is error 160 (this asserted a success on standard output)
+        CollectionAssert.AreEqual(new[] { 160 }, build.ErrorCodeHistory.ToArray());
     }
 
     [TestMethod]
@@ -694,8 +694,8 @@ end
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("+console-output", build.Execute!.IdentifierTable[build.FoldCase("b")].OutputChannel);
+        // sbl -b: OUTPUT of a channel nothing is open on is error 160 (this asserted a success on standard output)
+        CollectionAssert.AreEqual(new[] { 160 }, build.ErrorCodeHistory.ToArray());
     }
 
     [TestMethod]
@@ -997,8 +997,8 @@ end
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("+console-output", build.Execute!.IdentifierTable[build.FoldCase("a")].OutputChannel);
+        // sbl -b: OUTPUT of a channel nothing is open on is error 160 (this asserted a success on standard output)
+        CollectionAssert.AreEqual(new[] { 160 }, build.ErrorCodeHistory.ToArray());
     }
 
     [TestMethod]
@@ -1014,8 +1014,8 @@ end
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("+console-output", build.Execute!.IdentifierTable[build.FoldCase("b")].OutputChannel);
+        // sbl -b: OUTPUT of a channel nothing is open on is error 160 (this asserted a success on standard output)
+        CollectionAssert.AreEqual(new[] { 160 }, build.ErrorCodeHistory.ToArray());
     }
 
     [TestMethod]

@@ -97,6 +97,8 @@ public partial class Executive
             return;
         }
 
+        IgnoreInvalidExtraArguments(arguments, (3, 1, 6), (4, 0, 4));
+
         // file mode has to be an integer
         if (!arguments[3].Convert(VarType.INTEGER, out _, out var fileModeObj, this))
         {
@@ -142,6 +144,13 @@ public partial class Executive
             return;
         }
 
+        // A file name needs a channel to open it on, as in SPITBOL (error 116)
+        if (fileName != "" && channel == "")
+        {
+            LogRuntimeException(116);
+            return;
+        }
+
         // No file name and the F 0 option (' -f0') reads standard input, as in SPITBOL
         if (fileName == "" && descriptor == 0)
         {
@@ -172,6 +181,7 @@ public partial class Executive
             // If the pathname is not valid, return an error
             // SPITBOL gives different errors depending on whether the channel is in use for input or output
             LogRuntimeException(StreamInputs.ContainsKey(channel) ? 117 : 116);
+            return;
         }
 
         // If the filename is not blank, thw channel cannot be in use
@@ -199,6 +209,20 @@ public partial class Executive
         }
 
         PredicateSuccess();
+    }
+
+    // SPITBOL's INPUT and OUTPUT take nothing after the file specification and ignore what they are given. The arguments here are
+    // .NET's (file mode, share, end-of-line mode): one that is no value of its kind is ignored as well, so that a call means what it
+    // means to SPITBOL (OUTPUT(.B, 10, "B,U", "test.bin") names the file "B,U" and ignores "test.bin"); a valid one is the extension.
+    private void IgnoreInvalidExtraArguments(List<Var> arguments, params (int Index, long Low, long High)[] extras)
+    {
+        foreach (var (index, low, high) in extras)
+        {
+            if (arguments[index] is StringVar { Data: "" })
+                continue;
+            if (!arguments[index].Convert(VarType.INTEGER, out _, out var value, this) || (long)value < low || (long)value > high)
+                arguments[index] = StringVar.Null();
+        }
     }
 
     private string GetPathFromChannel(string channel)

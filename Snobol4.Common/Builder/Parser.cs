@@ -164,7 +164,7 @@ public class Parser
         }
     }
 
-    // The postfix form of one list of lexed tokens, for the compile-time check of its constant parts (PreEvaluator); the tokens
+    // The postfix form of one list of lexed tokens, for the compile-time checks of a statement (StatementChecker); the tokens
     // are not changed, so the real parse that follows is unaffected. Null when the list is malformed.
     internal List<Token>? ToPostfix(List<Token> lexTokenList)
     {

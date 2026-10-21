@@ -252,7 +252,7 @@ public partial class Lexer
     private bool LexLines()
     {
         var allLexed = true;
-        var preEvaluator = new PreEvaluator(_parent);
+        var preEvaluator = new StatementChecker(_parent);
         foreach (var sourceLine in _parent.Code.SourceLines.Where(line => !line.Compiled))
         {
             _parent.BuildOptions.CaseFolding = sourceLine.CaseFolding;

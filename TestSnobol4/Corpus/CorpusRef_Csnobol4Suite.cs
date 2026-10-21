@@ -5391,11 +5391,21 @@ END
 
 END
 ";
-        Assert.AreEqual(@"> Negative number in illegal context
-> Null string in illegal context
-> Illegal data type
-> Variable not present where required
-> String overflow", SetupTests.RunWithInput(s));
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        // sbl prints a report or listing page here; the run's time, regenerations, memory and the head's identity and clock are masked
+        Assert.AreEqual(@"
+
+
+<identity>
+<clock>
+
+
+
+                                                                                                                page 1
+
+16      	""FOO"" @1					:S(END)
+
+Test.sno(18) : ERROR 212 -- syntax error: value used where name is required", SetupTests.MaskOracle(SetupTests.RunWithInput(s)));
     }
 
     [TestMethod]

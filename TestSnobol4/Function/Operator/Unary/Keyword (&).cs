@@ -67,7 +67,8 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(251, build.ErrorCodeHistory[0]);
+        // sbl -b: a literal where a keyword's name is required is error 212 when the statement is compiled (it was 251 when it ran)
+        Assert.AreEqual(212, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]

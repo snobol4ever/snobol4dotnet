@@ -230,8 +230,8 @@ e003
         differ(rson(lson(b)), 'z')                   :f(e004)
         output = 'FAIL 1115/004: nested accessor after mutate' :(end)
 e004
-        differ(value('b'), b)                   :f(e005)
-        output = 'FAIL 1115/005: value() by variable name' :(end)
+        differ($'b', b)                   :f(e005)
+        output = 'FAIL 1115/005: indirect by variable name' :(end)
 e005
         val(a) = 'new'
         differ(val(a), 'new')                   :f(e006)

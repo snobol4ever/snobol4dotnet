@@ -6,7 +6,7 @@ namespace Test.Corpus;
 
 /// <summary>
 /// Coverage for builtins with zero or near-zero prior test coverage:
-///   VALUE(name)  — indirect variable lookup by string name
+///   $name        — indirect variable lookup by string name (VALUE(name) is not SPITBOL's: error 22)
 ///   CLEAR(skip)  — reinitialize all variables except skip list
 ///   COLLECT()    — GC hint (no crash, returns null)
 ///   CHAR(n)      — integer code point → one-character string
@@ -15,15 +15,52 @@ namespace Test.Corpus;
 [TestClass]
 public class CorpusRef_Builtins
 {
-    // ── VALUE ──────────────────────────────────────────────────────────────
+    // ── VALUE and CONCAT are not SPITBOL's (CEO-1858: sbl -bf answers error 22; no extension) ─────
 
     [TestMethod]
-    public void TEST_Builtin_value_basic()
+    public void TEST_Builtin_value_is_undefined_22()
     {
-        // VALUE('X') looks up variable X by name — same as $'X'
         var s = @"
         X = 'hello'
-        DIFFER(VALUE('X'), 'hello')                 :F(ok)
+        OUTPUT = VALUE('X')
+        OUTPUT = 'after'
+END";
+        var build = SetupTests.SetupScript("-bf", s);
+        Assert.AreEqual(22, build.ErrorCodeHistory[0]);
+    }
+
+    [TestMethod]
+    public void TEST_Builtin_concat_is_undefined_22()
+    {
+        var s = @"
+        P = CONCAT('a', 'b')
+        OUTPUT = 'after'
+END";
+        var build = SetupTests.SetupScript("-bf", s);
+        Assert.AreEqual(22, build.ErrorCodeHistory[0]);
+    }
+
+    [TestMethod]
+    public void TEST_Builtin_value_as_data_field_still_defines()
+    {
+        // a program's own DATA field named VALUE is an ordinary field function (sbl -bf prints v)
+        var s = @"
+        DATA('CLUNK(VALUE)')
+        C = CLUNK('v')
+        OUTPUT = VALUE(C)
+END";
+        Assert.AreEqual("v", SetupTests.RunWithInputDirectives("-bf", s));
+    }
+
+    // ── indirection by name: SPITBOL spells it $ (these were VALUE(...) before CEO-1858) ─────────
+
+    [TestMethod]
+    public void TEST_Builtin_indirect_basic()
+    {
+        // $'X' looks up variable X by name
+        var s = @"
+        X = 'hello'
+        DIFFER($'X', 'hello')                       :F(ok)
         OUTPUT = 'FAIL'                             :(END)
 ok      OUTPUT = 'PASS'
 END";
@@ -31,13 +68,13 @@ END";
     }
 
     [TestMethod]
-    public void TEST_Builtin_value_via_namevar()
+    public void TEST_Builtin_indirect_via_namevar()
     {
-        // VALUE(.X) where .X is a name descriptor — deref to value
+        // $NM where NM = .X is a name descriptor — deref to value
         var s = @"
         X = 'world'
         NM = .X
-        DIFFER(VALUE(NM), 'world')                  :F(ok)
+        DIFFER($NM, 'world')                        :F(ok)
         OUTPUT = 'FAIL'                             :(END)
 ok      OUTPUT = 'PASS'
 END";
@@ -45,26 +82,13 @@ END";
     }
 
     [TestMethod]
-    public void TEST_Builtin_value_integer_name()
+    public void TEST_Builtin_indirect_string_name_of_integer_value()
     {
-        // VALUE(integer) — integer coerced to string name
+        // $N where N = 'A' names the variable A, whose value is the integer 42
         var s = @"
         A = 42
         N = 'A'
-        DIFFER(VALUE(N), 42)                        :F(ok)
-        OUTPUT = 'FAIL'                             :(END)
-ok      OUTPUT = 'PASS'
-END";
-        Assert.AreEqual("PASS", SetupTests.RunWithInput(s));
-    }
-
-    [TestMethod]
-    public void TEST_Builtin_value_equiv_dollar()
-    {
-        // VALUE('X') must equal $'X'
-        var s = @"
-        FOO = 'bar'
-        DIFFER(VALUE('FOO'), $'FOO')                :F(ok)
+        DIFFER($N, 42)                              :F(ok)
         OUTPUT = 'FAIL'                             :(END)
 ok      OUTPUT = 'PASS'
 END";

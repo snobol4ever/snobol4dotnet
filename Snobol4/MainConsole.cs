@@ -30,7 +30,7 @@ internal class MainConsole
         builder.DisplaySignOnBanner();
         builder.Code.ReadAllFiles();
         builder.BuildMain();
-        return Executive.AmpCode;
+        return builder.ExitStatus ?? Executive.AmpCode;
     }
 }
 

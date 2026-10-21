@@ -68,6 +68,13 @@ public partial class Builder : IDisposable
     internal bool CodeMode;
     internal int RecordedExpressionCount = 0;
 
+    // The status the console exits with when the run did not get as far as running the program, as sbl's does: 231 when execution
+    // was suppressed (a compile error, or -n), 1 when an -INCLUDE could not be opened. Null leaves the exit to &CODE.
+    public int? ExitStatus;
+
+    // The source could not be read: the run ends before it starts, whatever -k says
+    internal bool SourceFailed;
+
     // Threaded execution tables
     internal List<VariableSlot> VariableSlots = new(64);
     internal Dictionary<string, int> VariableSlotIndex = new(64, StringComparer.Ordinal);
@@ -153,11 +160,13 @@ public partial class Builder : IDisposable
             PrintCompilationStatistics();
             // -n or -NOEXECUTE: compile (and write -w's file) but do not run, as in SPITBOL; nor does a
             // program with compilation errors run, unless -k or -ERRORS asks for it
-            if (!BuildOptions.SuppressExecution && (ErrorCodeHistory.Count == 0 || BuildOptions.RunDespiteCompileErrors))
+            if (!BuildOptions.SuppressExecution && !SourceFailed && (ErrorCodeHistory.Count == 0 || BuildOptions.RunDespiteCompileErrors))
             {
                 Execute.StartTimer();
                 Execute.ExecuteLoop(0);
             }
+            else
+                ExitStatus ??= 231;
         }
         catch (CompilerException) { }
         catch (Exception e) { ReportProgrammingError(e); }

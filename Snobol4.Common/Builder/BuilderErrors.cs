@@ -155,9 +155,14 @@ public partial class Builder
 
     // An error in a control line (an -INCLUDE of a file that cannot be opened) is reported on the same page: no statement number,
     // and the caret under `column`, the opening quote of the name
-    internal void LogControlLineError(int code, string physical, int column, int line, string file) =>
+    internal void LogControlLineError(int code, string physical, int column, int line, string file)
+    {
+        // an include that cannot be opened ends the run before it starts, whatever -k says
+        SourceFailed = true;
+        ExitStatus = 1;
         LogCompilerExceptionCore(code, column, CompilerException.ErrorMessage[code], null,
             () => WriteErrorPage(new string(' ', 8), physical, line, column, code, file));
+    }
 
     // The page of one error: the physical line under its number field, the line that keeps its tabs and puts ! under `column`
     // (empty when there is none), the error line, and an empty line

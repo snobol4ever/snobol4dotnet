@@ -79,7 +79,8 @@ public partial class Executive
     {
         if (arguments[0] is ExpressionVar expressionVar)
         {
-            SystemStack.Push(new PatternVar(new BreakPattern(expressionVar.FunctionName, 69)));
+            // an argument evaluated when the pattern is matched is error 44 if it is not a string
+            SystemStack.Push(new PatternVar(new BreakPattern(expressionVar.FunctionName, 44)));
             return;
         }
 
@@ -89,7 +90,7 @@ public partial class Executive
             return;
         }
 
-        SystemStack.Push(new PatternVar(new BreakPattern((string)s, 69)));
+        SystemStack.Push(new PatternVar(new BreakPattern((string)s, 44)));
     }
 
     #endregion

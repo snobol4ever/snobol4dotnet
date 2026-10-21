@@ -485,7 +485,7 @@ public class SourceCode
         {
             case "copy":
             case "include":
-                ProcessIncludeDirective(directive);
+                ProcessIncludeDirective(directive, pathName);
                 break;
 
             case "case":
@@ -566,7 +566,7 @@ public class SourceCode
     /// Processes an INCLUDE or COPY directive
     /// </summary>
     /// <param name="directive">The directive text</param>
-    private void ProcessIncludeDirective(string directive)
+    private void ProcessIncludeDirective(string directive, string pathName)
     {
         // sbl skips a name it has already included, comparing the name as written, and opens it with a
         // blank before the closing quote dropped (a leading one kept): "line2.sno " is a second include
@@ -585,10 +585,12 @@ public class SourceCode
             using var reader = new StreamReader(ResolveIncludePath(include), Encoding.UTF8);
             ReadFile(reader, include);
         }
-        catch (IOException e)
+        catch (IOException)
         {
-            Console.Error.WriteLine(e.Message);
-            _parent.LogCompilerException(285, 2);
+            // sbl reports it on the listing page: the control line, the caret under the opening quote of the name
+            var physical = CurrentPhysicalLines.Count > 0 ? CurrentPhysicalLines[0] : "";
+            var quote = physical.IndexOfAny(['\'', '"']);
+            _parent.LogControlLineError(285, physical, quote >= 0 ? quote + 1 : 0, 1 + LineCountFile, pathName);
         }
         finally
         {

@@ -98,7 +98,7 @@ public partial class Builder
     /// <param name="code">The error code.</param>
     /// <param name="cursorCurrent">The current cursor position.</param>
     /// <param name="message">The formatted error message.</param>
-    private void LogCompilerExceptionCore(int code, int cursorCurrent, string message, SourceLine? source = null)
+    private void LogCompilerExceptionCore(int code, int cursorCurrent, string message, SourceLine? source = null, Action? report = null)
     {
         if (Execute is not null)
         {
@@ -111,10 +111,12 @@ public partial class Builder
             return;
         // an error in a statement is reported on the listing page, as sbl does; one with no statement stays on standard error
         // as sbl's does ("No END statement found")
-        if (source is null)
-            Console.Error.WriteLine(message);
-        else
+        if (source is not null)
             WriteStatementInError(code, cursorCurrent, source);
+        else if (report is not null)
+            report();
+        else
+            Console.Error.WriteLine(message);
     }
 
     // SPITBOL's report of a statement in error, on the listing page as sbl writes it (CEO-1858): the physical line the error was
@@ -148,11 +150,21 @@ public partial class Builder
             column = index == 0 ? at - start + 1 : at - start + 2;
         }
 
-        var physical = lines[index];
-        var file = source.PathName;
-        var line = 1 + source.LineCountFile + index;
+        WriteErrorPage($"{source.FirstStatementNumber,-8}", lines[index], 1 + source.LineCountFile + index, column, code, source.PathName);
+    }
+
+    // An error in a control line (an -INCLUDE of a file that cannot be opened) is reported on the same page: no statement number,
+    // and the caret under `column`, the opening quote of the name
+    internal void LogControlLineError(int code, string physical, int column, int line, string file) =>
+        LogCompilerExceptionCore(code, column, CompilerException.ErrorMessage[code], null,
+            () => WriteErrorPage(new string(' ', 8), physical, line, column, code, file));
+
+    // The page of one error: the physical line under its number field, the line that keeps its tabs and puts ! under `column`
+    // (empty when there is none), the error line, and an empty line
+    private void WriteErrorPage(string numberField, string physical, int line, int column, int code, string file)
+    {
         if (!BuildOptions.ListSource)
-            WriteListingLine($"{source.FirstStatementNumber,-8}{physical.TrimEnd(' ', '\t')}");
+            WriteListingLine($"{numberField}{physical.TrimEnd(' ', '\t')}");
 
         var pointer = new StringBuilder();
         if (column > 0)

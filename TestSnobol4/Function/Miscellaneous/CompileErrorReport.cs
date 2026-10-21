@@ -59,6 +59,16 @@ public class CompileErrorReport
     }
 
     [TestMethod]
+    public void TEST_CompileErrorReport_a_missing_include_names_the_control_line_and_the_opening_quote()
+    {
+        // a control line carries no statement number (eight blanks), and the caret is under the opening quote; nothing runs
+        var s = "        OUTPUT = 'before'\n-include 'nosuchfile.sno'\n        OUTPUT = 'after'\nEND";
+        Assert.AreEqual(
+            Head + "        -include 'nosuchfile.sno'\n" + new string(' ', 17) + "!\nTest.sno(2,10) : ERROR 285 -- include file cannot be opened",
+            Run(s));
+    }
+
+    [TestMethod]
     public void TEST_CompileErrorReport_an_error_without_a_column_has_an_empty_caret_line()
     {
         // a continuation line after a comment continues nothing: error 214, named by its line only

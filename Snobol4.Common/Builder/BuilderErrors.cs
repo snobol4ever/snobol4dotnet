@@ -150,18 +150,50 @@ public partial class Builder
             column = index == 0 ? at - start + 1 : at - start + 2;
         }
 
-        WriteErrorPage($"{source.FirstStatementNumber,-8}", lines[index], 1 + source.LineCountFile + index, column, code, source.PathName);
+        WriteErrorPage(SourceCode.NumberField(source.FirstStatementNumber, source.IncludeDepth), lines[index], 1 + source.LineCountFile + index, column,
+            code, source.PathName, source.Listed);
     }
 
     // An error in a control line (an -INCLUDE of a file that cannot be opened) is reported on the same page: no statement number,
     // and the caret under `column`, the opening quote of the name
-    internal void LogControlLineError(int code, string physical, int column, int line, string file)
+    // The reports of control lines that went wrong, kept until the lexer reaches the statement they stand before: SPITBOL compiles
+    // as it reads, so its errors list in the order of the source, and the source is read before it is lexed here
+    private readonly List<(int Position, Action Report)> _deferred = [];
+
+    // Keeps a report of the source, a listed line or the page of a control line that went wrong, until the lexer reaches statement
+    // `position`
+    internal void Defer(int position, Action report) => _deferred.Add((position, report));
+
+    internal void LogControlLineError(int code, string physical, int column, int line, string file, int position, int depth, bool listed)
     {
-        // an include that cannot be opened ends the run before it starts, whatever -k says
+        // an include that cannot be opened ends the run before it starts, whatever -k says; SPITBOL's source stack keeps the
+        // include open, so its END is never seen and the run ends "No END statement found" once the rest is compiled
         SourceFailed = true;
+        IncludeFailed = true;
         ExitStatus = 1;
-        LogCompilerExceptionCore(code, column, CompilerException.ErrorMessage[code], null,
-            () => WriteErrorPage(new string(' ', 8), physical, line, column, code, file));
+        Defer(position, () =>
+            LogCompilerExceptionCore(code, column, CompilerException.ErrorMessage[code], null,
+                () => WriteErrorPage(SourceCode.NumberField(0, depth), physical, line, column, code, file, listed)));
+    }
+
+    // Runs the kept reports that stand before statement `before` (all of them for int.MaxValue), in the order they were kept
+    internal void FlushDeferred(int before)
+    {
+        while (_deferred.Count > 0 && _deferred[0].Position <= before)
+        {
+            var report = _deferred[0].Report;
+            _deferred.RemoveAt(0);
+            report();
+        }
+    }
+
+    // sbl's last word after a failed include, on standard error once everything has been compiled and listed
+    internal void ReportNoEndAfterFailedInclude()
+    {
+        if (!IncludeFailed)
+            return;
+        IncludeFailed = false;
+        Console.Error.WriteLine("No END statement found in source file(s).");
     }
 
     // sbl's line on standard error for source that holds no END; the run does not start
@@ -200,10 +232,10 @@ public partial class Builder
 
     // The page of one error: the physical line under its number field, the line that keeps its tabs and puts ! under `column`
     // (empty when there is none), the error line, and an empty line
-    private void WriteErrorPage(string numberField, string physical, int line, int column, int code, string file)
+    private void WriteErrorPage(string numberField, string physical, int line, int column, int code, string file, bool listed)
     {
         // a statement that -LIST has already listed is not listed again, but its line is still copied
-        WriteReportPageLine($"{numberField}{physical.TrimEnd(' ', '\t')}", listed: BuildOptions.ListSource);
+        WriteReportPageLine($"{numberField}{physical.TrimEnd(' ', '\t')}", listed);
 
         var pointer = new StringBuilder();
         if (column > 0)

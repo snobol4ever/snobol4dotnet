@@ -76,6 +76,9 @@ public partial class Builder : IDisposable
     // The source could not be read: the run ends before it starts, whatever -k says
     internal bool SourceFailed;
 
+    // An -INCLUDE could not be opened (see ReportNoEndAfterFailedInclude)
+    internal bool IncludeFailed;
+
     // Threaded execution tables
     internal List<VariableSlot> VariableSlots = new(64);
     internal Dictionary<string, int> VariableSlotIndex = new(64, StringComparer.Ordinal);
@@ -139,6 +142,7 @@ public partial class Builder : IDisposable
             _timerBuild ??= new Stopwatch();
             _timerBuild.Restart();
             Lex(this);
+            ReportNoEndAfterFailedInclude();
 
             // When -CASE changed folding part way, the lexer already folded each line's names as its
             // line required, so the passes after it take the names as spelled; the program then runs

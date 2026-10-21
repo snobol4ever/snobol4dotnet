@@ -64,6 +64,7 @@ public class SourceCode
     private string? _lineFileName;   // the file a -LINE control named, for the lines after it
     private string? _staleIncludeName;   // the included file's name, which sbl gives the next statement after it
     private bool _lastLineIsNote;        // the last line read was a comment or a control line
+    private bool _controlLineListed;     // an -INCLUDE has listed its own line
 
     internal SourceCode(Builder parent)
     {
@@ -188,13 +189,22 @@ public class SourceCode
             var currentLine = ReadLineAndContinuations(reader, out var continuation, out var physicalLines);
             _continuation = continuation;
             var statementsBefore = SourceLines.Count + BlankLineCount;
+            var linesBefore = SourceLines.Count;
             CurrentPhysicalLines = physicalLines;
             CurrentFirstStatementNumber = statementsBefore + 1;
 
             ProcessLineWithSubLines(currentLine, _staleIncludeName ?? _lineFileName ?? pathName);
 
-            // listed after it is read, so -LIST lists itself and -NOLIST does not
-            ListSource(physicalLines, SourceLines.Count + BlankLineCount > statementsBefore ? statementsBefore + 1 : 0);
+            // listed after it is read, so -LIST lists itself and -NOLIST does not (an -INCLUDE lists itself before its lines)
+            if (_controlLineListed)
+                _controlLineListed = false;
+            else if (_parent.IncludeFailed && EndFound)
+            {
+                // the END that follows a failed include is not listed: sbl's source stack is still inside the include, whose end
+                // is not the program's
+            }
+            else
+                ListSource(physicalLines, SourceLines.Count + BlankLineCount > statementsBefore ? statementsBefore + 1 : 0, linesBefore);
 
             // A comment or control line leaves a carried-over included name in place for the next
             // statement; a statement or a blank (null statement) line uses it up
@@ -387,18 +397,30 @@ public class SourceCode
     /// </summary>
     /// <param name="line">The line to display</param>
     // SPITBOL's listing line: a line that begins a statement carries its number in an eight-column field,
-    // any other line (comment, control, continuation) eight blanks
-    private void ListSource(List<string> physicalLines, int statementNumber)
+    // any other line (comment, control, continuation) eight blanks; a line of an included file carries the
+    // depth of the include as well, in the sixth column
+    // SPITBOL lists a line as it compiles it, so a statement's errors follow its line: the lines are kept, with the statement they
+    // stand before, until the lexer reaches it (Builder.Defer)
+    private void ListSource(List<string> physicalLines, int statementNumber, int position)
     {
         if (!_parent.BuildOptions.ListSource)
             return;
 
         for (var i = 0; i < physicalLines.Count; i++)
         {
-            var field = i == 0 && statementNumber > 0 ? statementNumber.ToString(CultureInfo.InvariantCulture) : "";
+            var field = NumberField(i == 0 ? statementNumber : 0, _includeDepth);
             // a source line's trailing blanks are trimmed, as SPITBOL reads it
-            _parent.WriteListingLine($"{field,-8}{physicalLines[i].TrimEnd(' ', '\t')}");
+            var text = $"{field}{physicalLines[i].TrimEnd(' ', '\t')}";
+            _parent.Defer(position, () => _parent.WriteListingLine(text));
         }
+    }
+
+    // The eight columns before a listed line: its statement number (none for a line that is no statement) and, inside an included
+    // file, the depth of the include in the sixth column ("12   1  ", "     1  ")
+    internal static string NumberField(int statementNumber, int includeDepth)
+    {
+        var number = statementNumber > 0 ? statementNumber.ToString(CultureInfo.InvariantCulture) : "";
+        return includeDepth > 0 ? $"{number,-5}{includeDepth}".PadRight(8) : $"{number,-8}";
     }
 
     #endregion
@@ -580,23 +602,34 @@ public class SourceCode
             return;
 
         _parent.IncludeList.Add(written);
+        var physicalLines = CurrentPhysicalLines;
+        var statementsBefore = SourceLines.Count;
+
+        // the control line is listed before the lines it brings in, not after them
+        ListSource(physicalLines, 0, statementsBefore);
+        var listed = _parent.BuildOptions.ListSource;
         _includeDepth++;
         
         try
         {
             using var reader = new StreamReader(ResolveIncludePath(include), Encoding.UTF8);
             ReadFile(reader, include);
+            _includeDepth--;
         }
         catch (IOException)
         {
-            // sbl reports it on the listing page: the control line, the caret under the opening quote of the name
-            var physical = CurrentPhysicalLines.Count > 0 ? CurrentPhysicalLines[0] : "";
+            // sbl reports it on the listing page, in its place among the statements' errors: the control line, the caret under
+            // the opening quote of the name. The include is left open in sbl's source stack: the statements after it list at
+            // depth 1 and its END is never seen, so the run ends "No END statement found" (see Builder.LogControlLineError)
+            var physical = physicalLines.Count > 0 ? physicalLines[0] : "";
             var quote = physical.IndexOfAny(['\'', '"']);
-            _parent.LogControlLineError(285, physical, quote >= 0 ? quote + 1 : 0, 1 + LineCountFile, pathName);
+            _parent.LogControlLineError(285, physical, quote >= 0 ? quote + 1 : 0, 1 + LineCountFile, pathName, statementsBefore,
+                _includeDepth - 1, listed);
         }
         finally
         {
-            _includeDepth--;
+            // the line has been listed: ReadFile does not list it again
+            _controlLineListed = true;
         }
     }
 
@@ -647,6 +680,7 @@ public class SourceCode
     }
 
     internal bool CaseFoldingNow => _parent.BuildOptions.CaseFolding;
+    internal bool ListingOn => _parent.BuildOptions.ListSource;
 
     #endregion
 

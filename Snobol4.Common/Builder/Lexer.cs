@@ -253,8 +253,14 @@ public partial class Lexer
     {
         var allLexed = true;
         var preEvaluator = new StatementChecker(_parent);
-        foreach (var sourceLine in _parent.Code.SourceLines.Where(line => !line.Compiled))
+        var lines = _parent.Code.SourceLines;
+        for (var position = 0; position < lines.Count; position++)
         {
+            // a control line that went wrong reports where it stood among the statements
+            _parent.FlushDeferred(position);
+            var sourceLine = lines[position];
+            if (sourceLine.Compiled)
+                continue;
             _parent.BuildOptions.CaseFolding = sourceLine.CaseFolding;
             if (sourceLine.CompileError)
             {
@@ -290,6 +296,7 @@ public partial class Lexer
             }
         }
 
+        _parent.FlushDeferred(int.MaxValue);
         return allLexed;
     }
 

@@ -5,6 +5,9 @@ public class SourceLine
     // Whether statement has already been compiled
     internal bool Compiled { get; set; }
 
+    // Whether -LIST had its line listed when it was read (the page of an error in it does not list it again)
+    internal bool Listed { get; init; }
+
     // The statement did not compile; it keeps its label, and reaching it is error 7 (sbl -k)
     internal bool CompileError { get; set; }
     // Case folding as it stood when the line was read: a -CASE control acts from its own line on
@@ -90,6 +93,7 @@ public class SourceLine
     {
         ErrorOnUnhandledFail = errorOnUnhandledFail;
         IncludeDepth = includeDepth;
+        Listed = code.ListingOn;
         LineCountTotal = code.LineCountTotal;
         LineCountFile = code.LineCountFile;
         BlankLineCount = code.BlankLineCount;

@@ -78,6 +78,7 @@ public class SourceCode
     public void ReadAllFiles()
     {
         EndFound = false;
+        var current = "";
 
         try
         {
@@ -86,6 +87,7 @@ public class SourceCode
             var used = 0;
             foreach (var fileName in _parent.FilesToCompile.Select(AdjustFileExtension))
             {
+                current = fileName;
                 // the working directory stays where the program was started: relative file names and
                 // includes resolve from there, as in SPITBOL, not from the source file's directory
                 var fullPath = Path.GetFullPath(fileName);
@@ -104,16 +106,16 @@ public class SourceCode
             if (!_parent.HostParameterGiven)
                 _parent.BuildOptions.HostParameter = string.Join(" ", _parent.ProgramArguments);
         }
-        catch (IOException e)
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
-            Console.Error.WriteLine(e.Message);
+            _parent.LogCannotOpen(current);
             return;
         }
 
         if (PathList.Count > 0 && EndFound)
             return;
 
-        _parent.LogCompilerException(216);
+        _parent.LogMissingEnd();
     }
 
     /// <summary>
@@ -137,7 +139,7 @@ public class SourceCode
         if (EndFound)
             return;
 
-        _parent.LogCompilerException(216);
+        _parent.LogMissingEnd();
     }
 
     #endregion

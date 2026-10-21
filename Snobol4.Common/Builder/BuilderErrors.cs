@@ -164,6 +164,22 @@ public partial class Builder
             () => WriteErrorPage(new string(' ', 8), physical, line, column, code, file));
     }
 
+    // sbl's line on standard error for source that holds no END; the run does not start
+    internal void LogMissingEnd()
+    {
+        SourceFailed = true;
+        ExitStatus = 1;
+        LogCompilerExceptionCore(216, 0, "No END statement found in source file(s).");
+    }
+
+    // sbl's line on standard error for a source file that cannot be opened, named as it was given; the run does not start
+    internal void LogCannotOpen(string file)
+    {
+        SourceFailed = true;
+        ExitStatus = 1;
+        Console.Error.WriteLine($"Can't open {file}");
+    }
+
     // The page of one error: the physical line under its number field, the line that keeps its tabs and puts ! under `column`
     // (empty when there is none), the error line, and an empty line
     private void WriteErrorPage(string numberField, string physical, int line, int column, int code, string file)

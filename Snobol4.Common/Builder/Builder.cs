@@ -69,7 +69,8 @@ public partial class Builder : IDisposable
     internal int RecordedExpressionCount = 0;
 
     // The status the console exits with when the run did not get as far as running the program, as sbl's does: 231 when execution
-    // was suppressed (a compile error, or -n), 1 when an -INCLUDE could not be opened. Null leaves the exit to &CODE.
+    // was suppressed (a compile error, or -n), 1 when the source could not be read (a file or an -INCLUDE that cannot be opened,
+    // no END). Null leaves the exit to &CODE.
     public int? ExitStatus;
 
     // The source could not be read: the run ends before it starts, whatever -k says

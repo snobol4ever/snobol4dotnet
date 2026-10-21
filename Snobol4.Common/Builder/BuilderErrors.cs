@@ -149,7 +149,7 @@ public partial class Builder
         }
 
         var physical = lines[index];
-        var file = Path.GetFileName(source.PathName);
+        var file = source.PathName;
         var line = 1 + source.LineCountFile + index;
         if (!BuildOptions.ListSource)
             WriteListingLine($"{source.FirstStatementNumber,-8}{physical.TrimEnd(' ', '\t')}");

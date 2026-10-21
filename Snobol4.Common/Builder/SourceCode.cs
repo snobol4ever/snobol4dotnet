@@ -91,7 +91,8 @@ public class SourceCode
                 var fullPath = Path.GetFullPath(fileName);
                 PathList.Add(fullPath);
                 using StreamReader sourceFileReader = new(fullPath, Encoding.UTF8);
-                ReadFile(sourceFileReader, fullPath);
+                // the file is named as it was given: &FILE and the error reports print that spelling, as SPITBOL does
+                ReadFile(sourceFileReader, fileName);
                 used++;
                 if (EndFound)
                     break;
@@ -131,7 +132,7 @@ public class SourceCode
         PathList.Add(fileInfo.FullName);
 
         using var reader = new StreamReader(scriptStream, Encoding.UTF8);
-        ReadFile(reader, fileInfo.FullName);
+        ReadFile(reader, AdjustFileExtension(script));
 
         if (EndFound)
             return;

@@ -22,14 +22,15 @@ public class SetupTests
                 directives.Split(" ",
                     StringSplitOptions.RemoveEmptyEntries));
 
-        // Get cross-platform test file path
+        // The script is run as Test.sno in the TestSnobol4 folder of the output directory and named as the command line names a
+        // file there, bare: &FILE and the error reports print a file as it was given
         var testDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TestSnobol4");
-        var testFilePath = Path.Combine(testDirectory, "Test.sno");
 
         // Ensure directory exists
         Directory.CreateDirectory(testDirectory);
+        Directory.SetCurrentDirectory(testDirectory);
 
-        List<string> files = [testFilePath];
+        List<string> files = ["Test.sno"];
 
         var args = commands.Concat(files).ToArray();
 

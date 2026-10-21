@@ -163,7 +163,7 @@ public partial class Executive
     private long StatementLine(int index) => index >= 0 && index < SourceLineNumbers.Count ? SourceLineNumbers[index] + 1 : 0;
 
     private string StatementFile(int index) =>
-        index >= 0 && index < SourceFiles.Count ? Path.GetFileName(SourceFiles[index]) : "";
+        index >= 0 && index < SourceFiles.Count ? SourceFiles[index] : "";
 
     internal void HandleFile(Var value, bool set)
     {

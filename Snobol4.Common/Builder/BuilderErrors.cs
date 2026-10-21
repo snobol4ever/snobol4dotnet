@@ -180,12 +180,30 @@ public partial class Builder
         Console.Error.WriteLine($"Can't open {file}");
     }
 
+    // SPITBOL copies the lines of an error report to its interactive channel, standard error, as it prints them (prtis in its sources:
+    // ERRORS is in its default flags), unless its standard printer is the terminal (PRTICH, from the test of standard output). Run
+    // with standard output in a file or a pipe it therefore writes each such line twice, and a harness that merges the two streams
+    // reads it twice.
+    internal bool CopyErrorsToStandardError => BuildOptions.ListFileName != "" || Console.IsOutputRedirected;
+
+    // One line of an error report on the listing and, when `copy` and the copy is wanted, straight after it on standard error
+    internal void WriteReportLine(TextWriter listing, string text, bool copy)
+    {
+        listing.WriteLine(text);
+        listing.Flush();
+        if (copy && CopyErrorsToStandardError)
+        {
+            Console.Error.WriteLine(text);
+            Console.Error.Flush();
+        }
+    }
+
     // The page of one error: the physical line under its number field, the line that keeps its tabs and puts ! under `column`
     // (empty when there is none), the error line, and an empty line
     private void WriteErrorPage(string numberField, string physical, int line, int column, int code, string file)
     {
-        if (!BuildOptions.ListSource)
-            WriteListingLine($"{numberField}{physical.TrimEnd(' ', '\t')}");
+        // a statement that -LIST has already listed is not listed again, but its line is still copied
+        WriteReportPageLine($"{numberField}{physical.TrimEnd(' ', '\t')}", listed: BuildOptions.ListSource);
 
         var pointer = new StringBuilder();
         if (column > 0)
@@ -195,11 +213,27 @@ public partial class Builder
                 pointer.Append(i < physical.Length && physical[i] == '\t' ? '\t' : ' ');
             pointer.Append('!');
         }
-        WriteListingLine(pointer.ToString());
+        WriteReportPageLine(pointer.ToString());
         var where = column > 0 ? $"{line},{column}" : $"{line}";
-        WriteListingLine($"{file}({where}) : ERROR {code:D3} -- {CompilerException.ErrorMessage[code]}");
-        WriteListingLine("");
+        WriteReportPageLine($"{file}({where}) : ERROR {code:D3} -- {CompilerException.ErrorMessage[code]}");
+        WriteReportPageLine("");
+    }
+
+    // A line of an error page: on the listing, which opens its head if this is the first line, and copied to standard error
+    private void WriteReportPageLine(string text, bool listed = false)
+    {
+        if (!listed)
+            WriteListingLine(text);
         ListingWriter.Flush();
+        WriteReportCopy(text);
+    }
+
+    private void WriteReportCopy(string text)
+    {
+        if (!CopyErrorsToStandardError)
+            return;
+        Console.Error.WriteLine(text);
+        Console.Error.Flush();
     }
 
     // Set while EVAL compiles its argument: a compile error there makes EVAL fail, as in SPITBOL, and

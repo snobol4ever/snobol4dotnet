@@ -76,13 +76,16 @@ public partial class Executive
             Row("memory left (bytes)", memoryLeft),
             ""
         ];
+        // the lines SPITBOL also sends to standard error: the error line and the two empty lines after it, the position and run summary
+        // down to REGENERATIONS (not the memory figures), and the last empty line
+        var copied = new HashSet<int> { 3, 4, 5, 9, 10, 11, 12, 13, 14, 17 };
         var listing = Parent.ListingWriter;
-        foreach (var text in report)
+        for (var index = 0; index < report.Length; index++)
         {
-            var rest = text;
+            var rest = report[index];
             for (; rest.Length > width; rest = rest[width..])
-                listing.WriteLine(rest[..width]);
-            listing.WriteLine(rest);
+                Parent.WriteReportLine(listing, rest[..width], copied.Contains(index));
+            Parent.WriteReportLine(listing, rest, copied.Contains(index));
         }
         listing.Flush();
     }

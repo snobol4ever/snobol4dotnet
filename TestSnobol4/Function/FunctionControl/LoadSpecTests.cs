@@ -123,16 +123,16 @@ public class LoadSpecTests
     [TestMethod]
     public void Dispatcher_PrototypeString_RoutesToSpecPath()
     {
-        // A prototype-string s1 containing '(' routes to spec path.
-        // Using a non-existent lib — we just want to confirm it attempts spec path
-        // and fails :F (not crashes).
+        // A prototype-string s1 containing '(' routes to spec path. With a library that does not exist sbl -b ends the run
+        // with error 142, load function does not exist (this test once expected :F)
         var b = Run(@"
         load('MYFUNC(INTEGER)INTEGER', '/nonexistent/lib.so')   :S(OK)F(FAIL)
 FAIL    result = 'failed'   :(END)
 OK      result = 'ok'
 END
 end");
-        Assert.AreEqual("failed", Str("result", b));
+        Assert.AreEqual(142, b.ErrorCodeHistory[0]);
+        Assert.AreEqual("", Str("result", b));
     }
 
     [TestMethod]
@@ -168,15 +168,46 @@ end");
     }
 
     [TestMethod]
-    public void Load_Spec_MissingLib_Fails()
+    public void Load_Spec_MissingLib_Is_Error142()
     {
+        // sbl -b: LOAD of a function from a library that does not exist is error 142, not a failure to branch on
         var b = Run(@"
         load('spl_add(INTEGER,INTEGER)INTEGER', '/no/such/lib.so')   :S(OK)F(FAIL)
 FAIL    result = 'failed'   :(END)
 OK      result = 'ok'
 END
 end");
-        Assert.AreEqual("failed", Str("result", b));
+        Assert.AreEqual(142, b.ErrorCodeHistory[0]);
+        Assert.AreEqual("", Str("result", b));
+    }
+
+    [TestMethod]
+    public void Load_Spec_NoLibraryGiven_Is_Error142()
+    {
+        // sbl -b: no library named and the function not found on SNOLIB is error 142
+        var b = Run(@"
+        OUTPUT = 'a'
+        load('ZZZ()')
+        OUTPUT = 'b'
+END");
+        Assert.AreEqual(142, b.ErrorCodeHistory[0]);
+    }
+
+    [TestMethod]
+    public void Load_Spec_FunctionNotInLibrary_Is_Error142()
+    {
+        // sbl -b: a library that exists but does not export the function is error 142 at the LOAD, not at the first call
+        var lib = Path.GetFullPath(SpitbolLibPath);
+        if (!File.Exists(lib)) Assert.Inconclusive($"Native lib not found: {lib}");
+
+        var b = Run($@"
+        load('no_such_function(INTEGER)INTEGER', '{lib}')   :S(OK)F(FAIL)
+FAIL    result = 'failed'   :(END)
+OK      result = 'loaded'
+END
+end");
+        Assert.AreEqual(142, b.ErrorCodeHistory[0]);
+        Assert.AreEqual("", Str("result", b));
     }
 
     [TestMethod]
@@ -277,7 +308,7 @@ end");
     }
 
     [TestMethod]
-    public void Load_Spec_SnolibEmpty_Fails()
+    public void Load_Spec_SnolibEmpty_Is_Error142()
     {
         var oldSnolib = Environment.GetEnvironmentVariable("SNOLIB");
         try
@@ -289,7 +320,8 @@ FAIL    result = 'failed'   :(END)
 OK      result = 'ok'
 END
 end");
-            Assert.AreEqual("failed", Str("result", b));
+            // sbl -b: no library named and none on SNOLIB is error 142 (it was a failure to branch on)
+            Assert.AreEqual(142, b.ErrorCodeHistory[0]);
         }
         finally
         {

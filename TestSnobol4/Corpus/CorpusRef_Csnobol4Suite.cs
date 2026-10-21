@@ -4402,8 +4402,25 @@ EQQQ
 	OUTPUT = FUNCTION(.QQQ) QQQ(""QQQ2"")
 END
 ";
-        Assert.AreEqual(@"QQQ1
-QQQ2", SetupTests.RunWithInput(s));
+        // re-cut from sbl -b (CEO-1858 item 5): the old expectation was CSNOBOL4's answer, which snobol4dotnet does not give
+        // sbl prints a report or listing page here; the run's time, regenerations, memory and the head's identity and clock are masked
+        Assert.AreEqual(@"
+
+
+Test.sno(2) : ERROR 142 -- load function does not exist
+
+
+
+
+
+in file              Test.sno
+in line              2
+in statement         1
+stmts executed       1
+execution time msec  -
+REGENERATIONS        -
+memory used (bytes)  -
+memory left (bytes)  -", SetupTests.MaskOracle(SetupTests.RunWithInput(s)));
     }
 
     [TestMethod]

@@ -220,15 +220,32 @@ public partial class Executive
             ? ResolveLibraryPath(rawLibPath)
             : SnolibSearch(proto.FunctionName);
 
+        // sbl: a library that is not there, one that will not load, or one that does not export the function is error 142 at the
+        // LOAD, not a failure to branch on and not a surprise at the first call. LogRuntimeException throws when the error is
+        // fatal, so these stay outside the try below, which turns any exception into a failure
         if (resolvedLib == null)
         {
-            NonExceptionFailure();
+            LogRuntimeException(142);
+            return;
+        }
+
+        IntPtr handle;
+        try { handle = NativeLibrary.Load(resolvedLib); }
+        catch (Exception)
+        {
+            LogRuntimeException(142);
+            return;
+        }
+
+        if (!NativeLibrary.TryGetExport(handle, proto.FunctionName, out _))
+        {
+            NativeLibrary.Free(handle);
+            LogRuntimeException(142);
             return;
         }
 
         try
         {
-            var handle = NativeLibrary.Load(resolvedLib);
             var entry  = new NativeEntry(handle, resolvedLib, proto);
             NativeContexts[fnameKey] = entry;
 

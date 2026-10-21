@@ -34,6 +34,13 @@ public class BreakErrors
     }
 
     [TestMethod]
+    public void TEST_BreakErrors_breakx_of_a_null_string_is_70()
+    {
+        var s = "        &ERRLIMIT = 10\n        E = ''\n        P = BREAKX(E)\n        OUTPUT = 'built ' &ERRTYPE\nEND";
+        Assert.AreEqual("built 70", SetupTests.RunWithInput(s));
+    }
+
+    [TestMethod]
     public void TEST_BreakErrors_breakx_of_an_evaluated_pattern_is_45()
     {
         var s = "        &ERRLIMIT = 10\n        S = LEN(1)\n        'abc' ? BREAKX(*S)\n        OUTPUT = 'evaluated ' &ERRTYPE\nEND";

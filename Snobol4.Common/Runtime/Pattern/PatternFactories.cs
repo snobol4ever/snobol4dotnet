@@ -110,7 +110,7 @@ public partial class Executive
 
         if (!arguments[0].Convert(VarType.STRING, out _, out var s, this) || string.IsNullOrEmpty((string)s))
         {
-            LogRuntimeException(45);
+            LogRuntimeException(70);
             return;
         }
 

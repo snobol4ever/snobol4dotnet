@@ -12,6 +12,12 @@ public partial class Executive
 
     public void LogRuntimeException(int code, bool fatal)
     {
+        if (PreEvaluating)
+        {
+            PreEvaluationCode = code;
+            throw new PreEvaluationAbandoned();
+        }
+
         AmpErrorType = code;
         TraceKeyword("ERRTYPE", code);
         var fileName = Path.GetFileName(SourceFiles[AmpCurrentLineNumber]);

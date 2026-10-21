@@ -252,6 +252,7 @@ public partial class Lexer
     private bool LexLines()
     {
         var allLexed = true;
+        var preEvaluator = new PreEvaluator(_parent);
         foreach (var sourceLine in _parent.Code.SourceLines.Where(line => !line.Compiled))
         {
             _parent.BuildOptions.CaseFolding = sourceLine.CaseFolding;
@@ -275,6 +276,18 @@ public partial class Lexer
             ConvertUnaryStarOperatorsToDeferredExpressions(sourceLine.LexFailureGoto);
             ConvertUnaryStarOperatorsToDeferredExpressions(sourceLine.LexSuccessGoto);
             ConvertUnaryStarOperatorsToDeferredExpressions(sourceLine.LexUnconditionalGoto);
+
+            // an error found pre-evaluating the constants of the statement is an error in it, as in SPITBOL
+            if (preEvaluator.FirstError(sourceLine) is var code and not 0)
+            {
+                _parent.LogCompilerException(code, 0, sourceLine);
+                allLexed = false;
+                sourceLine.CompileError = true;
+                sourceLine.LexBody.Clear();
+                sourceLine.LexFailureGoto.Clear();
+                sourceLine.LexSuccessGoto.Clear();
+                sourceLine.LexUnconditionalGoto.Clear();
+            }
         }
 
         return allLexed;

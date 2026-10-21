@@ -164,6 +164,21 @@ public class Parser
         }
     }
 
+    // The postfix form of one list of lexed tokens, for the compile-time check of its constant parts (PreEvaluator); the tokens
+    // are not changed, so the real parse that follows is unaffected. Null when the list is malformed.
+    internal List<Token>? ToPostfix(List<Token> lexTokenList)
+    {
+        _operatorStack.Clear();
+        try
+        {
+            return ShuntYardAlgorithm(lexTokenList);
+        }
+        catch (InvalidOperationException)
+        {
+            return null;
+        }
+    }
+
     /// <summary>
     /// Parses a single source line by applying the shunting yard algorithm to all its components
     /// (body, unconditional goto, success goto, and failure goto).

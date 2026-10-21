@@ -5,7 +5,8 @@ namespace Test.Miscellaneous;
 
 /// <summary>
 /// A runtime error names the erring statement's own line, as sbl -b does (el.sno(4) : ERROR 001), not
-/// the end of the source.
+/// the end of the source. The operand is a variable: with constants for both operands sbl finds the error when it
+/// compiles the statement (PreEvaluation).
 /// </summary>
 [TestClass]
 public class ErrorLocation
@@ -15,8 +16,8 @@ public class ErrorLocation
     {
         var build = SetupTests.SetupScript("-b", @"* a comment
         &ERRLIMIT = 1
-
-        Y = 'a' + 1
+        A = 'a'
+        Y = A + 1
         X = 1
 end");
         Assert.AreEqual(1, build.ErrorCodeHistory[0]);

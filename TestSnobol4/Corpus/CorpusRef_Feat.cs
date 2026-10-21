@@ -301,11 +301,12 @@ END";
     [TestMethod]
     public void TEST_Feat_f18_error_handling()
     {
-        // SETEXIT jumps to handler on error
+        // SETEXIT jumps to handler on error (the divisor is a variable: sbl finds 1 / 0 when it compiles the statement)
         var s = @"
         &ERRLIMIT = 1
+        Z = 0
         SETEXIT('HANDLER')
-        X = 1 / 0
+        X = 1 / Z
         OUTPUT = 'FAIL (should have jumped to HANDLER)'  :(END)
 HANDLER OUTPUT = 'PASS'
 END";

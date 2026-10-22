@@ -32,7 +32,9 @@ END";
         var output = SetupTests.RunWithInput(s).Replace("\r\n", "\n");
         StringAssert.StartsWith(output, "count 7 limit 2147483647\nafter set 3 err 0\nafter reset 100 err 0\n");
         StringAssert.Contains(output, "Test.sno(14) : ERROR 244 -- statement count exceeds value of stlimit keyword");
-        StringAssert.Contains(output, "stmts executed       20");
+        // &ERRLIMIT is 100, so the first two times the limit is passed are errors like others; the third ends the run, at the limit
+        // raised twice (sbl -b printed 40)
+        StringAssert.Contains(output, "stmts executed       40");
     }
 
     [TestMethod]

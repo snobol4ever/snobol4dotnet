@@ -109,12 +109,19 @@ public partial class Executive
                             : (idx + 1);
                         MonitorIpc.EmitLabel(stno);
                     }
-                    if (StatementLimitReached())
+                    var limitPassed = StatementLimitReached();
+                    if (limitPassed == StatementLimit.PassedForGood)
                     {
                         LogRuntimeException(244, fatal: true);
                         Failure = true;
                         exitCode = -1;
                         goto Done;
+                    }
+                    if (limitPassed == StatementLimit.Passed)
+                    {
+                        // an error like any other: the statement fails and is not counted
+                        LogRuntimeException(244);
+                        break;
                     }
                     // with &STLIMIT negative statements are not counted, so &STCOUNT neither changes nor traces, as in SPITBOL
                     if (AmpStatementLimit >= 0)

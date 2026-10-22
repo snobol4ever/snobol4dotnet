@@ -53,7 +53,9 @@ public partial class Executive
     internal long AmpProfile;
 
     // SPITBOL counts the statements from the one that sets &STLIMIT, not from the start of the run: the limit-th statement
-    // after it ends the run (error 244), unless the limit is below the count at the time it is set, when it is never reached
+    // after it is error 244, unless the limit is below the count at the time it is set, when it is never reached. The error is like
+    // any other while &ERRLIMIT allows it, twice at most: &STCOUNT becomes the limit that was passed, the limit goes up by ten and
+    // the budget starts again at the new limit; the third time, or with &ERRLIMIT at 0, it ends the run
     private long _statementLimit = 2147483647;
     internal long AmpStatementLimit
     {
@@ -63,22 +65,27 @@ public partial class Executive
             _statementLimit = value;
             StatementLimitArmed = value >= AmpStatementCount;
             StatementsToLimit = value;
+            StatementLimitHits = 0;
         }
     }
 
     internal bool StatementLimitArmed = true;
     internal long StatementsToLimit = 2147483647;
+    internal int StatementLimitHits;
 
-    // called as each statement starts, before it is counted: true when it is the one the limit ends the run at; the report and
-    // the dump then show the count as the limit, and the limit is ten higher, as SPITBOL leaves them
-    internal bool StatementLimitReached()
+    internal enum StatementLimit { Within, Passed, PassedForGood }
+
+    // called as each statement starts, before it is counted: Passed when it is the statement the limit is passed at and the run goes
+    // on (the statement fails), PassedForGood when it ends the run. The report and the dump then show the count as the limit, and
+    // the limit is ten higher, as SPITBOL leaves them
+    internal StatementLimit StatementLimitReached()
     {
         if (AmpStatementLimit <= 0 || !StatementLimitArmed || --StatementsToLimit > 0)
-            return false;
+            return StatementLimit.Within;
         AmpStatementCount = AmpStatementLimit;
         _statementLimit += 10;
-        StatementsToLimit = 10;
-        return true;
+        StatementsToLimit = _statementLimit;
+        return ++StatementLimitHits >= 3 || AmpErrorLimit <= 0 ? StatementLimit.PassedForGood : StatementLimit.Passed;
     }
     internal long AmpTrace;
     internal long AmpTrim = 1;   // sbl x64 starts &TRIM at 1 (kvtrm), not the manual's 0

@@ -76,6 +76,18 @@ public class StringConversionStrategy : IConversionStrategy
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static bool ConvertToExpression(StringVar stringSelf, Executive exec, out Var varOut, out object valueOut)
     {
+        // one expression, as EVAL takes it: a comma outside every bracket and quote is error 223, a compile error of the conversion
+        // (it compiled *(1,000), a selection)
+        if (Executive.HasTopLevelComma(stringSelf.Data))
+        {
+            exec.AmpErrorType = 223;
+            exec.AmpErrorText = CompilerException.ErrorMessage[223];
+            exec.CompileErrorSerial++;
+            varOut = StringVar.Null();
+            valueOut = string.Empty;
+            return false;
+        }
+
         var previousCaseFolding = exec.Parent.BuildOptions.CaseFolding;
         exec.Parent.BuildOptions.CaseFolding = exec.AmpCaseFolding != 0;
         exec.Parent.CodeMode = true;

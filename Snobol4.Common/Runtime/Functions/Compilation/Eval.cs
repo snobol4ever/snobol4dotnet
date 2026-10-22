@@ -33,12 +33,13 @@ public partial class Executive
                 return;
 
             case StringVar stringVar:
-                // the text is one expression: a comma outside every bracket and quote is not part of one (223)
+                // the text is one expression: a comma outside every bracket and quote is not part of one (223), a compile error
+                // like any other (counted while &ERRLIMIT is above 0, taken by an armed SETEXIT handler)
                 if (HasTopLevelComma(stringVar.Data))
                 {
                     AmpErrorType = 223;
                     AmpErrorText = CompilerException.ErrorMessage[223];
-                    NonExceptionFailure();
+                    CompileErrorFailure();
                     return;
                 }
 
@@ -74,7 +75,7 @@ public partial class Executive
         }
     }
 
-    private static bool HasTopLevelComma(string text)
+    internal static bool HasTopLevelComma(string text)
     {
         var depth = 0;
         for (var i = 0; i < text.Length; i++)

@@ -68,10 +68,11 @@ end";
         var s = @"
         a = .table(0)
 end";
+        // sbl -b answers this program with ERROR 021, function called by name returned a value: the name of a call
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(212, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(21, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
@@ -80,10 +81,11 @@ end";
         var s = @"
         a = .array('10')
 end";
+        // sbl -b answers this program with ERROR 021, function called by name returned a value: the name of a call
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(212, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(21, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
@@ -245,5 +247,30 @@ SW_END
 end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("new", build.Execute!.IdentifierTable["R"].ToString());
+    }
+
+    [TestMethod]
+    public void TEST_Name_of_a_call_that_returned_a_value_is_error_21()
+    {
+        // sbl -bf: the name of a call that handed back a value, a RETURN's or a builtin's, is error 21 (was a NAME of G for .G(), and
+        // error 212 for .SIZE('abc')); the name of an NRETURN and of ITEM() are names
+        var build = SetupTests.SetupScript("-bf", @"
+        &ERRLIMIT = 10
+        DEFINE('F()')
+        DEFINE('G()')                             :(FE)
+F       F = .ZZ                                   :(NRETURN)
+G       G = 'val'                                 :(RETURN)
+FE      N = .F()
+        R = DATATYPE(N)
+        M = .G()                                  :S(Y3)
+        R = R ' ' &ERRTYPE
+Y3      &ERRTYPE = 0
+        K = .SIZE('abc')                          :S(Y4)
+        R = R ' ' &ERRTYPE
+Y4      A = ARRAY(2)
+        P = .ITEM(A, 1)
+        R = R ' ' DATATYPE(P)
+END");
+        Assert.AreEqual("NAME 21 21 NAME", build.Execute!.IdentifierTable["R"].ToString());
     }
 }

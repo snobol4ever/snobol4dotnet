@@ -1,15 +1,18 @@
 ﻿namespace Snobol4.Common;
 
 
-// TODO: Determine error codes
+//"function called by name returned a value" /* 21 */,
+//"syntax error: value used where name is required" /* 212 */,
 
 public partial class Executive
 {
     internal void Name(List<Var> arguments)
     {
-        if (arguments[0].Symbol == "" && (arguments[0].Key == null || arguments[0].Collection == null))
+        // A call in the place of a name that handed back a value, a builtin's (.SIZE('abc')) or a RETURN's (.G()), is error 21,
+        // as in SPITBOL; every other value that is no name (.'abc', .(X Y)) is error 212, found as its statement is compiled
+        if (ReferenceEquals(arguments[0], ValueReturned) || arguments[0].Symbol == "" && (arguments[0].Key == null || arguments[0].Collection == null))
         {
-            LogRuntimeException(212);
+            LogRuntimeException(21);
             return;
         }
 

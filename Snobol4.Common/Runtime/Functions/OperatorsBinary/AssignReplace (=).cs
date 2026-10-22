@@ -108,6 +108,15 @@ public partial class Executive
                 return;
             }
             arguments[0] = SystemStack.Pop();
+
+            // A deferred target is evaluated for a NAME, as SPITBOL evaluates it by name: an expression that can only give
+            // a value, or a call that gave one (a RETURN, a builtin's value), fails the assignment once its side effects are
+            // done, where it assigned the value's own variable or was error 212 (. *F() with F = 'ZZ' :(RETURN) assigned F)
+            if (ValueExpressions.Contains(expressionVar1.FunctionName) || !IsName(arguments[0]))
+            {
+                Failure = true;
+                return;
+            }
         }
 
         var leftVar = arguments[0];  // Destination Var
@@ -401,6 +410,11 @@ public partial class Executive
 
     // The copy of a value an assignment stores: protection and keyword-ness belong to the variable the
     // value came from (FAIL, &TRIM), not to the value, so X = FAIL then X = 1 is an ordinary assignment
+    // What a deferred target gave can be assigned through: a NAME, a variable, an element or a field, but not the value a
+    // program-defined function handed back by RETURN, which carries the function's own variable
+    private bool IsName(Var target) =>
+        !ReferenceEquals(target, ValueReturned) && (target is NameVar || target.Symbol != "" || target.Key is not null);
+
     private static Var StoredCopy(Var value)
     {
         var copy = value.Clone();

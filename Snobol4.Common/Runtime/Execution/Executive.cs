@@ -36,6 +36,14 @@ public partial class Executive
 
     // The variable each simple deferred expression (*X) defers, which prtvl prints as *X
     internal readonly Dictionary<DeferredCode, string> SimpleExpressionNames = [];
+
+    // The deferred expressions that can only give a value, never a name (*'X', *(N = N + 1), *(A B), *(.X)): SPITBOL
+    // compiles each expression by name or by value only, and one used as a capture target by value fails the assignment
+    internal readonly HashSet<DeferredCode> ValueExpressions = [];
+
+    // The value the latest call of a program-defined function handed back by RETURN: a call in a name's place (a deferred
+    // capture target) that gave this gave a value, not a name
+    internal Var? ValueReturned;
     public int PreviousStarFunctionCount;
     public delegate int StatementCode(Executive x);
     public delegate void DeferredCode(Executive x);

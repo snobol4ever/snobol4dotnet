@@ -345,6 +345,7 @@ public partial class Executive
                 AmpReturnType = "RETURN";
                 rtnTypeStr = "RETURN";
                 returnVar.Succeeded = true;
+                ValueReturned = returnVar;
                 Failure = callerFailure;   // preserve caller's Failure; UDF success doesn't clear it
                 break;
 

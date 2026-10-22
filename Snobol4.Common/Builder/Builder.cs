@@ -463,9 +463,26 @@ public partial class Builder : IDisposable
             Execute.StarFunctionList.Add(function);
             if (ParseExpression[i] is [{ TokenType: Token.Type.IDENTIFIER } variable])
                 Execute.SimpleExpressionNames[function] = FoldCase(variable.MatchedString);
+            if (ParseExpression[i] is [.., var root] && GivesValueOnly(root))
+                Execute.ValueExpressions.Add(function);
         }
         Execute.PreviousStarFunctionCount = Execute.StarFunctionList.Count;
     }
+
+    // An expression whose last operation (its root, last in postfix) can only make a value: a literal, an assignment, a
+    // concatenation, arithmetic, a pattern operator, a match, or the name, negation, interrogation or cursor operator.  A
+    // variable, $X, &K, a subscript and a call can give a name (a call only when it returns one), and so can an operator a
+    // program may define with OPSYN, as SPITBOL compiles an expression by name when it can (sbl -bf: . *(.X) and
+    // . *('Z' 'Z') fail the match, . *$'ZZ', . *A<1>, . *ITEM(A,2) and . *VAL(N) assign)
+    private static bool GivesValueOnly(Token root) => root.TokenType switch
+    {
+        Token.Type.STRING or Token.Type.INTEGER or Token.Type.REAL or Token.Type.NULL => true,
+        Token.Type.BINARY_EQUAL or Token.Type.BINARY_CONCAT or Token.Type.BINARY_PLUS or Token.Type.BINARY_MINUS
+            or Token.Type.BINARY_STAR or Token.Type.BINARY_SLASH or Token.Type.BINARY_CARET or Token.Type.BINARY_PIPE
+            or Token.Type.BINARY_PERIOD or Token.Type.BINARY_DOLLAR or Token.Type.BINARY_QUESTION => true,
+        Token.Type.UNARY_OPERATOR => root.MatchedString is "." or "-" or "+" or "~" or "?" or "@",
+        _ => false
+    };
 
     #endregion
 

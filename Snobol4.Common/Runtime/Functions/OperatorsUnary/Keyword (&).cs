@@ -105,6 +105,14 @@ public partial class Executive
         // &operator must be existing keyword
         var newSymbol = "&" + v.Symbol;
 
+        // names are spelled as written when case folding is off, and SPITBOL's keywords are the upper-case names only (the table
+        // holds the folded, lower-case ones too)
+        if (!Parent.BuildOptions.CaseFolding && v.Symbol.Any(char.IsLower))
+        {
+            LogRuntimeException(251);
+            return;
+        }
+
         if (KeywordTable.TryGetValue(newSymbol, out var handler))
         {
             handler(v, false);

@@ -196,12 +196,24 @@ public partial class Builder
         Console.Error.WriteLine("No END statement found in source file(s).");
     }
 
-    // sbl's line on standard error for source that holds no END; the run does not start
+    // sbl's line on standard error for source that holds no END; the run does not start. It is sbl's last word, after the listing and
+    // the errors of the statements it did compile, so it is kept until the lexer has finished (ReportMissingEnd).
     internal void LogMissingEnd()
     {
         SourceFailed = true;
         ExitStatus = 1;
-        LogCompilerExceptionCore(216, 0, "No END statement found in source file(s).");
+        MissingEndPending = true;
+        LogCompilerExceptionCore(216, 0, "No END statement found in source file(s).", null, () => { });
+    }
+
+    internal bool MissingEndPending;
+
+    internal void ReportMissingEnd()
+    {
+        if (!MissingEndPending)
+            return;
+        MissingEndPending = false;
+        Console.Error.WriteLine("No END statement found in source file(s).");
     }
 
     // sbl's line on standard error for a source file that cannot be opened, named as it was given; the run does not start

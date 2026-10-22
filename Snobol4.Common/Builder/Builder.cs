@@ -149,6 +149,7 @@ public partial class Builder : IDisposable
             _timerBuild.Restart();
             Lex(this);
             ReportNoEndAfterFailedInclude();
+            ReportMissingEnd();
 
             // When -CASE changed folding part way, the lexer already folded each line's names as its
             // line required, so the passes after it take the names as spelled; the program then runs

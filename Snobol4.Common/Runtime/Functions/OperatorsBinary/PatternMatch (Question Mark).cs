@@ -18,29 +18,21 @@ public partial class Executive
         // Found: GOAL-NET-BEAUTY-SELF session #81 — *mypat() returning LEN(5) matched
         // subject "5" (= coerced IntegerVar from LEN's arg) instead of "hello".
         var savedSubject = arguments[0];
-        // A deferred pattern that calls a program-defined function (*ONCE(N)) runs a body whose calls clear
-        // _reusableArgList, the list arguments may be, outright; the match works on its own copy
-        if (arguments[1] is ExpressionVar)
-            arguments = [.. arguments];
-        while (arguments[1] is ExpressionVar expressionVar1)
-        {
-            expressionVar1.FunctionName(this);
-            if (Failure) { Failure = false; NonExceptionFailure(); return; }
-            if (SystemStack.Count == 0) { NonExceptionFailure(); return; }
-            arguments[1] = SystemStack.Pop();
-            // Restore subject — inner Function() calls clobber _reusableArgList[0]
-            arguments[0] = savedSubject;
-        }
+
+        // A deferred right operand (S ? *F(), or P = *F() then S ? P) is a pattern of one element, *F(), which the match evaluates
+        // each time it reaches it, at every cursor of an unanchored match, and whose value when it is no pattern is error 46, as in
+        // SPITBOL; it was evaluated once, before the match and before the subject was checked
+        var right = arguments[1] is ExpressionVar expressionVar1 ? new PatternVar(UnevaluatedPattern.Structure(expressionVar1.FunctionName)) : arguments[1];
 
         // Right argument must resolve to a pattern
-        if (!arguments[1].Convert(VarType.PATTERN, out _, out var patternValue, this))
+        if (!right.Convert(VarType.PATTERN, out _, out var patternValue, this))
         {
             LogRuntimeException(240);
             return;
         }
 
         // Left argument must resolve to a string
-        if (!arguments[0].Convert(VarType.STRING, out var subject, out var subjectValue, this))
+        if (!savedSubject.Convert(VarType.STRING, out var subject, out var subjectValue, this))
         {
             LogRuntimeException(241);
             return;
@@ -48,7 +40,7 @@ public partial class Executive
 
         // If the subject is converted from something other than a string, it loses its symbol.
         // So preserve it here.
-        subject.Symbol = arguments[0].Symbol;
+        subject.Symbol = savedSubject.Symbol;
 
         // Try the match.
         // Save and temporarily replace BetaStack so that any nested PatternMatch invoked

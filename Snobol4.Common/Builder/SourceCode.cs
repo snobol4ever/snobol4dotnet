@@ -936,8 +936,10 @@ public class SourceCode
 
         try
         {
-            using var reader = new StreamReader(ResolveIncludePath(include), Encoding.UTF8);
-            ReadFile(reader, include);
+            // the file is named for where it was found: the directory as the list gives it, a slash and the name as written
+            var found = ResolveIncludePath(include);
+            using var reader = new StreamReader(found, Encoding.UTF8);
+            ReadFile(reader, found);
             _includeDepth--;
         }
         catch (IOException)
@@ -979,9 +981,15 @@ public class SourceCode
             var list = Environment.GetEnvironmentVariable(variable);
             if (string.IsNullOrEmpty(list))
                 continue;
+            // the list may be wrapped in one pair of parentheses; sbl takes one off the front of the list and one off its end
+            list = list.Trim();
+            if (list.StartsWith('('))
+                list = list[1..];
+            if (list.EndsWith(')'))
+                list = list[..^1];
             foreach (var dir in list.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries))
             {
-                var candidate = Path.Combine(dir.Trim().TrimStart('('), include);
+                var candidate = dir.Trim() + "/" + include;
                 if (File.Exists(candidate))
                     return candidate;
             }
@@ -989,7 +997,7 @@ public class SourceCode
 
         if (PathList.Count > 0 && Path.GetDirectoryName(PathList[0]) is { Length: > 0 } sourceDirectory)
         {
-            var candidate = Path.Combine(sourceDirectory, include);
+            var candidate = sourceDirectory + "/" + include;
             if (File.Exists(candidate))
                 return candidate;
         }

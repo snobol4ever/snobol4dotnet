@@ -1,0 +1,3 @@
+-maxcpucount:1
+-nodeReuse:false
+-p:UseSharedCompilation=false

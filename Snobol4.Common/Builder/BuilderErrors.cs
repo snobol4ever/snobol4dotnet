@@ -193,6 +193,7 @@ public partial class Builder
         if (!IncludeFailed)
             return;
         IncludeFailed = false;
+        MissingEndPending = false;   // the one line says both
         Console.Error.WriteLine("No END statement found in source file(s).");
     }
 

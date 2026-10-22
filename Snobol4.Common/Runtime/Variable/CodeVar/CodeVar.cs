@@ -29,6 +29,19 @@ public sealed class CodeVar : Var
 
     #endregion
 
+    // The same code again, under another name or in another place: its text and its identity (SequenceId), which a code keeps wherever it
+    // is copied, as SPITBOL's does (R = V, then IDENT(R, V))
+    internal CodeVar Alias()
+    {
+        var alias = (CodeVar)MemberwiseClone();
+        alias.Key = null;
+        alias.Collection = null;
+        alias.LvalueMark = 0;
+        alias.IsReadOnly = false;
+        alias.IsKeyword = false;
+        return alias;
+    }
+
     #region Constructors
 
 

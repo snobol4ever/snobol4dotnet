@@ -59,5 +59,13 @@ public partial class Executive
         SystemStack.Push(new PatternVar(new ConcatenatePattern((Pattern)leftPattern, (Pattern)rightPattern)));
     }
 
-    private static Var SameValue(Var operand) => operand is PatternVar pattern ? new PatternVar(pattern) : operand.Clone();
+    // The operand that is not null, as the value of the concatenation: the same value, so IDENT(E V, V) holds for an array, a table, an
+    // expression and a code as for a pattern (an array or table by another handle on it, not a copy of its elements)
+    private static Var SameValue(Var operand) => operand switch
+    {
+        PatternVar pattern => new PatternVar(pattern),
+        ArrayVar or TableVar => Handle(operand),
+        ExpressionVar or CodeVar => operand,
+        _ => operand.Clone()
+    };
 }

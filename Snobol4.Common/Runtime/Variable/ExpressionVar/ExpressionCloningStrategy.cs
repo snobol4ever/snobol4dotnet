@@ -5,13 +5,7 @@ public sealed class ExpressionCloningStrategy : ICloningStrategy
 
     public Var Clone(Var self)
     {
-        var expressionSelf = (ExpressionVar)self;
-
-        return new ExpressionVar(expressionSelf.FunctionName)
-        {
-            Symbol = expressionSelf.Symbol,
-            InputChannel = expressionSelf.InputChannel,
-            OutputChannel = expressionSelf.OutputChannel
-        };
+        // an expression is a value that is shared, not copied: its copy is the same expression
+        return ((ExpressionVar)self).Alias();
     }
 }

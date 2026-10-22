@@ -5,13 +5,7 @@ public sealed class CodeCloningStrategy : ICloningStrategy
 
     public Var Clone(Var self)
     {
-        var codeSelf = (CodeVar)self;
-
-        return new CodeVar(codeSelf.StatementNumber, codeSelf.Data)
-        {
-            Symbol = codeSelf.Symbol,
-            InputChannel = codeSelf.InputChannel,
-            OutputChannel = codeSelf.OutputChannel
-        };
+        // a code is a value that is shared, not copied: its copy is the same code
+        return ((CodeVar)self).Alias();
     }
 }

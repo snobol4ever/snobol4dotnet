@@ -28,6 +28,19 @@ public sealed class ExpressionVar : Var
 
     #endregion
 
+    // The same expression again, under another name or in another place: its function and its identity (SequenceId), which an expression
+    // keeps wherever it is copied, as SPITBOL's does (R = V, then IDENT(R, V))
+    internal ExpressionVar Alias()
+    {
+        var alias = (ExpressionVar)MemberwiseClone();
+        alias.Key = null;
+        alias.Collection = null;
+        alias.LvalueMark = 0;
+        alias.IsReadOnly = false;
+        alias.IsKeyword = false;
+        return alias;
+    }
+
     #region Constructors
 
 

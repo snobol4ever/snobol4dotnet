@@ -54,6 +54,10 @@ internal sealed partial class SyntaxScanner
 
     private Func<string, bool>? _defined;
 
+    // Where the physical lines of the statement end in the text, each at the blank that stands for the continuation character: a string
+    // does not run over one
+    private int[] _lineEnds = [];
+
     private SyntaxScanner(string text) => _text = text;
 
     /// <summary>
@@ -61,12 +65,12 @@ internal sealed partial class SyntaxScanner
     /// name SPITBOL could read is left to the lexer. The END statement may carry the name of the label the run starts at, which must
     /// be one the program has defined (`defined` says so): anything else after END is error 215.
     /// </summary>
-    internal static Error? FirstError(string text, Func<string, bool>? defined = null)
+    internal static Error? FirstError(string text, Func<string, bool>? defined = null, int[]? lineEnds = null)
     {
         if (text.Length == 0)
             return null;
 
-        var scanner = new SyntaxScanner(text) { _defined = defined };
+        var scanner = new SyntaxScanner(text) { _defined = defined, _lineEnds = lineEnds ?? [] };
         try
         {
             return scanner.Statement();
@@ -418,9 +422,11 @@ internal sealed partial class SyntaxScanner
                 case '\'' or '"':
                 {
                     var close = text.IndexOf(c, position);
-                    if (close < 0)
+                    // the string is closed on the line it opens on
+                    var lineEnd = _lineEnds.FirstOrDefault(end => end >= position, -1);
+                    if (close < 0 || (lineEnd >= 0 && close >= lineEnd))
                     {
-                        _position = text.Length;
+                        _position = lineEnd >= 0 && lineEnd < text.Length ? lineEnd : text.Length;
                         throw new SyntaxFault(232);
                     }
 

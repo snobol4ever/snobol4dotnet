@@ -271,7 +271,7 @@ public partial class Lexer
             }
 
             // a syntax error is reported as SPITBOL meets it, at the element it meets it at
-            if (SyntaxScanner.FirstError(sourceLine.SyntaxText, name => _parent.Code.Labels.ContainsKey(_parent.FoldCase(name))) is { } syntax)
+            if (SyntaxScanner.FirstError(sourceLine.SyntaxText, name => _parent.Code.Labels.ContainsKey(_parent.FoldCase(name)), LineEnds(sourceLine)) is { } syntax)
             {
                 allLexed = false;
                 sourceLine.CompileError = true;
@@ -343,6 +343,26 @@ public partial class Lexer
     /// <param name="sourceLine">The source line to tokenize.</param>
     /// <returns><c>true</c> if the line was successfully tokenized; otherwise, <c>false</c>.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="sourceLine"/> or its text is null.</exception>
+    // Where the physical lines of the statement end in its text (SyntaxText), each at the blank that stands for the continuation character of
+    // the next line, counted from the start of the text
+    private static int[] LineEnds(SourceLine line)
+    {
+        var ends = new List<int>();
+        var physical = line.PhysicalLines;
+        var total = 0;
+        for (var k = 0; k < physical.Count - 1; k++)
+        {
+            if (k == 0)
+                total = physical[0].Length;
+            else if (physical[k].Length > 0)
+                total += physical[k].Length;
+            if (total - line.SubLineOffset > 0)
+                ends.Add(total - line.SubLineOffset);
+        }
+
+        return ends.ToArray();
+    }
+
     private bool LexLine(SourceLine sourceLine)
     {
         ArgumentNullException.ThrowIfNull(sourceLine);

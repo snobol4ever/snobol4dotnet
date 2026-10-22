@@ -38,11 +38,12 @@ end";
     public void TEST_Alphabet_209()
     {
         var s = @"
-        &alphabet = 'abcxyz'
+        &alphabet = 5
 end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
+        // a protected keyword is 209 once its value passes the checks of a keyword's value: sbl says 208 for 'abcxyz' (no integer)
         Assert.AreEqual(209, build.ErrorCodeHistory[0]);
     }
 

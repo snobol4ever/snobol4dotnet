@@ -274,15 +274,18 @@ END";
     [TestMethod]
     public void TEST_Corpus_kw_fullscan()
     {
-        // &FULLSCAN = 1 enables full scan (no heuristic shortcut)
+        // &FULLSCAN = 1 enables full scan (no heuristic shortcut); &FULLSCAN = 0 is error 274, and leaves it 1, as sbl does
         var s = @"
+        &ERRLIMIT = 5
         &FULLSCAN = 1
         DIFFER(&FULLSCAN, 1)                        :F(ok)
         OUTPUT = 'FAIL: &FULLSCAN not set'          :(END)
 ok      &FULLSCAN = 0
-        DIFFER(&FULLSCAN, 0)                        :F(ok2)
-        OUTPUT = 'FAIL: &FULLSCAN not cleared'      :(END)
-ok2     OUTPUT = 'PASS'
+        DIFFER(&ERRTYPE, 274)                       :F(ok2)
+        OUTPUT = 'FAIL: &FULLSCAN = 0 not refused'  :(END)
+ok2     DIFFER(&FULLSCAN, 1)                        :F(ok3)
+        OUTPUT = 'FAIL: &FULLSCAN changed'          :(END)
+ok3     OUTPUT = 'PASS'
 END";
         Assert.AreEqual("PASS", SetupTests.RunWithInput(s));
     }
@@ -295,8 +298,8 @@ END";
         GT(&MAXLNGTH, 0)                            :S(ok1)
         OUTPUT = 'FAIL: &MAXLNGTH not positive'     :(END)
 ok1     OLD = &MAXLNGTH
-        &MAXLNGTH = 1000
-        DIFFER(&MAXLNGTH, 1000)                     :F(ok2)
+        &MAXLNGTH = 2000
+        DIFFER(&MAXLNGTH, 2000)                     :F(ok2)
         OUTPUT = 'FAIL: &MAXLNGTH not set'          :(END)
 ok2     &MAXLNGTH = OLD
         OUTPUT = 'PASS'

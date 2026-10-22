@@ -270,19 +270,20 @@ public partial class Executive
 
         // SPITBOL's predefined pattern variables: ABORT, ARB, BAL, FAIL, FENCE, REM, SUCCEED.
         // NULL is not one of them: it is an ordinary variable whose value is the null string.
+        // Each holds the very pattern its keyword holds, as in SPITBOL: IDENT(&ARB, ARB) succeeds
         IdentifierTable = new IdentifierTable(this)
         {
             // The predefined names are upper case only: under -f a lower-case arb or output is an
             // ordinary variable, as in SPITBOL (sbl -bf); under folding no lower-case name reaches here
-            {"ABORT", new PatternVar(new AbortPattern(), "ABORT", false, true)},
-            {"ARB", new PatternVar(ArbPattern.Structure(), "ARB", false, true)},
-            {"BAL", new PatternVar(BalPattern.Structure(), "BAL", false, true)},
-            {"FAIL", new PatternVar(new FailPattern(), "FAIL", false, true)},
-            {"FENCE", new PatternVar(new AlternatePattern(new NullPattern(), new AbortPattern()), "FENCE", false, true)},
+            {"ABORT", new PatternVar(AmpAbortPattern, "ABORT", false, true)},
+            {"ARB", new PatternVar(AmpArbPattern, "ARB", false, true)},
+            {"BAL", new PatternVar(AmpBalPattern, "BAL", false, true)},
+            {"FAIL", new PatternVar(AmpFailPattern, "FAIL", false, true)},
+            {"FENCE", new PatternVar(AmpFencePattern, "FENCE", false, true)},
             {"INPUT", new StringVar("","INPUT")},
             {"OUTPUT", new StringVar("","OUTPUT")},
-            {"REM", new PatternVar(new RemPattern(), "REM", false, true)},
-            {"SUCCEED", new PatternVar(new SucceedPattern(), "SUCCEED", false, true)},
+            {"REM", new PatternVar(AmpRemPattern, "REM", false, true)},
+            {"SUCCEED", new PatternVar(AmpSucceedPattern, "SUCCEED", false, true)},
             {"TERMINAL", new StringVar("", "TERMINAL")}
         };
 

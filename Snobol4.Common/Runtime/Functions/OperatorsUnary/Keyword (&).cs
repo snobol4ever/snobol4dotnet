@@ -20,7 +20,7 @@ public partial class Executive
     // Protected keywords
     internal Pattern AmpAbortPattern = new AbortPattern();
     internal string AmpAlphabet;
-    internal Pattern AmpArbPattern = new ArbPattern();
+    internal Pattern AmpArbPattern = ArbPattern.Structure();
     internal Pattern AmpBalPattern = BalPattern.Structure();
     internal Pattern AmpFailPattern = new FailPattern();
     internal Pattern AmpFencePattern = new AlternatePattern(new NullPattern(), new AbortPattern());

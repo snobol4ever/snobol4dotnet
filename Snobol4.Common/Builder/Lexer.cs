@@ -947,16 +947,19 @@ public partial class Lexer
         if (_successGotoStart > 0)
         {
             sourceLine.LexSuccessGoto = [.. sourceLine.LexBody[(_successGotoStart + 1)..(_successGotoEnd - 1)]];
+            sourceLine.EmptySuccessGoto = sourceLine.LexSuccessGoto.Count == 0;
         }
 
         if (_failureGotoStart > 0)
         {
             sourceLine.LexFailureGoto = [.. sourceLine.LexBody[(_failureGotoStart + 1)..(_failureGotoEnd - 1)]];
+            sourceLine.EmptyFailureGoto = sourceLine.LexFailureGoto.Count == 0;
         }
 
         if (_unconditionalGotoStart > 0)
         {
             sourceLine.LexUnconditionalGoto = [.. sourceLine.LexBody[(_unconditionalGotoStart + 1)..(_unconditionalGotoEnd - 1)]];
+            sourceLine.EmptyUnconditionalGoto = sourceLine.LexUnconditionalGoto.Count == 0;
         }
 
         sourceLine.LexBody.RemoveRange(_colonPosition, sourceLine.LexBody.Count - _colonPosition);

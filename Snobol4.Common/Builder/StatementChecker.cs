@@ -27,7 +27,8 @@ internal sealed class StatementChecker(Builder parent)
     // Question: a pattern match, whose subject is what a replacement assigns to. Other: anything else, taken as a name here
     // (a concatenation or alternation may be the pattern of a statement, and parentheses are lost in the postfix form).
     // The two marks hold the place of a function name or an array until its arguments or subscripts are in.
-    private enum Kind { Constant, Value, Name, Question, Other, FunctionMark, ArrayMark }
+    // Combination: a concatenation, an alternation or a choice, which is a pattern or a value as the statement needs it, but no name
+    private enum Kind { Constant, Value, Name, Question, Other, Combination, FunctionMark, ArrayMark }
 
     // Value is the operand's constant value when it has one; Subject is a match's subject
     private sealed record Operand(Kind Kind, Var? Value = null, Operand? Subject = null, string Name = "");
@@ -41,18 +42,37 @@ internal sealed class StatementChecker(Builder parent)
     {
         if (parent.Execute is null)
             return 0;
-        foreach (var tokens in new[] { line.LexBody, line.LexSuccessGoto, line.LexFailureGoto, line.LexUnconditionalGoto })
-            if (FirstError(tokens) is var code and not 0)
+        if (FirstError(line.LexBody, false) is var bodyCode and not 0)
+            return bodyCode;
+
+        // a goto in angle brackets takes a value (a code), whose kind is found when it is taken; the others take a name
+        var both = line.LexSuccessGoto.Count > 0 && line.LexFailureGoto.Count > 0;
+        var successDirect = both ? line.SuccessFirst ? line.DirectGotoFirst : line.DirectGotoSecond : line.DirectGotoFirst;
+        var failureDirect = both ? line.SuccessFirst ? line.DirectGotoSecond : line.DirectGotoFirst : line.DirectGotoFirst;
+        foreach (var (tokens, direct, empty) in new[]
+                 {
+                     (line.LexSuccessGoto, successDirect, line.EmptySuccessGoto), (line.LexFailureGoto, failureDirect, line.EmptyFailureGoto),
+                     (line.LexUnconditionalGoto, line.DirectGotoFirst, line.EmptyUnconditionalGoto)
+                 })
+        {
+            // a goto with nothing in it is a null, which is no name
+            if (empty && !direct)
+                return ValueWhereNameIsRequired;
+            if (FirstError(tokens, !direct) is var code and not 0)
                 return code;
+        }
+
         return 0;
     }
 
-    private int FirstError(List<Token> lexTokens)
+    // `gotoTarget` is the expression of a goto, which SPITBOL generates by name: a constant, an arithmetic result or a combination of
+    // operands (concatenation, alternation, a choice) is no name, so it is 212 there as it is for a target of =
+    private int FirstError(List<Token> lexTokens, bool gotoTarget)
     {
-        if (!HasCandidate(lexTokens))
+        if (!gotoTarget && !HasCandidate(lexTokens))
             return 0;
         var postfix = _parser.ToPostfix(lexTokens);
-        return postfix is null ? 0 : Walk(postfix);
+        return postfix is null ? 0 : Walk(postfix, gotoTarget);
     }
 
     // Whether the list holds an operator or call that could err: one that is pre-evaluated, one that takes a name, or a deferred
@@ -79,7 +99,7 @@ internal sealed class StatementChecker(Builder parent)
     // or a value that is no name is error 212
     private static bool IsValue(Operand operand) => operand.Kind is Kind.Constant or Kind.Value;
 
-    private int Walk(List<Token> postfix)
+    private int Walk(List<Token> postfix, bool gotoTarget)
     {
         List<Operand> stack = [];
         foreach (var token in postfix)
@@ -106,7 +126,7 @@ internal sealed class StatementChecker(Builder parent)
                 {
                     // a deferred expression is compiled where it stands, and its statements are checked then
                     var index = int.Parse(token.MatchedString[4..]);
-                    if (index < parent.ExpressionList.Count && FirstError(parent.ExpressionList[index].ExpressionList) is var inner and not 0)
+                    if (index < parent.ExpressionList.Count && FirstError(parent.ExpressionList[index].ExpressionList, false) is var inner and not 0)
                         return inner;
                     stack.Add(new Operand(Kind.Name));
                     break;
@@ -164,7 +184,7 @@ internal sealed class StatementChecker(Builder parent)
                 case Token.Type.R_PAREN_CHOICE:
                     if (stack.Count == 0)
                         return 0;
-                    stack[^1] = new Operand(Kind.Other);
+                    stack[^1] = new Operand(Kind.Combination);
                     break;
 
                 case Token.Type.BINARY_PLUS or Token.Type.BINARY_MINUS or Token.Type.BINARY_STAR or Token.Type.BINARY_SLASH
@@ -276,8 +296,14 @@ internal sealed class StatementChecker(Builder parent)
                 }
 
                 // every other operator takes two operands and gives a value that is neither a constant nor a name
-                case Token.Type.BINARY_AMPERSAND or Token.Type.BINARY_AT or Token.Type.BINARY_CONCAT or Token.Type.BINARY_HASH
-                    or Token.Type.BINARY_PERCENT or Token.Type.BINARY_PIPE or Token.Type.BINARY_TILDE:
+                case Token.Type.BINARY_CONCAT or Token.Type.BINARY_PIPE:
+                    if (!TakeTwo(stack, out _, out _))
+                        return 0;
+                    stack.Add(new Operand(Kind.Combination));
+                    break;
+
+                case Token.Type.BINARY_AMPERSAND or Token.Type.BINARY_AT or Token.Type.BINARY_HASH or Token.Type.BINARY_PERCENT
+                    or Token.Type.BINARY_TILDE:
                     if (!TakeTwo(stack, out _, out _))
                         return 0;
                     stack.Add(new Operand(Kind.Other));
@@ -285,7 +311,7 @@ internal sealed class StatementChecker(Builder parent)
             }
         }
 
-        return 0;
+        return gotoTarget && stack.Count == 1 && stack[0].Kind is Kind.Constant or Kind.Value or Kind.Combination ? ValueWhereNameIsRequired : 0;
     }
 
     // The two operands on top of the stack, taken off it; false when the postfix form is not what the walk expects

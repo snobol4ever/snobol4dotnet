@@ -84,6 +84,12 @@ public class SourceLine
     // Parse of unconditional goto in RPN
     internal List<Token> ParseUnconditionalGoto { get; set; }
 
+    // Whether the success, failure and unconditional goto is written with nothing in its parens or brackets (the lists above are empty
+    // for these and for a goto not written)
+    internal bool EmptySuccessGoto { get; set; }
+    internal bool EmptyFailureGoto { get; set; }
+    internal bool EmptyUnconditionalGoto { get; set; }
+
     // True if first goto is direct (Angle brackets)
     internal bool DirectGotoFirst { get; set; }
 

@@ -1420,7 +1420,7 @@ public partial class Lexer
             Token.Type.R_PAREN_CHOICE => CheckImplicitNull(sourceLine, Token.Type.L_PAREN_CHOICE),
             Token.Type.R_PAREN_FUNCTION => CheckImplicitNull(sourceLine, Token.Type.L_PAREN_FUNCTION),
             Token.Type.R_SQUARE => CheckImplicitNull(sourceLine, Token.Type.L_SQUARE),
-            Token.Type.COMMA => CheckCommaImplicitNull(sourceLine),
+            Token.Type.COMMA or Token.Type.COMMA_CHOICE => CheckCommaImplicitNull(sourceLine),
             _ => false
         };
     }
@@ -1458,7 +1458,7 @@ public partial class Lexer
     {
         var secondLast = sourceLine.LexBody[^2].TokenType;
         
-        if (secondLast is Token.Type.COMMA or Token.Type.L_SQUARE or Token.Type.L_ANGLE 
+        if (secondLast is Token.Type.COMMA or Token.Type.COMMA_CHOICE or Token.Type.L_SQUARE or Token.Type.L_ANGLE 
             or Token.Type.L_PAREN_CHOICE or Token.Type.L_PAREN_FUNCTION)
         {
             return true;
@@ -1467,7 +1467,7 @@ public partial class Lexer
         if (secondLast == Token.Type.SPACE && sourceLine.LexBody.Count >= 3)
         {
             var thirdLast = sourceLine.LexBody[^3].TokenType;
-            return thirdLast is Token.Type.COMMA or Token.Type.L_SQUARE or Token.Type.L_ANGLE 
+            return thirdLast is Token.Type.COMMA or Token.Type.COMMA_CHOICE or Token.Type.L_SQUARE or Token.Type.L_ANGLE 
                 or Token.Type.L_PAREN_CHOICE or Token.Type.L_PAREN_FUNCTION;
         }
 

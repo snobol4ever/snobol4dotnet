@@ -16,8 +16,7 @@ public partial class Executive
         var blockCounter = BlockCounterValue;
         var result = 0;
         ExceptionDispatchInfo? failure = null;
-        var stackBytes = (int)Math.Clamp(Parent.BuildOptions.StackSizeBytes / 72L * LargeStackBytesPerLevel, 256L << 20, int.MaxValue);
-        var thread = new Thread(() =>
+        void Body()
         {
             BlockCounterValue = blockCounter;
             try
@@ -32,9 +31,30 @@ public partial class Executive
             {
                 blockCounter = BlockCounterValue;
             }
-        }, stackBytes);
-        thread.Start();
-        thread.Join();
+        }
+
+        // a system that will not reserve so much (a limit on address space) gets the largest stack it will, and the run goes on
+        // this thread's own stack when it will give none
+        var stackBytes = (int)Math.Clamp(Parent.BuildOptions.StackSizeBytes / 72L * LargeStackBytesPerLevel, 256L << 20, int.MaxValue);
+        var started = false;
+        for (; stackBytes >= 16 << 20 && !started; stackBytes /= 4)
+        {
+            var thread = new Thread(Body, stackBytes);
+            try
+            {
+                thread.Start();
+            }
+            catch (Exception e) when (e is OutOfMemoryException or ThreadStartException)
+            {
+                continue;
+            }
+
+            started = true;
+            thread.Join();
+        }
+
+        if (!started)
+            Body();
         BlockCounterValue = blockCounter;
         failure?.Throw();
         return result;

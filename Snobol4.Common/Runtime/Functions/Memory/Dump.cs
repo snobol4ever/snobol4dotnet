@@ -57,7 +57,10 @@ public partial class Executive
 
         var w = new StringBuilder();
         w.Append("\n\n\ndump of natural variables\n\n");
-        foreach (var (name, value) in NaturalVariables().OrderBy(kv => kv.Key, StringComparer.Ordinal))
+        var natural = NaturalVariables();
+        if (level == 3)
+            natural = natural.Concat(NamesWithBlocksOnly(natural));
+        foreach (var (name, value) in natural.OrderBy(kv => kv.Key, StringComparer.Ordinal))
         {
             if (level != 3 && IsNullValue(value))
                 continue;
@@ -92,6 +95,40 @@ public partial class Executive
             .Concat(Parent.FunctionSlots.Select(slot => slot.Symbol)).ToHashSet();
         return IdentifierTable.Where(kv => kv.Key.Length > 0 && kv.Key[0] != '&'
                                            && (!kv.Value.IsReadOnly || referenced.Contains(kv.Key)));
+    }
+
+    // The dump of level 3 lists null variables, and SPITBOL has a variable block for names the program never assigns: the label of the END
+    // statement and its first letter E, each defined label and its first letter, and the name of every function the program calls
+    private IEnumerable<KeyValuePair<string, Var>> NamesWithBlocksOnly(IEnumerable<KeyValuePair<string, Var>> listed)
+    {
+        var have = listed.Select(kv => kv.Key).ToHashSet();
+        var extra = new List<string> { "E", "END" };
+        // (the labels RETURN, FRETURN, ABORT and the like are not statements: their targets are negative; the table keeps END in lower
+        // case besides, whatever the program wrote)
+        foreach (var label in LabelTable.Where(entry => entry.Value >= 0).Select(entry => entry.Key).Where(label => label.Length > 0 && label != "end"))
+        {
+            extra.Add(label);
+            extra.Add(label[..1]);
+        }
+
+        extra.AddRange(Parent.FunctionSlots.Select(slot => slot.Symbol).Where(symbol => symbol.Length > 0 && char.IsLetter(symbol[0])));
+
+        // DEFINE and DATA name their function, parameters, locals, type and fields, all of which get blocks
+        foreach (var definition in UserFunctionTable.Values)
+        {
+            extra.Add(definition.FunctionName);
+            extra.AddRange(definition.Parameters);
+            extra.AddRange(definition.Locals);
+        }
+
+        foreach (var (type, definition) in UserDataDefinitions)
+        {
+            extra.Add(type);
+            extra.AddRange(definition.FieldNames);
+        }
+
+        return extra.Select(Parent.FoldCase).Where(name => name[0] != '&' && have.Add(name))
+                    .Select(name => new KeyValuePair<string, Var>(name, StringVar.Null()));
     }
 
     private static bool IsNullValue(Var value) => value is StringVar { Data: "" };

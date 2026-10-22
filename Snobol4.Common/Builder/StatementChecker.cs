@@ -236,12 +236,17 @@ internal sealed class StatementChecker(Builder parent)
                             break;
                         }
 
-                        // the name operators take a name: a literal or a value there is error 212. A keyword is a name, the
-                        // others (. and @) give a value
+                        // the name operators take a name: a literal, a value or a combination of operands (which only parens
+                        // can bring there) is error 212. A keyword is a name, the others (. and @) give a value
                         case "." or "@" or "&":
-                            if (IsValue(operand))
+                            if (IsValue(operand) || operand.Kind == Kind.Combination)
                                 return ValueWhereNameIsRequired;
                             stack.Add(new Operand(token.MatchedString == "&" ? Kind.Name : Kind.Value));
+                            break;
+
+                        // negation and interrogation give a value, whatever the operand: no name
+                        case "~" or "?":
+                            stack.Add(new Operand(Kind.Value));
                             break;
 
                         // an indirection takes a value and is a name
@@ -268,7 +273,7 @@ internal sealed class StatementChecker(Builder parent)
                 {
                     if (!TakeTwo(stack, out _, out var right))
                         return 0;
-                    if (IsValue(right))
+                    if (IsValue(right) || right.Kind == Kind.Combination)
                         return ValueWhereNameIsRequired;
                     stack.Add(new Operand(Kind.Value));
                     break;
@@ -289,7 +294,9 @@ internal sealed class StatementChecker(Builder parent)
                     if (!TakeTwo(stack, out var left, out _))
                         return 0;
                     var target = left.Kind == Kind.Question ? left.Subject! : left;
-                    if (IsValue(target))
+                    // a concatenation is the subject and pattern of the statement's own =, and a value as the target of any other
+                    // (inside parens or the arguments of a call it is no pattern match: SPITBOL's c_cnp)
+                    if (IsValue(target) || target.Kind == Kind.Combination && !ReferenceEquals(token, postfix[^1]))
                         return ValueWhereNameIsRequired;
                     stack.Add(new Operand(Kind.Value));
                     break;

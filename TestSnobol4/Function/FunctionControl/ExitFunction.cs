@@ -52,4 +52,51 @@ public class ExitFunction
         var build = SetupTests.SetupScript("-b", s);
         Assert.AreEqual(7, build.ExitStatus);
     }
+
+    [TestMethod]
+    public void TEST_ExitFunction_a_save_file_may_have_any_name()
+    {
+        // sbl -b writes a file named as given, however odd: a blank, a tab, a name that is all extension, a name with a NUL (cut at it)
+        var folder = Path.Combine(Path.GetTempPath(), "exit_" + Guid.NewGuid().ToString("N")[..8]);
+        Directory.CreateDirectory(folder);
+        try
+        {
+            foreach (var (name, written) in new[] { (" ", " "), ("  ", "  "), ("\t", "\t"), (".spx", ".spx"), (" lead", " lead"), ("a  b", "a  b") })
+            {
+                var s = $"        EXIT(-4, '{folder}/{name}')\n        OUTPUT = 'after'\nEND";
+                Assert.AreEqual("after", SetupTests.RunWithInput(s), $"[{name}]");
+                Assert.IsTrue(File.Exists(Path.Combine(folder, written)), $"[{name}] written");
+            }
+
+            var cut = $"        EXIT(-4, '{folder}/x' CHAR(0) 'y')\n        OUTPUT = 'after'\nEND";
+            Assert.AreEqual("after", SetupTests.RunWithInput(cut));
+            Assert.IsTrue(File.Exists(Path.Combine(folder, "x")));
+        }
+        finally
+        {
+            Directory.Delete(folder, true);
+        }
+    }
+
+    [TestMethod]
+    public void TEST_ExitFunction_an_unwritable_save_file_is_error_106_and_says_nothing_else()
+    {
+        // sbl -b: the report is all there is; the console added a warning on standard error of its own
+        var s = "        EXIT(-4, '/nonexistent/dir/x')\n        OUTPUT = 'after'\nEND";
+        var error = new StringWriter();
+        var old = Console.Error;
+        Console.SetError(error);
+        string output;
+        try
+        {
+            output = SetupTests.RunWithInput(s);
+        }
+        finally
+        {
+            Console.SetError(old);
+        }
+
+        StringAssert.Contains(output, "e.sno(1) : ERROR 106 -- exit action caused irrecoverable error".Replace("e.sno", "Test.sno"));
+        Assert.IsFalse(error.ToString().Contains("could not write"), error.ToString());
+    }
 }

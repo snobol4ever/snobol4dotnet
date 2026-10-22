@@ -19,9 +19,10 @@ public partial class Executive
         {
             case IntegerVar { Data: -3 or -4 } save:
             {
-                var named = arguments[1].Convert(VarType.STRING, out _, out var name, this) && (string)name != "";
-                var file = named ? (string)name : "a.spx";
-                if (!Parent.WriteProgramImage(Path.GetFullPath(file)))
+                // the name is cut at a NUL, as the operating system's call takes it
+                var named = arguments[1].Convert(VarType.STRING, out _, out var name, this) && ((string)name).Split('\0')[0] != "";
+                var file = named ? ((string)name).Split('\0')[0] : "a.spx";
+                if (!Parent.WriteProgramImage(Path.GetFullPath(file), warn: false))
                 {
                     LogRuntimeException(106);
                     return;

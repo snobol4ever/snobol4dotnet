@@ -48,7 +48,7 @@ public partial class Builder
     /// runs again. EXIT(-3) and EXIT(-4) write a save file this way; the file holds the program, not its state, so running it
     /// starts the program over where SPITBOL's save file resumes after the EXIT.
     /// </summary>
-    internal bool WriteProgramImage(string outputPath)
+    internal bool WriteProgramImage(string outputPath, bool warn = true)
     {
         // Reconstruct source text from the already-parsed source lines.
         // SourceLine.Text preserves leading whitespace (column-1 = label field),
@@ -69,10 +69,18 @@ public partial class Builder
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine(
-                $"snobol4: warning — could not write DLL '{outputPath}': {ex.Message}");
+            if (warn)
+                Console.Error.WriteLine(
+                    $"snobol4: warning — could not write DLL '{outputPath}': {ex.Message}");
             return false;
         }
+    }
+
+    // The assembly is named for its file, but a file may be called anything (a blank, a tab, .spx): any other character is an _
+    private static string AssemblyNameFor(string outputPath)
+    {
+        var stem = new string(Path.GetFileNameWithoutExtension(outputPath).Select(c => char.IsLetterOrDigit(c) || c is '_' or '-' ? c : '_').ToArray());
+        return stem == "" ? "Snobol4Image" : stem;
     }
 
     /// <summary>
@@ -82,8 +90,7 @@ public partial class Builder
     private static void EmitThreadedDll(
         string outputPath, string sourceText, string filename, string options)
     {
-        var asmName   = new AssemblyName(
-            Path.GetFileNameWithoutExtension(outputPath));
+        var asmName   = new AssemblyName(AssemblyNameFor(outputPath));
         var pab = new PersistedAssemblyBuilder(
             asmName, typeof(object).Assembly);
         var mod = pab.DefineDynamicModule(asmName.Name!);

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Runtime.CompilerServices;
 ﻿namespace Snobol4.Common;
 
@@ -405,14 +406,30 @@ public partial class Executive
         // A NAME an NRETURN hands back gives the named variable's value, which the statement may also
         // assign (F() = V) or name (.F()), as in SPITBOL; a RETURN of a NAME gives the NAME itself.  The
         // value is read once the caller's variables are back, so a name of a local or a parameter gives
-        // the caller's value of it, as SPITBOL dereferences the name after the return
-        SystemStack.Push(rtnTypeStr == "NRETURN" && returnVar is NameVar returnedName ? NameReturnValue(returnedName) : returnVar);
+        // the caller's value of it, as SPITBOL dereferences the name after the return.  A string or number
+        // an NRETURN hands back names the variable it spells, as $ would (F = 'ZZ' :(NRETURN) names ZZ)
+        SystemStack.Push(rtnTypeStr == "NRETURN" && (returnVar as NameVar ?? SpelledName(returnVar)) is { } returnedName
+            ? NameReturnValue(returnedName)
+            : returnVar);
 
         // Pop ProgramDefinedFunctionStack — balances the Push at the top of this method.
         // Without this Pop, Peek() returns stale data after the function returns,
         // breaking the body-assign isReturnSlot suppression in nested-call scenarios.
         // See GOAL-NET-BEAUTY-SELF S-2-bridge-7-fullscan.
         ProgramDefinedFunctionStack.Pop();
+    }
+
+    // The variable a string, integer or real spells, as the indirection operator reads it, or null for any other value or the null string
+    private NameVar? SpelledName(Var value)
+    {
+        var spelling = value switch
+        {
+            StringVar s => s.Data,
+            IntegerVar i => i.Data.ToString(CultureInfo.InvariantCulture),
+            RealVar r => r.Data.ToString(CultureInfo.InvariantCulture),
+            _ => ""
+        };
+        return spelling == "" ? null : new NameVar(Parent.FoldCase(spelling), null, null);
     }
 
     // A call or return is traced when &FTRACE is on (each line counts it down) or when TRACE named the

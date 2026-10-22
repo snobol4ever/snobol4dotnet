@@ -244,6 +244,29 @@ end");
     }
 
     [TestMethod]
+    public void TEST_Define_an_nreturn_of_a_string_or_number_names_the_variable_it_spells()
+    {
+        // sbl -b (rung user_function_pos_defer_branch_1): F = 'ZZ' :(NRETURN) names ZZ, as $'ZZ' would, for a value, an
+        // assignment and a deferred capture target alike, and H = 12 :(NRETURN) names $'12' (was R = ZZ and nothing assigned)
+        var build = SetupTests.SetupScript("-b", @"
+        DEFINE('F()')
+        DEFINE('H()')                  :(FE)
+F       F = 'ZZ'                       :(NRETURN)
+H       H = 12                         :(NRETURN)
+FE      ZZ = 'old'
+        R = F()
+        F() = 'new'
+        H() = 'twelve'
+        S = 'QR'
+        S 'Q' . *F() 'R' . *H()
+        T = ZZ ' ' $'12'
+end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("old", build.Execute!.IdentifierTable["R"].ToString());
+        Assert.AreEqual("Q R", build.Execute!.IdentifierTable["T"].ToString());
+    }
+
+    [TestMethod]
     public void TEST_Define_a_return_of_a_name_gives_the_name()
     {
         // sbl -b (rung user_function_datatype_1): G = .DUMMY :(RETURN) gives the NAME, printed DUMMY

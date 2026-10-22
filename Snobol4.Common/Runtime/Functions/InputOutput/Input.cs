@@ -172,13 +172,14 @@ public partial class Executive
             // If the pathname is valid, associate the channel with the identifier
             if (filePath != "")
             {
-                if (IdentifierTable[symbol].InputChannel != "" && IdentifierTable[symbol].InputChannel != channel)
+                // a channel open for output cannot be read
+                if (!StreamInputs.ContainsKey(channel))
                 {
-                    // An identifier can only be associated with one output channel at a time
-                    LogRuntimeException(290);
+                    LogRuntimeException(117);
                     return;
                 }
 
+                // a variable is given its new channel, whatever it was associated with before, as in SPITBOL
                 IdentifierTable[symbol].InputChannel = channel;
                 PredicateSuccess();
                 return;

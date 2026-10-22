@@ -561,6 +561,7 @@ end
     [TestMethod]
     public void Test02000()
     {
+        // sbl -b runs this program to a fatal error 117: a channel open for output cannot be given to INPUT
         // error 117 -- input file cannot be read
         var s = @"
         output('a','1','fil456.txt')
@@ -572,12 +573,14 @@ end
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(1, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(117, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
     public void Test02001()
     {
+        // sbl -b runs this program to a fatal error 117: a channel open for output cannot be given to INPUT
         // error 117 -- input file cannot be read
         var s = @"
         output('a','1','file474.txt')
@@ -589,7 +592,8 @@ end
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(1, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(117, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
@@ -953,6 +957,10 @@ end
     [TestMethod]
     public void Test12100()
     {
+        // sbl -b runs this program to a fatal error 161 when file959.txt exists, as it does here: INPUT opens channel 1 for reading, and OUTPUT
+        // cannot write to it (with no such file INPUT leaves the channel unopened and OUTPUT is 160)
+        Directory.CreateDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TestSnobol4"));
+        File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TestSnobol4", "file959.txt"), "");
         // error 161 -- output file cannot be written to
         var s = @"
         input('a','1','file959.txt')
@@ -964,12 +972,17 @@ end
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(1, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(161, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
     public void Test12101()
     {
+        // sbl -b runs this program to a fatal error 161 when file976.txt exists, as it does here: INPUT opens channel 1 for reading, and OUTPUT
+        // cannot write to it (with no such file INPUT leaves the channel unopened and OUTPUT is 160)
+        Directory.CreateDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TestSnobol4"));
+        File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TestSnobol4", "file976.txt"), "");
         // error 161 -- output file cannot be written to
         var s = @"
         input('a','1','file976.txt')
@@ -981,7 +994,8 @@ end
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(1, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(161, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]

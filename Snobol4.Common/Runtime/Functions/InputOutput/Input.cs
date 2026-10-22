@@ -141,6 +141,7 @@ public partial class Executive
         if (channel == "" && fileName == "")
         {
             IdentifierTable[symbol].InputChannel = "+console-input";   // standard input, as INPUT reads it
+            PredicateSuccess();
             return;
         }
 
@@ -179,6 +180,7 @@ public partial class Executive
                 }
 
                 IdentifierTable[symbol].InputChannel = channel;
+                PredicateSuccess();
                 return;
             }
 

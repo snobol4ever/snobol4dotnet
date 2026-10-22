@@ -33,24 +33,28 @@ public partial class Executive
             return;
         }
 
-        if (!arguments[1].Convert(VarType.INTEGER, out _, out var offsetObj, this))
+        // SPITBOL looks for the file (295) before it looks at the offset (293) and the origin (294)
+        var sr = ChannelReader(channel);
+        if (sr is null)
+        {
+            LogRuntimeException(295);
+            return;
+        }
+
+        // An offset or an origin that is no integer (a real is none) is 293, as sbl reports it for either; an origin that is an integer
+        // but none of 0, 1 and 2 is a non-recoverable I/O error, 297
+        if (arguments[1] is RealVar || !arguments[1].Convert(VarType.INTEGER, out _, out var offsetObj, this)
+            || arguments[2] is RealVar || !arguments[2].Convert(VarType.INTEGER, out _, out var whenceObj, this))
         {
             LogRuntimeException(293);
             return;
         }
 
         var offset = (long)offsetObj;
-        if (!arguments[2].Convert(VarType.INTEGER, out _, out var whenceObj, this) || (long)whenceObj is < 0 or > 2)
-        {
-            LogRuntimeException(294);
-            return;
-        }
-
         var whence = (long)whenceObj;
-        var sr = ChannelReader(channel);
-        if (sr is null)
+        if (whence is < 0 or > 2)
         {
-            LogRuntimeException(295);
+            LogRuntimeException(297);
             return;
         }
 

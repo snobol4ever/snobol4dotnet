@@ -19,8 +19,8 @@ public partial class Executive
         // The current implementation of BackspaceFile uses the simpler approach of only allowing backspace
         // by one record at a time.
 
-        // Channel must be a string
-        if (!arguments[0].Convert(VarType.STRING, out _, out var channel, this))
+        // Channel must be a string, and not the null one
+        if (!arguments[0].Convert(VarType.STRING, out _, out var channel, this) || (string)channel == "")
         {
             LogRuntimeException(316);
             return;

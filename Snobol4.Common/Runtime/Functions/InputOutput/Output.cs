@@ -201,6 +201,7 @@ public partial class Executive
                 }
 
                 IdentifierTable[symbol].OutputChannel = channel;
+                PredicateSuccess();
                 return;
             }
 
@@ -213,6 +214,7 @@ public partial class Executive
             }
 
             IdentifierTable[symbol].OutputChannel = (long)eolMode == 1 ? "+console-output-nnl" : "+console-output";
+            PredicateSuccess();
             return;
         }
 

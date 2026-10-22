@@ -9,10 +9,30 @@ public partial class Executive
 {
     internal void EjectFile(List<Var> arguments)
     {
-        // DIFFERENCE
-        // EJECT is not supported as files do not support a page eject. Essentially a no-op.
+        // EJECT() ejects standard output: a form feed is written to it. EJECT(n) ejects the file open for output on channel n: a form
+        // feed and a line end are written to it. Any other channel is a file that does not exist (93); an argument that is no string
+        // or number is 92.
+        if (arguments[0] is StringVar { Data: "" })
+        {
+            Console.Out.Write('\f');
+            PredicateSuccess();
+            return;
+        }
 
-        SystemStack.Push(StringVar.Null());
+        if (!arguments[0].Convert(VarType.STRING, out _, out var channel, this))
+        {
+            LogRuntimeException(92);
+            return;
+        }
+
+        if (!StreamOutputs.TryGetValue((string)channel, out var stream))
+        {
+            LogRuntimeException(93);
+            return;
+        }
+
+        stream.Write(System.Text.Encoding.UTF8.GetBytes("\f" + Environment.NewLine));
+        PredicateSuccess();
     }
 
 }

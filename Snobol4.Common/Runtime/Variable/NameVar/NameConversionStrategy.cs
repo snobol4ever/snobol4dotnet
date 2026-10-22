@@ -114,16 +114,15 @@ public class NameConversionStrategy : IConversionStrategy
 
     private static bool ConvertToCode(NameVar nameSelf, out Var varOut, out object valueOut, Executive exec)
     {
-        var argCode = exec.IdentifierTable[nameSelf.Pointer];
-
-        if (argCode is not StringVar stringVarCode || stringVarCode.Symbol.Length == 0)
+        // the text compiled is the NAME's: CODE(.S) is the statement labelled S, whatever S holds
+        if (nameSelf.Pointer.Length == 0)
         {
             varOut = StringVar.Null();
             valueOut = "";
             return false;
         }
 
-        var code = exec.CompileCodeText(stringVarCode.Symbol);
+        var code = exec.CompileCodeText(nameSelf.Pointer);
         if (code is null)
         {
             varOut = StringVar.Null();

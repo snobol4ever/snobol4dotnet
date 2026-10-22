@@ -8,8 +8,19 @@ public partial class Executive
     {
         var arg = arguments[0];
 
+        // A NAME evaluates to the value of what it names, as SPITBOL's expression for the name does; the name of an element of an
+        // array or table is no expression (103)
         if (arg is NameVar nameVar)
-            arg = IdentifierTable[nameVar.Pointer];
+        {
+            if (nameVar.Pointer == "" && nameVar.Key is not null)
+            {
+                LogRuntimeException(103);
+                return;
+            }
+
+            SystemStack.Push(NameReturnValue(nameVar));
+            return;
+        }
 
         switch (arg)
         {
@@ -22,6 +33,15 @@ public partial class Executive
                 return;
 
             case StringVar stringVar:
+                // the text is one expression: a comma outside every bracket and quote is not part of one (223)
+                if (HasTopLevelComma(stringVar.Data))
+                {
+                    AmpErrorType = 223;
+                    AmpErrorText = CompilerException.ErrorMessage[223];
+                    NonExceptionFailure();
+                    return;
+                }
+
                 var previousCaseFolding = Parent.BuildOptions.CaseFolding;
                 Parent.BuildOptions.CaseFolding = AmpCaseFolding != 0;
                 Parent.CodeMode = true;
@@ -52,5 +72,32 @@ public partial class Executive
                 LogRuntimeException(103);
                 return;
         }
+    }
+
+    private static bool HasTopLevelComma(string text)
+    {
+        var depth = 0;
+        for (var i = 0; i < text.Length; i++)
+        {
+            switch (text[i])
+            {
+                case '\'' or '"':
+                    var close = text.IndexOf(text[i], i + 1);
+                    if (close < 0)
+                        return false;
+                    i = close;
+                    break;
+                case '(' or '[' or '<':
+                    depth++;
+                    break;
+                case ')' or ']' or '>':
+                    depth--;
+                    break;
+                case ',' when depth == 0:
+                    return true;
+            }
+        }
+
+        return false;
     }
 }

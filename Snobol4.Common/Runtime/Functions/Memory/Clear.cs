@@ -16,9 +16,10 @@ public partial class Executive
         }
 
         data = Parent.FoldCase((string)data);
-        var valuesArray = ((string)data).Split(',');
 
-        // Skip list cannot have null entries
+        // The names are scanned off a comma at a time with their blanks trimmed; the null string is no list, and a name that is
+        // null (or blanks) is 72
+        var valuesArray = ((string)data).Split(',').Select(name => name.Trim(' ', '\t')).ToArray();
         if ((string)data != "" && valuesArray.Contains(""))
         {
             LogRuntimeException(72);

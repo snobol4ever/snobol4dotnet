@@ -6,14 +6,9 @@ public partial class Executive
 {
     public void CreateCode(List<Var> arguments)
     {
-        var text = arguments[0] switch
-        {
-            NameVar when IdentifierTable.TryGetValue(arguments[0].Symbol, out var argument) && argument is StringVar named => named.Data,
-            StringVar stringVar => stringVar.Data,
-            _ => null
-        };
-
-        if (text is null)
+        // SPITBOL's gtcod: a CODE is itself; a string is compiled; so is the text of a number or of a NAME (CODE(7) is the statement
+        // whose label is 7, CODE(.S) compiles S, the name, and not what S holds); anything else fails
+        if (arguments[0] is not (CodeVar or StringVar or IntegerVar or RealVar or NameVar))
         {
             NonExceptionFailure();
             return;
@@ -22,11 +17,11 @@ public partial class Executive
         var previousCaseFolding = Parent.BuildOptions.CaseFolding;
         Parent.BuildOptions.CaseFolding = AmpCaseFolding != 0;
         Parent.CodeMode = true;
-        var code = CompileCodeText(text);
+        var converted = arguments[0].Convert(VarType.CODE, out var code, out _, this);
         Parent.BuildOptions.CaseFolding = previousCaseFolding;
         Parent.CodeMode = false;
 
-        if (code is null)
+        if (!converted)
         {
             NonExceptionFailure();
             return;

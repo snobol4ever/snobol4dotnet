@@ -82,9 +82,12 @@ public sealed class IntegerConversionStrategy : IConversionStrategy
                     return true;
                 }
 
+            // a number compiles as its text, as a string does
+            case Executive.VarType.CODE:
+                return new StringVar(intSelf.Data.ToString(CultureInfo.InvariantCulture)).Convert(targetType, out varOut, out valueOut, exec);
+
             case Executive.VarType.ARRAY:
             case Executive.VarType.TABLE:
-            case Executive.VarType.CODE:
             default:
                 return false;
         }

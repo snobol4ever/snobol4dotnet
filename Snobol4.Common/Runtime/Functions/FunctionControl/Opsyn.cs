@@ -46,7 +46,7 @@ public partial class Executive
             return;
         }
 
-        errorCode = CheckArgument1(arguments[0], out var newFunction, this);
+        errorCode = CheckArgument1(arguments[0], operands, out var newFunction, this);
 
         if (errorCode != 0)
         {
@@ -176,15 +176,15 @@ public partial class Executive
     private FunctionTableEntry UndefinedOperator(string name, int operands) =>
         new(this, name, _ => LogRuntimeException(22), operands, false);
 
-    private static int CheckArgument1(Var arg, out string newFunction, Executive exec)
+    private static int CheckArgument1(Var arg, int operands, out string newFunction, Executive exec)
     {
         newFunction = "";
 
-        // First argument must be a string
+        // The first argument names a function (any string but the null one, 155) or, for an operator, is one character (156)
         if (!arg.Convert(VarType.STRING, out _, out var synonym, exec))
-            return 155;
+            return operands == 0 ? 155 : 156;
 
         newFunction = (string)synonym;
-        return 0;
+        return operands == 0 && newFunction == "" ? 155 : 0;
     }
 }

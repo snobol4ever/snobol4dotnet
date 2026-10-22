@@ -18,6 +18,8 @@ public sealed class RealConversionStrategy : IConversionStrategy
             Executive.VarType.PATTERN => ConvertToPattern(realSelf, out varOut, out valueOut),
             Executive.VarType.NAME => ConvertToName(realSelf, out varOut, out valueOut),
             Executive.VarType.EXPRESSION => ConvertToExpression(realSelf, exec, out varOut, out valueOut),
+            // a number compiles as its text, as a string does
+            Executive.VarType.CODE => new StringVar(SpitbolRealString(realSelf.Data)).Convert(targetType, out varOut, out valueOut, exec),
             _ => false
         };
     }

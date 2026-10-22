@@ -17,13 +17,14 @@ public partial class Executive
             arguments[1] = new PatternVar(UnevaluatedPattern.Structure(expressionVar1.FunctionName));
         }
 
-        if (!arguments[0].Convert(VarType.PATTERN, out _, out var patternLeft, this))
+        // the right operand is taken off the stack first, so it is the one reported when neither is a pattern
+        if (!arguments[1].Convert(VarType.PATTERN, out _, out var patternRight, this))
         {
             LogRuntimeException(5);
             return;
         }
 
-        if (!arguments[1].Convert(VarType.PATTERN, out _, out var patternRight, this))
+        if (!arguments[0].Convert(VarType.PATTERN, out _, out var patternLeft, this))
         {
             LogRuntimeException(6);
             return;

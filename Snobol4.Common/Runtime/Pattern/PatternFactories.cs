@@ -64,7 +64,7 @@ public partial class Executive
 
         if (!arguments[0].Convert(VarType.PATTERN, out _, out var pattern, this))
         {
-            LogRuntimeException(70);
+            LogRuntimeException(61);
             return;
         }
 

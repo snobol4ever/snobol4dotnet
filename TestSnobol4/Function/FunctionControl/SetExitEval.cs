@@ -45,4 +45,20 @@ B       SETEXIT(.H2)
 H2      OUTPUT = 'handler 2 t=' &ERRTYPE ' lim=' &ERRLIMIT     :(CONTINUE)
 END").Replace("\r\n", "\n"));
     }
+
+    // sbl -b: with &ERRLIMIT at 0 a SETEXIT handler intercepts nothing; an error inside EVAL or a deferred pattern fails its statement
+    // and the handler is not entered (was handler t=14 lim=0 before each failure)
+    [TestMethod]
+    public void TEST_SetExitEval_no_handler_runs_while_errlimit_is_zero()
+    {
+        Assert.AreEqual("1 failed lim=0 t=14\n2 failed t=14", SetupTests.RunWithInput(@"        SETEXIT(.H)
+        X = 1
+        R = EVAL('X / 0')                         :S(A1)
+        OUTPUT = '1 failed lim=' &ERRLIMIT ' t=' &ERRTYPE
+A1      SETEXIT(.H)
+        'abc' ? *(X / 0)                          :S(END)
+        OUTPUT = '2 failed t=' &ERRTYPE           :(END)
+H       OUTPUT = 'handler t=' &ERRTYPE ' lim=' &ERRLIMIT   :(CONTINUE)
+END").Replace("\r\n", "\n"));
+    }
 }

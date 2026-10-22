@@ -39,7 +39,9 @@ public partial class Executive
         SystemStack.Push(new StringVar(false));
         var ce = new CompilerException(code, 0, LastDiagnostic);
         Parent.MessageHistory.Add(LastDiagnostic);
-        OnErrorGoto = SetExitNumber;
+        // A SETEXIT handler intercepts an error only while &ERRLIMIT is above 0, as in SPITBOL; an error inside an expression's
+        // evaluation at 0 fails its statement and enters no handler (EVAL('X / 0') with the limit at 0 just fails)
+        OnErrorGoto = AmpErrorLimit > 0 ? SetExitNumber : 0;
 
         // An error inside the evaluation of an expression (EVAL, a deferred expression in a pattern) never ends the run, whatever
         // &ERRLIMIT is, in SPITBOL: the statement fails and &ERRLIMIT counts down no further than 0

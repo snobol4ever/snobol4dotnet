@@ -186,7 +186,8 @@ public partial class Executive
         if (!arg.Convert(VarType.STRING, out _, out var synonym, exec))
             return operands == 0 ? 155 : 156;
 
-        newFunction = (string)synonym;
+        // a function's name folds as every name does (OPSYN('h', 'f') defines H under -b); an operator is its symbol
+        newFunction = operands == 0 ? exec.Parent.FoldCase((string)synonym) : (string)synonym;
         return operands == 0 && newFunction == "" ? 155 : 0;
     }
 }

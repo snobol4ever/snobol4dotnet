@@ -15,38 +15,80 @@ public partial class Executive
     internal void CreateProgramDefinedFunction(List<Var> arguments)
     {
 
-        // define argument cannot be null
-        if (arguments.Count == 0)
+        // SPITBOL looks at the entry label (the second argument) first: a name that is not a variable's is 86
+        string? entryLabel = null;
+        if (arguments.Count >= 2 && arguments[1] is not StringVar { Data: "" })
+        {
+            if (!NaturalVariableName(arguments[1], out var label))
+            {
+                LogRuntimeException(86);
+                return;
+            }
+
+            entryLabel = label;
+        }
+
+        // the prototype must be a string (81) and not the null string (82)
+        if (arguments.Count == 0 || !arguments[0].Convert(VarType.STRING, out _, out var value, this))
+        {
+            LogRuntimeException(arguments.Count == 0 ? 82 : 81);
+            return;
+        }
+
+        if ((string)value == "")
         {
             LogRuntimeException(82);
             return;
         }
 
-        // define argument must be a string
-        if (!arguments[0].Convert(VarType.STRING, out _, out var value, this))
-        {
-            LogRuntimeException(81);
-            return;
-        }
-
+        // The prototype is scanned as SPITBOL scans it: the function's name up to the left paren (83 when there is none, 84 when
+        // it is null), the arguments up to the right paren, each ended by a comma or the paren (85 at the end of the string), and
+        // the locals, ended by commas. A null name is skipped, except that a prototype with no arguments ends the argument list.
         var prototype = Parent.FoldCase((string)value).Trim();
-
-        // define argument cannot be null string
-        if (prototype == "")
+        var position = 0;
+        var functionName = ScanPrototype(prototype, ref position, '(', '(', out var stopped);
+        if (stopped == 0)
         {
-            LogRuntimeException(81);
+            LogRuntimeException(83);
             return;
         }
 
-        // define argument must not have a null datatype name
-        var match = CompiledRegex.FunctionPrototypePattern().Match(prototype);
-        var functionName = match.Groups[1].Value.Trim();
-
-        // function name cannot be null
         if (functionName == "")
         {
             LogRuntimeException(84);
             return;
+        }
+
+        List<string> parameters = [];
+        while (true)
+        {
+            var parameter = ScanPrototype(prototype, ref position, ')', ',', out stopped);
+            if (stopped == 0)
+            {
+                LogRuntimeException(85);
+                return;
+            }
+
+            if (parameter == "")
+            {
+                if (parameters.Count == 0)
+                    break;
+                continue;
+            }
+
+            parameters.Add(parameter);
+            if (stopped == 1)
+                break;
+        }
+
+        List<string> locals = [];
+        while (true)
+        {
+            var local = ScanPrototype(prototype, ref position, ',', ',', out stopped);
+            if (local != "")
+                locals.Add(local);
+            if (stopped == 0)
+                break;
         }
 
         // function name cannot redefine a protected (system) function
@@ -58,61 +100,19 @@ public partial class Executive
             return;
         }
 
-        // must have a left paren
-        var lParen = match.Groups[2].Value;
-        if (lParen == "")
-        {
-            LogRuntimeException(83);
-            return;
-        }
-
-        // must have a right paren
-        var rParen = match.Groups[4].Value;
-        if (rParen == "")
-        {
-            LogRuntimeException(85);
-            return;
-        }
-
-        // Get entry label
-        string entryLabel;
-        if (arguments.Count < 2 || arguments[1] is StringVar { Data: "" })
-        {
-            // No second arg or empty string → use function name as entry label
-            entryLabel = functionName;
-        }
-        else if (arguments[1] is StringVar strArg)
-        {
-            // String second arg → use it directly as label name
-            entryLabel = Parent.FoldCase(strArg.Data.Trim());
-        }
-        else
-        {
-            // Name/indirect reference (.label)
-            if (!arguments[1].Convert(VarType.NAME, out var entry, out _, this))
-            {
-                LogRuntimeException(86);
-                return;
-            }
-            entryLabel = ((NameVar)entry).Pointer;
-        }
-
-        // The entry label need not exist yet (CODE may compile it later); a call to it while it is
-        // undefined is error 286, as in SPITBOL
+        // No second argument, or a null one: the function's own name is the entry label. The entry label need not exist yet
+        // (CODE may compile it later); a call to it while it is undefined is error 286, as in SPITBOL
+        entryLabel ??= functionName;
 
         // Build table entry
-        var tempParameters = new List<string>(match.Groups[3].Value.Split(','));
-        List<string> parameters = new();
-        parameters.AddRange(tempParameters.Select(t => t.Trim()).Where(parameter => parameter != ""));
-        var tempLocals = new List<string>(match.Groups[5].Value.Split(','));
-        List<string> locals = new();
-        locals.AddRange(tempLocals.Select(t => t.Trim()).Where(local => local != ""));
         var argumentCount = parameters.Count;
         var newEntry = new FunctionTableEntry(this, functionName, ExecuteProgramDefinedFunction, argumentCount, false);
         FunctionTable[functionName] = newEntry;
 
-        // Build user function definition entry
+        // Build user function definition entry; a datatype of that name is a datatype no longer
         UserFunctionTable[functionName] = new UserFunctionTableEntry(functionName, prototype, parameters, locals, entryLabel);
+        UserDataDefinitions.Remove(functionName);
+        DataConstructors.Remove(functionName);
 
         PredicateSuccess();
     }

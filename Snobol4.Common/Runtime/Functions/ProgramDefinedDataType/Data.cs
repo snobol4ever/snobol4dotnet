@@ -31,43 +31,73 @@ public partial class Executive
 
     internal void ProgramDefinedData(List<Var> arguments)
     {
-        // data argument cannot be null
+        // data argument cannot be null (76) and must be a string (75)
         if (arguments.Count == 0)
         {
             LogRuntimeException(76);
             return;
         }
 
-        // data argument must be a string
         if (!arguments[0].Convert(VarType.STRING, out _, out var value, this))
         {
             LogRuntimeException(75);
             return;
         }
 
-        // data argument cannot be null
-        var prototype = Parent.FoldCase((string)value).Trim();
-        if (prototype == "")
+        if ((string)value == "")
         {
             LogRuntimeException(76);
             return;
         }
 
-        // data argument must not have a null datatype name
-        var match = CompiledRegex.ProgramDefinedDataPrototypePattern().Match(prototype);
-        if (!match.Success)
+        // The prototype is scanned as SPITBOL scans it: the datatype's name up to the left paren (77 when there is none, 78 when it
+        // is null), then the field names up to the right paren, each ended by a comma or the paren (79 at the end of the string,
+        // 80 for a null name)
+        var prototype = Parent.FoldCase((string)value).Trim();
+        var position = 0;
+        var dataName = ScanPrototype(prototype, ref position, '(', '(', out var stopped);
+        if (stopped == 0)
         {
-            Assert.IsTrue(true, "prototype argument is not valid object in Data()");
-            LogRuntimeException(164);
+            LogRuntimeException(77);
             return;
         }
 
-        // datatype name cannot be null
-        var dataName = match.Groups[1].Value.Trim();
         if (dataName == "")
         {
             LogRuntimeException(78);
             return;
+        }
+
+        var fields = new List<string>();
+        while (true)
+        {
+            var field = ScanPrototype(prototype, ref position, ')', ',', out stopped);
+            if (stopped == 0)
+            {
+                LogRuntimeException(79);
+                return;
+            }
+
+            if (field == "")
+            {
+                LogRuntimeException(80);
+                return;
+            }
+
+            fields.Add(field);
+            if (stopped == 1)
+                break;
+        }
+
+        // a datatype or field name that is a system function's cannot be defined (248)
+        foreach (var fieldName in fields)
+        {
+            var existingField = FunctionTable[fieldName];
+            if (existingField is not null && existingField.IsProtected)
+            {
+                LogRuntimeException(248);
+                return;
+            }
         }
 
         // datatype name cannot be an existing user-defined function
@@ -93,47 +123,14 @@ public partial class Executive
             }
         }
 
-        // must have a left paren
-        var lParen = match.Groups[2].Value;
-        if (lParen == "")
-        {
-            LogRuntimeException(77);
-            return;
-        }
-
-        // must have a right paren
-        var rParen = match.Groups[4].Value;
-        if (rParen == "")
-        {
-            LogRuntimeException(79);
-            return;
-        }
-
-        // TODO Does this ignore consecutive commas like DEFINE
-        var fields = new List<string>(match.Groups[3].Value.Split(','));
-        for (var i = 0; i < fields.Count; i++)
-        {
-            fields[i] = Parent.FoldCase(fields[i].Trim());
-
-            // field name cannot be null
-            if (fields[i] == "")
-            {
-                LogRuntimeException(80);
-                return;
-            }
-
-            // nor can a field name be a system function's
-            var existingField = FunctionTable[fields[i]];
-            if (existingField is not null && existingField.IsProtected)
-            {
-                LogRuntimeException(248);
-                return;
-            }
-        }
-
 
         // The constructor and field functions carry their own names, so a synonym OPSYN makes (QLINK for
         // COUNT) still builds that type and reads that field, as in SPITBOL
+        // a datatype's constructor and its field functions replace any program-defined function of the same name
+        UserFunctionTable.Remove(dataName);
+        foreach (var fieldName in fields)
+            UserFunctionTable.Remove(fieldName);
+
         FunctionTableEntry.FunctionHandler create = a => CreateProgramDefinedDataInstance(a, dataName);
         DataConstructors[dataName] = create;
         FunctionTable[dataName] = new FunctionTableEntry(this, dataName, create, fields.Count, false);

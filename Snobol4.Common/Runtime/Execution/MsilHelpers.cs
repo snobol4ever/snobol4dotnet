@@ -208,11 +208,31 @@ public partial class Executive
             if (instrIdx >= 0) return instrIdx;
             return target;   // CODE'd statement — caller treats as exitCode
         }
-        // GotoNotFound or unknown label: a goto to a label that is not defined ends the run, whatever &ERRLIMIT allows, and leaves
-        // &ERRLIMIT at 0, as SPITBOL does
+        // an error the statement had, which SETEXIT has trapped, takes the statement's place: the goto is not made
+        if (_trapTaken)
+            return int.MinValue;
+
+        UndefinedLabelError(errorCode);
+        return _trapTaken ? int.MinValue : -1;
+    }
+
+    // GotoNotFound or unknown label: a goto to a label that is not defined. A SETEXIT handler takes the error as it takes any other, and
+    // counts &ERRLIMIT down; with none armed it ends the run, whatever &ERRLIMIT allows, and leaves &ERRLIMIT at 0, as SPITBOL does
+    internal void UndefinedLabelError(int errorCode = 38) => TrappedOrFatalError(errorCode);
+
+    // An error that is the run's end unless a SETEXIT handler is armed to take it (the handler is armed once)
+    internal void TrappedOrFatalError(int errorCode)
+    {
+        if (SetExitNumber > 0)
+        {
+            LogRuntimeException(errorCode);
+            if (OnErrorGoto > 0)
+                ProcessTrappedErrorThreaded();
+            return;
+        }
+
         AmpErrorLimit = 0;
         LogRuntimeException(errorCode, fatal: true);
-        return -1;
     }
 
     // A computed goto that cannot be performed (to no label, to no code, or whose expression fails) is the error it is; with &ERRLIMIT above 0

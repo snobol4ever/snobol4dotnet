@@ -62,6 +62,10 @@ public partial class Executive
     // Set once the fatal report has been printed: it carries the run summary, which -x does not print again
     internal bool FatalReportPrinted;
 
+    // The statement whose line the report names when :(CONTINUE) has resumed at the goto of the statement in error and that goto errs
+    // again: the line is that statement's, the statement number the handler's CONTINUE; -1 when the line is the current statement's
+    internal int ReportLineIndex = -1;
+
     // The position and run summary that end a run, from "in file" to "memory left (bytes)", labelled to column 21
     internal string[] RunSummary()
     {
@@ -70,8 +74,8 @@ public partial class Executive
         var memoryLeft = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
         return
         [
-            Row("in file", StatementFile(AmpCurrentLineNumber)),
-            Row("in line", StatementLine(AmpCurrentLineNumber)),
+            Row("in file", StatementFile(ReportLineIndex >= 0 ? ReportLineIndex : AmpCurrentLineNumber)),
+            Row("in line", StatementLine(ReportLineIndex >= 0 ? ReportLineIndex : AmpCurrentLineNumber)),
             Row("in statement", StatementNumber(AmpCurrentLineNumber)),
             Row("stmts executed", AmpStatementCount),
             Row("execution time msec", _timerExecute.ElapsedMilliseconds),
@@ -88,8 +92,8 @@ public partial class Executive
     {
         // cut at the width of the page: 120, or what -t gives
         var width = Math.Max(1, Parent.BuildOptions.PageWidth);
-        var file = StatementFile(AmpCurrentLineNumber);
-        var line = StatementLine(AmpCurrentLineNumber);
+        var file = StatementFile(ReportLineIndex >= 0 ? ReportLineIndex : AmpCurrentLineNumber);
+        var line = StatementLine(ReportLineIndex >= 0 ? ReportLineIndex : AmpCurrentLineNumber);
         FatalReportPrinted = true;
         string[] report =
         [

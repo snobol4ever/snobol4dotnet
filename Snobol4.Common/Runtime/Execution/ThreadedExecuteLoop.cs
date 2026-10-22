@@ -308,6 +308,25 @@ public partial class Executive
         Done:
         // A SETEXIT handler's :(CONTINUE) resumes at the failure exit of the statement in error, as in
         // SPITBOL: its :F label, else its unconditional goto, else the next statement
+        // :(ABORT) ends the run with the error that is pending, which is then fatal; with none it is error 36, which a handler takes once
+        if (exitCode == -5 && overrideThread == null)
+        {
+            if (_trapPending && Parent.ErrorCodeHistory.Count > 0)
+            {
+                _trapPending = false;
+                LogRuntimeException(Parent.ErrorCodeHistory[^1], fatal: true, AmpErrorType);
+            }
+
+            TrappedOrFatalError(36);
+            if (_trapTaken)
+            {
+                _trapTaken = false;
+                thread = Thread!;
+                exitCode = -1;
+                goto Restart;
+            }
+        }
+
         // :(CONTINUE) with no trapped error pending is itself error 37, which a SETEXIT handler traps
         if (exitCode == -6 && _continueStatement == -1 && overrideThread == null)
         {
@@ -354,10 +373,27 @@ public partial class Executive
         // that label is then taken as the goto it is
         if (exitCode == -6 && _continueStatement is <= -2 and >= -7 && overrideThread == null)
         {
+            ReportLineIndex = _trapStatement;
             exitCode = _continueStatement;
             _continueStatement = -1;
             _trapPending = false;
             goto Done;
+        }
+
+        // the failure exit that :(CONTINUE) resumes at can be a label that is not there: the goto errs again, and a handler takes it again
+        if (exitCode == -6 && _continueStatement == GotoNotFound && overrideThread == null)
+        {
+            _continueStatement = -1;
+            _trapPending = false;
+            ReportLineIndex = _trapStatement;
+            UndefinedLabelError();
+            if (_trapTaken)
+            {
+                _trapTaken = false;
+                thread = Thread!;
+                exitCode = -1;
+                goto Restart;
+            }
         }
 
         if (exitCode == -6 && _continueStatement >= 0 && overrideThread == null)
@@ -402,7 +438,9 @@ public partial class Executive
         // and SETEXIT then answers the null string, as in SPITBOL
         SetExitLabel = "";
         SetExitNumber = 0;
-        var errorStatement = AmpCurrentLineNumber;
+        // an error of the goto that :(CONTINUE) resumed at is the error of the statement that was in error
+        var errorStatement = ReportLineIndex >= 0 ? ReportLineIndex : AmpCurrentLineNumber;
+        _trapStatement = errorStatement;
         _continueStatement = Parent.FailureExits.TryGetValue(errorStatement, out var exitLabel) && exitLabel is not null
             ? LabelTable[Parent.FoldCase(exitLabel)]
             : errorStatement + 1;
@@ -417,6 +455,9 @@ public partial class Executive
 
     // The fatal errors so far (SPITBOL's errft): a bad SCONTINUE counts as one, and the third ends the run
     private int _fatalErrors;
+
+    // The statement the pending trapped error was in
+    private int _trapStatement;
 
     // Where :(CONTINUE) resumes after the trapped error, by statement index; -1 when no trap is pending
     private int _continueStatement = -1;

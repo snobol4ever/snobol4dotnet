@@ -4,7 +4,8 @@ namespace Test.Miscellaneous;
 
 /// <summary>
 /// A run that does not get as far as running the program exits as sbl does, which the console returns from Builder.ExitStatus:
-/// 231 when execution is suppressed (a statement in error, or -n), and 1 when an -INCLUDE cannot be opened, whatever -k says.
+/// 231 when execution is suppressed (a statement in error, or -n), and 1 when an -INCLUDE cannot be opened and END ends the file,
+/// whatever -k says (a card after END lets the compile end there: 231, and -k runs the program).
 /// A program that runs leaves the exit to &amp;CODE. Every status below is what sbl -bf exited with for the same program.
 /// </summary>
 [DoNotParallelize]
@@ -65,5 +66,30 @@ public class ExitStatus
     public void TEST_ExitStatus_a_missing_include_exits_1_under_k_too_and_does_not_run()
     {
         Assert.AreEqual(1, Status("-b -k", "-INCLUDE 'nosuchfile.sno'\n        OUTPUT = 'x'\nEND"));
+    }
+
+    // sbl's source stack, still inside the include that failed, ends the file at END only when END is its last line; a card after it, a
+    // blank one too, is read, the compile ends at END, and the include is an error among the statements' (sbl -bf and -bf -k)
+    [TestMethod]
+    public void TEST_ExitStatus_a_missing_include_with_a_card_after_end_is_a_statement_in_error()
+    {
+        foreach (var after in new[] { "\n", "data\n", "   \n" })
+        {
+            var script = "-INCLUDE 'nosuchfile.sno'\n        OUTPUT = 'x'\nEND\n" + after;
+            Assert.AreEqual(231, Status("-b", script), after);
+            var written = new StringWriter();
+            var old = Console.Out;
+            Console.SetOut(written);
+            try
+            {
+                Assert.IsNull(SetupTests.SetupScript("-b -k", script).ExitStatus, after);
+            }
+            finally
+            {
+                Console.SetOut(old);
+            }
+
+            StringAssert.Contains(written.ToString(), "x", after);
+        }
     }
 }

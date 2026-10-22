@@ -235,7 +235,13 @@ public partial class Builder
         // sbl says it only when END ends the file: a line after it, a blank one too, is something its stack, still inside the include,
         // has to read, and it says nothing
         if (LinesAfterEnd.Count > 0)
+        {
+            // the compile ended at END all the same: the include is one more error among the statements', which -k runs the program past
+            SourceFailed = false;
+            ExitStatus = null;
             return;
+        }
+
         Console.Error.WriteLine("No END statement found in source file(s).");
     }
 

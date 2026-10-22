@@ -54,4 +54,20 @@ END").Replace("\r\n", "\n");
             "T9<'abcdefghijklmnopqrstuvwxyz0123'> = 'long'", "ARRAY(2,2) #3", "A<1,2> = 12", "A<2,1> = 21"
         }, lines);
     }
+
+    [TestMethod]
+    public void TEST_DumpFormat_fence_called_as_a_function_names_the_pattern_variable()
+    {
+        // sbl -b: any mention of FENCE, even FENCE(P), makes its variable block, so the dump lists FENCE = PATTERN;
+        // the other predefined patterns are listed only when named as variables (ARBNO(P) does not name ARB)
+        var output = SetupTests.RunWithInput(@"        X = 'a' FENCE('b')
+        Y = ARBNO('c')
+        DUMP(1)
+END").Replace("\r\n", "\n");
+        var lines = output.Split('\n').Where(line => !line.StartsWith('&') && line != "").ToArray();
+        CollectionAssert.AreEqual(new[]
+        {
+            "dump of natural variables", "FENCE = PATTERN", "X = PATTERN", "Y = PATTERN", "dump of keyword values"
+        }, lines);
+    }
 }

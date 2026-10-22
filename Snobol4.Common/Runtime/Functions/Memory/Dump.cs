@@ -78,9 +78,11 @@ public partial class Executive
 
     // The program's natural variables: every name but the keywords; a protected one (ARB, REM, ...)
     // only once the program has named it, as SPITBOL makes its variable block on first reference
+    // (a call FENCE(P) names FENCE as well: a function and its variable share one block)
     private IEnumerable<KeyValuePair<string, Var>> NaturalVariables()
     {
-        var referenced = Parent.VariableSlots.Select(slot => slot.Symbol).ToHashSet();
+        var referenced = Parent.VariableSlots.Select(slot => slot.Symbol)
+            .Concat(Parent.FunctionSlots.Select(slot => slot.Symbol)).ToHashSet();
         return IdentifierTable.Where(kv => kv.Key.Length > 0 && kv.Key[0] != '&'
                                            && (!kv.Value.IsReadOnly || referenced.Contains(kv.Key)));
     }

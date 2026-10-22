@@ -23,6 +23,17 @@ public partial class Executive
         // Get all arguments and check for prior failure, into a list lent for this depth of assignment: an assignment can run another
         // (a trace function, a deferred target's call), and neither Assign nor ReplaceMatch keeps the list (it was a new List and its
         // array on every assignment)
+        // A failure or an error before the assignment stops the statement's evaluation there, as in SPITBOL (OperatorFast does the same
+        // for the other operators): an assignment inside the expression after it is not made, -A + (Y = 2) with A not numeric leaves Y
+        // as it was. It was made, and the statement then ended on an empty stack
+        if (Failure)
+        {
+            SystemStack.Pop();
+            SystemStack.Pop();
+            SystemStack.Push(new StringVar(false) { Succeeded = false });
+            return;
+        }
+
         if (_assignDepth == _assignArguments.Count)
             _assignArguments.Add(new List<Var>(2));
         var arguments = _assignArguments[_assignDepth++];

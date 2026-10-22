@@ -118,6 +118,17 @@ public partial class Executive
         PredicateSuccess();
     }
 
+    // CALL trace, at the calling statement and level: ****11******  F('arg',7)
+    private void TraceCall(string functionName, string returnVarName, List<Var> arguments, int parametersCount)
+    {
+        if (!TraceThisCall(TraceTableFunctionCall, functionName, out var callHandler))
+            return;
+        if (callHandler != null)
+            CallTraceHandler(callHandler, functionName);
+        else
+            TraceLine($"{returnVarName}({string.Join(",", arguments.Take(parametersCount).Select(PrintValue))})");
+    }
+
     // The bytes of SPITBOL's stack the program-defined functions being run have taken, and the bytes it starts with
     private long StackBytesUsed;
     private const long StackBaseBytes = 3216;
@@ -169,6 +180,9 @@ public partial class Executive
         var definition = UserFunctionTable[entry.Symbol];
         if (LabelTable[definition!.EntryLabel] == GotoNotFound)
         {
+            // the call is traced before the branch to the entry label that is not there, as in SPITBOL
+            ProgramDefinedFunctionStack.Pop();
+            TraceCall(functionName, definition.FunctionName, arguments, definition.Parameters.Count);
             LogRuntimeException(286);
             return;
         }
@@ -263,14 +277,7 @@ public partial class Executive
         // Save value of local variables on the stack
         entry!.StateStack.Push(saveVars);
 
-        // CALL trace, at the calling statement and level: ****11******  F('arg',7)
-        if (TraceThisCall(TraceTableFunctionCall, functionName, out var callHandler))
-        {
-            if (callHandler != null)
-                CallTraceHandler(callHandler, functionName);
-            else
-                TraceLine($"{returnVarName}({string.Join(",", arguments.Take(parametersCount).Select(PrintValue))})");
-        }
+        TraceCall(functionName, returnVarName, arguments, parametersCount);
 
         // SPITBOL's stack holds each call's frame, 64 bytes and 8 for each parameter, local and operand waiting in the calling
         // expression, down from the 3,216 bytes its start takes, in the -s bytes (4m by default); a call past it is error 246

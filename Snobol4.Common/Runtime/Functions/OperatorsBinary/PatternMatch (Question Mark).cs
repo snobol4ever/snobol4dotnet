@@ -93,8 +93,11 @@ public partial class Executive
                 new StringVar(nameListEntry.Scan.Subject[nameListEntry.PreCursor..nameListEntry.PostCursor])
             ];
 
+            // an assignment that was not made (the evaluation of its deferred target failed or was an error) leaves nothing to take off
+            var depth = SystemStack.Count;
             Assign(assignment);
-            SystemStack.Pop();
+            while (SystemStack.Count > depth)
+                SystemStack.Pop();
         }
 
         // Restore the caller's BetaStack and AlphaStack now that this PatternMatch has committed its own.

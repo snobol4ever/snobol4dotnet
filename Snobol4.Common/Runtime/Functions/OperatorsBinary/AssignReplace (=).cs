@@ -90,6 +90,7 @@ public partial class Executive
         // expression is itself the target, as in SPITBOL (V = *(X + 1) then V = *Y assigns V)
         while (arguments[0] is ExpressionVar { Symbol: "" } expressionVar1)
         {
+            var depth = SystemStack.Count;
             expressionVar1.FunctionName(this);
             // If the deferred Assignee evaluation FRETURNed (e.g. *match(...)
             // used as the right-hand side of `$`), the function pushed a null
@@ -100,7 +101,10 @@ public partial class Executive
             // the pattern matcher and trigger alternation backtracking.
             if (Failure)
             {
-                SystemStack.Pop();
+                // what the evaluation pushed, if it pushed anything: a call of an undefined function is an error that leaves nothing, and
+                // taking another entry off the stack took the statement's own separator
+                if (SystemStack.Count > depth)
+                    SystemStack.Pop();
                 return;
             }
             arguments[0] = SystemStack.Pop();

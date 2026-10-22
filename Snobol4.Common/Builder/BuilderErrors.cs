@@ -289,6 +289,9 @@ public partial class Builder
     {
         if (!CopyErrorsToStandardError)
             return;
+        // the copy is cut at the width of the listing too
+        for (; text.Length > BuildOptions.PageWidth && BuildOptions.PageWidth > 0; text = text[BuildOptions.PageWidth..])
+            Console.Error.WriteLine(text[..BuildOptions.PageWidth]);
         Console.Error.WriteLine(text);
         Console.Error.Flush();
     }

@@ -37,6 +37,10 @@ public partial class Builder
             StartListingPage(writer, 0);
         }
 
+        // a line longer than the width of the listing is cut into lines of that width, mid-word, as sbl prints it; it takes one
+        // line of the page
+        for (; line.Length > BuildOptions.PageWidth && BuildOptions.PageWidth > 0; line = line[BuildOptions.PageWidth..])
+            writer.Write(line[..BuildOptions.PageWidth] + "\n");
         writer.Write(line + "\n");
         _listingLinesOnPage++;
     }

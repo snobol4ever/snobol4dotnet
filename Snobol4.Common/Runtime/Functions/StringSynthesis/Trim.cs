@@ -9,7 +9,7 @@ public partial class Executive
     {
         if (!arguments[0].Convert(VarType.STRING, out _, out var str, this))
         {
-            LogRuntimeException(247);
+            LogRuntimeException(200);
             return;
         }
 

@@ -72,10 +72,18 @@ internal class UnevaluatedPattern : TerminalPattern
             return MatchResult.Failure(scan);
 
         var evaluatedExpression = scan.Exec.SystemStack.Pop();
-        // If the deferred code pushed an ExpressionVar (e.g. *P where P is a plain
-        // variable), evaluate it one more level to get the actual value (PatternVar etc.).
-        if (evaluatedExpression is ExpressionVar exprVar)
+        // If the deferred code pushed an ExpressionVar (e.g. *P where P is a plain variable), evaluate it
+        // to get the actual value (PatternVar etc.), and again while the value is itself an expression:
+        // G0 = *G1 and P = *G0 make *P a reference to a reference. SPITBOL follows the chain without end,
+        // so one that returns to itself never finishes there; here it is cut at the left-recursion limit.
+        for (var depth = 0; evaluatedExpression is ExpressionVar exprVar; depth++)
         {
+            if (depth > Scanner.StarRepeatLimit)
+            {
+                scan.Exec.RunLeftAtOnce = true;
+                scan.Exec.LogRuntimeException(246, fatal: true);
+                return MatchResult.Failure(scan);
+            }
             exprVar.FunctionName(scan.Exec);
             if (scan.Exec.Failure)
                 return MatchResult.Failure(scan);

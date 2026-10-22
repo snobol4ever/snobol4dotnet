@@ -30,6 +30,10 @@ public partial class Executive
         //if (!FunctionTable.TryGetValue(functionStringVar.Data, out var functionEntry))
         if (functionEntry == null)
         {
+            // the arguments are evaluated before the call is found undefined: an input association is read, and at its end the
+            // statement fails with no error, as in SPITBOL
+            if (InputArguments(arguments))
+                return;
             // 22 undefined function called
             LogRuntimeException(22);
             return;
@@ -79,6 +83,8 @@ public partial class Executive
 
         if (string.IsNullOrEmpty(functionName))
         {
+            if (InputArguments(arguments))
+                return;
             LogRuntimeException(22);
             return;
         }
@@ -87,6 +93,8 @@ public partial class Executive
         var functionEntry = FunctionTable[functionName];
         if (functionEntry == null)
         {
+            if (InputArguments(arguments))
+                return;
             LogRuntimeException(22);
             return;
         }

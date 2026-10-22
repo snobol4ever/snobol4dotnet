@@ -59,14 +59,18 @@ public partial class Executive
 
         var slot = Parent.FunctionSlots[slotIdx];
         var entry = FunctionTable[slot.Symbol];
+
+        // the arguments are evaluated before the call is found undefined: an argument that failed fails the statement, an input
+        // association is read, and at its end the statement fails with no error 22, as in SPITBOL
+        _reusableArgList.Clear();
+        if (SystemStack.ExtractArguments(argCount, _reusableArgList, this)) return;
         if (entry == null)
         {
+            if (InputArguments(_reusableArgList))
+                return;
             LogRuntimeException(22);
             return;
         }
-
-        _reusableArgList.Clear();
-        if (SystemStack.ExtractArguments(argCount, _reusableArgList, this)) return;
 
         for (var i = _reusableArgList.Count; i < entry.ArgumentCount; i++)
             _reusableArgList.Add(StringVar.Null());

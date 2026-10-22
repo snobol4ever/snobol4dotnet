@@ -269,7 +269,7 @@ public class SourceCode
         {
             var continued = CutToMaximum(reader.ReadLine()) ?? "";
             physicalLines.Add(continued);
-            currentLine += continued.Length > 0 ? continued[1..] : "";
+            currentLine += continued.Length > 0 ? " " + continued[1..] : "";
             continuationLines++;
         }
 

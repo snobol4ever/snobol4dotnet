@@ -122,8 +122,8 @@ public partial class Builder
     // SPITBOL's report of a statement in error, on the listing page as sbl writes it (CEO-1858): the physical line the error was
     // found at, with the number of its statement in an eight-column field and its tabs kept; a line that keeps the tabs and puts
     // ! under the error column (empty when the error has none); "file(line,col) : ERROR nnn -- text"; and an empty line. A line
-    // that -LIST has already listed is not listed again. The joined text of a continued statement drops the first character of
-    // each continuation line, and an error found at the end of the text is reported at its last character, as sbl does.
+    // that -LIST has already listed is not listed again. The joined text of a continued statement has a blank for the first character
+    // of each continuation line, and an error found at the end of the text is reported at its last character, as sbl does.
     private void WriteStatementInError(int code, int cursor, SourceLine source)
     {
         var lines = source.PhysicalLines;
@@ -135,9 +135,7 @@ public partial class Builder
         {
             if (source.DeferredExpression)
                 cursor -= 2;
-            var total = lines[0].Length;
-            for (var i = 1; i < lines.Count; i++)
-                total += Math.Max(0, lines[i].Length - 1);
+            var total = lines.Sum(line => line.Length);
             var at = Math.Clamp(source.SubLineOffset + cursor, 0, Math.Max(0, total - 1));
             var start = 0;
             var length = lines[0].Length;
@@ -145,9 +143,9 @@ public partial class Builder
             {
                 start += length;
                 index++;
-                length = Math.Max(0, lines[index].Length - 1);
+                length = lines[index].Length;
             }
-            column = index == 0 ? at - start + 1 : at - start + 2;
+            column = at - start + 1;
         }
 
         WriteErrorPage(SourceCode.NumberField(source.FirstStatementNumber, source.IncludeDepth), lines[index], 1 + source.LineCountFile + index, column,

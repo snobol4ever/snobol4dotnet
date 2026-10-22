@@ -1250,6 +1250,10 @@ public partial class Lexer
         {
             var op = match.Groups[1].Value.Substring(j, 1);
 
+            // the caret is the exclamation mark, as a unary operator too (OPSYN('!', ..., 1) gives ^X a meaning)
+            if (op == "^")
+                op = "!";
+
             if (op == "*")
             {
                 // Runs of consecutive stars is equivalent to one star; include once, then ignore

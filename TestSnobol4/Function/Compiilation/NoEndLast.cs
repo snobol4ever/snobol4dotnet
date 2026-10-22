@@ -81,7 +81,7 @@ public class NoEndLast
         }
     }
 
-    private static string[] CompileWithoutEnd(string source)
+    private static string[] CompileWithoutEnd(string source, string directives = "-b")
     {
         var merged = new StringWriter();
         var (output, error) = (Console.Out, Console.Error);
@@ -89,7 +89,7 @@ public class NoEndLast
         Console.SetError(merged);
         try
         {
-            SetupTests.SetupScript("-b", source);
+            SetupTests.SetupScript(directives, source);
         }
         finally
         {
@@ -135,5 +135,19 @@ public class NoEndLast
             var lines = CompileWithoutEnd("        OUTPUT = 1\n        X = (1\n" + after);
             Assert.IsTrue(lines.Any(line => line.Contains("ERROR 226")), after);
         }
+    }
+
+    // sbl lists a line when it reads the next, so the last line of a source with no END is never listed; the page of an error in it
+    // prints it (sbl -b -l): a statement's first line with its number, a continuation line with the number field blank
+    [TestMethod]
+    public void TEST_NoEndLast_the_page_of_an_error_in_the_last_line_prints_the_line()
+    {
+        var lines = CompileWithoutEnd("        OUTPUT = 1\n        X = 1 )\n", "-b -l");
+        CollectionAssert.AreEqual(new[] { "2               X = 1 )", "                      !" }, lines.Take(2).ToArray());
+        lines = CompileWithoutEnd("        OUTPUT = 1\n        X = 1 +\n+ 2 )\n", "-b -l");
+        CollectionAssert.AreEqual(new[] { "        + 2 )", "            !" }, lines.Take(2).ToArray());
+        lines = CompileWithoutEnd("        OUTPUT = 1\n:END\n", "-b -l");
+        Assert.AreEqual("2       :END", lines[0]);
+        Assert.AreEqual(1, lines.Count(line => line.Contains(":END")));
     }
 }

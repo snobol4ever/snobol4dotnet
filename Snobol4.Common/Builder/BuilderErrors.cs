@@ -148,8 +148,12 @@ public partial class Builder
             column = at - start + 1;
         }
 
-        WriteErrorPage(SourceCode.NumberField(source.FirstStatementNumber, source.IncludeDepth), lines[index], 1 + source.LineCountFile + index, column,
-            code, source.PathName, source.Listed);
+        // the last line of a source with no END is never listed, SPITBOL lists a line when it reads the next: the page of an error in it does
+        var listed = source.Listed && !(source.EndsTheSource && index == lines.Count - 1);
+        // with the listing off the page carries the number of the statement on every line it prints; with it on, only the first line of a
+        // statement carries its number, as in the listing
+        WriteErrorPage(SourceCode.NumberField(index == 0 || !source.Listed ? source.FirstStatementNumber : 0, source.IncludeDepth), lines[index],
+            1 + source.LineCountFile + index, column, code, source.PathName, listed);
     }
 
     // An error in a control line (an -INCLUDE of a file that cannot be opened) is reported on the same page: no statement number,

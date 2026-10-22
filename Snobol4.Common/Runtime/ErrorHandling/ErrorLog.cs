@@ -41,9 +41,12 @@ public partial class Executive
         Parent.MessageHistory.Add(LastDiagnostic);
         OnErrorGoto = SetExitNumber;
 
-        if (AmpErrorLimit > 0 && !fatal)
+        // An error inside the evaluation of an expression (EVAL, a deferred expression in a pattern) never ends the run, whatever
+        // &ERRLIMIT is, in SPITBOL: the statement fails and &ERRLIMIT counts down no further than 0
+        if ((AmpErrorLimit > 0 || ExpressionDepth > 0) && !fatal)
         {
-            AmpErrorLimit--;
+            if (AmpErrorLimit > 0)
+                AmpErrorLimit--;
             return;
         }
 

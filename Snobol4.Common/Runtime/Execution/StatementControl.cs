@@ -6,6 +6,9 @@ public partial class Executive
 {
     private bool _inExecuteLoop;
 
+    // How many expressions (EVAL, deferred expressions of patterns) are being evaluated, the functions they call included
+    internal int ExpressionDepth;
+
     // The program runs on a thread with a stack large enough for the depth SPITBOL's stack allows (-s bytes of 72-byte frames
     // at the least) at the .NET frames each level takes; the thread that called goes on afterwards with the program's state
     private int OnLargeStack(Func<int> run)
@@ -153,7 +156,16 @@ public partial class Executive
         var savedIP    = InstructionPointer;
         Failure        = false;   // sub-expression always starts clean
         InitExecutionCache();     // no-op after first call
-        ThreadedExecuteLoop(0, useFastPath: false, overrideThread: subThread);
+        ExpressionDepth++;
+        try
+        {
+            ThreadedExecuteLoop(0, useFastPath: false, overrideThread: subThread);
+        }
+        finally
+        {
+            ExpressionDepth--;
+        }
+
         var exprFailure = LastExpressionFailure;
         InstructionPointer = savedIP;
         Failure            = exprFailure;

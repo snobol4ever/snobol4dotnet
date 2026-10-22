@@ -84,6 +84,61 @@ end
         finally { File.Delete(testFile); }
     }
 
+    // Detach_003: DETACH ends the association of the one variable it names; another variable on the same output channel keeps it
+    [TestMethod]
+    public void Detach_003()
+    {
+        var testFile = Path.GetTempFileName();
+        try
+        {
+            // sbl -bf: records a1, b1, b2 -- A's second assignment writes nothing, B's still does
+            var s = $@"
+        output('A','1','{testFile}')
+        output('B','1')
+        A = 'a1'
+        B = 'b1'
+        detach('A')
+        A = 'a2'
+        B = 'b2'
+        endfile('1')
+end
+";
+            var build = SetupTests.SetupScript("-b", s);
+            Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+            CollectionAssert.AreEqual(new[] { "a1", "b1", "b2" }, File.ReadAllLines(testFile));
+        }
+        finally { File.Delete(testFile); }
+    }
+
+    // Detach_004: the same for input; the variable left on the channel goes on reading its lines
+    [TestMethod]
+    public void Detach_004()
+    {
+        var testFile = Path.GetTempFileName();
+        try
+        {
+            File.WriteAllLines(testFile, new[] { "one", "two", "three" });
+
+            // sbl -bf: A reads one and keeps it once detached; B, still on channel 3, reads two
+            var s = $@"
+        input('A','3','{testFile}')
+        input('B','3')
+        x = A
+        detach('A')
+        y = A
+        z = B
+        endfile('3')
+end
+";
+            var build = SetupTests.SetupScript("-b", s);
+            Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+            Assert.AreEqual("one", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("x")]).Data);
+            Assert.AreEqual("one", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("y")]).Data);
+            Assert.AreEqual("two", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("z")]).Data);
+        }
+        finally { File.Delete(testFile); }
+    }
+
     // Detach_087: pattern arg as channel name → error 87
     [TestMethod]
     public void Detach_087()

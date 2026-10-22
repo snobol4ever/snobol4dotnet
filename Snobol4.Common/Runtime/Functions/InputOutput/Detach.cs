@@ -20,17 +20,10 @@ public partial class Executive
             return;
         }
 
-        var inputChannel = IdentifierTable[symbol].InputChannel;
-
-        if (inputChannel != "")
-            foreach (var identifier in IdentifierTable.Where(identifier => identifier.Value.InputChannel == inputChannel))
-                identifier.Value.InputChannel = "";
-
-        var outputChannel = IdentifierTable[symbol].OutputChannel;
-
-        if (outputChannel != "")
-            foreach (var identifier in IdentifierTable.Where(identifier => identifier.Value.OutputChannel == outputChannel))
-                identifier.Value.InputChannel = "";
+        // Only the variable named is detached; another variable on the same channel keeps its association (sbl).
+        var variable = IdentifierTable[symbol];
+        variable.InputChannel = "";
+        variable.OutputChannel = "";
 
         PredicateSuccess();
     }

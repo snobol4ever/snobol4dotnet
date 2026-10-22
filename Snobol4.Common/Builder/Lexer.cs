@@ -462,6 +462,16 @@ public partial class Lexer
                     break;
                 }
 
+                // A bracket after blanks opens the subscripts of the name before it, as in SPITBOL: A [1] is A<1>
+                if (sourceLine.LexBody[^1].TokenType == Token.Type.IDENTIFIER && _cursorCurrent < sourceLine.Text.Length
+                    && sourceLine.Text[_cursorCurrent] is '[' or '<')
+                {
+                    var name = sourceLine.LexBody[^1];
+                    sourceLine.LexBody[^1] = new Token(Token.Type.IDENTIFIER_ARRAY_OR_TABLE, name.MatchedString, _bracketStack.Count);
+                    state = 3;
+                    break;
+                }
+
                 sourceLine.LexBody.Add(new Token(Token.Type.SPACE, " ", _bracketStack.Count));
                 ProcessImplicitOperators(sourceLine);
                 break;

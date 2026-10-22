@@ -9,6 +9,13 @@ public partial class Executive
         // arguments[0]: pattern to associate
         // arguments[1]; variable to immediately assign all match(es)
 
+        // a call in the place of the name that handed back a value by RETURN is error 21 as the pattern is built, as in SPITBOL
+        if (ReferenceEquals(arguments[1], ValueReturned))
+        {
+            LogRuntimeException(21);
+            return;
+        }
+
         if (arguments[0] is ExpressionVar expressionVar)
         {
             arguments[0] = new PatternVar(UnevaluatedPattern.Structure(expressionVar.FunctionName));

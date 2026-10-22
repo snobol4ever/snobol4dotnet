@@ -9,6 +9,14 @@ public partial class Executive
         // arguments[0]: left (pattern to associate)
         // arguments[1]; right (variable to assign match(es) upon successful match
 
+        // a call in the place of the name that handed back a value by RETURN is error 21 as the pattern is built, as in SPITBOL
+        // (P = LEN(1) . H(2)); it was found only when the match assigned
+        if (ReferenceEquals(arguments[1], ValueReturned))
+        {
+            LogRuntimeException(21);
+            return;
+        }
+
         // *X . V defers X to match time, as $ does: evaluating it here read X before the match
         // could set it (Budne's uneval2) and, for *LEN(3) . V, failed with error 212
         if (arguments[0] is ExpressionVar expressionVar)

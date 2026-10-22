@@ -1,5 +1,6 @@
 ﻿#pragma warning disable CS8770 // Method lacks `[DoesNotReturn]` annotation to match implemented or overridden member.
 using System.Diagnostics;
+using System.Globalization;
 
 #pragma warning disable IDE0130
 namespace Snobol4.Common;
@@ -45,80 +46,115 @@ public sealed class ArrayVar : Var
 
     #region Array-Specific Methods
 
-                            internal int ConfigurePrototype(string prototype, Var fill)
+    // SPITBOL's array prototype, scanned as sbl does: a prototype that is one integer in any form ('3', ' 3', '1e1') is a vector;
+    // otherwise it is bounds separated by commas, each "high" or "low:high" with the bound taken as an integer (a null bound is 0,
+    // so ':3' is 0:3 and '3:' is the negative dimension 3:0). The error is 65 for a low bound, 66 for a high bound that is not an
+    // integer, 67 for a dimension that is zero, negative or out of range, and 68 when the elements do not fit in `maxObjectBytes`.
+    // A zero-length array does not exist: 1:0 is 67.
+    internal int ConfigurePrototype(string prototype, Var fill, long maxObjectBytes = long.MaxValue)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(prototype);
+        ArgumentNullException.ThrowIfNull(prototype);
         ArgumentNullException.ThrowIfNull(fill);
 
         Fill = fill;
-        var prototypeSpan = prototype.AsSpan();
 
-        while (prototypeSpan.Length > 0)
+        if (BoundToInteger(prototype, out var length))
         {
-            var match = CompiledRegex.ArrayPrototypePattern().Match(prototypeSpan.ToString());
-            if (!match.Success)
-                return 65; // Invalid prototype syntax
-
-            prototypeSpan = prototypeSpan[match.Length..];
-
-            if (!TryParseDimensionBounds(match, out var lower, out var upper, out var errorCode, out var hasExplicitLower))
-                return errorCode;
-
-            var dimensionSize = upper - lower + 1;
-            // Zero-length allowed only with explicit lower:upper syntax (e.g. ARRAY('1:0')).
-            // Simple form ARRAY(0) or a bare-0 dimension must still fail with error 67.
-            if (dimensionSize < 0 || (dimensionSize == 0 && !hasExplicitLower))
+            if (length <= 0)
                 return 67;
+            if (!Fits(length, 3, maxObjectBytes))
+                return 68;
+
+            LowerBounds.Add(1);
+            UpperBounds.Add(length);
+            ExplicitLower.Add(false);
+            Dimensions = 1;
+            Sizes.Add(length);
+            Prototype = length.ToString(CultureInfo.InvariantCulture);
+            return InitializeArrayData();
+        }
+
+        long elements = 1;
+        var position = 0;
+        while (true)
+        {
+            long lower = 1;
+            var hasExplicitLower = false;
+            var delimiter = prototype.AsSpan(position).IndexOfAny(':', ',');
+            if (delimiter >= 0)
+                delimiter += position;
+            if (delimiter >= 0 && prototype[delimiter] == ':')
+            {
+                if (!BoundToInteger(prototype.AsSpan(position, delimiter - position), out lower))
+                    return 65;
+                hasExplicitLower = true;
+                position = delimiter + 1;
+                var comma = prototype.AsSpan(position).IndexOf(',');
+                delimiter = comma < 0 ? -1 : comma + position;
+            }
+
+            var end = delimiter < 0 ? prototype.Length : delimiter;
+            if (!BoundToInteger(prototype.AsSpan(position, end - position), out var upper))
+                return 66;
+
+            long dimensionSize;
+            try
+            {
+                dimensionSize = checked(upper - lower);
+            }
+            catch (OverflowException)
+            {
+                return 67;
+            }
+
+            if (dimensionSize < 0 || dimensionSize == long.MaxValue)
+                return 67;
+            dimensionSize++;
+
+            try
+            {
+                elements = checked(elements * dimensionSize);
+            }
+            catch (OverflowException)
+            {
+                return 68;
+            }
 
             LowerBounds.Insert(0, lower);
             UpperBounds.Insert(0, upper);
             ExplicitLower.Insert(0, hasExplicitLower);
             Dimensions++;
             Sizes.Insert(0, dimensionSize);
+
+            if (delimiter < 0)
+                break;
+            position = delimiter + 1;
         }
 
-        // Validate we have at least one dimension
-        if (Dimensions == 0)
-            return 67; // Array must have at least one dimension
+        if (!Fits(elements, 6 + 2 * Dimensions, maxObjectBytes))
+            return 68;
 
+        Prototype = prototype;
         return InitializeArrayData();
     }
 
-            
-    private static bool TryParseDimensionBounds(System.Text.RegularExpressions.Match match, out long lower, out long upper, out int errorCode, out bool hasExplicitLower)
+    // A bound as SPITBOL's gtint reads it: an integer, or a string that reads as a real, truncated; the null string is 0
+    private static bool BoundToInteger(ReadOnlySpan<char> text, out long bound)
     {
-        lower = 1;
-        upper = 0;
-        errorCode = 0;
-        hasExplicitLower = false;
-
-        if (match.Groups[3].Success)
-        {
-            hasExplicitLower = true;
-            // Format: "lower:upper"
-            if (!ToInteger(match.Groups[1].ValueSpan, out lower))
-            {
-                errorCode = 65; // Invalid lower bound
-                return false;
-            }
-
-            if (!ToInteger(match.Groups[3].ValueSpan, out upper))
-            {
-                errorCode = 66; // Invalid upper bound
-                return false;
-            }
-        }
-        else
-        {
-            // Format: "upper" (assumes lower = 1)
-            if (!ToInteger(match.Groups[1].ValueSpan, out upper))
-            {
-                errorCode = 67; // Invalid dimension size
-                return false;
-            }
-        }
-
+        if (ToInteger(text, out bound))
+            return true;
+        if (!ToReal(text, out var real) || double.IsNaN(real) || real >= 9223372036854775808.0 || real < -9223372036854775808.0)
+            return false;
+        bound = (long)real;
         return true;
+    }
+
+    // The block is its elements and `overheadWords` of its own (a vector 3; an array 6 and two for each dimension), each word 8
+    // bytes, and may not be larger than `maxObjectBytes`
+    private static bool Fits(long elements, long overheadWords, long maxObjectBytes)
+    {
+        var words = (UInt128)(ulong)elements + (ulong)overheadWords;
+        return words * 8 <= (ulong)maxObjectBytes;
     }
 
                 private int InitializeArrayData()
@@ -138,10 +174,6 @@ public sealed class ArrayVar : Var
 
         TotalSize = Multipliers[dimensions - 1] * Sizes[dimensions - 1];
 
-        // Validate total size to prevent memory issues
-        if (TotalSize > int.MaxValue)
-            return 67; // Array too large
-
         var totalSize = (int)TotalSize;
 
         // Pre-allocate array data with exact capacity
@@ -151,38 +183,10 @@ public sealed class ArrayVar : Var
         for (var i = 0; i < totalSize; i++)
             Data.Add(Fill);
 
-        // Build human-readable prototype string
-        BuildPrototypeString();
-
         return 0;
     }
 
-                private void BuildPrototypeString()
-    {
-        var dimensions = (int)Dimensions;
 
-        // Emit "lower:upper" if explicit lo:hi was given, else just upper bound (the size)
-        string FormatDim(int d) {
-            var lower = LowerBounds[d];
-            var upper = UpperBounds[d];
-            return ExplicitLower[d] ? $"{lower}:{upper}" : upper.ToString();
-        }
-
-        if (dimensions == 1)
-        {
-            Prototype = FormatDim(0);
-            return;
-        }
-
-        var parts = new string[dimensions];
-        for (var d = dimensions - 1; d >= 0; --d)
-        {
-            parts[dimensions - 1 - d] = FormatDim(d);
-        }
-        Prototype = string.Join(',', parts);
-    }
-
-                    
     internal long Index(List<long> indices)
     {
         ArgumentNullException.ThrowIfNull(indices);

@@ -108,7 +108,8 @@ end
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(67, build.ErrorCodeHistory[0]);
+        // a high bound that is not an integer is 66, as sbl says
+        Assert.AreEqual(66, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]

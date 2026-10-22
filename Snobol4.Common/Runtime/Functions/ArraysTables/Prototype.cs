@@ -16,8 +16,8 @@ public partial class Executive
             case ArrayVar array:
                 SystemStack.Push(new StringVar(array.Prototype));
                 return;
-            case TableVar:
-                SystemStack.Push(StringVar.Null());
+            case TableVar table:
+                SystemStack.Push(new IntegerVar(table.Buckets));
                 return;
             default:
                 LogRuntimeException(164);

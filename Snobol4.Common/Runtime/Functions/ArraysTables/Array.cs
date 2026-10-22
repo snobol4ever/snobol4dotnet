@@ -6,22 +6,25 @@ public partial class Executive
     //"array first argument lower bound is not integer" /* 65 */,
     //"array first argument upper bound is not integer" /* 66 */,
     //"array dimension is zero, negative or out of range" /* 67 */,
-    //"array size exceeds maximum permitted" /* 68 UNUSED*/,
+    //"array size exceeds maximum permitted" /* 68 */,
 
                     public void CreateArray(List<Var> arguments)
     {
-        // A real bound is an integer one, truncated: ARRAY(3.5) has three elements, as in SPITBOL
-        var prototype = arguments[0] is RealVar && arguments[0].Convert(VarType.INTEGER, out var bound, out _, this)
-            ? bound
-            : arguments[0];
-        if (!prototype.Convert(VarType.STRING, out _, out var prototypeString, this))
+        // SPITBOL takes the first argument as an integer before it takes it as a prototype, so ARRAY(3), ARRAY(3.5), ARRAY('3')
+        // and ARRAY(' 3') are all the vector of three
+        string prototype;
+        if (arguments[0].Convert(VarType.INTEGER, out _, out var dimension, this))
+            prototype = ((long)dimension).ToString(System.Globalization.CultureInfo.InvariantCulture);
+        else if (arguments[0].Convert(VarType.STRING, out _, out var prototypeString, this))
+            prototype = (string)prototypeString;
+        else
         {
             LogRuntimeException(64);
             return;
         }
 
         ArrayVar av = new();
-        var result = av.ConfigurePrototype((string)prototypeString, arguments[1]);
+        var result = av.ConfigurePrototype(prototype, arguments[1], MaxObjectLength);
 
         if (result == 0)
         {

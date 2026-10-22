@@ -49,7 +49,8 @@ end
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
+        // the prototype of a table is its size, as an integer, as sbl says
+        Assert.AreEqual(20, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
     }
 
     [TestMethod]

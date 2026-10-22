@@ -135,12 +135,15 @@ public partial class Executive
             }
             arguments[0] = SystemStack.Pop();
 
-            // A deferred target is evaluated for a NAME, as SPITBOL evaluates it by name: an expression that can only give
-            // a value, or a call that gave one (a RETURN, a builtin's value), fails the assignment once its side effects are
-            // done, where it assigned the value's own variable or was error 212 (. *F() with F = 'ZZ' :(RETURN) assigned F)
+            // A deferred target is evaluated for a NAME, as SPITBOL evaluates it by name: an expression that can only give a
+            // value (*'abc', *(X 'b')) is error 249 and a call that gave one (a RETURN, a builtin's value) error 21, once its side
+            // effects are done. The error is the deferred evaluation's, so it fails the statement even with &ERRLIMIT at 0, as in
+            // SPITBOL; the assignment failed with no error, and before that assigned the value's own variable or was error 212
             if (ValueExpressions.Contains(expressionVar1.FunctionName) || !IsName(arguments[0]))
             {
-                Failure = true;
+                ExpressionDepth++;
+                try { LogRuntimeException(ValueExpressions.Contains(expressionVar1.FunctionName) ? 249 : 21); }
+                finally { ExpressionDepth--; }
                 return;
             }
         }

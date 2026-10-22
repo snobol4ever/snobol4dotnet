@@ -128,6 +128,21 @@ public partial class Executive
         SystemStack.Push(keywordVar);
     }
 
+    // The keywords whose values never change, which SPITBOL's compiler takes as constants: an operator or a pre-evaluated function
+    // given one is evaluated as the statement is compiled, and an error in it refuses the statement (StatementChecker)
+    private static readonly HashSet<string> ConstantKeywords =
+        ["ABORT", "ALPHABET", "ARB", "BAL", "FAIL", "FENCE", "LCASE", "REM", "SUCCEED", "UCASE"];
+
+    // The value of &symbol when the symbol, as Ampersand reads it, names one of those keywords; else null
+    internal Var? ConstantKeyword(string symbol)
+    {
+        if (!ConstantKeywords.Contains(symbol.ToUpperInvariant()) || !Parent.BuildOptions.CaseFolding && symbol.Any(char.IsLower)
+            || !KeywordTable.TryGetValue("&" + symbol, out var handler))
+            return null;
+        handler(StringVar.Null(), false);
+        return SystemStack.Pop();
+    }
+
     // Helpers
 
     private bool ReadOnlyHandler(bool set)

@@ -80,6 +80,31 @@ public class PreEvaluation
         Assert.AreEqual("eval 14\ncode 121\nw -1", SetupTests.RunWithInput(s));
     }
 
+    // The keywords whose values never change (&ABORT &ALPHABET &ARB &BAL &FAIL &FENCE &LCASE &REM &SUCCEED &UCASE) are constants to
+    // SPITBOL's compiler: -&FENCE ANY('') was compiled and failed at run time with ANY's 59, where sbl refuses it with 10. Found by the
+    // infinite_snobol4 generator ('{vc}(g){d}' -&FENCE ANY(''))
+    [TestMethod]
+    public void TEST_PreEvaluation_a_keyword_whose_value_never_changes_is_a_constant()
+    {
+        var s = "        OUTPUT = 'before'\n        V = -&FENCE ANY('')\n        W = 1 + &ALPHABET\n        X = LEN(&LCASE)\n" +
+                "        Y = &ARB | -&REM\n        OUTPUT = 'after'\nEND";
+        Assert.AreEqual(
+            Head +
+            "2               V = -&FENCE ANY('')\n\nTest.sno(2) : ERROR 010 -- negation operand is not numeric\n\n" +
+            "3               W = 1 + &ALPHABET\n\nTest.sno(3) : ERROR 002 -- addition right operand is not numeric\n\n" +
+            "4               X = LEN(&LCASE)\n\nTest.sno(4) : ERROR 120 -- len argument is not integer or expression\n\n" +
+            "5               Y = &ARB | -&REM\n\nTest.sno(5) : ERROR 010 -- negation operand is not numeric",
+            Run(s));
+    }
+
+    [TestMethod]
+    public void TEST_PreEvaluation_a_constant_keyword_is_still_a_name_and_its_values_run_as_before()
+    {
+        var s = "        &ERRLIMIT = 10\n        &ALPHABET = 1\n" +
+                "        OUTPUT = 'ran ' &ERRTYPE ' ' SIZE(&UCASE) ' ' SIZE(&ALPHABET) ' ' DATATYPE(&FENCE)\nEND";
+        Assert.AreEqual("ran 209 26 256 PATTERN", SetupTests.RunWithInput(s));
+    }
+
     [TestMethod]
     public void TEST_PreEvaluation_constants_that_do_not_err_run_as_before()
     {

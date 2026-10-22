@@ -123,7 +123,7 @@ internal sealed class StatementChecker(Builder parent)
                     stack.Add(new Operand(Kind.Other, StringVar.Null()));
                     break;
                 case Token.Type.IDENTIFIER:
-                    stack.Add(new Operand(Kind.Name));
+                    stack.Add(new Operand(Kind.Name, Name: token.MatchedString));
                     break;
 
                 case Token.Type.EXPRESSION:
@@ -241,11 +241,13 @@ internal sealed class StatementChecker(Builder parent)
                         }
 
                         // the name operators take a name: a literal, a value or a combination of operands (which only parens
-                        // can bring there) is error 212. A keyword is a name, the others (. and @) give a value
+                        // can bring there) is error 212. A keyword is a name, and a constant too when its value never changes
+                        // (&ALPHABET, &FENCE: -&FENCE is 10 as the statement is compiled); the others (. and @) give a value
                         case "." or "@" or "&":
                             if (IsValue(operand) || operand.Kind == Kind.Combination)
                                 return ValueWhereNameIsRequired;
-                            stack.Add(new Operand(token.MatchedString == "&" ? Kind.Name : Kind.Value));
+                            stack.Add(token.MatchedString != "&" ? new Operand(Kind.Value)
+                                : new Operand(Kind.Name, operand.Name == "" ? null : parent.Execute!.ConstantKeyword(parent.FoldCase(operand.Name))));
                             break;
 
                         // negation and interrogation give a value, whatever the operand: no name

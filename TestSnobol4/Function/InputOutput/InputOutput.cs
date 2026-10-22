@@ -5,6 +5,16 @@ namespace Test.InputOutput;
 [TestClass]
 public class InputOutput
 {
+    // The files a program opens for input, made empty in the folder the program runs in: INPUT of a file that is not there leaves the
+    // channel unopened, so a test of a channel in use read a file an earlier run had left behind and failed on a fresh clone
+    private static void MakeFiles(params string[] names)
+    {
+        var dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TestSnobol4");
+        Directory.CreateDirectory(dir);
+        foreach (var name in names)
+            File.WriteAllText(Path.Combine(dir, name), "");
+    }
+
     [TestMethod]
     public void TEST_113_001()
     {
@@ -705,6 +715,7 @@ end
     [TestMethod]
     public void Test10000()
     {
+        MakeFiles("file598.txt");
         // error 289 -- input channel currently in use
         var s = @"
         input('a','1','file598.txt')
@@ -723,6 +734,7 @@ end
     [TestMethod]
     public void Test10001()
     {
+        MakeFiles("file616.txt");
         // error 289 -- input channel currently in use
         var s = @"
         input('a','1','file616.txt')
@@ -741,6 +753,7 @@ end
     [TestMethod]
     public void Test10100()
     {
+        MakeFiles("file670.txt");
         // error 290 -- output channel currently in use
         var s = @"
         input('a','1','file670.txt')
@@ -759,6 +772,7 @@ end
     [TestMethod]
     public void Test10101()
     {
+        MakeFiles("file688.txt");
         // error 290 -- output channel currently in use
         var s = @"
         input('a','1','file688.txt')
@@ -777,6 +791,7 @@ end
     [TestMethod]
     public void Test11000()
     {
+        MakeFiles("file742.txt");
         // error 289 -- input channel currently in use
         var s = @"
         input('a','1','file742.txt')
@@ -795,6 +810,7 @@ end
     [TestMethod]
     public void Test11001()
     {
+        MakeFiles("file760.txt", "file761.txt");
         // error 289 -- input channel currently in use
         var s = @"
         input('a','1','file760.txt')
@@ -813,6 +829,7 @@ end
     [TestMethod]
     public void Test11100()
     {
+        MakeFiles("file814.txt", "file815.txt");
         // error 290 -- output channel currently in use
         var s = @"
         input('a','1','file814.txt')
@@ -831,6 +848,7 @@ end
     [TestMethod]
     public void Test11101()
     {
+        MakeFiles("file832.txt", "file833.txt");
         // error 290 -- output channel currently in use
         var s = @"
         input('a','1','file832.txt')
@@ -885,6 +903,7 @@ end
     [TestMethod]
     public void Test12000()
     {
+        MakeFiles("file886.txt");
         // success
         var s = @"
         input('a','1','file886.txt')
@@ -903,6 +922,7 @@ end
     [TestMethod]
     public void Test12001()
     {
+        MakeFiles("file904.txt");
         // success
         var s = @"
         input('a','1','file904.txt')

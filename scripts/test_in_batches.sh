@@ -18,7 +18,9 @@ size="${1:-100}"; secs="${BATCH_SECS:-300}"
 proj=TestSnobol4/TestSnobol4.csproj; dll=TestSnobol4/bin/Debug/net10.0/TestSnobol4.dll
 t="$(mktemp -d)"; trap 'rm -rf "$t"' EXIT
 
-dotnet build "$proj" -m:4 -v:q > "$t/build" 2>&1 || { tail -5 "$t/build"; echo "REFUSE(2): the test project does not build"; exit 2; }
+# one MSBuild worker, no node reuse, no shared compiler server: the box is shared (ceo CEO-1924, seven nodes seen at 17:15), and a -m
+# on the command line overrides Directory.Build.rsp's own -maxcpucount:1; the tests then run --no-build, so dotnet test builds nothing
+dotnet build "$proj" -m:1 -nodeReuse:false -p:UseSharedCompilation=false -v:q > "$t/build" 2>&1 || { tail -5 "$t/build"; echo "REFUSE(2): the test project does not build"; exit 2; }
 dotnet vstest "$dll" /ListFullyQualifiedTests /ListTestsTargetPath:"$t/all" > /dev/null 2>&1 && [ -s "$t/all" ] \
     || { echo "REFUSE(2): vstest listed no tests from $dll"; exit 2; }
 split -l "$size" -d -a 3 "$t/all" "$t/batch."

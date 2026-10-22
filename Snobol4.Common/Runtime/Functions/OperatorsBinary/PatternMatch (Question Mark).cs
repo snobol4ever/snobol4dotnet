@@ -85,7 +85,8 @@ public partial class Executive
         }
 
         // Perform conditional assignments from this PatternMatch's own BetaStack. An assignment whose deferred target fails or is an
-        // error (the run went on because &ERRLIMIT lets it) fails the statement, and the assignments after it are not made, as in SPITBOL
+        // error (the run went on because &ERRLIMIT lets it) fails the statement, and the assignments after it are not made, as in SPITBOL;
+        // an error raised inside a function the target calls fails only that function's statement, and its return is the target's
         var committed = true;
         foreach (var nameListEntry in BetaStack.Reverse())
         {
@@ -97,12 +98,11 @@ public partial class Executive
 
             // an assignment that was not made (the evaluation of its deferred target failed or was an error) leaves nothing to take off
             var depth = SystemStack.Count;
-            var errors = Parent.ErrorCodeHistory.Count;
             Failure = false;
             Assign(assignment);
             while (SystemStack.Count > depth)
                 SystemStack.Pop();
-            if (Failure || Parent.ErrorCodeHistory.Count != errors)
+            if (Failure)
             {
                 committed = false;
                 break;

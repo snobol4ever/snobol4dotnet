@@ -131,4 +131,33 @@ E10     OUTPUT = R ' N=' N ' FIRES=' FIRES ' ZZ=' ZZ ' A1=' A<1> ' G=' G
 end";
         Assert.AreEqual(@"nnnnnnnnyy N=1 FIRES=1 ZZ=h A1=i G=", SetupTests.MaskListingHead(SetupTests.RunWithInput(program)));
     }
+
+    // An error inside a function the target's own call needs (an integer overflow in CR, called for SH's argument) fails only CR's
+    // statement, as any error in an expression's evaluation does, and the match goes on (rung32); the console counted the logged error
+    // as the assignment's own and failed the match (was A: match failed)
+    [TestMethod]
+    public void TEST_DeferredAssigneeFailure_an_error_in_a_function_the_target_calls_fails_only_its_statement()
+    {
+        var program = @"        DEFINE('CR(RAW)N,I,LEN,D')                         :(CR_END)
+CR      N = 0
+        I = 1
+        LEN = SIZE(RAW)
+CRL     LE(I, LEN)                                         :F(CRE)
+        D = SUBSTR(RAW, I, 1)
+        (N = ((N * 10) + D))
+        I = I + 1                                          :(CRL)
+CRE     CR = N                                             :(RETURN)
+CR_END
+        DEFINE('SH(T,V)')                                  :(SH_END)
+SH      OUTPUT = 'SH ' T ' ' V
+        SH = .DUMMY                                        :(NRETURN)
+SH_END
+        OUTPUT = 'A: in a deferred capture target'
+        'x' ? ('x' . *SH('ILIT', CR('1234567890123456789012345')))   :S(B)
+        OUTPUT = 'A: match failed'
+B       OUTPUT = 'B: the program continues'
+END";
+        Assert.AreEqual("A: in a deferred capture target\nSH ILIT 1234567890123456789\nB: the program continues",
+            SetupTests.MaskListingHead(SetupTests.RunWithInput(program)).Replace("\r\n", "\n"));
+    }
 }

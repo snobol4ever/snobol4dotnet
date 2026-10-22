@@ -20,8 +20,9 @@ public partial class Executive
     private bool NaturalVariableName(Var argument, out string name)
     {
         name = "";
-        if (argument is NameVar { Collection: not null })
-            return false;
+
+        // the NAME of an element has no pointer, and has no string; a NAME kept in an array or a DATA field is stamped with its place
+        // (Key, Collection) but is still the name of its variable
         if (!argument.Convert(VarType.STRING, out _, out var text, this) || (string)text == "")
             return false;
         name = Parent.FoldCase((string)text);

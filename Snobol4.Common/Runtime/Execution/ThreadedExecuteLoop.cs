@@ -117,9 +117,9 @@ public partial class Executive
                     }
                     // a statement that did not compile is error 7 once it is counted as executed, as in SPITBOL
                     CheckCompiledStatement(instr.IntOperand);
-                    if (AmpStatementLimit > 0 && AmpStatementCount >= AmpStatementLimit)
+                    if (AmpStatementLimit > 0 && AmpStatementCount >= AmpStatementLimit && !StatementLimitBelowCount)
                     {
-                        LogRuntimeException(244);
+                        LogRuntimeException(244, fatal: true);
                         Failure = true;
                         exitCode = -1;
                         goto Done;

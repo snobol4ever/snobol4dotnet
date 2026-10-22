@@ -52,6 +52,7 @@ public partial class Executive
     internal long AmpOutput = 1;   // 0 suspends every output association, as in SPITBOL
     internal long AmpProfile;
     internal long AmpStatementLimit = 2147483647;
+    internal bool StatementLimitBelowCount;   // &STLIMIT was set at or below &STCOUNT: it is never reached, as in SPITBOL
     internal long AmpTrace;
     internal long AmpTrim = 1;   // sbl x64 starts &TRIM at 1 (kvtrm), not the manual's 0
 
@@ -420,6 +421,10 @@ public partial class Executive
         {
             if (IntegerHandler(value, out var integerVar)) return;
             AmpStatementLimit = integerVar.Data;
+
+            // SPITBOL counts down from the limit as it is set: a limit at or below the count already made allows no more or fewer
+            // statements, it is just never reached (until it is set again)
+            StatementLimitBelowCount = AmpStatementLimit > 0 && AmpStatementLimit <= AmpStatementCount;
         }
 
         SystemStack.Push(new IntegerVar(AmpStatementLimit, "&stlimit", true));

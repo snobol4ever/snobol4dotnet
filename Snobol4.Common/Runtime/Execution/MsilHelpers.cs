@@ -152,9 +152,10 @@ public partial class Executive
         }
         // a statement that did not compile is error 7 once it is counted as executed, as in SPITBOL
         CheckCompiledStatement(stmtIdx);
-        if (AmpStatementLimit > 0 && AmpStatementCount >= AmpStatementLimit)
+        if (AmpStatementLimit > 0 && AmpStatementCount >= AmpStatementLimit && !StatementLimitBelowCount)
         {
-            LogRuntimeException(244);
+            // the limit is passed on every statement from here, so the run ends whatever &ERRLIMIT allows
+            LogRuntimeException(244, fatal: true);
             Failure = true;
             return true;   // caller should abort
         }

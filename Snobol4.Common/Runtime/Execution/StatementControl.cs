@@ -74,10 +74,10 @@ public partial class Executive
             if (AmpStatementLimit <= 0)
                 continue;
 
-            if (AmpStatementCount < AmpStatementLimit)
+            if (AmpStatementCount < AmpStatementLimit || StatementLimitBelowCount)
                 continue;
 
-            LogRuntimeException(244);
+            LogRuntimeException(244, fatal: true);
             Failure = true;
             break;
         }

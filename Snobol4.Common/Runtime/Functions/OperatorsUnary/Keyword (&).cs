@@ -48,6 +48,7 @@ public partial class Executive
     internal long AmpFullScan = 1;
     internal long AmpInput = 1;
     internal long AmpMaxLength = 16777216;
+    internal long MaxObjectLength = 16777216;   // sbl's mxlen: the -m value, which no &MAXLNGTH and no small-integer argument exceeds
     internal long AmpOutput = 1;   // 0 suspends every output association, as in SPITBOL
     internal long AmpProfile;
     internal long AmpStatementLimit = 2147483647;

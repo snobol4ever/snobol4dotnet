@@ -8,36 +8,59 @@ public partial class Executive
 {
     internal void Substring(List<Var> arguments)
     {
+        // SPITBOL takes the third argument off the stack first, then the second, then the first: that is the order of
+        // its errors, and a third or second argument out of range fails before the first one is looked at
+        if (!SmallInteger(arguments[2], out var length, out var lengthInRange))
+        {
+            LogRuntimeException(192);
+            return;
+        }
+
+        if (!lengthInRange)
+        {
+            NonExceptionFailure();
+            return;
+        }
+
+        if (!SmallInteger(arguments[1], out var start, out var startInRange))
+        {
+            LogRuntimeException(193);
+            return;
+        }
+
+        if (!startInRange || start == 0)
+        {
+            NonExceptionFailure();
+            return;
+        }
+
         if (!arguments[0].Convert(VarType.STRING, out _, out var inputString, this))
         {
             LogRuntimeException(194);
             return;
         }
 
-        if (!arguments[1].Convert(VarType.INTEGER, out _, out var start, this))
+        var text = (string)inputString;
+        var offset = (int)start - 1;
+        var count = (int)length;
+        if (count == 0)
         {
-            LogRuntimeException(193);
-            return;
+            // no third argument (or zero): the rest of the string, which is null when the offset is just past its end
+            if (offset > text.Length)
+            {
+                NonExceptionFailure();
+                return;
+            }
+
+            count = text.Length - offset;
         }
 
-        if (!arguments[2].Convert(VarType.INTEGER, out _, out var length, this))
-        {
-            LogRuntimeException(192);
-            return;
-        }
-
-        if ((int)(long)start > ((string)inputString).Length || (int)(long)start < 1 || (int)(long)length < 0 || (int)(long)length + (int)(long)start - 1 > ((string)inputString).Length)
+        if (offset + count > text.Length)
         {
             NonExceptionFailure();
             return;
         }
 
-        if ((long)length == 0)
-        {
-            SystemStack.Push(new StringVar(((string)inputString)[((int)(long)start - 1)..]));
-            return;
-        }
-
-        SystemStack.Push(new StringVar(((string)inputString).Substring((int)(long)start - 1, (int)(long)length)));
+        SystemStack.Push(new StringVar(text.Substring(offset, count)));
     }
 }

@@ -117,7 +117,8 @@ end
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("fail", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r")]).Data);
+        // a negative length pads nothing and returns the string, as in sbl
+        Assert.AreEqual("this is a test", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r")]).Data);
     }
 
 }

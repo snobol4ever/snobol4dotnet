@@ -291,6 +291,7 @@ public partial class Builder : IDisposable
     {
         // -m: seed &MAXLNGTH from the command-line value before any user code runs
         exec.AmpMaxLength = BuildOptions.MaxObjectBytes;
+        exec.MaxObjectLength = BuildOptions.MaxObjectBytes;
 
         // -f: CaseFolding OFF → seed &CASE=0 so EVAL/CODE compile with the same
         // case-sensitivity setting as the main program.  Without this, EVAL would

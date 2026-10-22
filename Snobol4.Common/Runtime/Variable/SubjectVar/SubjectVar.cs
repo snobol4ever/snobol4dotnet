@@ -3,8 +3,15 @@ using System.Diagnostics;
 
 namespace Snobol4.Common;
 
+/// <summary>
+/// The value of a pattern match, S ? P: a string, the substring P matched, as SPITBOL gives it wherever a value is
+/// wanted (V = (S ? P), (S ? P) 'X', SIZE(S ? P), a subscript, an argument).  It also keeps the subject and where P
+/// matched, for the one use that needs them: as the left operand of =, S ? P = R replaces the matched substring in S.
+/// A copy of it is a plain string (StringVar's cloning), so a variable, element or parameter given it never holds a
+/// match to replace into.
+/// </summary>
 [DebuggerDisplay("{FormattingStrategy.DebugVar(this)}")]
-public sealed class SubjectVar : Var
+public sealed class SubjectVar : StringVar
 {
     #region Data
 
@@ -13,37 +20,13 @@ public sealed class SubjectVar : Var
 
     #endregion
 
-    #region Strategy Instances (Singletons for performance)
-
-    private static readonly SubjectArithmeticStrategy _arithmeticStrategy = new();
-    private static readonly SubjectComparisonStrategy _comparisonStrategy = new();
-    private static readonly SubjectConversionStrategy _conversionStrategy = new();
-    private static readonly SubjectCloningStrategy _cloningStrategy = new();
-    private static readonly SubjectFormattingStrategy _formattingStrategy = new();
-
-    protected override IArithmeticStrategy ArithmeticStrategy => _arithmeticStrategy;
-    protected override IComparisonStrategy ComparisonStrategy => _comparisonStrategy;
-    protected override IConversionStrategy ConversionStrategy => _conversionStrategy;
-    protected override ICloningStrategy CloningStrategy => _cloningStrategy;
-    protected override IFormattingStrategy FormattingStrategy => _formattingStrategy;
-
-    #endregion
-
     #region Constructors
 
     internal SubjectVar(string subject, MatchResult matchResult)
+        : base(subject[matchResult.PreCursor..matchResult.PostCursor])
     {
         Subject = subject;
         MatchResult = matchResult;
-    }
-
-    internal SubjectVar(SubjectVar template)
-    {
-        Subject = template.Subject;
-        MatchResult = template.MatchResult;
-        Symbol = template.Symbol;
-        InputChannel = template.InputChannel;
-        OutputChannel = template.OutputChannel;
     }
 
     #endregion
@@ -90,77 +73,6 @@ public sealed class SubjectVar : Var
             InputChannel = InputChannel,
             OutputChannel = OutputChannel
         };
-    }
-
-                public string GetMatchedString()
-    {
-        // Optimized: Direct length calculation and substring
-        var length = MatchResult.PostCursor - MatchResult.PreCursor;
-        return Subject.Substring(MatchResult.PreCursor, length);
-    }
-
-                public string GetBeforeMatch()
-    {
-        return Subject[..MatchResult.PreCursor];
-    }
-
-                public string GetAfterMatch()
-    {
-        return Subject[MatchResult.PostCursor..];
-    }
-
-    #endregion
-
-    #region Double Dispatch Methods
-
-    // Subject variables don't support arithmetic operations with other types
-
-    protected internal override Var AddInteger(IntegerVar left, Executive executive)
-    {
-        executive.LogRuntimeException(2); // RightPattern operand of + is not numeric
-        return StringVar.Null();
-    }
-
-    protected internal override Var AddReal(RealVar left, Executive executive)
-    {
-        executive.LogRuntimeException(2); // RightPattern operand of + is not numeric
-        return StringVar.Null();
-    }
-
-    protected internal override Var SubtractInteger(IntegerVar left, Executive executive)
-    {
-        executive.LogRuntimeException(33); // RightPattern operand of - is not numeric
-        return StringVar.Null();
-    }
-
-    protected internal override Var SubtractReal(RealVar left, Executive executive)
-    {
-        executive.LogRuntimeException(33); // RightPattern operand of - is not numeric
-        return StringVar.Null();
-    }
-
-    protected internal override Var MultiplyInteger(IntegerVar left, Executive executive)
-    {
-        executive.LogRuntimeException(27); // RightPattern operand of * is not numeric
-        return StringVar.Null();
-    }
-
-    protected internal override Var MultiplyReal(RealVar left, Executive executive)
-    {
-        executive.LogRuntimeException(27); // RightPattern operand of * is not numeric
-        return StringVar.Null();
-    }
-
-    protected internal override Var DivideInteger(IntegerVar left, Executive executive)
-    {
-        executive.LogRuntimeException(13); // RightPattern operand of / is not numeric
-        return StringVar.Null();
-    }
-
-    protected internal override Var DivideReal(RealVar left, Executive executive)
-    {
-        executive.LogRuntimeException(13); // RightPattern operand of / is not numeric
-        return StringVar.Null();
     }
 
     #endregion

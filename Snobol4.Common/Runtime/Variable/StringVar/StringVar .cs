@@ -4,7 +4,8 @@ using System.Diagnostics;
 namespace Snobol4.Common;
 
 [DebuggerDisplay("{FormattingStrategy.DebugVar(this)}")]
-public sealed class StringVar : Var
+// Not sealed: the value of a pattern match (S ? P), a SubjectVar, is a string too
+public class StringVar : Var
 {
     #region Data
 

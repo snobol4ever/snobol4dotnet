@@ -178,12 +178,17 @@ public class Scanner
         _state!.ClearAlternates();
         _matchFunctionLevel = Exec.AmpFunctionLevel;
 
+        // Set when an ARBNO repetition returns to its loop without getting past its start: the loop goes on to what follows, but
+        // keeps no alternate to try a further repetition from there
+        var noFurtherRepetition = false;
+
         while (true)
         {
-            if (node.HasAlternate())
+            if (node.HasAlternate() && !noFurtherRepetition)
             {
                 _state.SaveAlternate(node.Alternate);
             }
+            noFurtherRepetition = false;
 
             // S-2-bridge-7-byrd-pattern: PM_CALL — entering a node match.
             MonitorIpc.EmitPmCall(NodeTag(node), _state.CursorPosition);
@@ -226,15 +231,12 @@ public class Scanner
                         break;
                     }
                     // The end of a pattern: the statement's own ends the match; one entered by *X or ARBNO returns
-                    // to its caller, and an ARBNO repetition that did not get past its start fails there
+                    // to its caller. An ARBNO repetition that did not get past its start still goes on to what follows
+                    // the ARBNO, as in SPITBOL, but no further repetition is tried from it, which would repeat forever
                     if (_state.Frames is not { } frame)
                         return MatchResult.Success(_state);
                     _state.Frames = frame.Parent;
-                    if (_state.CursorPosition <= frame.AdvanceFrom)
-                    {
-                        mr = MatchResult.Failure(_state);
-                        goto case MatchResult.Status.FAILURE;
-                    }
+                    noFurtherRepetition = _state.CursorPosition <= frame.AdvanceFrom;
                     node = _ast![frame.ReturnNode];
                     break;
 

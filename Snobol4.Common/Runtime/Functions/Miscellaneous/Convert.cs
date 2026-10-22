@@ -65,9 +65,15 @@ public partial class Executive
             return;
         }
 
+        // A text that does not compile as an EXPRESSION or a CODE is the compile error of EVAL or CODE, as in SPITBOL: counted while
+        // &ERRLIMIT is above 0 and trapped by an armed SETEXIT handler (CONVERT('[]', 'EXPRESSION') is 222); it failed quietly
+        var compileErrors = CompileErrorSerial;
         if (!varIn.Convert(vOutType, out var varOut, out _, this))
         {
-            NonExceptionFailure();
+            if (CompileErrorSerial != compileErrors)
+                CompileErrorFailure();
+            else
+                NonExceptionFailure();
             return;
         }
 

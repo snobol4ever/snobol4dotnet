@@ -50,9 +50,14 @@ public class StringConversionStrategy : IConversionStrategy
                 valueOut = stringSelf.Data;
                 return true;
 
+            // the null string is the expression whose value is the null string, as SPITBOL converts it
             case Executive.VarType.EXPRESSION:
                 if (stringSelf.Data.Length == 0)
-                    return false;
+                {
+                    varOut = new ExpressionVar(x => x.SystemStack.Push(StringVar.Null()));
+                    valueOut = ((ExpressionVar)varOut).FunctionName;
+                    return true;
+                }
 
                 return ConvertToExpression(stringSelf, exec, out varOut, out valueOut);
 

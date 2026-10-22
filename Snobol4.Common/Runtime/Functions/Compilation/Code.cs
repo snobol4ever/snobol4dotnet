@@ -70,6 +70,9 @@ public partial class Executive
         return null;
     }
 
+    // Counts the compiles CompileQuietly found in error, so a caller that compiled through a conversion (CONVERT) can tell
+    internal long CompileErrorSerial;
+
     // Runs a compile for EVAL or CODE with its diagnostics unprinted. A compile error is taken back out of the histories and left
     // in &ERRTYPE and &ERRTEXT, and the compile fails; the caller decides what the error is (CompileErrorFailure)
     internal bool CompileQuietly(Func<bool> build)
@@ -90,6 +93,7 @@ public partial class Executive
         Parent.MessageHistory.RemoveRange(Parent.MessageHistory.Count - added, added);
         AmpErrorType = code;
         AmpErrorText = CompilerException.ErrorMessage[code];
+        CompileErrorSerial++;
         return false;
     }
 }

@@ -46,7 +46,7 @@ public partial class Executive
         // The prototype is scanned as SPITBOL scans it: the function's name up to the left paren (83 when there is none, 84 when
         // it is null), the arguments up to the right paren, each ended by a comma or the paren (85 at the end of the string), and
         // the locals, ended by commas. A null name is skipped, except that a prototype with no arguments ends the argument list.
-        var prototype = Parent.FoldCase((string)value).Trim();
+        var prototype = FoldName((string)value).Trim();
         var position = 0;
         var functionName = ScanPrototype(prototype, ref position, '(', '(', out var stopped);
         if (stopped == 0)
@@ -430,7 +430,7 @@ public partial class Executive
             RealVar r => r.Data.ToString(CultureInfo.InvariantCulture),
             _ => ""
         };
-        return spelling == "" ? null : new NameVar(Parent.FoldCase(spelling), null, null);
+        return spelling == "" ? null : new NameVar(FoldName(spelling), null, null);
     }
 
     // A call or return is traced when &FTRACE is on (each line counts it down) or when TRACE named the

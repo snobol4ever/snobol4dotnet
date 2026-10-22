@@ -337,15 +337,17 @@ public partial class Executive
         SystemStack.Push(new IntegerVar(AmpAnchor, "&anchor", true));
     }
 
+    // A name the run reads from a string (APPLY, $, DEFINE, DATA, OPSYN, an indirect call) folds as &CASE says at that moment, as in
+    // SPITBOL: under -f, once &CASE is 1, APPLY('f') calls F and $'abc' reads ABC. A name in the program's own text was folded when it
+    // was compiled, and &CASE does not change it after
+    internal string FoldName(string name) => AmpCaseFolding != 0 ? name.ToUpperInvariant() : name;
+
     internal void HandleCase(Var value, bool set)
     {
         if (set)
         {
             if (IntegerHandler(value, out var integerVar)) return;
             AmpCaseFolding = integerVar.Data;
-            // the names the run reads from strings fold as &CASE says from now on, as in SPITBOL: APPLY('f') calls F, $'abc' reads
-            // ABC and DEFINE('g()') defines G once &CASE is 1, under -f too (FoldCase reads this)
-            Parent.BuildOptions.CaseFolding = AmpCaseFolding != 0;
         }
 
         SystemStack.Push(new IntegerVar(AmpCaseFolding, "&case", true));

@@ -2,7 +2,8 @@
 
 public partial class Executive
 {
-    public void Function(int argumentCount)
+    // nameFolded: the name on the stack was folded by its caller (APPLY, by &CASE), and is looked up as it is
+    public void Function(int argumentCount, bool nameFolded = false)
     {
         using var profiler1 = Profiler.Start3($"Function", this);
 
@@ -26,7 +27,7 @@ public partial class Executive
         var functionStringVar = (StringVar)SystemStack.Pop();
         // Function name must be in the symbol table; a name given as a string folds as any name does
         // (APPLY('gt', ...) calls GT under case folding, as in SPITBOL)
-        var functionEntry = FunctionTable[Parent.FoldCase(functionStringVar.Data)];
+        var functionEntry = FunctionTable[nameFolded ? functionStringVar.Data : Parent.FoldCase(functionStringVar.Data)];
         //if (!FunctionTable.TryGetValue(functionStringVar.Data, out var functionEntry))
         if (functionEntry == null)
         {
@@ -79,7 +80,7 @@ public partial class Executive
 
         // The name was resolved by OpIndirection — pop and convert to string.
         var nameVar = SystemStack.Pop();
-        var functionName = Parent.FoldCase(nameVar.ToString() ?? "");
+        var functionName = FoldName(nameVar.ToString() ?? "");
 
         if (string.IsNullOrEmpty(functionName))
         {

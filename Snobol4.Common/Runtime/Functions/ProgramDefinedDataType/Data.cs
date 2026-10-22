@@ -53,7 +53,7 @@ public partial class Executive
         // The prototype is scanned as SPITBOL scans it: the datatype's name up to the left paren (77 when there is none, 78 when it
         // is null), then the field names up to the right paren, each ended by a comma or the paren (79 at the end of the string,
         // 80 for a null name)
-        var prototype = Parent.FoldCase((string)value).Trim();
+        var prototype = FoldName((string)value).Trim();
         var position = 0;
         var dataName = ScanPrototype(prototype, ref position, '(', '(', out var stopped);
         if (stopped == 0)

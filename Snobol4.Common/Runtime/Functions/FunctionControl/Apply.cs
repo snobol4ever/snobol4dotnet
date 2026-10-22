@@ -10,12 +10,13 @@ public partial class Executive
             return;
         }
 
+        // the name was folded as &CASE says now (NaturalVariableName), as in SPITBOL: under -f with &CASE = 1, APPLY('f') calls F
         arguments[0] = new StringVar(name);
         arguments.RemoveAt(arguments.Count - 1);
 
         foreach (var argument in arguments)
             SystemStack.Push(argument);
 
-        Function(arguments.Count - 1);
+        Function(arguments.Count - 1, nameFolded: true);
     }
 }

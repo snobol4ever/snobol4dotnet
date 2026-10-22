@@ -25,7 +25,7 @@ public partial class Executive
         // (Key, Collection) but is still the name of its variable
         if (!argument.Convert(VarType.STRING, out _, out var text, this) || (string)text == "")
             return false;
-        name = Parent.FoldCase((string)text);
+        name = FoldName((string)text);
         return true;
     }
 

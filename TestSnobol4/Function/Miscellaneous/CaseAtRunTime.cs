@@ -60,4 +60,32 @@ END";
 6 F 286
 7 S 30", SetupTests.RunWithInputDirectives("-bf", program).Replace("\r\n", "\n").TrimEnd('\n'));
     }
+
+    // A call in a program's text was resolved when that text was compiled, and a later &amp;CASE does not change it: h(1) still calls h
+    // once &amp;CASE is 1, and so does h(3) in an EVAL whose own text sets &amp;CASE first, where APPLY('h', 1) looks for H (22). Setting &amp;CASE
+    // had refolded the name of every call the run looked up by name, so EVAL("(&amp;CASE = 1) h(3)") was 22 (the infinite_snobol4
+    // generator, BREAKX((&amp;CASE = 9)) . h(h))
+    [TestMethod]
+    public void TEST_CaseAtRunTime_leaves_the_compiled_calls_alone()
+    {
+        var program = @"        &ERRLIMIT = 10
+        DEFINE('h(n)')                              :(he)
+h       h = n + 1                                   :(RETURN)
+he      &CASE = 1
+        OUTPUT = '1 ' h(1)
+        V = APPLY('h', 1)                           :S(Y2)
+        OUTPUT = '2 F ' &ERRTYPE                    :(E2)
+Y2      OUTPUT = '2 S ' V
+E2      &CASE = 0
+        V = EVAL(""(&CASE = 1) h(3)"")                :S(Y3)
+        OUTPUT = '3 F ' &ERRTYPE                    :(E3)
+Y3      OUTPUT = '3 S ' V
+E3      &CASE = 0
+        C = CODE("" &CASE = 1; OUTPUT = '4 ' h(4)"") :S<C>
+END";
+        Assert.AreEqual(@"1 2
+2 F 22
+3 S 14
+4 5", SetupTests.RunWithInputDirectives("-bf", program).Replace("\r\n", "\n").TrimEnd('\n'));
+    }
 }

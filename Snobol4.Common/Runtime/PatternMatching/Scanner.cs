@@ -103,6 +103,13 @@ public class Scanner
         _state?.MarkAlternates();
     }
 
+    internal void StartImmediate()
+    {
+        _state?.StartImmediate();
+    }
+
+    internal int FinishImmediate() => _state?.FinishImmediate() ?? 0;
+
     // Graft the nodes of subPattern into this scanner's live AST, wiring the last
     // node's Subsequent to successorNodeIndex (the node that follows *X in the outer
     // pattern).  Returns the index of the grafted sub-tree's start node so the Match

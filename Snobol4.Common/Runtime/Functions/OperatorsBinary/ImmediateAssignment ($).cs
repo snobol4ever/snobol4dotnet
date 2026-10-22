@@ -21,7 +21,7 @@ public partial class Executive
         }
 
         var vb = new ImmediateVariableAssociation2(arguments[1]);
-        var va = new ImmediateVariableAssociation1(vb);
+        var va = new ImmediateVariableAssociation1();
         var structure = new PatternVar(new ConcatenatePattern(va, new ConcatenatePattern((Pattern)pattern, vb)));
         SystemStack.Push(structure);
     }

@@ -5,21 +5,6 @@ namespace Snobol4.Common;
 [DebuggerDisplay("{DebugPattern()}")]
 internal class ImmediateVariableAssociation1 : NullPattern
 {
-    #region Members
-
-                    private readonly ImmediateVariableAssociation2 _va2;
-
-    #endregion
-
-    #region Construction
-
-                                                        internal ImmediateVariableAssociation1(ImmediateVariableAssociation2 va2)
-    {
-        _va2 = va2;
-    }
-
-    #endregion
-
     #region Methods
 
                                                                         internal override MatchResult Scan(int node, Scanner scan)
@@ -27,13 +12,14 @@ internal class ImmediateVariableAssociation1 : NullPattern
         using var profile1 = Profiler.Start4("$1", scan.Exec);
 
 
-        _va2.PreCursor = scan.CursorPosition;
+        // The start of P is stacked, not kept here: P can be matched again inside itself before its $ fires
+        scan.StartImmediate();
         return MatchResult.Success(scan);
     }
 
                                     internal override Pattern Clone()
     {
-        return new ImmediateVariableAssociation1(_va2);
+        return new ImmediateVariableAssociation1();
     }
 
     #endregion
@@ -42,8 +28,6 @@ internal class ImmediateVariableAssociation1 : NullPattern
 internal class ImmediateVariableAssociation2 : NullPattern
 {
     #region Members
-
-                    internal int PreCursor;
 
                 internal Var Assignee;
 
@@ -73,7 +57,7 @@ internal class ImmediateVariableAssociation2 : NullPattern
         List<Var> arguments =
         [
             Assignee,
-            new StringVar(scan.Subject[PreCursor..scan.CursorPosition])
+            new StringVar(scan.Subject[scan.FinishImmediate()..scan.CursorPosition])
         ];
 
         // Perform the immediate assignment

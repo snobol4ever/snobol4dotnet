@@ -7,11 +7,6 @@ namespace Snobol4.Common;
 
 public partial class Executive
 {
-    // Natural-variable-name pattern: letter/digit/underscore, starting with letter
-    // (SNOBOL4 identifiers). Used for Error 202 check on spec-path UNLOAD(fname).
-    private static bool IsNaturalVariableName(string s) =>
-        s.Length > 0 && char.IsLetter(s[0]) && s.All(c => char.IsLetterOrDigit(c) || c == '_');
-
     internal void UnloadExternalFunction(List<Var> arguments)
     {
         if (!arguments[0].Convert(VarType.STRING, out _, out var argObj, this))
@@ -36,11 +31,6 @@ public partial class Executive
         var looksLikePath = arg.Contains(Path.DirectorySeparatorChar)
                          || arg.Contains(Path.AltDirectorySeparatorChar)
                          || arg.Contains('.');
-        if (!looksLikePath && !IsNaturalVariableName(arg))
-        {
-            LogRuntimeException(201);
-            return;
-        }
 
         if (NativeContexts.TryGetValue(fnameKey, out var nativeEntry))
         {
@@ -51,7 +41,6 @@ public partial class Executive
             NativeContexts.Remove(fnameKey);
             FunctionTable.Remove(fnameKey);
 
-            SystemStack.Push(StringVar.Null());
             PredicateSuccess();
             return;
         }
@@ -82,7 +71,6 @@ public partial class Executive
                 DllRefCounts[dllPath] = count;
             }
 
-            SystemStack.Push(StringVar.Null());
             PredicateSuccess();
             return;
         }
@@ -108,10 +96,10 @@ public partial class Executive
         // Resolve path the same way Load does
         var resolvedPath = Path.IsPathRooted(arg)
             ? arg
-            : Path.GetFullPath(arg,
-                Parent.FilesToCompile.Count > 0
-                    ? Path.GetDirectoryName(Parent.FilesToCompile[^1]) ?? Directory.GetCurrentDirectory()
-                    : Directory.GetCurrentDirectory());
+            : Path.GetFullPath(arg, Path.GetFullPath(
+                Parent.FilesToCompile.Count > 0 && Path.GetDirectoryName(Parent.FilesToCompile[^1]) is { Length: > 0 } sourceDirectory
+                    ? sourceDirectory
+                    : Directory.GetCurrentDirectory()));
 
         // ── Reflect path: path-based UNLOAD — sweep all fnames for this DLL ──
         var reflectKeys = DotNetReflectContexts
@@ -142,7 +130,6 @@ public partial class Executive
             {
                 DllRefCounts[resolvedPath] = count;
             }
-            SystemStack.Push(StringVar.Null());
             PredicateSuccess();
             return;
         }
@@ -150,7 +137,6 @@ public partial class Executive
         if (!ActiveContexts.TryGetValue(resolvedPath, out var entry))
         {
             // Not loaded under either path — idempotent success
-            SystemStack.Push(StringVar.Null());
             PredicateSuccess();
             return;
         }
@@ -169,7 +155,6 @@ public partial class Executive
         GC.WaitForPendingFinalizers();
         GC.Collect();
 
-        SystemStack.Push(StringVar.Null());
         PredicateSuccess();
     }
 }

@@ -231,4 +231,20 @@ Test.sno(1) : ERROR 212 -- syntax error: value used where name is required", Set
 END";
         Assert.AreEqual(@"x", SetupTests.MaskListingHead(SetupTests.RunWithInput(program)));
     }
+
+    // the = of a chained assignment takes a concatenation as the subject and pattern of its own match: compiled, sbl accepts these
+    [TestMethod]
+    public void TEST_NameOperands_a_concatenation_before_an_equal_at_the_statements_level_compiles()
+    {
+        foreach (var statement in new[] { "A = X 'b' = 2", "A = X Y = 2", "B = A = X 'b' = 2", "A = X Y Z = 2" })
+            Assert.AreEqual(0, SetupTests.SetupScript("-b -n", $"        {statement}\nEND").ErrorCodeHistory.Count, statement);
+    }
+
+    // an alternation is no subject unless it is over a concatenation
+    [TestMethod]
+    public void TEST_NameOperands_an_alternation_that_is_no_pattern_match_as_a_target_is_212()
+    {
+        var build = SetupTests.SetupScript("-b -n", "        A | B C = 2\nEND");
+        Assert.AreEqual(212, build.ErrorCodeHistory[0]);
+    }
 }

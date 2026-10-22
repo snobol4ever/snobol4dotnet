@@ -31,7 +31,11 @@ internal sealed class StatementChecker(Builder parent)
     private enum Kind { Constant, Value, Name, Question, Other, Combination, FunctionMark, ArrayMark }
 
     // Value is the operand's constant value when it has one; Subject is a match's subject
-    private sealed record Operand(Kind Kind, Var? Value = null, Operand? Subject = null, string Name = "");
+    // A combination is Nested when it stands inside parens or the arguments of a call (SPITBOL's c_cnp, no pattern match), and
+    // PatternMatch when it is a concatenation at the statement's own level, or an alternation of one (c_cnc, and c_alt over it), which an
+    // = takes for a subject and a pattern
+    private sealed record Operand(Kind Kind, Var? Value = null, Operand? Subject = null, string Name = "", bool Nested = false,
+        bool PatternMatch = false);
 
     private static readonly Operand ArrayMark = new(Kind.ArrayMark);
 
@@ -184,7 +188,7 @@ internal sealed class StatementChecker(Builder parent)
                 case Token.Type.R_PAREN_CHOICE:
                     if (stack.Count == 0)
                         return 0;
-                    stack[^1] = new Operand(Kind.Combination);
+                    stack[^1] = new Operand(Kind.Combination, Nested: true);
                     break;
 
                 case Token.Type.BINARY_PLUS or Token.Type.BINARY_MINUS or Token.Type.BINARY_STAR or Token.Type.BINARY_SLASH
@@ -294,9 +298,9 @@ internal sealed class StatementChecker(Builder parent)
                     if (!TakeTwo(stack, out var left, out _))
                         return 0;
                     var target = left.Kind == Kind.Question ? left.Subject! : left;
-                    // a concatenation is the subject and pattern of the statement's own =, and a value as the target of any other
-                    // (inside parens or the arguments of a call it is no pattern match: SPITBOL's c_cnp)
-                    if (IsValue(target) || target.Kind == Kind.Combination && !ReferenceEquals(token, postfix[^1]))
+                    // a concatenation at the statement's level is the subject and pattern of an =; inside parens or the arguments of a
+                    // call it is SPITBOL's c_cnp, no pattern match, and an alternation that is not over a concatenation is none either
+                    if (IsValue(target) || target.Kind == Kind.Combination && (target.Nested || !target.PatternMatch))
                         return ValueWhereNameIsRequired;
                     stack.Add(new Operand(Kind.Value));
                     break;
@@ -304,10 +308,14 @@ internal sealed class StatementChecker(Builder parent)
 
                 // every other operator takes two operands and gives a value that is neither a constant nor a name
                 case Token.Type.BINARY_CONCAT or Token.Type.BINARY_PIPE:
-                    if (!TakeTwo(stack, out _, out _))
+                {
+                    if (!TakeTwo(stack, out var left, out _))
                         return 0;
-                    stack.Add(new Operand(Kind.Combination));
+                    var concatenation = token.TokenType == Token.Type.BINARY_CONCAT;
+                    stack.Add(new Operand(Kind.Combination, Nested: token.Index > 0,
+                        PatternMatch: concatenation || left.Kind == Kind.Combination && left.PatternMatch));
                     break;
+                }
 
                 case Token.Type.BINARY_AMPERSAND or Token.Type.BINARY_AT or Token.Type.BINARY_HASH or Token.Type.BINARY_PERCENT
                     or Token.Type.BINARY_TILDE:

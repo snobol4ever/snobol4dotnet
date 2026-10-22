@@ -257,6 +257,9 @@ public abstract class Var : IEquatable<Var>
                         return false;
                 if (!digits)
                     return false;
+                // 9223372036854775808 is no integer, and a string of digits with no point or exponent is no real: it is not a number
+                if (!negative && integer == long.MinValue)
+                    return false;
                 realOut = negative ? integer : -(double)integer;
                 return true;
             }

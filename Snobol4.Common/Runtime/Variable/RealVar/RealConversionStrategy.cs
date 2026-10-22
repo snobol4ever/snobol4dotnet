@@ -83,19 +83,12 @@ public sealed class RealConversionStrategy : IConversionStrategy
         // Round towards zero (truncate)
         var rounded = Math.Round(realSelf.Data, MidpointRounding.ToZero);
 
-        try
-        {
-            var intValue = checked((long)rounded);
-            varOut = IntegerVar.Create(intValue);
-            valueOut = intValue;
-            return true;
-        }
-        catch (OverflowException)
-        {
-            varOut = StringVar.Null();
-            valueOut = string.Empty;
-            return false;
-        }
+        // A real beyond the integers converts to the smallest integer, as the x86 conversion SPITBOL uses does (CONVERT(1.0E19, 'INTEGER')
+        // is -9223372036854775808, and so DUPL('x', 1.0E100) fails and LPAD('x', 1.0E100) pads nothing)
+        var intValue = rounded is >= -9223372036854775808.0 and < 9223372036854775808.0 ? (long)rounded : long.MinValue;
+        varOut = IntegerVar.Create(intValue);
+        valueOut = intValue;
+        return true;
     }
 
 

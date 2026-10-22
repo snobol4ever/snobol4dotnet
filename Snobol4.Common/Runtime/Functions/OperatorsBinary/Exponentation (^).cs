@@ -142,9 +142,15 @@ public partial class Executive
             return 0;
         }
 
+        // 0, 1 and -1 stay where they are however long the multiplying goes on; any other base overflows within 63 steps (error 17)
+        if (left is 0 or 1)
+            return right == 0 ? 1 : left;
+        if (left == -1)
+            return right % 2 == 0 ? 1 : -1;
+
         checked
         {
-            for (var i = 0; i < right; ++i)
+            for (long i = 0; i < right; ++i)
                 result *= left;
         }
 

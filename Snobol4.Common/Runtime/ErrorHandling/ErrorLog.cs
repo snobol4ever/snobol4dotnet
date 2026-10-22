@@ -10,7 +10,8 @@ public partial class Executive
     // fatal: the run ends whatever &ERRLIMIT allows, as SPITBOL ends it on a stack overflow (246)
     public void LogRuntimeException(int code) => LogRuntimeException(code, fatal: false);
 
-    public void LogRuntimeException(int code, bool fatal)
+    // `errorType` is the value &ERRTYPE takes where it is not the code reported: assigning &ERRTYPE = 0 reports error 36 and leaves 0
+    public void LogRuntimeException(int code, bool fatal, long? errorType = null)
     {
         if (PreEvaluating)
         {
@@ -18,8 +19,8 @@ public partial class Executive
             throw new PreEvaluationAbandoned();
         }
 
-        AmpErrorType = code;
-        TraceKeyword("ERRTYPE", code);
+        AmpErrorType = errorType ?? code;
+        TraceKeyword("ERRTYPE", AmpErrorType);
         var fileName = Path.GetFileName(SourceFiles[AmpCurrentLineNumber]);
         // The erring statement's own numbers, recorded when it was compiled ("name:code/list)" and its
         // physical line), not the compiler's counters, which have moved on to the end of the source
@@ -28,9 +29,9 @@ public partial class Executive
         var lineCount = 1 + SourceLineNumbers[AmpCurrentLineNumber];
         // &ERRTEXT is the message alone, as in SPITBOL; the full diagnostic (file, numbers, source
         // line) is what is printed and recorded
-        AmpErrorText = CompilerException.ErrorMessage[code];
+        AmpErrorText = ErrorMessageText(code);
         LastDiagnostic =
-            $"{fileName}({counts}/{lineCount}): error {code} -- {CompilerException.ErrorMessage[code]}{Environment.NewLine}{SourceCode[AmpCurrentLineNumber].Split('\n')[1]}";
+            $"{fileName}({counts}/{lineCount}): error {code} -- {AmpErrorText}{Environment.NewLine}{SourceCode[AmpCurrentLineNumber].Split('\n')[1]}";
         Parent.ErrorCodeHistory.Add(code);
         Parent.ColumnHistory.Add(0);
         Failure = true;
@@ -49,6 +50,11 @@ public partial class Executive
         PrintFatalReport(code);
         throw ce;
     }
+
+    // The text of error `code`: SPITBOL's own, or for a number it does not use (an error a program signals by assigning &ERRTYPE) the
+    // text the program put in &ERRTEXT
+    internal string ErrorMessageText(int code) =>
+        code >= 0 && code < CompilerException.ErrorMessage.Length ? CompilerException.ErrorMessage[code] : AmpErrorText;
 
     // Set once the fatal report has been printed: it carries the run summary, which -x does not print again
     internal bool FatalReportPrinted;
@@ -84,7 +90,7 @@ public partial class Executive
         string[] report =
         [
             "", "", "",
-            $"{file}({line}) : ERROR {code:D3} -- {CompilerException.ErrorMessage[code]}",
+            $"{file}({line}) : ERROR {code:D3} -- {ErrorMessageText(code)}",
             "", "", "", "", "",
             .. RunSummary(),
             ""

@@ -332,7 +332,7 @@ public partial class Executive
             AmpErrorText = stringVar.Data;
         }
 
-        SystemStack.Push(new StringVar(AmpErrorText, "&errtype", true));
+        SystemStack.Push(new StringVar(AmpErrorText, "&errtext", true));
     }
 
     internal void HandleErrType(Var value, bool set)

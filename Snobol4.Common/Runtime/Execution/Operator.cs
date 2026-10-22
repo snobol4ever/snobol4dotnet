@@ -27,8 +27,8 @@ public partial class Executive
         }
 
         // If any arguments have input channels, get input now; the name operator takes its operand's
-        // name, so .INPUT reads no line, as in SPITBOL
-        if (functionName != "_." && InputArguments(arguments))
+        // name, so .INPUT reads no line, as in SPITBOL, and nor does the keyword operator, &INPUT
+        if (functionName is not ("_." or "_&") && InputArguments(arguments))
             return;
 
         var handler = FunctionTable[functionName]!.Handler;

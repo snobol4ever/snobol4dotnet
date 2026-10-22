@@ -137,18 +137,16 @@ public partial class Executive
         // Special checks for keywords
         if (leftVar.IsKeyword)
         {
-            // LeftPattern side must be writable
-            if (leftVar.IsReadOnly)
+            // &ERRTEXT takes a string, or whatever has one (211 for a value that has none)
+            if (leftVar.Symbol == "&errtext")
             {
-                LogRuntimeException(209);
-                return;
-            }
+                if (!rightVar.Convert(VarType.STRING, out var errorText, out _, this))
+                {
+                    LogRuntimeException(211);
+                    return;
+                }
 
-
-            // If leftVar side is &errtext, rightVar side must be a string
-            if (leftVar.Symbol == "&errtext" && leftVar is not StringVar)
-            {
-                LogRuntimeException(211);
+                HandleErrText(errorText, true);
                 return;
             }
 
@@ -162,6 +160,46 @@ public partial class Executive
                     return;
                 }
                 rightVar = asInteger;
+            }
+
+            // The value of a keyword is 0 up to the biggest object (only &STLIMIT may be negative), else 210, and some keywords
+            // limit it further: &ERRTYPE to 999, and assigning it signals that error; &PROFILE to 2; &MAXLNGTH to 1024 and more
+            // (287); &FULLSCAN to not 0 (274)
+            var number = ((IntegerVar)rightVar).Data;
+            if (leftVar.Symbol != "&stlimit")
+            {
+                if (number < 0 || number > MaxObjectLength
+                    || leftVar.Symbol == "&errtype" && number > 999
+                    || leftVar.Symbol == "&profile" && number > 2)
+                {
+                    LogRuntimeException(210);
+                    return;
+                }
+
+                if (leftVar.Symbol == "&maxlngth" && number < 1024)
+                {
+                    LogRuntimeException(287);
+                    return;
+                }
+
+                if (leftVar.Symbol == "&fullscan" && number == 0)
+                {
+                    LogRuntimeException(274);
+                    return;
+                }
+
+                if (leftVar.IsReadOnly)
+                {
+                    LogRuntimeException(209);
+                    return;
+                }
+
+                if (leftVar.Symbol == "&errtype")
+                {
+                    // an immediate error is signaled: its own text for a number SPITBOL uses, &ERRTEXT for one it does not
+                    LogRuntimeException(number == 0 ? 36 : (int)number, false, number);
+                    return;
+                }
             }
 
             if (KeywordTable.TryGetValue(leftVar.Symbol, out var handler))

@@ -19,7 +19,7 @@ public partial class Executive
         Failure = false;
         AlphaStack.Clear(); // Used for conditional variable association
         BetaStack.Clear();  // Used for conditional variable association
-        SystemStack.Push(new StatementSeparator());
+        SystemStack.Push(StatementSeparator.Instance);
 
         // Monitor bridge — LABEL event (SN-26-bridge-coverage-f).
         // Use precomputed Execute.SourceStno — Parent.Code is replaced by

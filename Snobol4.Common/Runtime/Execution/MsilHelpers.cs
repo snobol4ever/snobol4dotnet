@@ -139,7 +139,7 @@ public partial class Executive
         Failure = false;
         AlphaStack.Clear();
         BetaStack.Clear();
-        SystemStack.Push(new StatementSeparator());
+        SystemStack.Push(StatementSeparator.Instance);
 
         // Monitor bridge — LABEL event (SN-26-bridge-coverage-f).
         // Wire payload: 1-based statement number aligned with SPITBOL's

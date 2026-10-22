@@ -20,23 +20,37 @@ public partial class Executive
             Console.Error.WriteLine(@"_BinaryEquals");
         // Do not delete. Used by DLL
 
-        // Get all arguments and check for prior failure
-        List<Var> arguments = [];
+        // Get all arguments and check for prior failure, into a list lent for this depth of assignment: an assignment can run another
+        // (a trace function, a deferred target's call), and neither Assign nor ReplaceMatch keeps the list (it was a new List and its
+        // array on every assignment)
+        if (_assignDepth == _assignArguments.Count)
+            _assignArguments.Add(new List<Var>(2));
+        var arguments = _assignArguments[_assignDepth++];
+        try
+        {
+            if (SystemStack.ExtractArguments(2, arguments, this, 1))
+            {
+                return;
+            }
 
-        if (SystemStack.ExtractArguments(2, arguments, this, 1))
-        {
-            return;
+            if (arguments[0] is SubjectVar)
+            {
+                ReplaceMatch(arguments);
+            }
+            else
+            {
+                Assign(arguments);
+            }
         }
-
-        if (arguments[0] is SubjectVar)
+        finally
         {
-            ReplaceMatch(arguments);
-        }
-        else
-        {
-            Assign(arguments);
+            arguments.Clear();
+            _assignDepth--;
         }
     }
+
+    private readonly List<List<Var>> _assignArguments = [];
+    private int _assignDepth;
 
     internal void ReplaceMatch(List<Var> arguments)
     {

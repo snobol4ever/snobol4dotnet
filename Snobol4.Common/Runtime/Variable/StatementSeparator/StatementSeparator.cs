@@ -23,6 +23,8 @@ public sealed class StatementSeparator : Var
     #endregion
 
     #region Singleton Instance
+    // The one separator every statement pushes: it carries no data and is only ever recognised by its type, so a statement's start
+    // allocates nothing for it (it allocated one per statement)
 
                 public static readonly StatementSeparator Instance = new();
 

@@ -16,4 +16,16 @@
   <ItemGroup>
     <ProjectReference Include="..\Snobol4.Common\Snobol4.Common.csproj" />
   </ItemGroup>
+  <!-- A Release build is precompiled (ReadyToRun) for the machine that builds it: the engine and the console are published with
+       native code into obj and copied over the build output, so a run starts without JIT-compiling the engine first (measured
+       2026-10-22: start-up and compile of a small program 129-144 ms down to 78-85 ms, short programs about 40 percent faster). The
+       IL stays in the files, so they still run anywhere, JIT-compiled there. -p:ReadyToRunBuild=false builds without it. -->
+  <Target Name="ReadyToRunBuildOutput" AfterTargets="Build"
+          Condition="'$(Configuration)' == 'Release' and '$(ReadyToRunBuild)' != 'false' and '$(ReadyToRunInner)' != 'true'">
+    <PropertyGroup>
+      <ReadyToRunDir>$(MSBuildProjectDirectory)/$(BaseIntermediateOutputPath)readytorun/</ReadyToRunDir>
+    </PropertyGroup>
+    <Exec Command="dotnet publish &quot;$(MSBuildProjectFullPath)&quot; -c Release -r $(NETCoreSdkRuntimeIdentifier) --self-contained false -p:PublishReadyToRun=true -p:ReadyToRunInner=true -o &quot;$(ReadyToRunDir)&quot; -v:q -nologo" />
+    <Copy SourceFiles="$(ReadyToRunDir)Snobol4.Common.dll;$(ReadyToRunDir)Snobol4.dll" DestinationFolder="$(OutDir)" />
+  </Target>
 </Project>

@@ -289,7 +289,21 @@ public partial class Executive
                 newVar.InputChannel = leftVar.InputChannel;
                 IdentifierTable[newVar.Symbol] = newVar;
                 TraceIdentifierValue(newVar.Symbol, newVar);
-                SystemStack.Push(newVar);
+                // the value of the assignment is the value assigned: reading it again must not read the variable's input
+                // association (X = (INPUT = 'zz') is zz and reads nothing), as in SPITBOL
+                if (!string.IsNullOrEmpty(newVar.InputChannel))
+                {
+                    var assigned = newVar.Clone();
+                    assigned.Symbol = newVar.Symbol;
+                    assigned.OutputChannel = newVar.OutputChannel;
+                    assigned.InputChannel = "";
+                    SystemStack.Push(assigned);
+                }
+                else
+                {
+                    SystemStack.Push(newVar);
+                }
+
                 break;
         }
 

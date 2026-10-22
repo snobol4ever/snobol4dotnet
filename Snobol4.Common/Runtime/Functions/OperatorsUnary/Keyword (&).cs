@@ -343,6 +343,9 @@ public partial class Executive
         {
             if (IntegerHandler(value, out var integerVar)) return;
             AmpCaseFolding = integerVar.Data;
+            // the names the run reads from strings fold as &CASE says from now on, as in SPITBOL: APPLY('f') calls F, $'abc' reads
+            // ABC and DEFINE('g()') defines G once &CASE is 1, under -f too (FoldCase reads this)
+            Parent.BuildOptions.CaseFolding = AmpCaseFolding != 0;
         }
 
         SystemStack.Push(new IntegerVar(AmpCaseFolding, "&case", true));

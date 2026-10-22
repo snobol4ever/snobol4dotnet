@@ -27,8 +27,12 @@ public partial class Executive
 
     internal void StartTimer()
     {
+        ExecutionBegan = true;
         _timerExecute.Start();
     }
+
+    // The program ran: -x prints nothing for one that did not start (a compile error, -n, an include that could not be opened)
+    internal bool ExecutionBegan;
 
     internal void PrintExecutionStatistics()
     {
@@ -37,23 +41,16 @@ public partial class Executive
         if (!Parent.BuildOptions.ShowExecutionStatistics)
             return;
 
-        var memoryUsed = Process.GetCurrentProcess().WorkingSet64;
-        var memInfo = GC.GetGCMemoryInfo();
-        var memoryLeft = memInfo.TotalAvailableMemoryBytes;
-        Console.Error.WriteLine("");
-        Console.Error.WriteLine("");
-        Console.Error.WriteLine("");
-        if (AmpErrorType == 0)
-            Console.Error.WriteLine(@"normal end");
-        var fileName = Path.GetFileName(SourceFiles[AmpCurrentLineNumber]);
-        Console.Error.WriteLine(@$"in file                   {fileName}");
-        Console.Error.WriteLine(@$"in line                   {SourceLineNumbers[AmpCurrentLineNumber]}");
-        Console.Error.WriteLine(@$"in statement              {AmpCurrentLineNumber}");
-        Console.Error.WriteLine(@$"statements executed       {AmpStatementCount}");
-        Console.Error.WriteLine(@$"execution time (h:m:s.μ)  {_timerExecute.Elapsed}");
-        Console.Error.WriteLine(@$"regenerations             {GC.CollectionCount(memInfo.Generation)}");
-        Console.Error.WriteLine(@$"memory used (bytes)       {memoryUsed}");
-        Console.Error.WriteLine(@$"memory left (bytes)       {memoryLeft}");
+        // -x: the end-of-run statistics on the listing stream, as sbl lays them out: three empty lines, "normal end", the run summary
+        // and an empty line. A run that ended on a fatal error has printed its summary in the report.
+        if (ExecutionBegan && !FatalReportPrinted)
+        {
+            var listing = Parent.ListingWriter;
+            string[] block = ["", "", "", "normal end", .. RunSummary(), ""];
+            foreach (var text in block)
+                listing.WriteLine(text);
+            listing.Flush();
+        }
 
 
         if (AmpProfile != 1 && AmpProfile != 3 && AmpProfile != 4)

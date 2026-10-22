@@ -10,6 +10,10 @@ public class SourceLine
 
     // The statement did not compile; it keeps its label, and reaching it is error 7 (sbl -k)
     internal bool CompileError { get; set; }
+
+    // The number of an error found as the line was read (a continuation with nothing to continue), reported where the lexer reaches
+    // the line so that it follows the line's listing
+    internal int PendingError { get; set; }
     // Case folding as it stood when the line was read: a -CASE control acts from its own line on
     internal bool CaseFolding { get; }
 

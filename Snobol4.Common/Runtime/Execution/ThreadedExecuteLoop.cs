@@ -95,7 +95,6 @@ public partial class Executive
                     AlphaStack.Clear();
                     BetaStack.Clear();
                     SystemStack.Push(new StatementSeparator());
-                    CheckCompiledStatement(instr.IntOperand);
                     // Monitor bridge — LABEL event (SN-26-bridge-coverage-f).
                     // Use precomputed Execute.SourceStno — Parent.Code is
                     // replaced by EVAL/CODE at runtime; a BlankLineCount
@@ -116,6 +115,8 @@ public partial class Executive
                         AmpStatementCount++;
                         TraceKeyword("STCOUNT", AmpStatementCount);
                     }
+                    // a statement that did not compile is error 7 once it is counted as executed, as in SPITBOL
+                    CheckCompiledStatement(instr.IntOperand);
                     if (AmpStatementLimit > 0 && AmpStatementCount >= AmpStatementLimit)
                     {
                         LogRuntimeException(244);

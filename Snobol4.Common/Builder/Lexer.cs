@@ -264,6 +264,8 @@ public partial class Lexer
             _parent.BuildOptions.CaseFolding = sourceLine.CaseFolding;
             if (sourceLine.CompileError)
             {
+                if (sourceLine.PendingError != 0)
+                    _parent.LogCompilerException(sourceLine.PendingError, 0, sourceLine);
                 allLexed = false;
                 continue;
             }

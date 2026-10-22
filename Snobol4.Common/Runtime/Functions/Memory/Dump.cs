@@ -34,7 +34,7 @@ public partial class Executive
     // on the listing channel): the -o file when one is named, else standard output
     internal void DisplayVariableValues()
     {
-        DisplayVariableValues(AmpDump, Parent.BuildOptions.ListFileName != "" ? Parent.ListingWriter : Console.Out);
+        DisplayVariableValues(AmpDump, Parent.ListingPath != "" ? Parent.ListingWriter : Console.Out);
     }
 
     /// <summary>

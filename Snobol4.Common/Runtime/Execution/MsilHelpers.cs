@@ -130,7 +130,6 @@ public partial class Executive
         AlphaStack.Clear();
         BetaStack.Clear();
         SystemStack.Push(new StatementSeparator());
-        CheckCompiledStatement(stmtIdx);
 
         // Monitor bridge — LABEL event (SN-26-bridge-coverage-f).
         // Wire payload: 1-based statement number aligned with SPITBOL's
@@ -151,6 +150,8 @@ public partial class Executive
             AmpStatementCount++;
             TraceKeyword("STCOUNT", AmpStatementCount);
         }
+        // a statement that did not compile is error 7 once it is counted as executed, as in SPITBOL
+        CheckCompiledStatement(stmtIdx);
         if (AmpStatementLimit > 0 && AmpStatementCount >= AmpStatementLimit)
         {
             LogRuntimeException(244);

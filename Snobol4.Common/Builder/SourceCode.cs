@@ -320,10 +320,10 @@ public class SourceCode
             CurrentSubLineOffset = 0;
             var misplaced = new SourceLine(pathName, _includeDepth, line, this, _parent.BuildOptions.ErrorOnUnhandledFail)
             {
-                CompileError = true
+                CompileError = true,
+                PendingError = 214
             };
             SourceLines.Add(misplaced);
-            _parent.LogCompilerException(214, 0, misplaced);
             return;
         }
 

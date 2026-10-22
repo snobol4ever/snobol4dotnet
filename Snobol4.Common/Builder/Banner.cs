@@ -8,12 +8,16 @@ public partial class Builder
             DisplayBanner(Console.Out);
     }
 
-    // SPITBOL's listing (-LIST): the first listed line brings the head (three blank lines, the identity and
-    // clock lines unless -h, three more blank lines) and every page opens with "page N" after 112 blanks and
-    // a blank line; a page holds 55 listed lines, the first 51 under the head, and the next page starts with
-    // three blank lines, as sbl lays it out
+    // SPITBOL's listing (-LIST, -l): the first listed line brings the head (three blank lines, the identity and
+    // clock lines unless -h, three more blank lines) and every page opens with "page N" after the page width
+    // less eight blanks (112 at the default 120, -t sets it) and a blank line. A page holds -g less five
+    // listed lines (55 at the default 60), the first four fewer under the head, and the next page starts with
+    // three blank lines. Under -p or -z, the long format, a form feed takes the place of the three blank lines
+    // (before the head and between pages) and a page holds -g less two lines. As sbl lays it out.
     private int _listingPage;
     private int _listingLinesOnPage;
+
+    private bool LongListing => BuildOptions.PrinterListing || BuildOptions.FormFeedListing;
 
     // The identity line of the listing head: this compiler's own (whether to print SPITBOL's is Lon's question,
     // as for HOST())
@@ -24,22 +28,12 @@ public partial class Builder
         var writer = ListingWriter;
         if (_listingPage == 0)
         {
-            writer.Write("\n\n\n");
-            if (!BuildOptions.SuppressListingHeader)
-            {
-                var now = DateTime.Now;
-                var platform = System.Runtime.InteropServices.RuntimeInformation.OSArchitecture switch
-                {
-                    System.Runtime.InteropServices.Architecture.X64 => "x86-64",
-                    var other => other.ToString().ToLowerInvariant()
-                };
-                writer.Write($"{ListingIdentity}\n{platform}  {now:ddd MMM} {now.Day,2} {now:HH:mm:ss yyyy}\n\n\n\n");
-            }
+            WriteListingHead(writer);
             StartListingPage(writer, BuildOptions.SuppressListingHeader ? 0 : 4);
         }
-        else if (_listingLinesOnPage >= 55)
+        else if (_listingPage > 0 && _listingLinesOnPage >= BuildOptions.LinesPerPage - (LongListing ? 2 : 5))
         {
-            writer.Write("\n\n\n");
+            writer.Write(LongListing ? "\f" : "\n\n\n");
             StartListingPage(writer, 0);
         }
 
@@ -47,10 +41,27 @@ public partial class Builder
         _listingLinesOnPage++;
     }
 
+    // The head of a listing: three blank lines (a form feed under -p and -z), the identity and clock lines unless -h, and three
+    // blank lines
+    private void WriteListingHead(TextWriter writer)
+    {
+        writer.Write(LongListing ? "\f" : "\n\n\n");
+        if (BuildOptions.SuppressListingHeader)
+            return;
+        var now = DateTime.Now;
+        var platform = System.Runtime.InteropServices.RuntimeInformation.OSArchitecture switch
+        {
+            System.Runtime.InteropServices.Architecture.X64 => "x86-64",
+            var other => other.ToString().ToLowerInvariant()
+        };
+        writer.Write($"{ListingIdentity}\n{platform}  {now:ddd MMM} {now.Day,2} {now:HH:mm:ss yyyy}\n\n\n\n");
+    }
+
     private void StartListingPage(TextWriter writer, int used)
     {
         _listingPage++;
-        writer.Write($"{(BuildOptions.ListingPageFlushLeft ? "" : new string(' ', 112))}page {_listingPage}\n\n");
+        var indent = BuildOptions.ListingPageFlushLeft ? "" : new string(' ', Math.Max(0, BuildOptions.PageWidth - 8));
+        writer.Write($"{indent}page {_listingPage}\n\n");
         _listingLinesOnPage = used;
     }
 

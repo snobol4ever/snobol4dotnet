@@ -161,6 +161,7 @@ public partial class Builder
                 BuildOptions.ShowCompilerStatistics  = true;
                 BuildOptions.ShowExecutionStatistics = true;
                 BuildOptions.ShowListing             = true;
+                BuildOptions.ListSource              = true;
                 break;
 
             case "-b":
@@ -215,6 +216,7 @@ public partial class Builder
 
             case "-l":
                 BuildOptions.ShowListing = true;
+                BuildOptions.ListSource  = true;
                 break;
 
             case "-m":
@@ -245,6 +247,7 @@ public partial class Builder
             case "-p":
                 BuildOptions.PrinterListing = true;
                 BuildOptions.ShowListing    = true;
+                BuildOptions.ListSource     = true;
                 break;
 
             case "-r":
@@ -284,6 +287,7 @@ public partial class Builder
             case "-z":
                 BuildOptions.FormFeedListing = true;
                 BuildOptions.ShowListing     = true;
+                BuildOptions.ListSource      = true;
                 break;
 
             case "-?":

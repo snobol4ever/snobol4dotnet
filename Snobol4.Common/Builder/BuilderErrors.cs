@@ -216,7 +216,7 @@ public partial class Builder
     // ERRORS is in its default flags), unless its standard printer is the terminal (PRTICH, from the test of standard output). Run
     // with standard output in a file or a pipe it therefore writes each such line twice, and a harness that merges the two streams
     // reads it twice.
-    internal bool CopyErrorsToStandardError => BuildOptions.ListFileName != "" || Console.IsOutputRedirected;
+    internal bool CopyErrorsToStandardError => !BuildOptions.ErrorsToStdout && (ListingPath != "" || Console.IsOutputRedirected);
 
     // One line of an error report on the listing and, when `copy` and the copy is wanted, straight after it on standard error
     internal void WriteReportLine(TextWriter listing, string text, bool copy)
@@ -236,6 +236,9 @@ public partial class Builder
     {
         // a statement that -LIST has already listed is not listed again, but its line is still copied
         WriteReportPageLine($"{numberField}{physical.TrimEnd(' ', '\t')}", listed);
+        // under -e, errors to the list file only, sbl leaves an empty line before the pointer
+        if (BuildOptions.ErrorsToStdout)
+            WriteReportPageLine("");
 
         var pointer = new StringBuilder();
         if (column > 0)

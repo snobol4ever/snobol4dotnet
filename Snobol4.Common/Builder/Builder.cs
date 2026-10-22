@@ -31,18 +31,24 @@ public partial class Builder : IDisposable
     private bool _listingOpened;
 
     // The listing goes to the -o=file named on the command line (file.lst when it has no extension), as
-    // SPITBOL's does, and otherwise to standard output, as SPITBOL's does; a file that cannot be opened
-    // falls back to standard error
+    // SPITBOL's does; under -l, -a, -p or -z with no -o to the first source file's name with .lst for its
+    // extension, as SPITBOL's does; and otherwise to standard output, as SPITBOL's does. A file that cannot
+    // be opened falls back to standard error
+    internal string ListingPath =>
+        BuildOptions.ListFileName != "" ? BuildOptions.ListFileName
+        : BuildOptions.ShowListing && FilesToCompile.Count > 0 && FilesToCompile[0] != "" ? Path.ChangeExtension(FilesToCompile[0], ".lst")
+        : "";
+
     internal TextWriter ListingWriter
     {
         get
         {
-            if (BuildOptions.ListFileName == "")
+            if (ListingPath == "")
                 return Console.Out;
             try
             {
                 // the first open replaces the file; a reopen after the run's close adds to it
-                ListFileWriter ??= new StreamWriter(BuildOptions.ListFileName, append: _listingOpened) { AutoFlush = true };
+                ListFileWriter ??= new StreamWriter(ListingPath, append: _listingOpened) { AutoFlush = true };
                 _listingOpened = true;
                 return ListFileWriter;
             }
@@ -283,10 +289,6 @@ public partial class Builder : IDisposable
     /// </summary>
     private void ApplyStartupOptions(Executive exec)
     {
-        // -e: redirect Console.Error to Console.Out so errors can be piped
-        if (BuildOptions.ErrorsToStdout)
-            Console.SetError(Console.Out);
-
         // -m: seed &MAXLNGTH from the command-line value before any user code runs
         exec.AmpMaxLength = BuildOptions.MaxObjectBytes;
 
@@ -515,15 +517,29 @@ public partial class Builder : IDisposable
 
     #region Statistics
 
+    // -c: the compiler statistics on the listing stream, as sbl lays them out: the head if nothing has been listed (without a page
+    // line), three empty lines after what was listed, five rows labelled to column 21, and three empty lines
     private void PrintCompilationStatistics()
     {
-        if (!BuildOptions.ShowCompilerStatistics || _timerBuild == null) return;
+        // a source that could not be read ends the run before there is a compilation to report
+        if (!BuildOptions.ShowCompilerStatistics || _timerBuild == null || SourceFailed) return;
         var memoryUsed = Process.GetCurrentProcess().WorkingSet64;
         var memInfo    = GC.GetGCMemoryInfo();
-        Console.Error.WriteLine($"memory used (bytes)  {memoryUsed}");
-        Console.Error.WriteLine($"memory left (bytes)  {memInfo.TotalAvailableMemoryBytes}");
-        Console.Error.WriteLine($"comp errors          {ErrorCodeHistory.Count}");
-        Console.Error.WriteLine($"comp time (sec)      {_timerBuild.Elapsed}");
+        var writer = ListingWriter;
+        if (_listingPage == 0)
+        {
+            WriteListingHead(writer);
+            _listingPage = -1;   // the head is out; the page line is not
+        }
+        else
+            writer.Write("\n\n\n");
+        writer.Write($"{"memory used (bytes)",-21}{memoryUsed}\n");
+        writer.Write($"{"memory left (bytes)",-21}{memInfo.TotalAvailableMemoryBytes}\n");
+        writer.Write($"{"comp errors",-21}{ErrorCodeHistory.Count}\n");
+        writer.Write($"{"REGENERATIONS",-21}{GC.CollectionCount(2)}\n");
+        writer.Write($"{"comp time (microsec)",-21}{_timerBuild.Elapsed.Ticks / 10}\n");
+        writer.Write("\n\n\n");
+        writer.Flush();
     }
 
     #endregion

@@ -50,6 +50,28 @@ public partial class Executive
         throw ce;
     }
 
+    // Set once the fatal report has been printed: it carries the run summary, which -x does not print again
+    internal bool FatalReportPrinted;
+
+    // The position and run summary that end a run, from "in file" to "memory left (bytes)", labelled to column 21
+    internal string[] RunSummary()
+    {
+        string Row(string label, object value) => label.PadRight(21) + value;
+        var memoryUsed = System.Diagnostics.Process.GetCurrentProcess().WorkingSet64;
+        var memoryLeft = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
+        return
+        [
+            Row("in file", StatementFile(AmpCurrentLineNumber)),
+            Row("in line", StatementLine(AmpCurrentLineNumber)),
+            Row("in statement", StatementNumber(AmpCurrentLineNumber)),
+            Row("stmts executed", AmpStatementCount),
+            Row("execution time msec", _timerExecute.ElapsedMilliseconds),
+            Row("REGENERATIONS", GC.CollectionCount(2)),
+            Row("memory used (bytes)", memoryUsed),
+            Row("memory left (bytes)", memoryLeft)
+        ];
+    }
+
     // The report of a fatal run-time error as sbl writes it (CEO-1858): on the listing stream, which is standard output unless
     // -o names a file. Three empty lines, the error line, five empty lines, the position and run summary labelled to column 21,
     // and an empty line; sbl hard-wraps every line at 120 columns, mid-word.
@@ -58,22 +80,13 @@ public partial class Executive
         const int width = 120;
         var file = StatementFile(AmpCurrentLineNumber);
         var line = StatementLine(AmpCurrentLineNumber);
-        var memoryUsed = System.Diagnostics.Process.GetCurrentProcess().WorkingSet64;
-        var memoryLeft = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
-        string Row(string label, object value) => label.PadRight(21) + value;
+        FatalReportPrinted = true;
         string[] report =
         [
             "", "", "",
             $"{file}({line}) : ERROR {code:D3} -- {CompilerException.ErrorMessage[code]}",
             "", "", "", "", "",
-            Row("in file", file),
-            Row("in line", line),
-            Row("in statement", StatementNumber(AmpCurrentLineNumber)),
-            Row("stmts executed", AmpStatementCount),
-            Row("execution time msec", _timerExecute.ElapsedMilliseconds),
-            Row("REGENERATIONS", GC.CollectionCount(2)),
-            Row("memory used (bytes)", memoryUsed),
-            Row("memory left (bytes)", memoryLeft),
+            .. RunSummary(),
             ""
         ];
         // the lines SPITBOL also sends to standard error: the error line and the two empty lines after it, the position and run summary

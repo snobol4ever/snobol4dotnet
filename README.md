@@ -90,16 +90,22 @@ The .Net framework automatically optimizes all memory allocation on a program-by
 
 * -d   Max heap size
 * -i   Initial heap size
-* -s   Stack size
 
 The following command line options are not implemented:
 
 * -T   Write terminal output to file (Can be accomplished by redirecting STDIO or STDERR)
 * -y   Write a save file
 
-EXIT(-3, file) and EXIT(-4, file) write a save file and end the run, or go on. The file holds the program, as -w writes it, and not its
-state: running it starts the program over, where SPITBOL's resumes after the EXIT. EXIT(s) runs the command s through the shell
-(SHELL, else /bin/sh) and ends the run with its status. A load module (EXIT(3)) is error 105, as in SPITBOL.
+-s is the stack of SPITBOL's program (4m by default) and it is kept: the program runs on a thread whose .NET stack is sized from it, and a
+call of a function takes 64 bytes of it and 8 for each parameter, local and operand waiting in the calling expression, as SPITBOL's
+stack takes them, from the 3,216 bytes it starts with; past -s it is error 246, stack overflow (58,209 levels of a function with one
+parameter at the default). A recursion that sbl allows no longer dies of the .NET stack, and one it refuses is refused here.
+
+EXIT(n, file) with a negative n writes a save file (a.spx without a name; a real is cut toward zero, a numeric string is its number) and
+ends the run, except -4, which goes on. The file holds the program, as -w writes it, and not its state: running it starts the program over,
+where SPITBOL's resumes after the EXIT. An EXIT that ends the run leaves at once, with no end-of-run dump and no -x statistics. EXIT(s)
+runs the command s through the shell (SHELL, else /bin/sh) and ends the run with its status. A load module (EXIT(3)) is error 105, as in
+SPITBOL, and a second argument that is no string is error 288.
 
 #### INPUT() and OUTPUT() functions.
 

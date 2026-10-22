@@ -924,10 +924,12 @@ public class SourceCode
         var include = written.TrimEnd(' ');
         _staleIncludeName = null;
 
+        // the list keeps the names as they were opened and a name is compared as written: after "x.sno " a later "x.sno" is a name already
+        // included, and a second "x.sno " is not
         if (_parent.IncludeList.Contains(written))
             return;
 
-        _parent.IncludeList.Add(written);
+        _parent.IncludeList.Add(include);
         var physicalLines = CurrentPhysicalLines;
         var statementsBefore = SourceLines.Count;
 

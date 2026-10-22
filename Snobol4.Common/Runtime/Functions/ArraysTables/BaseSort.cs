@@ -80,6 +80,17 @@ public partial class Executive
             }
         }
 
+        // The array SPITBOL sorts for a table lists the buckets last first and each bucket's entries in the order they were added
+        // (CONVERT lists them in the order added); rows are the table's entries that are not null, as ConvertToArray took them
+        if (arguments[0] is TableVar table)
+        {
+            var buckets = table.Data.Where(entry => entry.Value is not StringVar { Data: "" })
+                                    .Select(entry => KeyBucket(entry.Key, table.Buckets)).ToList();
+            matrix = matrix.Select((row, position) => (row, position))
+                           .OrderByDescending(entry => buckets[entry.position])
+                           .Select(entry => entry.row).ToList();
+        }
+
         // Sort matrix. Rows with equal keys keep the order they had, in SORT and RSORT alike: SPITBOL compares the offsets of equal
         // keys (sortc), and List.Sort is not stable
         var ranked = matrix.Select((row, position) => (row, position)).ToList();

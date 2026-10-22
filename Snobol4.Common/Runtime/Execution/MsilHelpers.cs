@@ -1,4 +1,4 @@
-namespace Snobol4.Common;
+﻿namespace Snobol4.Common;
 
 /// <summary>
 /// Helper methods called by MSIL-emitted delegates (DynamicMethod instances
@@ -188,6 +188,7 @@ public partial class Executive
         TraceGoto(sym);
         var target = LabelTable[sym];
         if (target == -1)                 return -1;
+        if (target <= -2 && target >= -4 && AmpFunctionLevel == 0) return ReturnFromLevelZero();
         if (target <= -2 && target >= -7) return target;
         if (target >= 0)
         {
@@ -195,8 +196,25 @@ public partial class Executive
             if (instrIdx >= 0) return instrIdx;
             return target;   // CODE'd statement — caller treats as exitCode
         }
-        // GotoNotFound or unknown label
-        LogRuntimeException(errorCode);
+        // GotoNotFound or unknown label: a goto to a label that is not defined ends the run, whatever &ERRLIMIT allows
+        LogRuntimeException(errorCode, fatal: true);
+        return -1;
+    }
+
+    // A computed goto that cannot be performed (to no label, to no code, or whose expression fails) is the error it is; with &ERRLIMIT above 0
+    // the goto counts as failed and the failure exit is tried, which is the same goto: error 332 ends the run, as sbl's does. A SETEXIT
+    // intercept takes the first error instead.
+    internal void ComputedGotoError(int code)
+    {
+        LogRuntimeException(code);
+        if (SetExitNumber == 0)
+            LogRuntimeException(332, fatal: true);
+    }
+
+    // RETURN, FRETURN and NRETURN outside every function (&FNCLEVEL 0) end the run with error 242
+    private int ReturnFromLevelZero()
+    {
+        LogRuntimeException(242, fatal: true);
         return -1;
     }
 
@@ -212,6 +230,7 @@ public partial class Executive
         SystemStack.Pop();
         TraceGoto(sym);
         if (target == -1)                 return -1;
+        if (target <= -2 && target >= -4 && AmpFunctionLevel == 0) return ReturnFromLevelZero();
         if (target <= -2 && target >= -7) return target;
         if (target >= 0)
         {
@@ -219,7 +238,8 @@ public partial class Executive
             if (instrIdx >= 0) return instrIdx;
             return target;
         }
-        LogRuntimeException(errorCode);
+
+        ComputedGotoError(errorCode);
         return -1;
     }
 
@@ -243,7 +263,7 @@ public partial class Executive
             if (instrIdx >= 0) return instrIdx;
             return target;
         }
-        LogRuntimeException(errorCode);
+        ComputedGotoError(errorCode);
         return -1;
     }
 
@@ -255,7 +275,7 @@ public partial class Executive
     internal bool CheckGotoExprFailure()
     {
         if (!Failure) return false;
-        LogRuntimeException(20);
+        ComputedGotoError(20);
         SystemStack.Pop();   // pop the StringVar(false) pushed by LogRuntimeException
         return true;
     }

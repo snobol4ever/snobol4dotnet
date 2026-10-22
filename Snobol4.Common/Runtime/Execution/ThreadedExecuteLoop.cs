@@ -1,4 +1,4 @@
-namespace Snobol4.Common;
+﻿namespace Snobol4.Common;
 
 /// <summary>
 /// Threaded execution engine for SNOBOL4.NET.
@@ -249,7 +249,7 @@ public partial class Executive
                 case OpCode.CheckGotoFailure:
                     if (Failure)
                     {
-                        LogRuntimeException(20);
+                        ComputedGotoError(20);
                         // LogRuntimeException pushed a StringVar(false) on top of the
                         // label var that GotoIndirect needs. Pop it so dispatch works.
                         SystemStack.Pop();
@@ -273,7 +273,7 @@ public partial class Executive
                         }
                         else { exitCode = target; goto Done; }
                     }
-                    else { LogRuntimeException(instr.IntOperand); InstructionPointer = -1; }
+                    else { ComputedGotoError(instr.IntOperand); InstructionPointer = -1; }
                     break;
                 }
 
@@ -292,7 +292,7 @@ public partial class Executive
                         }
                         else { exitCode = target; goto Done; } // CODE'd stmt in Statements[]
                     }
-                    else { LogRuntimeException(instr.IntOperand); InstructionPointer = -1; }
+                    else { ComputedGotoError(instr.IntOperand); InstructionPointer = -1; }
                     break;
                 }
             }

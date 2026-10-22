@@ -127,4 +127,37 @@ end";
         Assert.AreEqual("abc", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("result")]).Data);
     }
 
+    [TestMethod]
+    public void TEST_Fence_function_backup_passes_through_and_the_scan_goes_on()
+    {
+        // sbl -b: match. Backing up into FENCE('a') at the start 0 does not abort the match, as &FENCE does (SPITBOL manual,
+        // FENCE(pattern)); the scan tries the next start and matches the last 'a' of the subject.
+        var s = @"
+        P = (BREAKX('abc') | FENCE('a'))
+        'aa a' P RPOS(0) :S(Y)F(N)
+Y       R1 = 'match' :(end)
+N       R1 = 'nomatch'
+end
+";
+        var build = SetupTests.SetupScript("-b", s);
+        Assert.AreEqual("match", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
+
+        // sbl -b: the same shape on 'AB' matches unanchored, at the second character, and fails under &ANCHOR = 1
+        var unanchored = SetupTests.SetupScript("-b", @"
+        'AB' FENCE(LEN(1) | LEN(2)) RPOS(0) :S(Y)F(N)
+Y       R1 = 'match' :(end)
+N       R1 = 'nomatch'
+end
+");
+        Assert.AreEqual("match", ((StringVar)unanchored.Execute!.IdentifierTable[unanchored.FoldCase("R1")]).Data);
+        var anchored = SetupTests.SetupScript("-b", @"
+        &ANCHOR = 1
+        'AB' FENCE(LEN(1) | LEN(2)) RPOS(0) :S(Y)F(N)
+Y       R1 = 'match' :(end)
+N       R1 = 'nomatch'
+end
+");
+        Assert.AreEqual("nomatch", ((StringVar)anchored.Execute!.IdentifierTable[anchored.FoldCase("R1")]).Data);
+    }
+
 }

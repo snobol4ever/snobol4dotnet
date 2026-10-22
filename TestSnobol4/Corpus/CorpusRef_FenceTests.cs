@@ -62,8 +62,10 @@ END
         var s = @"*  061 - FENCE(P) seals: backtrack cannot re-enter P's alternatives
 *  Without fence: FENCE(LEN(1)|LEN(2)) RPOS(0) on 'AB' would succeed
 *  via LEN(2). With fence: LEN(1) chosen, sealed, RPOS(0) fails -> match fails.
+*  Anchored by POS(0) as the corpus program is (rungs entry fence_pos_rpos_branch_24): unanchored, sbl
+*  goes on to the next start, where FENCE(LEN(1)) takes the last character and RPOS(0) holds.
         X = 'AB'
-        X  FENCE(LEN(1) | LEN(2))  RPOS(0)                   :S(YES)F(NO)
+        X  POS(0) FENCE(LEN(1) | LEN(2))  RPOS(0)             :S(YES)F(NO)
 YES     OUTPUT = 'should not reach'                            :(END)
 NO      OUTPUT = 'sealed correctly'
 END

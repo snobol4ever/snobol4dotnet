@@ -206,23 +206,22 @@ public class Scanner
                         return mr;
                     }
                     var (alternateIndex, _) = _state.RestoreAlternate();
-                    // Seal hit on backtrack: per Gimpel 1973 FENCE = NULL | ABORT,
-                    // backtrack INTO the sealed region is blocked.  But OUTER
-                    // alternates saved BEFORE the FENCE was entered (and which
-                    // sit BELOW the seal on the alt stack — preserved by
-                    // SealAlternates) must still be allowed to fire — they
-                    // represent OTHER ways the OUTER pattern could match
-                    // without re-entering the FENCE.  Pop the seal and
-                    // continue to the next non-seal entry.  If only the floor
-                    // (-1) remains, propagate ABORT to suppress unanchored
-                    // cursor-retry in PatternMatch (per session #66 correction).
+                    // Seal hit on backtrack: backtrack INTO the fenced region is blocked,
+                    // but backup passes THROUGH FENCE(P) (SPITBOL manual: it does not abort
+                    // the match as &FENCE does).  OUTER alternates saved BEFORE the FENCE
+                    // was entered (and which sit BELOW the seal on the alt stack — preserved
+                    // by SealAlternates) must still be allowed to fire — they represent
+                    // OTHER ways the OUTER pattern could match without re-entering the
+                    // FENCE.  Pop the seal and continue to the next non-seal entry.  If only
+                    // the floor (-1) remains, the match fails at this starting cursor and an
+                    // unanchored match tries the next one.
                     while (alternateIndex == -2)
                     {
                         if (!_state.HasAlternates())
                         {
-                            // PM_FAIL — seal-only stack, ABORT propagates outward.
+                            // PM_FAIL — seal-only stack, nothing left to try from this cursor.
                             MonitorIpc.EmitPmFail(NodeTag(node), _state.CursorPosition);
-                            return MatchResult.Abort(_state);
+                            return MatchResult.Failure(_state);
                         }
                         (alternateIndex, _) = _state.RestoreAlternate();
                     }

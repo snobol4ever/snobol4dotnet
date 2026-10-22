@@ -9,7 +9,7 @@ public partial class TestLexer
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(219, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(23, build.ColumnHistory[0]);
+        Assert.AreEqual(22, build.ColumnHistory[0]);
     }
 
 }

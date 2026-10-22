@@ -54,6 +54,9 @@ public class SourceLine
     // Unprocessed source code
     internal string Text { get; set; }
 
+    // The text as SPITBOL's scanner reads it: with the semicolon that ends the statement, if one does
+    internal string SyntaxText { get; init; }
+
     // Label of this line
     internal string Label { get; set; } = string.Empty;
 
@@ -110,6 +113,7 @@ public class SourceLine
         PathName = pathName;
         CaseFolding = code.CaseFoldingNow;
         Text = text.TrimEnd();
+        SyntaxText = Text + code.CurrentSubLineTail;
 
         // Mutable collections initialized during parsing
         ParseBody = [];

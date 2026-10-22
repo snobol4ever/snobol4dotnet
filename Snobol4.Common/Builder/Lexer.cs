@@ -270,6 +270,21 @@ public partial class Lexer
                 continue;
             }
 
+            // a syntax error is reported as SPITBOL meets it, at the element it meets it at
+            if (SyntaxScanner.FirstError(sourceLine.SyntaxText, name => _parent.Code.Labels.ContainsKey(_parent.FoldCase(name))) is { } syntax)
+            {
+                allLexed = false;
+                sourceLine.CompileError = true;
+                // its label is declared before its body is read: a statement with the same label later is a duplicate
+                if (!DeclareLabel(sourceLine))
+                    continue;
+                _parent.LogCompilerException(syntax.Code, syntax.Cursor, sourceLine);
+                if (syntax.SwallowsNext && position + 1 < lines.Count && ReferenceEquals(lines[position + 1].PhysicalLines, sourceLine.PhysicalLines)
+                    && lines[position + 1].SubLineOffset > sourceLine.SubLineOffset)
+                    lines[position + 1].CompileError = true;
+                continue;
+            }
+
             if (!LexLine(sourceLine))
             {
                 allLexed = false;
@@ -302,6 +317,25 @@ public partial class Lexer
         return allLexed;
     }
 
+
+    // The label of a statement that has an error in its body is declared all the same, as SPITBOL declares a label before it reads the
+    // body that follows; false, with 217 reported, when the label is one already
+    private bool DeclareLabel(SourceLine sourceLine)
+    {
+        var m = LabelPattern().Match(sourceLine.Text);
+        if (!m.Success)
+            return true;
+        var label = _parent.FoldCase(m.Value);
+        if (_parent.Code.Labels.ContainsKey(label))
+        {
+            _parent.LogCompilerException(217, 0, sourceLine);
+            return false;
+        }
+
+        sourceLine.Label = label;
+        _parent.Code.Labels[label] = sourceLine.LineCountTotal;
+        return true;
+    }
 
     /// <summary>
     /// Performs lexical analysis on a single source line using a DFA-based tokenizer.

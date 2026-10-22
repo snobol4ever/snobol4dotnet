@@ -10,7 +10,7 @@ public partial class TestLexer
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(16, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -31,7 +31,7 @@ public partial class TestLexer
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -52,7 +52,7 @@ public partial class TestLexer
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(16, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -63,7 +63,7 @@ public partial class TestLexer
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -74,7 +74,7 @@ public partial class TestLexer
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -85,7 +85,7 @@ public partial class TestLexer
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -96,7 +96,7 @@ public partial class TestLexer
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(14, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -107,7 +107,7 @@ public partial class TestLexer
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(16, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -130,7 +130,7 @@ end"; var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -151,7 +151,7 @@ end"; var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(16, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -162,7 +162,7 @@ end"; var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -173,7 +173,7 @@ end"; var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -184,7 +184,7 @@ end"; var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -195,7 +195,7 @@ end"; var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(14, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -206,7 +206,7 @@ end"; var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(16, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -230,7 +230,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -254,7 +254,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(16, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -265,7 +265,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -276,7 +276,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -287,7 +287,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -298,7 +298,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(14, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -309,7 +309,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(16, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -333,7 +333,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -356,7 +356,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(16, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -367,7 +367,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -378,7 +378,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -389,7 +389,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -400,7 +400,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(14, build.ColumnHistory[0]);
     }
 
 
@@ -412,7 +412,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(16, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -433,7 +433,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -454,7 +454,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(16, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -465,7 +465,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -476,7 +476,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -487,7 +487,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -498,7 +498,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(14, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -509,7 +509,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(16, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -533,7 +533,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -554,7 +554,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(16, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -565,7 +565,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -576,7 +576,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -587,7 +587,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -598,7 +598,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(14, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -609,7 +609,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(16, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -630,7 +630,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -653,7 +653,7 @@ end"; var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(16, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -664,7 +664,7 @@ end"; var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -674,7 +674,7 @@ end"; var directives = "-b";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -684,7 +684,7 @@ end"; var directives = "-b";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -694,7 +694,7 @@ end"; var directives = "-b";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(14, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -704,7 +704,7 @@ end"; var directives = "-b";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(16, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -726,7 +726,7 @@ end"; var directives = "-b";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -748,7 +748,7 @@ end"; var directives = "-b";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(16, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -758,7 +758,7 @@ end"; var directives = "-b";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -768,7 +768,7 @@ end"; var directives = "-b";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -778,7 +778,7 @@ end"; var directives = "-b";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -788,7 +788,7 @@ end"; var directives = "-b";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(14, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -798,7 +798,7 @@ end"; var directives = "-b";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(16, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -818,7 +818,7 @@ end"; var directives = "-b";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -838,7 +838,7 @@ end"; var directives = "-b";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(16, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -848,7 +848,7 @@ end"; var directives = "-b";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -859,7 +859,7 @@ end"; var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -870,7 +870,7 @@ end"; var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -881,7 +881,7 @@ end"; var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(14, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -892,7 +892,7 @@ end"; var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(16, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -916,7 +916,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -936,7 +936,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(16, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -947,7 +947,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -958,7 +958,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -969,7 +969,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -980,7 +980,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(14, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -991,7 +991,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(16, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -1012,7 +1012,7 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -1034,7 +1034,7 @@ end"; var directives = "-b";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(16, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -1044,7 +1044,7 @@ end"; var directives = "-b";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -1054,7 +1054,7 @@ end"; var directives = "-b";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -1064,7 +1064,7 @@ end"; var directives = "-b";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -1074,7 +1074,7 @@ end"; var directives = "-b";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(14, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -1084,7 +1084,7 @@ end"; var directives = "-b";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(16, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -1107,7 +1107,7 @@ end"; var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -1130,7 +1130,7 @@ end"; var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(16, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -1141,7 +1141,7 @@ end"; var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -1152,7 +1152,7 @@ end"; var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -1163,7 +1163,7 @@ end"; var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(15, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -1174,6 +1174,6 @@ end"; var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(218, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(10, build.ColumnHistory[0]);
+        Assert.AreEqual(14, build.ColumnHistory[0]);
     }
 }

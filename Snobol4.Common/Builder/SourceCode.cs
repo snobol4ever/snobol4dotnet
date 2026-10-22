@@ -40,6 +40,10 @@ public class SourceCode
     internal int CurrentFirstStatementNumber { get; set; }
     internal int CurrentSubLineOffset { get; set; }
 
+    // What follows the current statement on its line when a semicolon ends it: the blanks before the semicolon and the semicolon,
+    // which are no part of the statement's text but are what SPITBOL's scanner meets after its last element
+    internal string CurrentSubLineTail { get; set; } = "";
+
     // List of source lines
     internal List<SourceLine> SourceLines { get; set; } = [];
 
@@ -262,10 +266,11 @@ public class SourceCode
         var currentLine = line;
 
         // A continuation joins a statement still open: not a comment or control line, nor one a final
-        // semicolon has closed, as in SPITBOL, where a continuation after those is misplaced (error 214)
+        // semicolon has closed, as in SPITBOL, where a continuation after those is misplaced (error 214); nor the END
+        // statement, after which SPITBOL reads no more of the program
         while (!reader.EndOfStream && reader.Peek() is _continuationChar or _alternateContinuationChar
                && !IsCommentOrContinuation(currentLine) && !IsCommand(currentLine)
-               && !currentLine.TrimEnd().EndsWith(_semicolonChar))
+               && !currentLine.TrimEnd().EndsWith(_semicolonChar) && !IsEndStatement(currentLine))
         {
             var continued = CutToMaximum(reader.ReadLine()) ?? "";
             physicalLines.Add(continued);
@@ -308,6 +313,7 @@ public class SourceCode
     private void ProcessLineWithSubLines(string line, string pathName, bool codeText = false)
     {
         SubLineCount = 0;
+        CurrentSubLineTail = "";
 
         // In SNOBOL4, a comment line has '*' in column 1. Such lines must be
         // skipped BEFORE semicolon splitting — otherwise "* comment; key/value"
@@ -351,6 +357,14 @@ public class SourceCode
         foreach (var subLine in subLines)
         {
             CurrentSubLineOffset = offset;
+            CurrentSubLineTail = offset + subLine.Length < line.Length ? subLine[subLine.TrimEnd().Length..] + ";" : "";
+
+            // a comment may follow a semicolon in a source file, and runs to the end of the line, semicolons and all
+            if (!codeText && offset > 0 && subLine.Length > 0 && subLine[0] == '*')
+            {
+                CommentContinuationDirectiveCount++;
+                return;
+            }
 
             // a control may follow a semicolon in a source file, and is read to the end of the line; what follows it is lost
             if (!codeText && IsCommand(subLine))

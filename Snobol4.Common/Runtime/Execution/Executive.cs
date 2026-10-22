@@ -145,7 +145,7 @@ public partial class Executive
             { "__@", new FunctionTableEntry(this, "__@", Undefined, 2, false) },
             { "__^", new FunctionTableEntry(this, "__^", Power, 2, true) },
             { "__|", new FunctionTableEntry(this, "__|", CreateAlternatePattern, 2, true) },
-            { "__~", new FunctionTableEntry(this, "__~", PatternAnnotation, 2, false) },
+            { "__~", new FunctionTableEntry(this, "__~", Undefined, 2, false) },
             { "__+", new FunctionTableEntry(this, "__+", Add, 2, true) },
             { "___", new FunctionTableEntry(this, "___", CreateConcatenatePattern, 2, true) },
 

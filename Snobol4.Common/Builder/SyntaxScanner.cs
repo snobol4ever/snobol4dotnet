@@ -34,7 +34,8 @@ internal sealed partial class SyntaxScanner
 
     // SwallowsNext: the element at fault was the semicolon that ends the statement, so SPITBOL, skipping to the end of the statement
     // after the error, takes the next statement of the line for the rest of this one and compiles nothing of it
-    internal readonly record struct Error(int Code, int Cursor, bool SwallowsNext = false);
+    // AtEnd: the element at fault was the end of the text, which SPITBOL finds by reading on to the next card
+    internal readonly record struct Error(int Code, int Cursor, bool SwallowsNext = false, bool AtEnd = false);
 
     private sealed class SyntaxFault(int code) : Exception
     {
@@ -50,6 +51,7 @@ internal sealed partial class SyntaxScanner
     private bool _rescan;                 // scnrs: the element read last is read again
     private int _type = Semicolon;        // its type
     private bool _semicolon;              // and it is a semicolon in the text, not the end of it
+    private bool _atEnd;                  // and it is the end of the text
     private char _operator;               // and its character, for an operator
 
     private Func<string, bool>? _defined;
@@ -77,7 +79,7 @@ internal sealed partial class SyntaxScanner
         }
         catch (SyntaxFault fault)
         {
-            return new Error(fault.Code, scanner._start, scanner._type == Semicolon && scanner._semicolon);
+            return new Error(fault.Code, scanner._start, scanner._type == Semicolon && scanner._semicolon, scanner._atEnd);
         }
     }
 
@@ -342,6 +344,7 @@ internal sealed partial class SyntaxScanner
             return _type;
         }
 
+        _atEnd = false;
         var text = _text;
         var position = _position;
         if (position == text.Length)
@@ -446,6 +449,7 @@ internal sealed partial class SyntaxScanner
                 case ';':
                     Exit(Semicolon);
                     _semicolon = true;
+                    _atEnd = false;
                     return Semicolon;
                 case ',':
                     return Exit(Comma);
@@ -502,6 +506,7 @@ internal sealed partial class SyntaxScanner
     {
         _type = type;
         _semicolon = false;
+        _atEnd = type == Semicolon;
         _operator = op;
         _previous = type;
         _gotoField = false;

@@ -122,6 +122,7 @@ public class SourceCode
             return;
 
         _parent.DropDeferred(_lastListedLine);
+        MarkLastCard();
         _parent.LogMissingEnd();
     }
 
@@ -147,6 +148,7 @@ public class SourceCode
             return;
 
         _parent.DropDeferred(_lastListedLine);
+        MarkLastCard();
         _parent.LogMissingEnd();
     }
 
@@ -221,6 +223,7 @@ public class SourceCode
 
             // A comment or control line leaves a carried-over included name in place for the next
             // statement; a statement or a blank (null statement) line uses it up
+            _lastCardWasStatement = SourceLines.Count > linesBefore && !IsCommand(currentLine);
             _lastLineIsNote = currentLine.Length > 0 && currentLine[0] is '*' or '-';
             if (!_lastLineIsNote)
                 _staleIncludeName = null;
@@ -484,6 +487,16 @@ public class SourceCode
             _parent.Defer(position, listing);
             _lastListedLine = listing;
         }
+    }
+
+    // Whether the last card read held a statement (not a comment, a control or a blank line): with no END after it, it is the statement
+    // SPITBOL was reading when the source ran out
+    private bool _lastCardWasStatement;
+
+    private void MarkLastCard()
+    {
+        if (_lastCardWasStatement && SourceLines.Count > 0)
+            SourceLines[^1].EndsTheSource = true;
     }
 
     // The last line queued for the listing: sbl lists a line when it reads the next, so the last line of a source with no END is never

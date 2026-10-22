@@ -80,4 +80,60 @@ public class NoEndLast
             Assert.AreEqual(said ? 1 : 0, count, $"after END: {after.Replace("\n", "\\n")}");
         }
     }
+
+    private static string[] CompileWithoutEnd(string source)
+    {
+        var merged = new StringWriter();
+        var (output, error) = (Console.Out, Console.Error);
+        Console.SetOut(merged);
+        Console.SetError(merged);
+        try
+        {
+            SetupTests.SetupScript("-b", source);
+        }
+        finally
+        {
+            Console.SetOut(output);
+            Console.SetError(error);
+        }
+
+        return merged.ToString().Replace("\r\n", "\n").Split('\n').Where(line => line.Trim() != "").ToArray();
+    }
+
+    // sbl reads on after the last card of a source to see whether another continues it, and finds the end of the source: an error it
+    // finds only once it has read the whole statement (a missing right paren or operand, a goto without its paren, a constant that
+    // cannot be folded, a value where a name is required) is never reported. An error before the end of the card is (sbl -b -l)
+    [TestMethod]
+    public void TEST_NoEndLast_an_error_found_at_the_end_of_the_last_card_is_not_reported()
+    {
+        foreach (var last in new[] { "        X = (1", "        X = 1 +", "        X = 1 :S(", "        :(", "        X = F(", "        X = 1 / 0",
+                     "        X = LEN(-1)", "        'A' = 2", "        X . 1 = 2", "        X = (1 2 3", "        X = 1; Y = (1" })
+        {
+            var lines = CompileWithoutEnd("        OUTPUT = 1\n        Y = 2\n" + last + "\n");
+            CollectionAssert.AreEqual(new[] { "No END statement found in source file(s)." }, lines, last);
+        }
+    }
+
+    [TestMethod]
+    public void TEST_NoEndLast_an_error_before_the_end_of_the_last_card_is_reported()
+    {
+        foreach (var (last, code) in new[] { ("        X = 1 )", "224"), ("        X = 1 ,", "223"), ("        X =+", "233"), ("        X = 1 :FOO", "234"),
+                     ("        X = 1 :END", "234"), ("        X = \"abc", "232"), ("        X = 1 + + ", "221") })
+        {
+            var lines = CompileWithoutEnd("        OUTPUT = 1\n        Y = 2\n" + last + "\n");
+            Assert.IsTrue(lines.Any(line => line.Contains("ERROR " + code)), last);
+        }
+    }
+
+    // a card after the statement (a comment, a blank, a control, another statement) is what SPITBOL reads on to, so the statement is
+    // finished and its error is reported
+    [TestMethod]
+    public void TEST_NoEndLast_a_card_after_the_statement_lets_its_error_be_reported()
+    {
+        foreach (var after in new[] { "* comment\n", "\n", "-EJECT\n", "        Y = 1\n" })
+        {
+            var lines = CompileWithoutEnd("        OUTPUT = 1\n        X = (1\n" + after);
+            Assert.IsTrue(lines.Any(line => line.Contains("ERROR 226")), after);
+        }
+    }
 }

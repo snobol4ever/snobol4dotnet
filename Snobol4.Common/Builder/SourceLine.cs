@@ -11,6 +11,10 @@ public class SourceLine
     // The statement did not compile; it keeps its label, and reaching it is error 7 (sbl -k)
     internal bool CompileError { get; set; }
 
+    // The statement stands on the last card of a source that has no END: SPITBOL reads on to see whether a card continues it, finds the
+    // end of the source, and reports no error that it finds only once it has read the whole statement
+    internal bool EndsTheSource { get; set; }
+
     // The number of an error found as the line was read (a continuation with nothing to continue), reported where the lexer reaches
     // the line so that it follows the line's listing
     internal int PendingError { get; set; }

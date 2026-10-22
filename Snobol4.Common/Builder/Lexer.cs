@@ -278,6 +278,9 @@ public partial class Lexer
                 // its label is declared before its body is read: a statement with the same label later is a duplicate
                 if (!DeclareLabel(sourceLine))
                     continue;
+                // on the last card of a source with no END, SPITBOL has not read to the end of the statement when the source runs out
+                if (syntax.AtEnd && sourceLine.EndsTheSource)
+                    continue;
                 _parent.LogCompilerException(syntax.Code, syntax.Cursor, sourceLine);
                 if (syntax.SwallowsNext && position + 1 < lines.Count && ReferenceEquals(lines[position + 1].PhysicalLines, sourceLine.PhysicalLines)
                     && lines[position + 1].SubLineOffset > sourceLine.SubLineOffset)
@@ -303,7 +306,9 @@ public partial class Lexer
             // an error found pre-evaluating the constants of the statement is an error in it, as in SPITBOL
             if (preEvaluator.FirstError(sourceLine) is var code and not 0)
             {
-                _parent.LogCompilerException(code, 0, sourceLine);
+                // found once the whole statement is read, which the last card of a source with no END never is
+                if (!sourceLine.EndsTheSource)
+                    _parent.LogCompilerException(code, 0, sourceLine);
                 allLexed = false;
                 sourceLine.CompileError = true;
                 sourceLine.LexBody.Clear();

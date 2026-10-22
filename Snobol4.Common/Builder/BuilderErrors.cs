@@ -264,10 +264,10 @@ public partial class Builder
     private void WriteErrorPage(string numberField, string physical, int line, int column, int code, string file, bool listed)
     {
         // a statement that -LIST has already listed is not listed again, but its line is still copied
-        WriteReportPageLine($"{numberField}{physical.TrimEnd(' ', '\t')}", listed);
-        // under -e, errors to the list file only, sbl leaves an empty line before the pointer
+        WriteReportPageLine($"{numberField}{physical.TrimEnd(' ', '\t')}", listed, newPageAllowed: true);
+        // under -e, errors to the list file only, sbl leaves an empty line before the pointer, which the page does not count
         if (BuildOptions.ErrorsToStdout)
-            WriteReportPageLine("");
+            WriteReportPageLine("", counted: false);
 
         var pointer = new StringBuilder();
         if (column > 0)
@@ -283,11 +283,12 @@ public partial class Builder
         WriteReportPageLine("");
     }
 
-    // A line of an error page: on the listing, which opens its head if this is the first line, and copied to standard error
-    private void WriteReportPageLine(string text, bool listed = false)
+    // A line of an error page: on the listing, which opens its head if this is the first line, and copied to standard error. Only
+    // the line that opens a report may begin a new page: sbl breaks between the reports, never inside one
+    private void WriteReportPageLine(string text, bool listed = false, bool newPageAllowed = false, bool counted = true)
     {
         if (!listed)
-            WriteListingLine(text);
+            WriteListingLine(text, newPageAllowed, counted);
         ListingWriter.Flush();
         WriteReportCopy(text);
     }

@@ -103,19 +103,20 @@ public partial class Builder
             NewListingPage();
     }
 
-    internal void WriteListingLine(string line)
+    internal void WriteListingLine(string line, bool newPageAllowed = true, bool counted = true)
     {
         var writer = ListingWriter;
         if (OpenListing())
         {
         }
-        else if (_listingPage > 0 && _listingLinesOnPage >= BuildOptions.LinesPerPage - (LongListing ? 2 : 5))
+        else if (newPageAllowed && _listingPage > 0 && _listingLinesOnPage >= BuildOptions.LinesPerPage - (LongListing ? 2 : 5))
             NewListingPage();
 
         // a line longer than the width of the listing is cut into lines of that width, mid-word, as sbl prints it; it takes one
         // line of the page
         WriteWrapped(writer, line);
-        _listingLinesOnPage++;
+        if (counted)
+            _listingLinesOnPage++;
     }
 
     // The pieces of a line of at most `width` bytes (in UTF-8, as sbl counts them) that it is cut into; one when it fits

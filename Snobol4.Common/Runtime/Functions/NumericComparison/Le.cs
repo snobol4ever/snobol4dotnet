@@ -5,7 +5,7 @@
 
 public partial class Executive
 {
-    internal void Le(List<Var> arguments) => BinaryComparison(arguments, IntegerLe, RealLe, 121, 122);
+    internal void Le(List<Var> arguments) => BinaryComparison(arguments, IntegerLe, RealLe, 118, 119);
 
     internal bool IntegerLe(long left, long right) => left <= right;
 

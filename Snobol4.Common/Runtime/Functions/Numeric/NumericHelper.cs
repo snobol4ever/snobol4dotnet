@@ -22,19 +22,20 @@ public partial class Executive
         int errorIntegerOverflow,
         int errorRealOverflow)
     {
-        if (!Var.ToNumeric(arguments[0], out var isIntegerLeft, out var lLeft, out var dLeft, this))
-        {
-            // Propagate deferred-expression failure as a SNOBOL match failure
-            // rather than a fatal "left operand is not numeric" error.
-            if (Failure) { NonExceptionFailure(); return; }
-            LogRuntimeException(errorLeft);
-            return;
-        }
-
+        // The right operand is taken off the stack first, so it is the one SPITBOL finds wrong when both are
         if (!Var.ToNumeric(arguments[1], out var isIntegerRight, out var lRight, out var dRight, this))
         {
             if (Failure) { NonExceptionFailure(); return; }
             LogRuntimeException(errorRight);
+            return;
+        }
+
+        // Propagate deferred-expression failure as a SNOBOL match failure
+        // rather than a fatal "left operand is not numeric" error.
+        if (!Var.ToNumeric(arguments[0], out var isIntegerLeft, out var lLeft, out var dLeft, this))
+        {
+            if (Failure) { NonExceptionFailure(); return; }
+            LogRuntimeException(errorLeft);
             return;
         }
 
@@ -85,7 +86,10 @@ public partial class Executive
         }
         else
         {
-            if (double.IsNaN(dResult) || double.IsInfinity(dResult))
+            // 0.0 / 0.0 and 0.0 REMDR 0.0 are 0. in SPITBOL (the invalid operation is not an overflow), not an error
+            if (double.IsNaN(dResult) && dLeft == 0 && dRight == 0)
+                dResult = 0.0;
+            else if (double.IsNaN(dResult) || double.IsInfinity(dResult))
             {
                 LogRuntimeException(errorRealOverflow);
                 return;

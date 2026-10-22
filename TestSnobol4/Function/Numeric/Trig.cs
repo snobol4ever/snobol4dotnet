@@ -324,7 +324,8 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
 
-        Assert.AreEqual(100.5 % 31.2, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Data);
+        // sbl prints 6.90000000000001: n1 - chop(n1 / n2) * n2, and not the exact C# remainder 6.900000000000002
+        Assert.AreEqual(100.5 - Math.Truncate(100.5 / 31.2) * 31.2, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Data);
     }
 
     #endregion

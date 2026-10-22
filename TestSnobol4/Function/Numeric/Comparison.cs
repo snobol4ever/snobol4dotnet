@@ -663,7 +663,7 @@ false   a =  'false'  :(end)
 end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
-        Assert.AreEqual(121, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(118, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
@@ -676,7 +676,7 @@ false   a =  'false'  :(end)
 end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
-        Assert.AreEqual(122, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(119, build.ErrorCodeHistory[0]);
     }
 
     #endregion

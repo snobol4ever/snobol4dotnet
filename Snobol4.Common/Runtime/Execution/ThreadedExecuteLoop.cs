@@ -373,6 +373,27 @@ public partial class Executive
             goto Done;
         }
 
+        // a failure exit that is an expression (:F($'RETURN')) is evaluated now, as its goto would be, and names the label resumed at
+        if (exitCode == -6 && _continueStatement == ContinueAtExpression && overrideThread == null)
+            _continueStatement = ContinueExpressionTarget(_trapStatement);
+
+        // one that fails or names no label is a computed goto that cannot be made: its error, and then the same goto as its failure
+        // exit, error 332, as in SPITBOL
+        if (exitCode == -6 && _continueStatement == ContinueExpressionUnresolved && overrideThread == null)
+        {
+            _continueStatement = -1;
+            _trapPending = false;
+            ReportLineIndex = _trapStatement;
+            ComputedGotoError(38);
+            if (_trapTaken)
+            {
+                _trapTaken = false;
+                thread = Thread!;
+                exitCode = -1;
+                goto Restart;
+            }
+        }
+
         // :(CONTINUE) resumes at the failure exit of the statement in error, which can be a special label (SCONTINUE, RETURN):
         // that label is then taken as the goto it is
         if (exitCode == -6 && _continueStatement is <= -2 and >= -7 && overrideThread == null)
@@ -427,6 +448,33 @@ public partial class Executive
         return exitCode;
     }
 
+    // :(CONTINUE) is to evaluate the failure exit of the statement in error (Builder.FailureExitExpressions), or found that it fails
+    // or names no label
+    private const int ContinueAtExpression = -11;
+    private const int ContinueExpressionUnresolved = -12;
+
+    // The label the failure exit expression of a statement names, as GotoIndirect resolves it: a statement or a special label
+    // (-2 to -7), or ContinueExpressionUnresolved when the expression fails or names no label
+    private int ContinueExpressionTarget(int statement)
+    {
+        if (!Parent.FailureExitExpressions.TryGetValue(statement, out var tokens))
+            return statement + 1;
+        var depth = SystemStack.Count;
+        RunExpressionThread(new ThreadedCodeCompiler(Parent).CompileSubExpression(tokens));
+        if (Failure || SystemStack.Count <= depth)
+        {
+            while (SystemStack.Count > depth)
+                SystemStack.Pop();
+            Failure = false;
+            return ContinueExpressionUnresolved;
+        }
+
+        var target = LabelTable[SystemStack.Pop().Symbol];
+        while (SystemStack.Count > depth)
+            SystemStack.Pop();
+        return target == GotoNotFound ? ContinueExpressionUnresolved : target;
+    }
+
     private int StatementIndexToInstrIndex(int stmtIdx)
     {
         if (stmtIdx < 0) return stmtIdx;
@@ -447,7 +495,7 @@ public partial class Executive
         _trapStatement = errorStatement;
         _continueStatement = Parent.FailureExits.TryGetValue(errorStatement, out var exitLabel) && exitLabel is not null
             ? LabelTable[Parent.FoldCase(exitLabel)]
-            : errorStatement + 1;
+            : Parent.FailureExitExpressions.ContainsKey(errorStatement) ? ContinueAtExpression : errorStatement + 1;
         InstructionPointer = StatementIndexToInstrIndex(target);
         _trapTaken = true;
         _trapPending = true;

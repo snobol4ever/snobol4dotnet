@@ -67,4 +67,27 @@ H       OUTPUT = 'PREV=[' SETEXIT('') ']'
         :(END)
 END"));
     }
+
+    // sbl -b: a failure exit that is an expression is evaluated when :(CONTINUE) resumes there: $'RETURN' returns F with its null value
+    // and $L goes to the label L names (was F [normal] G [normal]: the console resumed at the next statement)
+    [TestMethod]
+    public void TEST_SetExitContinue_a_failure_exit_that_is_an_expression_is_evaluated()
+    {
+        Assert.AreEqual("handler t=14\nhandler t=14\nF [] G [there]",
+            SetupTests.RunWithInput(@"        &ERRLIMIT = 5
+        DEFINE('F()')
+        DEFINE('G()')                              :(FE)
+F       SETEXIT(.H)
+        X = Z / 0                                  :F($'RETURN')
+        F = 'normal'                               :(RETURN)
+G       SETEXIT(.H)
+        L = 'THERE'
+        X = Z / 0                                  :F($L)
+        G = 'normal'                               :(RETURN)
+THERE   G = 'there'                                :(RETURN)
+H       OUTPUT = 'handler t=' &ERRTYPE             :(CONTINUE)
+FE      Z = 1
+        OUTPUT = 'F [' F() '] G [' G() ']'
+END").Replace("\r\n", "\n"));
+    }
 }

@@ -96,6 +96,10 @@ public partial class Builder : IDisposable
     // indirect goto), by global statement index
     internal Dictionary<int, string?> FailureExits = new();
 
+    // A failure exit that is an expression naming a label (:F($'RETURN'), or such an unconditional goto when there is no :F),
+    // by statement: :(CONTINUE) evaluates it when it resumes there, as the goto would be
+    internal Dictionary<int, List<Token>> FailureExitExpressions = new();
+
     /// <summary>
     /// True when the compiled thread contains only <c>CallMsil</c> and <c>Halt</c>
     /// opcodes — all control flow has been absorbed into delegates.

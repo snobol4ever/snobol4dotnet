@@ -178,8 +178,12 @@ public partial class Builder
                 out var successLabel,       out var successExpr,        out var successExprCode,
                 out var failureLabel,       out var failureExpr,        out var failureExprCode);
 
-            // the statement's failure exit, where a SETEXIT handler's :(CONTINUE) resumes after an error in it
+            // the statement's failure exit, where a SETEXIT handler's :(CONTINUE) resumes after an error in it: a label, or an
+            // expression that names one, evaluated when :(CONTINUE) takes it
             FailureExits[stmtIdx] = failureLabel ?? directUncondLabel;
+            FailureExitExpressions.Remove(stmtIdx);
+            if (FailureExits[stmtIdx] is null && FailureExitExpression(line) is { } exitExpression)
+                FailureExitExpressions[stmtIdx] = exitExpression;
 
             TryCache(line.ParseBody, stmtIdx: stmtIdx, isBody: true,
                      directGotoLabel:  directUncondLabel,
@@ -208,6 +212,23 @@ public partial class Builder
     /// the body delegate.  Extracted so both <see cref="EmitMsilForAllStatements"/>
     /// and <see cref="DumpMsilToFile"/> share the same logic.
     /// </summary>
+    // The failure exit of a statement when it is an expression and not a label or a <code> goto: its :F goto, else its
+    // unconditional goto when it has no :F (:F($'RETURN'), :($NEXT)); null otherwise
+    private static List<Token>? FailureExitExpression(SourceLine line)
+    {
+        static bool IsLabel(List<Token> goTo) => goTo is [{ TokenType: Token.Type.IDENTIFIER }];
+
+        if (line.ParseFailureGoto.Count > 0)
+        {
+            var failureIsDirect = line.ParseSuccessGoto.Count > 0 && line.SuccessFirst ? line.DirectGotoSecond : line.DirectGotoFirst;
+            return failureIsDirect || IsLabel(line.ParseFailureGoto) ? null : line.ParseFailureGoto;
+        }
+
+        return line.ParseUnconditionalGoto.Count > 0 && !line.DirectGotoFirst && !IsLabel(line.ParseUnconditionalGoto)
+            ? line.ParseUnconditionalGoto
+            : null;
+    }
+
     private static void DetectGotoForms(SourceLine line,
         out string?      directUncondLabel,
         out List<Token>? indirectUncondExpr, out bool indirectUncondCode,

@@ -18,6 +18,10 @@ Run them from an **empty scratch directory** (they write `*.sno`, `*.sbl`, `*.ne
 | `ctxrun.py [N...]` | every context (or those numbered) against every value, one program each, on both engines; a run that dies is repeated value by value so a crash shows as `CRASH <Exception>` and a hang as `TIMEOUT` |
 | `ctxtest.py CLASS NS OUTFILE SUMMARY 'NAME=CTX;;CTX@VAL,VAL'...` | writes a C# test class whose expected lines are what `sbl -b` printed for the named contexts and values; it refuses to overwrite a file |
 
+| `syntaxsweep.py FILE` | the statements of FILE (one to a line, `\n` and `\t` for a newline and a tab), each a program on its own, under both engines; prints those whose compile errors (code, line, column) differ |
+| `compilediff.py LIST` | the programs named in LIST compiled without running (`-n`) under both engines, in their own folders with `SNOLIB` on the corpus includes; prints those whose compile errors differ (the corpus: `find corpus -name '*.sno' -o -name '*.spt'`; the include-search lists of error 285, the 8-bit and the CR sources are known to differ) |
+| `pagetest.py OUTFILE CASES.py` | writes a C# test class whose expected text is the page `sbl -b` printed for each program of CASES.py (head masked), for errors found when a program is compiled |
+
 A sweep gives the *cases*; a fix still needs a test that is red before and green after, with the oracle's line as its
 expectation (`TestSnobol4/Function/.../ArgumentRules.cs`, `NonStringValues.cs`, `KeywordAssignment.cs` are examples). Where an old
 test asserts a non-SPITBOL answer, run its exact program under `sbl -b` before correcting it.

@@ -90,6 +90,7 @@ public partial class Executive
     // number; one program runs on one thread, so the count is per thread and starts again per program
     [ThreadStatic] private static long _blockCounter;
     internal static long NewBlockId() => ++_blockCounter;
+    internal static long BlockCounterValue { get => _blockCounter; set => _blockCounter = value; }
 
     public Executive(Builder parent)
     {

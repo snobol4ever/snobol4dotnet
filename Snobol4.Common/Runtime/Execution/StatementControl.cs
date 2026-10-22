@@ -1,8 +1,45 @@
+using System.Runtime.ExceptionServices;
+
 namespace Snobol4.Common;
 
 public partial class Executive
 {
     private bool _inExecuteLoop;
+
+    // The program runs on a thread with a stack large enough for the depth SPITBOL's stack allows (-s bytes of 72-byte frames
+    // at the least) at the .NET frames each level takes; the thread that called goes on afterwards with the program's state
+    private int OnLargeStack(Func<int> run)
+    {
+        var blockCounter = BlockCounterValue;
+        var result = 0;
+        ExceptionDispatchInfo? failure = null;
+        var stackBytes = (int)Math.Clamp(Parent.BuildOptions.StackSizeBytes / 72L * LargeStackBytesPerLevel, 256L << 20, int.MaxValue);
+        var thread = new Thread(() =>
+        {
+            BlockCounterValue = blockCounter;
+            try
+            {
+                result = run();
+            }
+            catch (Exception e)
+            {
+                failure = ExceptionDispatchInfo.Capture(e);
+            }
+            finally
+            {
+                blockCounter = BlockCounterValue;
+            }
+        }, stackBytes);
+        thread.Start();
+        thread.Join();
+        BlockCounterValue = blockCounter;
+        failure?.Throw();
+        return result;
+    }
+
+    // What one SPITBOL level of recursion may take of the .NET stack: measured at about 1.8 KB for a plain call, and more where a
+    // pattern match or a deep expression sits between the levels
+    private const int LargeStackBytesPerLevel = 8 * 1024;
 
     public int ExecuteLoop(int i)
     {
@@ -30,7 +67,7 @@ public partial class Executive
                 _inExecuteLoop = true;
                 try
                 {
-                    result = ThreadedExecuteLoop(startInstr);
+                    result = OnLargeStack(() => ThreadedExecuteLoop(startInstr));
                 }
                 catch (CompilerException)
                 {

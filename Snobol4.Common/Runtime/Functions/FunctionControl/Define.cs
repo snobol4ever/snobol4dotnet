@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 ﻿namespace Snobol4.Common;
 
 //"define first argument is not a string" /* 81 */,
@@ -115,6 +116,25 @@ public partial class Executive
         DataConstructors.Remove(functionName);
 
         PredicateSuccess();
+    }
+
+    // The bytes of SPITBOL's stack the program-defined functions being run have taken, and the bytes it starts with
+    private long StackBytesUsed;
+    private const long StackBaseBytes = 3216;
+
+    // The operands of the calling expression that wait on the stack, which SPITBOL's call frame also carries: those above the
+    // statement's separator, less the one that is the target of an assignment
+    private int OperandsWaiting()
+    {
+        var waiting = 0;
+        foreach (var v in SystemStack)
+        {
+            if (v is StatementSeparator)
+                break;
+            waiting++;
+        }
+
+        return Math.Max(0, waiting - 1);
     }
 
     internal void ExecuteProgramDefinedFunction(List<Var> arguments)
@@ -252,6 +272,14 @@ public partial class Executive
                 TraceLine($"{returnVarName}({string.Join(",", arguments.Take(parametersCount).Select(PrintValue))})");
         }
 
+        // SPITBOL's stack holds each call's frame, 64 bytes and 8 for each parameter, local and operand waiting in the calling
+        // expression, down from the 3,216 bytes its start takes, in the -s bytes (4m by default); a call past it is error 246
+        var frameBytes = 64 + 8 * (parametersCount + localsCount + OperandsWaiting());
+        if (StackBytesUsed + frameBytes + StackBaseBytes > Parent.BuildOptions.StackSizeBytes
+            || !RuntimeHelpers.TryEnsureSufficientExecutionStack())
+            LogRuntimeException(246, fatal: true);
+        StackBytesUsed += frameBytes;
+
         // Update keywords
         AmpFunctionLevel++;
         TraceKeyword("FNCLEVEL", AmpFunctionLevel);
@@ -274,7 +302,15 @@ public partial class Executive
         // reads it as &LASTNO, as in SPITBOL
         var callerStatement = AmpCurrentLineNumber;
         var callerSerial = StatementSerial;
-        var nextIndex = ExecuteLoop(LabelTable[definition.EntryLabel]);
+        int nextIndex;
+        try
+        {
+            nextIndex = ExecuteLoop(LabelTable[definition.EntryLabel]);
+        }
+        finally
+        {
+            StackBytesUsed -= frameBytes;
+        }
 
         // A goto to END inside the body ends the whole program, as in SPITBOL, not just the call; the END
         // statement stays the current one (&STNO, &LINE) for the end-of-run dump

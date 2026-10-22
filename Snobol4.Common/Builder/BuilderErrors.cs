@@ -154,10 +154,13 @@ public partial class Builder
 
         // the last line of a source with no END is never listed, SPITBOL lists a line when it reads the next: the page of an error in it does
         var listed = source.Listed && !(source.EndsTheSource && index == lines.Count - 1);
+        // a second error on a line that a page has shown has an empty line where the line stood
+        var repeated = ReferenceEquals(_lastPageCard, source.PhysicalLines) && _lastPageIndex == index;
+        (_lastPageCard, _lastPageIndex) = (source.PhysicalLines, index);
         // with the listing off the page carries the number of the statement on every line it prints; with it on, only the first line of a
         // statement carries its number, as in the listing
         WriteErrorPage(SourceCode.NumberField(index == 0 || !source.Listed ? source.FirstStatementNumber : 0, source.IncludeDepth), lines[index],
-            1 + source.LineCountFile + index, column, code, source.PathName, listed);
+            1 + source.LineCountFile + index, column, code, source.PathName, listed, repeated);
     }
 
     // An error in a control line (an -INCLUDE of a file that cannot be opened) is reported on the same page: no statement number,
@@ -227,6 +230,7 @@ public partial class Builder
         if (!IncludeFailed)
             return;
         IncludeFailed = false;
+        RecordMissingEnd();
         MissingEndPending = false;   // the one line says both
         // sbl says it only when END ends the file: a line after it, a blank one too, is something its stack, still inside the include,
         // has to read, and it says nothing
@@ -242,13 +246,25 @@ public partial class Builder
         SourceFailed = true;
         ExitStatus = 1;
         MissingEndPending = true;
-        LogCompilerExceptionCore(216, 0, "No END statement found in source file(s).", null, () => { });
+        _missingEndUnrecorded = true;
     }
 
     internal bool MissingEndPending;
 
+    // The error is recorded where sbl says it, after the errors of the statements: a statement in error can be the one that swallowed END
+    private bool _missingEndUnrecorded;
+
+    private void RecordMissingEnd()
+    {
+        if (!_missingEndUnrecorded)
+            return;
+        _missingEndUnrecorded = false;
+        LogCompilerExceptionCore(216, 0, "No END statement found in source file(s).", null, () => { });
+    }
+
     internal void ReportMissingEnd()
     {
+        RecordMissingEnd();
         if (!MissingEndPending)
             return;
         MissingEndPending = false;
@@ -281,14 +297,21 @@ public partial class Builder
         }
     }
 
+    // The line of the last statement page, to tell a second error on the same line
+    private List<string>? _lastPageCard;
+    private int _lastPageIndex = -1;
+
     // The page of one error: the physical line under its number field, the line that keeps its tabs and puts ! under `column`
     // (empty when there is none), the error line, and an empty line
-    private void WriteErrorPage(string numberField, string physical, int line, int column, int code, string file, bool listed)
+    private void WriteErrorPage(string numberField, string physical, int line, int column, int code, string file, bool listed, bool repeated = false)
     {
         // a statement that -LIST has already listed is not listed again, but its line is still copied
-        WriteReportPageLine($"{numberField}{physical.TrimEnd(' ', '\t')}", listed, newPageAllowed: true);
+        if (repeated)
+            WriteReportPageLine("", newPageAllowed: true);
+        else
+            WriteReportPageLine($"{numberField}{physical.TrimEnd(' ', '\t')}", listed, newPageAllowed: true);
         // under -e, errors to the list file only, sbl leaves an empty line before the pointer, which the page does not count
-        if (BuildOptions.ErrorsToStdout)
+        if (BuildOptions.ErrorsToStdout && !repeated)
             WriteReportPageLine("", counted: false);
 
         var pointer = new StringBuilder();

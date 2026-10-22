@@ -282,9 +282,6 @@ public partial class Lexer
                 if (syntax.AtEnd && sourceLine.EndsTheSource)
                     continue;
                 _parent.LogCompilerException(syntax.Code, syntax.Cursor, sourceLine);
-                if (syntax.SwallowsNext && position + 1 < lines.Count && ReferenceEquals(lines[position + 1].PhysicalLines, sourceLine.PhysicalLines)
-                    && lines[position + 1].SubLineOffset > sourceLine.SubLineOffset)
-                    lines[position + 1].CompileError = true;
                 continue;
             }
 
@@ -350,7 +347,7 @@ public partial class Lexer
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="sourceLine"/> or its text is null.</exception>
     // Where the physical lines of the statement end in its text (SyntaxText), each at the blank that stands for the continuation character of
     // the next line, counted from the start of the text
-    private static int[] LineEnds(SourceLine line)
+    internal static int[] LineEnds(SourceLine line)
     {
         var ends = new List<int>();
         var physical = line.PhysicalLines;

@@ -386,8 +386,17 @@ public class SourceCode
             subLines.RemoveAt(subLines.Count - 1);
 
         var offset = 0;
+        var swallowed = false;
         foreach (var subLine in subLines)
         {
+            // the statement after one in error at its semicolon is taken for the rest of it, and is none
+            if (swallowed)
+            {
+                swallowed = false;
+                offset += subLine.Length + 1;
+                continue;
+            }
+
             CurrentSubLineOffset = offset;
             CurrentSubLineTail = offset + subLine.Length < line.Length ? subLine[subLine.TrimEnd().Length..] + ";" : "";
 
@@ -407,7 +416,18 @@ public class SourceCode
                 return;
             }
 
+            var statementsRead = SourceLines.Count;
             ProcessSubLine(subLine.TrimEnd(), pathName, codeText);
+            if (SourceLines.Count > statementsRead && !ReferenceEquals(subLine, subLines[^1]))
+            {
+                // SPITBOL skips the rest of the line after a bad label, and takes the next statement for the rest of one in error at
+                // its semicolon: neither the rest nor that statement is a statement, and they have no number
+                var added = SourceLines[^1];
+                if (added.Text.Length > 0 && added.Text[0] is not (' ' or '\t') && !char.IsAsciiLetterOrDigit(added.Text[0]))
+                    return;
+                swallowed = SyntaxScanner.FirstError(added.SyntaxText, null, Lexer.LineEnds(added)) is { SwallowsNext: true };
+            }
+
             offset += subLine.Length + 1;
         }
     }

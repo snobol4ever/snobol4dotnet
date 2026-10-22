@@ -266,9 +266,10 @@ internal sealed class StatementChecker(Builder parent)
                                     Fixed: true));
                             break;
 
-                        // negation and interrogation give a value, whatever the operand: no name
+                        // negation and interrogation give a value, whatever the operand: no name. The interrogation of a constant is
+                        // the null string to SPITBOL's compiler (?')' / *X is 13 as it is compiled); a negation is not folded
                         case "~" or "?":
-                            stack.Add(new Operand(Kind.Value));
+                            stack.Add(new Operand(Kind.Value, token.MatchedString == "?" && operand.Value is not null ? StringVar.Null() : null));
                             break;
 
                         // an indirection takes a value and is a name

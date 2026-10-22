@@ -158,6 +158,28 @@ public class PreEvaluation
         Assert.AreEqual("13 235\n10 PATTERN 2", SetupTests.RunWithInput(s));
     }
 
+    // ?C of a constant is the null string to SPITBOL's compiler (the interrogation of a value that is there), so ?')' / *X is 13 as it is
+    // compiled; ~C and ?X are not folded. Found by the infinite_snobol4 generator ('' ?')' / *&LCASE -BREAK('ab'): 13 not 10)
+    [TestMethod]
+    public void TEST_PreEvaluation_an_interrogation_of_a_constant_is_the_null_string()
+    {
+        var s = "        OUTPUT = 'before'\n        V = ?')' / *X\n        W = ?')' + 'x'\n        Y = SIZE(?'a') + 'x'\n        OUTPUT = 'after'\nEND";
+        Assert.AreEqual(
+            Head +
+            "2               V = ?')' / *X\n\nTest.sno(2) : ERROR 013 -- division right operand is not numeric\n\n" +
+            "3               W = ?')' + 'x'\n\nTest.sno(3) : ERROR 002 -- addition right operand is not numeric\n\n" +
+            "4               Y = SIZE(?'a') + 'x'\n\nTest.sno(4) : ERROR 002 -- addition right operand is not numeric",
+            Run(s));
+    }
+
+    [TestMethod]
+    public void TEST_PreEvaluation_an_interrogation_or_negation_still_runs_as_before()
+    {
+        var s = "        &ERRLIMIT = 10\n        V = (?'a') 'b'\n        W = ~')' + 'x'\n        OUTPUT = V ' ' &ERRTYPE ' [' W ']'\n" +
+                "        X = ?X + 'x'\n        OUTPUT = &ERRTYPE\nEND";
+        Assert.AreEqual("b 0 []\n2", SetupTests.RunWithInput(s));
+    }
+
     [TestMethod]
     public void TEST_PreEvaluation_constants_that_do_not_err_run_as_before()
     {

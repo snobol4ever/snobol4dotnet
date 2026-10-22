@@ -205,6 +205,26 @@ public class Opsyn
     }
 
     [TestMethod]
+    public void TEST_Opsyn_011_above_mxlen()
+    {
+        // sbl -b: the third argument may be as large as the -m value, 16777216, and one more is error 153
+        var accepted = SetupTests.SetupScript("-b", """
+
+                    	opsyn('~','size',16777216)
+                end
+                """);
+        Assert.AreEqual(0, accepted.ErrorCodeHistory.Count);
+
+        var refused = SetupTests.SetupScript("-b", """
+
+                    	opsyn('~','size',16777217)
+                end
+                """);
+        Assert.AreNotEqual(0, refused.ErrorCodeHistory.Count);
+        Assert.AreEqual(153, refused.ErrorCodeHistory[0]);
+    }
+
+    [TestMethod]
     public void TEST_Opsyn_012()
     {
         var s = """

@@ -151,9 +151,9 @@ public partial class Executive
             return 152;
 
         // 0 is a function, 1 a unary operator and any larger count a binary one, as in SPITBOL (s_ops);
-        // a negative count is error 153
+        // a negative count, or one above sbl's mxlen (the -m value), is error 153
         var n = (long)count;
-        if (n < 0)
+        if (n < 0 || n > exec.MaxObjectLength)
             return 153;
         operands = n > 2 ? 2 : (int)n;
         return 0;

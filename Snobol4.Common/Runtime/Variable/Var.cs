@@ -376,20 +376,9 @@ public abstract class Var : IEquatable<Var>
             varIn = exec.IdentifierTable[nameVar.Pointer];
         }
 
-        // Evaluate a deferred expression on demand — a *(...) star-expression
-        // arriving where a numeric value is needed evaluates now and uses
-        // the resulting top-of-stack value.  Mirrors SPITBOL semantics; see
-        // ExpressionConversionStrategy.TryConvert for the same on-demand rule
-        // applied to other target types.
-        if (varIn is ExpressionVar exprVar)
-        {
-            exprVar.FunctionName(exec);
-            if (exec.Failure)
-                return InitializeFailureValues(out isInteger, out l, out d);
-            varIn = exec.SystemStack.Pop();
-            if (varIn is NameVar nameAfterEval)
-                varIn = exec.IdentifierTable[nameAfterEval.Pointer];
-        }
+        // An expression (*(...), or a variable that holds one) is not a number, whatever it would evaluate to: only EVAL, a pattern
+        // match and a pattern primitive's argument evaluate one. E = *5 then E + 1, -E, LT(E, 6) and REMDR(E, 3) are the errors of
+        // a non-numeric operand, as in SPITBOL.
 
         // Use pattern matching with type checks - optimized for common cases
         return varIn switch

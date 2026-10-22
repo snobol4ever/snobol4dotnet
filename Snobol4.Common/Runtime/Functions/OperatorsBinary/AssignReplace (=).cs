@@ -232,7 +232,9 @@ public partial class Executive
                 // storing it directly and then stamping Key/Collection onto it creates a
                 // self-referential cycle: arrayVar.Data[i] → NameVar(Collection=arrayVar, Key=i)
                 // → arrayVar.Data[i] → ... indefinitely (ShiftReduce S-10 root cause).
-                var rval = rightVar is NameVar rvNv ? rvNv.Dereference(this) : rightVar;
+                // The NAME of a variable is a value like another and stays a NAME in the element (L<1> = .F, then DATATYPE(L<1>) is NAME,
+                // and $L<1> = 'x' sets F); only the NAME of an element, which has no pointer, is read through.
+                var rval = rightVar is NameVar { Pointer: "" } rvNv ? rvNv.Dereference(this) : rightVar;
                 // Clone rightVar before mutating Key/Collection so the source variable's
                 // VarSlotArray slot (if rightVar came from PushVar) is not contaminated.
                 var arrVal = rval is ArrayVar or TableVar ? Handle(rval) : StoredCopy(rval);
@@ -245,7 +247,7 @@ public partial class Executive
 
             case TableVar tableVar:
             {
-                var rval = rightVar is NameVar rvNv ? rvNv.Dereference(this) : rightVar;
+                var rval = rightVar is NameVar { Pointer: "" } rvNv ? rvNv.Dereference(this) : rightVar;
                 var tblVal = rval is ArrayVar or TableVar ? Handle(rval) : StoredCopy(rval);
                 tblVal.Key        = leftVar.Key;
                 tblVal.Collection = leftVar.Collection;

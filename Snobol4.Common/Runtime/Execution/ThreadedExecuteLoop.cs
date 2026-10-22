@@ -280,7 +280,7 @@ public partial class Executive
                         }
                         else { exitCode = target; goto Done; }
                     }
-                    else { ComputedGotoError(instr.IntOperand); InstructionPointer = -1; }
+                    else { ComputedGotoError(instr.IntOperand); if (!_trapTaken) InstructionPointer = -1; }
                     break;
                 }
 
@@ -299,7 +299,7 @@ public partial class Executive
                         }
                         else { exitCode = target; goto Done; } // CODE'd stmt in Statements[]
                     }
-                    else { ComputedGotoError(instr.IntOperand); InstructionPointer = -1; }
+                    else { ComputedGotoError(instr.IntOperand); if (!_trapTaken) InstructionPointer = -1; }
                     break;
                 }
             }
@@ -311,8 +311,9 @@ public partial class Executive
         // :(CONTINUE) with no trapped error pending is itself error 37, which a SETEXIT handler traps
         if (exitCode == -6 && _continueStatement == -1 && overrideThread == null)
         {
-            // with no handler armed it is a fatal error whatever &ERRLIMIT is (the run ended silently with &ERRLIMIT above 0)
-            LogRuntimeException(37, fatal: SetExitNumber == 0);
+            // struck like SCONTINUE: with no handler armed the statement fails and takes its failure exit, the goto again, and the third
+            // strike is fatal
+            LogRuntimeException(37, fatal: ++_fatalErrors >= 3);
             SystemStack.Pop();
             if (OnErrorGoto > 0)
             {
@@ -322,6 +323,8 @@ public partial class Executive
                 exitCode = -1;
                 goto Restart;
             }
+
+            goto Done;
         }
 
         // :(SCONTINUE) resumes only after a user interrupt (error 320), which this run has none of: with an error pending it is

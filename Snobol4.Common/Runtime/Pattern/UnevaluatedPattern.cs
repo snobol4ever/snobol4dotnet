@@ -54,6 +54,7 @@ internal class UnevaluatedPattern : TerminalPattern
         {
             if (++scan.StarRepeats > Scanner.StarRepeatLimit)
             {
+                scan.Exec.RunLeftAtOnce = true;
                 scan.Exec.LogRuntimeException(246, fatal: true);
                 return MatchResult.Failure(scan);
             }

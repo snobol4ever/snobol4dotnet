@@ -284,7 +284,10 @@ public partial class Executive
         var frameBytes = 64 + 8 * (parametersCount + localsCount + OperandsWaiting());
         if (StackBytesUsed + frameBytes + StackBaseBytes > Parent.BuildOptions.StackSizeBytes
             || !RuntimeHelpers.TryEnsureSufficientExecutionStack())
+        {
+            RunLeftAtOnce = true;
             LogRuntimeException(246, fatal: true);
+        }
         StackBytesUsed += frameBytes;
 
         // Update keywords

@@ -208,7 +208,9 @@ public partial class Executive
             if (instrIdx >= 0) return instrIdx;
             return target;   // CODE'd statement — caller treats as exitCode
         }
-        // GotoNotFound or unknown label: a goto to a label that is not defined ends the run, whatever &ERRLIMIT allows
+        // GotoNotFound or unknown label: a goto to a label that is not defined ends the run, whatever &ERRLIMIT allows, and leaves
+        // &ERRLIMIT at 0, as SPITBOL does
+        AmpErrorLimit = 0;
         LogRuntimeException(errorCode, fatal: true);
         return -1;
     }
@@ -219,13 +221,23 @@ public partial class Executive
     internal void ComputedGotoError(int code)
     {
         LogRuntimeException(code);
-        if (SetExitNumber == 0)
-            LogRuntimeException(332, fatal: true);
+        if (OnErrorGoto > 0)
+        {
+            // a SETEXIT handler takes the error as it takes any other
+            ProcessTrappedErrorThreaded();
+            return;
+        }
+
+        // no handler: the failure exit of a goto is the goto again, which errs as error 332, a fatal-class error, until the third strike
+        // (SPITBOL's errft, shared with SCONTINUE); the first two are trapped while &ERRLIMIT lasts
+        while (true)
+            LogRuntimeException(332, fatal: ++_fatalErrors >= 3);
     }
 
     // RETURN, FRETURN and NRETURN outside every function (&FNCLEVEL 0) end the run with error 242
     private int ReturnFromLevelZero()
     {
+        AmpErrorLimit = 0;
         LogRuntimeException(242, fatal: true);
         return -1;
     }

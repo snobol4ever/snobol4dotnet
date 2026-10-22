@@ -32,10 +32,12 @@ public class GotoErrors
     [TestMethod]
     public void TEST_GotoErrors_a_computed_goto_with_errlimit_is_followed_by_332()
     {
+        // sbl: the error, then error 332 three times (the failure exit is the goto again; the third strike is fatal), as a handler that
+        // takes each error and goes on shows: 38, 332, 332, then the fatal 332
         CollectionAssert.AreEqual(new[] { 38 }, Errors("        X = 'NOWHERE'\n        :($X)\n        OUTPUT = 'after'\nEND"));
-        CollectionAssert.AreEqual(new[] { 38, 332 }, Errors("        &ERRLIMIT = 5\n        X = 'NOWHERE'\n        :($X)\n        OUTPUT = 'after'\nEND"));
-        CollectionAssert.AreEqual(new[] { 38, 332 }, Errors("        &ERRLIMIT = 5\n        X = 5\n        :($X)\n        OUTPUT = 'after'\nEND"));
-        CollectionAssert.AreEqual(new[] { 24, 332 }, Errors("        &ERRLIMIT = 5\n        X = 'abc'\n        :<X>\n        OUTPUT = 'after'\nEND"));
+        CollectionAssert.AreEqual(new[] { 38, 332, 332, 332 }, Errors("        &ERRLIMIT = 5\n        X = 'NOWHERE'\n        :($X)\n        OUTPUT = 'after'\nEND"));
+        CollectionAssert.AreEqual(new[] { 38, 332, 332, 332 }, Errors("        &ERRLIMIT = 5\n        X = 5\n        :($X)\n        OUTPUT = 'after'\nEND"));
+        CollectionAssert.AreEqual(new[] { 24, 332, 332, 332 }, Errors("        &ERRLIMIT = 5\n        X = 'abc'\n        :<X>\n        OUTPUT = 'after'\nEND"));
         // the expression of a computed goto that is no name: whatever it is, the failure exit is the same goto and ends the run with 332
         Assert.AreEqual(332, Errors("        &ERRLIMIT = 5\n        :($(FAIL))\n        OUTPUT = 'after'\nEND")[^1]);
     }

@@ -42,7 +42,7 @@ public partial class Executive
 
             if (action != -4)
             {
-                ExitEndsRun = true;
+                RunLeftAtOnce = true;
                 throw new ProgramEndException();
             }
             SystemStack.Push(StringVar.Null());
@@ -122,11 +122,11 @@ public partial class Executive
             return;
         }
 
-        ExitEndsRun = true;
+        RunLeftAtOnce = true;
         throw new ProgramEndException();
     }
 
-    // Set when EXIT ends the run (a save with -3 or the like, or a command): SPITBOL then leaves at once, with no end-of-run dump and
-    // no statistics of -x
-    internal bool ExitEndsRun;
+    // Set when the run is left at once: by an EXIT that ends it (a save with -3 or the like, or a command) or by a stack overflow. SPITBOL
+    // then prints no end-of-run dump and none of the statistics of -x
+    internal bool RunLeftAtOnce;
 }

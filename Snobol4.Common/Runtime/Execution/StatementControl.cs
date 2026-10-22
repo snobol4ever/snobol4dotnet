@@ -66,20 +66,17 @@ public partial class Executive
             if (Parent.BuildOptions.TraceStatements)
                 Console.Error.WriteLine(@$"{i} {SourceCode[i]}");
 
+            if (StatementLimitReached())
+            {
+                LogRuntimeException(244, fatal: true);
+                Failure = true;
+                break;
+            }
+
             if (AmpStatementLimit >= 0)
                 AmpStatementCount++;
 
             i = Statements[i](this);
-
-            if (AmpStatementLimit <= 0)
-                continue;
-
-            if (AmpStatementCount < AmpStatementLimit || StatementLimitBelowCount)
-                continue;
-
-            LogRuntimeException(244, fatal: true);
-            Failure = true;
-            break;
         }
 
         Failure = failure;

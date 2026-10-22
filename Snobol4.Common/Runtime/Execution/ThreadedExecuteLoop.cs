@@ -109,6 +109,13 @@ public partial class Executive
                             : (idx + 1);
                         MonitorIpc.EmitLabel(stno);
                     }
+                    if (StatementLimitReached())
+                    {
+                        LogRuntimeException(244, fatal: true);
+                        Failure = true;
+                        exitCode = -1;
+                        goto Done;
+                    }
                     // with &STLIMIT negative statements are not counted, so &STCOUNT neither changes nor traces, as in SPITBOL
                     if (AmpStatementLimit >= 0)
                     {
@@ -117,13 +124,6 @@ public partial class Executive
                     }
                     // a statement that did not compile is error 7 once it is counted as executed, as in SPITBOL
                     CheckCompiledStatement(instr.IntOperand);
-                    if (AmpStatementLimit > 0 && AmpStatementCount >= AmpStatementLimit && !StatementLimitBelowCount)
-                    {
-                        LogRuntimeException(244, fatal: true);
-                        Failure = true;
-                        exitCode = -1;
-                        goto Done;
-                    }
                     break;
 
                 case OpCode.Finalize:

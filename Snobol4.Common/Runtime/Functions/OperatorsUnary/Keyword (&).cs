@@ -51,8 +51,35 @@ public partial class Executive
     internal long MaxObjectLength = 16777216;   // sbl's mxlen: the -m value, which no &MAXLNGTH and no small-integer argument exceeds
     internal long AmpOutput = 1;   // 0 suspends every output association, as in SPITBOL
     internal long AmpProfile;
-    internal long AmpStatementLimit = 2147483647;
-    internal bool StatementLimitBelowCount;   // &STLIMIT was set at or below &STCOUNT: it is never reached, as in SPITBOL
+
+    // SPITBOL counts the statements from the one that sets &STLIMIT, not from the start of the run: the limit-th statement
+    // after it ends the run (error 244), unless the limit is below the count at the time it is set, when it is never reached
+    private long _statementLimit = 2147483647;
+    internal long AmpStatementLimit
+    {
+        get => _statementLimit;
+        set
+        {
+            _statementLimit = value;
+            StatementLimitArmed = value >= AmpStatementCount;
+            StatementsToLimit = value;
+        }
+    }
+
+    internal bool StatementLimitArmed = true;
+    internal long StatementsToLimit = 2147483647;
+
+    // called as each statement starts, before it is counted: true when it is the one the limit ends the run at; the report and
+    // the dump then show the count as the limit, and the limit is ten higher, as SPITBOL leaves them
+    internal bool StatementLimitReached()
+    {
+        if (AmpStatementLimit <= 0 || !StatementLimitArmed || --StatementsToLimit > 0)
+            return false;
+        AmpStatementCount = AmpStatementLimit;
+        _statementLimit += 10;
+        StatementsToLimit = 10;
+        return true;
+    }
     internal long AmpTrace;
     internal long AmpTrim = 1;   // sbl x64 starts &TRIM at 1 (kvtrm), not the manual's 0
 
@@ -421,10 +448,6 @@ public partial class Executive
         {
             if (IntegerHandler(value, out var integerVar)) return;
             AmpStatementLimit = integerVar.Data;
-
-            // SPITBOL counts down from the limit as it is set: a limit at or below the count already made allows no more or fewer
-            // statements, it is just never reached (until it is set again)
-            StatementLimitBelowCount = AmpStatementLimit > 0 && AmpStatementLimit <= AmpStatementCount;
         }
 
         SystemStack.Push(new IntegerVar(AmpStatementLimit, "&stlimit", true));

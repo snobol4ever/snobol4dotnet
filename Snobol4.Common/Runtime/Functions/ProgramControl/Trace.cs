@@ -148,11 +148,12 @@ public partial class Executive
     }
 
     // SPITBOL's trace line: **** and the statement number padded with * to 8, a blank, an i for each
-    // function level, a blank, the event; written to standard output, as sbl writes it
+    // function level, a blank, the event; written to standard output, as sbl writes it, cut at the page width
     internal void TraceLine(string text)
     {
         var stno = StatementNumber(AmpCurrentLineNumber).ToString(CultureInfo.InvariantCulture).PadRight(8, '*');
-        Console.Out.WriteLine($"****{stno} {new string('i', (int)AmpFunctionLevel)} {text}");
+        foreach (var piece in Builder.WrapLine($"****{stno} {new string('i', (int)AmpFunctionLevel)} {text}", Parent.BuildOptions.PageWidth))
+            Console.Out.WriteLine(piece);
     }
 
 

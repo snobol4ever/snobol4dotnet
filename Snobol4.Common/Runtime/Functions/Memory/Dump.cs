@@ -61,12 +61,12 @@ public partial class Executive
         {
             if (level != 3 && IsNullValue(value))
                 continue;
-            w.Append(name).Append(" = ").Append(PrintValue(value)).Append('\n');
+            DumpLine(w, name + " = " + PrintValue(value));
         }
 
         w.Append("\n\ndump of keyword values\n\n");
         foreach (var keyword in DumpKeywords)
-            w.Append('&').Append(keyword).Append(" = ").Append(PrintValue(KeywordValue(keyword))).Append('\n');
+            DumpLine(w, "&" + keyword + " = " + PrintValue(KeywordValue(keyword)));
 
         if (level >= 2)
             DumpBlocks(w, level == 3);
@@ -74,6 +74,13 @@ public partial class Executive
         w.Append("\n\n\n");
         writer.Write(w.ToString());
         writer.Flush();
+    }
+
+    // One line of the dump, cut at the page width as SPITBOL's print buffer cuts it
+    private void DumpLine(StringBuilder w, string line)
+    {
+        foreach (var piece in Builder.WrapLine(line, Parent.BuildOptions.PageWidth))
+            w.Append(piece).Append('\n');
     }
 
     // The program's natural variables: every name but the keywords; a protected one (ARB, REM, ...)
@@ -129,26 +136,24 @@ public partial class Executive
 
         foreach (var block in blocks.Values.OrderBy(BlockIdOf))
         {
-            w.Append('\n').Append(PrintValue(block)).Append('\n');
+            w.Append('\n');
+            DumpLine(w, PrintValue(block));
             switch (block)
             {
                 case ArrayVar a:
                     for (var i = 0; i < a.Data.Count; i++)
                         if (includeNull || !IsNullValue(a.Data[i]))
-                            w.Append(PrintBlockName(a)).Append('<').Append(ArraySubscripts(a, i)).Append("> = ")
-                             .Append(PrintValue(a.Data[i])).Append('\n');
+                            DumpLine(w, PrintBlockName(a) + "<" + ArraySubscripts(a, i) + "> = " + PrintValue(a.Data[i]));
                     break;
                 case TableVar t:
                     foreach (var (key, value) in TableEntriesInBucketOrder(t))
                         if (!IsNullValue(value))
-                            w.Append(PrintBlockName(t)).Append('<').Append(PrintTableKey(key)).Append("> = ")
-                             .Append(PrintValue(value)).Append('\n');
+                            DumpLine(w, PrintBlockName(t) + "<" + PrintTableKey(key) + "> = " + PrintValue(value));
                     break;
                 case ProgramDefinedDataVar d:
                     for (var i = 0; i < d.FieldValues.Data.Count; i++)
                         if (includeNull || !IsNullValue(d.FieldValues.Data[i]))
-                            w.Append(d.Definition.FieldNames[i]).Append('(').Append(PrintBlockName(d)).Append(") = ")
-                             .Append(PrintValue(d.FieldValues.Data[i])).Append('\n');
+                            DumpLine(w, d.Definition.FieldNames[i] + "(" + PrintBlockName(d) + ") = " + PrintValue(d.FieldValues.Data[i]));
                     break;
             }
         }

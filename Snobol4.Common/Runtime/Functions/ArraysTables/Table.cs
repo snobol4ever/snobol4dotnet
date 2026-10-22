@@ -42,7 +42,7 @@ public partial class Executive
             // chained-subscript writes — e.g. mem['s']['w'] = 1 — modify the
             // real inner aggregate, not a transient clone.  Scalars are cloned
             // to avoid aliasing the data slot with a stack/variable copy.
-            value = stored is ArrayVar or TableVar ? stored : stored.Clone();
+            value = stored is ArrayVar or TableVar ? Handle(stored) : stored.Clone();
         }
         else
         {

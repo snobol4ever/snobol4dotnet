@@ -187,7 +187,7 @@ public partial class Executive
             Var paramVar;
             if (arguments[i] is ArrayVar or TableVar)
             {
-                paramVar = arguments[i];
+                paramVar = Handle(arguments[i]);
                 paramVar.Symbol = symbol;
             }
             else

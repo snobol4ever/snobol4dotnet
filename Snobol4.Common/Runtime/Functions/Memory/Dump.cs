@@ -104,6 +104,7 @@ public partial class Executive
     // not null (a table's null entries are never shown)
     private void DumpBlocks(StringBuilder w, bool includeNull)
     {
+        // a block is its elements, which every variable and element that holds it shares
         var blocks = new Dictionary<object, Var>(ReferenceEqualityComparer.Instance);
         var pending = new Stack<Var>(NaturalVariables().Select(kv => kv.Value));
         while (pending.Count > 0)
@@ -111,10 +112,10 @@ public partial class Executive
             var v = pending.Pop();
             switch (v)
             {
-                case ArrayVar a when blocks.TryAdd(a, a):
+                case ArrayVar a when blocks.TryAdd(a.Data, a):
                     foreach (var e in a.Data) pending.Push(e);
                     break;
-                case TableVar t when blocks.TryAdd(t, t):
+                case TableVar t when blocks.TryAdd(t.Data, t):
                     foreach (var e in t.Data.Values) pending.Push(e);
                     foreach (var k in t.Data.Keys) if (k is Var kv) pending.Push(kv);
                     break;
@@ -304,6 +305,8 @@ public partial class Executive
     private static bool SameBlock(Var value, Var block) => (value, block) switch
     {
         (ProgramDefinedDataVar a, ProgramDefinedDataVar b) => ReferenceEquals(a.FieldValues, b.FieldValues),
+        (ArrayVar a, ArrayVar b) => ReferenceEquals(a.Data, b.Data),
+        (TableVar a, TableVar b) => ReferenceEquals(a.Data, b.Data),
         _ => ReferenceEquals(value, block)
     };
 }

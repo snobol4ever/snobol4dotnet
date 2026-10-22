@@ -128,7 +128,7 @@ public partial class Executive
         // that the object stored in Data[] is never aliased to what's
         // on the stack or in a scalar variable slot.
         var stored = arrayVar.Data[(int)arrayKey];
-        var v = stored is ArrayVar or TableVar ? stored : stored.Clone();
+        var v = stored is ArrayVar or TableVar ? Handle(stored) : stored.Clone();
         v.Key        = arrayKey;
         v.Collection = arrayVar;
         v.LvalueMark = StatementSerial;

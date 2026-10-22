@@ -232,7 +232,7 @@ public partial class Executive
         // which confuses subsequent reads and creates NameVar → ArrayVar → NameVar cycles when
         // the bookmarked object is later stored back into another DATA field (ShiftReduce S-10).
         // ArrayVar, TableVar, ProgramDefinedDataVar have reference semantics — do not clone them.
-        var v = raw is ArrayVar or TableVar or ProgramDefinedDataVar ? raw : raw.Clone();
+        var v = raw is ArrayVar or TableVar ? Handle(raw) : raw is ProgramDefinedDataVar ? raw : raw.Clone();
         v.Key = index;
         v.Collection = programDefinedDataVar.FieldValues;
         v.LvalueMark = StatementSerial;

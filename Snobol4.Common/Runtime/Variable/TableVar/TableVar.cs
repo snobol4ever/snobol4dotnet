@@ -59,6 +59,9 @@ public sealed class TableVar : Var
 
     #region Table-Specific Methods
 
+    // Another handle on this same table: its entries, its identity (SequenceId, BlockId), but its own name and place
+    internal TableVar Alias() => (TableVar)MemberwiseClone();
+
 
     internal Var GetOrDefault(object key)
     {

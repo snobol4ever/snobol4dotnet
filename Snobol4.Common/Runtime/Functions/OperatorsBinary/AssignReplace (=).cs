@@ -197,7 +197,7 @@ public partial class Executive
                 var rval = rightVar is NameVar rvNv ? rvNv.Dereference(this) : rightVar;
                 // Clone rightVar before mutating Key/Collection so the source variable's
                 // VarSlotArray slot (if rightVar came from PushVar) is not contaminated.
-                var arrVal = rval is ArrayVar or TableVar ? rval : StoredCopy(rval);
+                var arrVal = rval is ArrayVar or TableVar ? Handle(rval) : StoredCopy(rval);
                 arrVal.Key        = leftVar.Key;
                 arrVal.Collection = leftVar.Collection;
                 arrayVar.Data[(int)(long)leftVar.Key!] = arrVal;
@@ -208,7 +208,7 @@ public partial class Executive
             case TableVar tableVar:
             {
                 var rval = rightVar is NameVar rvNv ? rvNv.Dereference(this) : rightVar;
-                var tblVal = rval is ArrayVar or TableVar ? rval : StoredCopy(rval);
+                var tblVal = rval is ArrayVar or TableVar ? Handle(rval) : StoredCopy(rval);
                 tblVal.Key        = leftVar.Key;
                 tblVal.Collection = leftVar.Collection;
                 tableVar.Data[leftVar.Key!] = tblVal;
@@ -220,7 +220,7 @@ public partial class Executive
                 // If the lvalue is a NameVar (e.g. returned via NRETURN), assign through
                 // its Pointer — the actual variable being referenced — not leftVar.Symbol.
                 var targetSymbol = leftVar is NameVar nameVar ? nameVar.Pointer : leftVar.Symbol;
-                var newVar = rightVar is ArrayVar or TableVar ? rightVar : StoredCopy(rightVar);
+                var newVar = rightVar is ArrayVar or TableVar ? Handle(rightVar) : StoredCopy(rightVar);
                 newVar.Symbol = targetSymbol;
                 // Strip array/table bookkeeping from the stored scalar value.
                 // A value read from A<K> carries .Collection=arrayVar and .Key=k so
@@ -229,7 +229,7 @@ public partial class Executive
                 // its own Key/Collection to track its referent), those fields must be
                 // cleared — otherwise a later use of the scalar as an lvalue routes
                 // into the array write branch instead of the scalar IdentifierTable path.
-                if (newVar is not NameVar && newVar is not ArrayVar && newVar is not TableVar)
+                if (newVar is not NameVar)
                 {
                     newVar.Key        = null;
                     newVar.Collection = null;
@@ -323,6 +323,16 @@ public partial class Executive
 
     // The copy of a value an assignment stores: protection and keyword-ness belong to the variable the
     // value came from (FAIL, &TRIM), not to the value, so X = FAIL then X = 1 is an ordinary assignment
+    // An array or table is one object however many variables and elements hold it, so each holder keeps its own handle on it: the
+    // same elements and identity, but its own name or place (L = V, then V = TABLE() assigns V and leaves L the array)
+    internal static Var Handle(Var aggregate)
+    {
+        Var handle = aggregate is ArrayVar array ? array.Alias() : ((TableVar)aggregate).Alias();
+        handle.IsReadOnly = false;
+        handle.IsKeyword = false;
+        return handle;
+    }
+
     private static Var StoredCopy(Var value)
     {
         var copy = value.Clone();

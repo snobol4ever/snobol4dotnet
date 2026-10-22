@@ -46,6 +46,9 @@ public sealed class ArrayVar : Var
 
     #region Array-Specific Methods
 
+    // Another handle on this same array: its elements, its identity (SequenceId, BlockId), but its own name and place
+    internal ArrayVar Alias() => (ArrayVar)MemberwiseClone();
+
     // SPITBOL's array prototype, scanned as sbl does: a prototype that is one integer in any form ('3', ' 3', '1e1') is a vector;
     // otherwise it is bounds separated by commas, each "high" or "low:high" with the bound taken as an integer (a null bound is 0,
     // so ':3' is 0:3 and '3:' is the negative dimension 3:0). The error is 65 for a low bound, 66 for a high bound that is not an

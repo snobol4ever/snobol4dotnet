@@ -58,7 +58,7 @@ public partial class Executive
                 {
                     var key = (long)nameVar.Key;
                     var stored = arrayVar.Data[(int)key];
-                    var v = stored is ArrayVar or TableVar or ProgramDefinedDataVar ? stored : stored.Clone();
+                    var v = stored is ArrayVar or TableVar ? Handle(stored) : stored is ProgramDefinedDataVar ? stored : stored.Clone();
                     v.Key = key;
                     v.Collection = arrayVar;
                     v.LvalueMark = StatementSerial;
@@ -68,7 +68,7 @@ public partial class Executive
                 case TableVar tableVar:
                 {
                     var v = tableVar.Data.TryGetValue(nameVar.Key, out var stored)
-                        ? stored is ArrayVar or TableVar ? stored : stored.Clone()
+                        ? stored is ArrayVar or TableVar ? Handle(stored) : stored.Clone()
                         : tableVar.Fill.Clone();
                     v.Key = nameVar.Key;
                     v.Collection = tableVar;
@@ -100,7 +100,7 @@ public partial class Executive
             return element;
 
         var stored = IdentifierTable[nameVar.Pointer];
-        var value = stored is ArrayVar or TableVar or ProgramDefinedDataVar ? stored : stored.Clone();
+        var value = stored is ArrayVar or TableVar ? Handle(stored) : stored is ProgramDefinedDataVar ? stored : stored.Clone();
         // the variable's name is its lvalue; no statement stamp, so a NAME it holds is not taken as a
         // target of its own (V = .Z; TOP() = X sets V)
         value.Symbol = nameVar.Pointer;

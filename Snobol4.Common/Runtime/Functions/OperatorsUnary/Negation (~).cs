@@ -5,7 +5,6 @@ public partial class Executive
                         internal void Negation(List<Var> arguments)
     {
         ReadInputOperand();
-        var v = SystemStack.Peek();
         var operand = SystemStack.Count - 1;
 
         // A failure that began before this operand (F(1) ~F(2) with F failing) fails the statement, as in
@@ -13,11 +12,18 @@ public partial class Executive
         if (Failure && FailureOrigin < operand)
             return;
 
-        // the value's own flag follows the statement's state: a FRETURN pushes a null value still marked
-        // succeeded, which toggling turned into a failed value under a succeeding statement
-        Failure = !Failure;
-        v.Succeeded = !Failure;
-        FailureOrigin = Failure ? operand : int.MaxValue;
+        // The operand's value is replaced, never changed, as in SPITBOL: a failed operand gives the null string (so ~~X is the null
+        // string) and one that succeeded fails. Toggling the value's own flag marked the very value a variable holds as failed, so
+        // X read as failed after ~X, and ~~X gave X
+        SystemStack.Pop();
+        if (Failure)
+        {
+            Failure = false;
+            FailureOrigin = int.MaxValue;
+            SystemStack.Push(StringVar.Null());
+        }
+        else
+            NonExceptionFailure();
     }
 
     // ~ and ? take their operand off the stack themselves, so an input-associated variable there (?INPUT,

@@ -2,6 +2,7 @@
 
 namespace Snobol4.Common;
 
+//"function called by name returned a value" /* 21 */,
 //"pattern replacement right operand is not a string" /* 31 */,
 //"keyword value assigned is not integer" /* 208 */,
 //"keyword in assignment is protected" /* 209 */,
@@ -120,6 +121,14 @@ public partial class Executive
         }
 
         var leftVar = arguments[0];  // Destination Var
+
+        // A call in the place of a name (G() = V) that handed back a value by RETURN has nothing to assign through: error 21,
+        // as in SPITBOL, where it assigned the function's own variable
+        if (ReferenceEquals(leftVar, ValueReturned))
+        {
+            LogRuntimeException(21);
+            return;
+        }
 
         // A NAME is an indirect target only when this statement produced it (an NRETURN result); a
         // variable that merely holds a NAME is itself the target, as in SPITBOL (R = .ONE, then

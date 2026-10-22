@@ -267,6 +267,24 @@ end");
     }
 
     [TestMethod]
+    public void TEST_Define_an_assignment_to_a_call_that_returned_a_value_is_error_21()
+    {
+        // sbl -b: G() = 'v' with G = 'ZZ' :(RETURN) is error 21, function called by name returned a value, and assigns
+        // nothing (was S 0 [][v]: the console assigned G itself); the same for a NAME or a number returned by RETURN
+        var build = SetupTests.SetupScript("-b", @"
+        &ERRLIMIT = 5
+        DEFINE('G()')                  :(GE)
+G       G = 'ZZ'                       :(RETURN)
+GE      G() = 'v'                      :S(Y)F(N)
+Y       R = 'S'                        :(E)
+N       R = 'F'
+E       R = R ' ' &ERRTYPE ' [' ZZ '][' G ']'
+end");
+        Assert.AreEqual(21, build.ErrorCodeHistory[0]);
+        Assert.AreEqual("F 21 [][]", build.Execute!.IdentifierTable["R"].ToString());
+    }
+
+    [TestMethod]
     public void TEST_Define_a_return_of_a_name_gives_the_name()
     {
         // sbl -b (rung user_function_datatype_1): G = .DUMMY :(RETURN) gives the NAME, printed DUMMY

@@ -101,7 +101,8 @@ end
         // Under case folding the type name is folded to upper case, as sbl -b answers
         Assert.AreEqual("PRO+DUCT", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("R1")])).Data);
         Assert.AreEqual(2.39, ((RealVar)(build.Execute!.IdentifierTable[build.FoldCase("R2")])).Data);
-        Assert.AreEqual("1PRICE", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("R3")])).Data);
+        // FIELD gives the field's NAME, as sbl does
+        Assert.AreEqual("1PRICE", ((NameVar)(build.Execute!.IdentifierTable[build.FoldCase("R3")])).Pointer);
         Assert.AreEqual("", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("R4")])).Data);
     }
 

@@ -7,34 +7,33 @@ public partial class Executive
 
     public void Arg(List<Var> arguments)
     {
-        if (!arguments[0].Convert(VarType.STRING, out _, out var str, this) || (string)str == "")
-        {
-            LogRuntimeException(60);
-            return;
-        }
-
-        str = Parent.FoldCase((string)str);
-
-        if (!UserFunctionTable.TryGetValue((string)str, out var entry))
-        {
-            LogRuntimeException(63);
-            return;
-        }
-
-        if (!arguments[1].Convert(VarType.INTEGER, out _, out var i, this))
+        // SPITBOL takes the second argument first: a number out of range fails before the first one is looked at
+        if (!SmallInteger(arguments[1], out var i, out var inRange))
         {
             LogRuntimeException(62);
             return;
         }
 
+        if (!inRange)
+        {
+            NonExceptionFailure();
+            return;
+        }
+
+        if (!NaturalVariableName(arguments[0], out var functionName) || !UserFunctionTable.TryGetValue(functionName, out var entry))
+        {
+            LogRuntimeException(63);
+            return;
+        }
+
         // Fail if index is out of range
-        if ((long)i > entry.Parameters.Count || (long)i <= 0)
+        if (i > entry.Parameters.Count || i <= 0)
         {
             NonExceptionFailure();
             return;
         }
 
         // the parameter's NAME, as in SPITBOL (DATATYPE(ARG(.F,1)) is NAME)
-        SystemStack.Push(new NameVar(entry.Parameters[(int)(long)i - 1], null, null));
+        SystemStack.Push(new NameVar(entry.Parameters[(int)i - 1], null, null));
     }
 }

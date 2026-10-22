@@ -121,13 +121,13 @@ END";
     [TestMethod]
     public void TEST_Corpus_data_field_names()
     {
-        // FIELD(typename, n) returns the nth field accessor name
+        // FIELD(typename, n) returns the NAME of the nth field, which is IDENT to .X and not to the string 'X', as sbl answers
         // Type name must be uppercase (as registered by DATA())
         var s = @"
         DATA('POINT(X,Y)')
-        DIFFER(FIELD('POINT', 1), 'X')              :F(ok1)
+        DIFFER(FIELD('POINT', 1), .X)               :F(ok1)
         OUTPUT = 'FAIL: FIELD POINT 1'              :(END)
-ok1     DIFFER(FIELD('POINT', 2), 'Y')              :F(ok2)
+ok1     DIFFER(FIELD('POINT', 2), .Y)               :F(ok2)
         OUTPUT = 'FAIL: FIELD POINT 2'              :(END)
 ok2     OUTPUT = 'PASS'
 END";

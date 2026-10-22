@@ -38,7 +38,7 @@ public partial class Executive
 
         // The type is any value with a string form -- 'INTEGER', the name .INTEGER, even 3 -- and
         // a string that names no datatype fails the call, as in SPITBOL
-        if (!arguments[1].Convert(VarType.STRING, out _, out var typeArgument, this))
+        if (!arguments[1].Convert(VarType.STRING, out _, out var typeArgument, this) || (string)typeArgument == "")
         {
             LogRuntimeException(74);
             return;

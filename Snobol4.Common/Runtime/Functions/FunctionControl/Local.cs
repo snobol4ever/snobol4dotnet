@@ -7,35 +7,33 @@ public partial class Executive
 {
     public void Local(List<Var> arguments)
     {
-        if (!arguments[0].Convert(VarType.STRING, out _, out var functionName, this) || (string)functionName == "")
-        {
-            LogRuntimeException(60);
-            return;
-        }
-
-        functionName = Parent.FoldCase((string)functionName);
-
-        if (!UserFunctionTable.TryGetValue((string)functionName, out var entry))
-        {
-            LogRuntimeException(135);
-            return;
-        }
-
-        if (!arguments[1].Convert(VarType.INTEGER, out _, out var i, this))
+        // SPITBOL takes the second argument first: a number out of range fails before the first one is looked at
+        if (!SmallInteger(arguments[1], out var i, out var inRange))
         {
             LogRuntimeException(134);
             return;
         }
 
+        if (!inRange)
+        {
+            NonExceptionFailure();
+            return;
+        }
+
+        if (!NaturalVariableName(arguments[0], out var functionName) || !UserFunctionTable.TryGetValue(functionName, out var entry))
+        {
+            LogRuntimeException(135);
+            return;
+        }
+
         // Fail if index is out of range
-        var j = (int)(long)i - 1;
-        if (j >= entry.Locals.Count || j < 0)
+        if (i > entry.Locals.Count || i <= 0)
         {
             NonExceptionFailure();
             return;
         }
 
         // the local's NAME, as in SPITBOL (DATATYPE(LOCAL(.F,1)) is NAME)
-        SystemStack.Push(new NameVar(entry.Locals[j], null, null));
+        SystemStack.Push(new NameVar(entry.Locals[(int)i - 1], null, null));
     }
 }

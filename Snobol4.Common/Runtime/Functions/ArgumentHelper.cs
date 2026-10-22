@@ -15,6 +15,19 @@ public partial class Executive
         return true;
     }
 
+    // SPITBOL's gtnvr: the name of a natural variable (a function, a datatype) as given in the argument, folded as the program is.
+    // A string of any kind will do, even 3, but not the null string, a pattern or the name of an element of an array or table.
+    private bool NaturalVariableName(Var argument, out string name)
+    {
+        name = "";
+        if (argument is NameVar { Collection: not null })
+            return false;
+        if (!argument.Convert(VarType.STRING, out _, out var text, this) || (string)text == "")
+            return false;
+        name = Parent.FoldCase((string)text);
+        return true;
+    }
+
     // SPITBOL's alocs: a string longer than &MAXLNGTH is error 205
     private bool StringTooLong(long length)
     {

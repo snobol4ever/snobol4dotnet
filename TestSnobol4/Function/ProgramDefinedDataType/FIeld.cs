@@ -19,8 +19,9 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("IMAG", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("I")])).Data);
-        Assert.AreEqual("REAL", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("R")])).Data);
+        // FIELD gives the field's NAME, as sbl does (DATATYPE is NAME, and it is IDENT to .IMAG)
+        Assert.AreEqual("IMAG", ((NameVar)(build.Execute!.IdentifierTable[build.FoldCase("I")])).Pointer);
+        Assert.AreEqual("REAL", ((NameVar)(build.Execute!.IdentifierTable[build.FoldCase("R")])).Pointer);
     }
 
     [TestMethod]
@@ -37,9 +38,9 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("X", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("F1")]).Data);
-        Assert.AreEqual("Y", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("F2")]).Data);
-        Assert.AreEqual("Z", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("F3")]).Data);
+        Assert.AreEqual("X", ((NameVar)build.Execute!.IdentifierTable[build.FoldCase("F1")]).Pointer);
+        Assert.AreEqual("Y", ((NameVar)build.Execute!.IdentifierTable[build.FoldCase("F2")]).Pointer);
+        Assert.AreEqual("Z", ((NameVar)build.Execute!.IdentifierTable[build.FoldCase("F3")]).Pointer);
     }
 
     [TestMethod]

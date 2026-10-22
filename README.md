@@ -50,71 +50,62 @@ If you want to run an existing SPITBOL program, consider the following items tha
 
 #### Command-line options
 
-The following command line options function the same as SPITBOL. 
+The following command line options function the same as SPITBOL. The listing and statistics options write what SPITBOL writes, in
+SPITBOL's layout.
 
-* -a   equivalent to -c, -l -x
+* -a   equivalent to -l -c -x
 * -b   Suppress sign on message
-* -c   Show Compiler statistics
+* -c   Show compiler statistics, on the listing stream
+* -e   Errors to the list file only: the lines of an error report are not also written to standard error
 * -f   Case folding OFF
 * -F   Case folding ON
-* -h   Suppress listing header
-* -k   Stop on run time error
-* -l   Show listing
-* -n   Suppress execution. Compile only.
-* -o   Redirect STDERR to list file
+* -g#  Listing page length (60)
+* -h   Suppress the identity and date lines of the listing head
+* -k   Run despite compilation errors (a statement in error is error 7 when reached)
+* -l   List the source to the first source file's name with the extension .lst (to the -o file when there is one)
+* -n   Suppress execution. Compile only. The exit status is 231.
+* -o=file   The listing file (file.lst when it has no extension)
+* -p   Long listing format (form feeds between pages)
+* -r   INPUT reads the source lines that follow END
+* -t#  Listing line width (120)
 * -u   String passed to HOST(0)
-* -v   Generate debug symbols
-* -x   Show execution statistics
+* -x   Show execution statistics, on the listing stream
+* -z   Standard listing options (the same as -p here)
+* -#=file[options]   Associate a file with I/O channel number #
 * -?   Display manual
+
+The listing, the statistics and the reports of errors go to standard output unless -l, -a, -p, -z or -o sends them to a file. Wherever
+they go, standard error also gets a copy of the lines of an error report (the error line and its position and run summary, or a
+statement in error with its pointer) when the listing is not the terminal, as SPITBOL's interactive channel does.
+
+The exit status is 231 when execution was suppressed (a compilation error without -k, or -n), 1 when the source could not be
+read (a file that cannot be opened, no END statement, an -INCLUDE that cannot be opened), and otherwise &CODE.
 
 The following are new to SNOBOL4.NET:
 
-* -w   Write binary code to a dynamic linked library
+* -v   Generate debug symbols
+* -w   Write binary code to a dynamic linked library (the program's source and options, which Snobol4 runs again)
 
-The .Net framework automatically optimizes all memory allocation on a program-by-program basis and cannot be modified by the users. As such, the following command-line options are no longer supported:
+The .Net framework automatically optimizes all memory allocation on a program-by-program basis and cannot be modified by the users. As such, the following command-line options are accepted and have no effect (-m sets &MAXLNGTH):
 
 * -d   Max heap size
 * -i   Initial heap size
-* -m   Max object size
 * -s   Stack size
-
-The show listing command line option (-l) creates a listing similar to SPITBOL, but the following command line options are not implemented. A text editor or word processor can manage SPITBOL's command line options as well as preferences not available in SPITBOL, such as line spacing, indentations, justification, and fonts.
-
-* -g   Listing page length
-* -p   Long listing format
-* -t   Listing line width
-* -z   Standard listing options
 
 The following command line options are not implemented:
 
-* -e   Errors to list file only (can be replaced with -o)
-* -r   Input from source file following END statement
 * -T   Write terminal output to file (Can be accomplished by redirecting STDIO or STDERR)
-* -#   Associate file with I/O channel number (Can be done inline with INPUT() or OUTPUT() functions.
+* -y   Write a save file
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+EXIT(-3, file) and EXIT(-4, file) write a save file and end the run, or go on. The file holds the program, as -w writes it, and not its
+state: running it starts the program over, where SPITBOL's resumes after the EXIT. EXIT(s) runs the command s through the shell
+(SHELL, else /bin/sh) and ends the run with its status. A load module (EXIT(3)) is error 105, as in SPITBOL.
 
 #### INPUT() and OUTPUT() functions.
 
-In SPITBOL the arguments are INPUT(.Variable, Channel, "filename[options]) and the same for OUTPUT(). In SNOBOL4.NET, a third object is the file mode option, a fourth argument is the file share option, and a fifth argument for OUTPUT controls whether an end of line is printed. If 0 (the default), an end of line is printed. If non-zero, an end of line is not printed. If options are not used, INPUT() and OUTPUT() function identically between SNOBOL4.NET and SPITBOL.
+In SPITBOL the arguments are INPUT(.Variable, Channel, "filename[options]") and the same for OUTPUT(); SPITBOL ignores anything after the third. In SNOBOL4.NET a fourth argument is the file mode option, a fifth the file share option, and a sixth for OUTPUT controls whether an end of line is printed. If 0 (the default), an end of line is printed. If non-zero, an end of line is not printed. An argument that is no value of its kind is ignored, as SPITBOL ignores it. If options are not used, INPUT() and OUTPUT() function identically between SNOBOL4.NET and SPITBOL. As in SPITBOL a file name needs a channel to be opened on (INPUT 116, OUTPUT 160 without one) and a channel with nothing open on it needs a file name.
 
-In SNOBOL4.NET, fixed length records are not supported due to conflicts with UNICODE support.
+The options of the file name, in square brackets or after a blank, are SPITBOL's: -a appends, -f# uses a file descriptor (-f0 is standard input, -f1 and -f2 standard output and error), -l# is the longest record INPUT returns (1,024 by default; characters beyond it up to the end of the line are ignored), and -r# or -q# or -c read in raw mode: an input request returns exactly # characters (1 for -c), line ends included, nothing is trimmed, and the request fails when none is left (INPUT(.INPUT, 9, '[-f0 -r4194304]') takes all of standard input at once). In SNOBOL4.NET records are counted in characters, not bytes, and fixed length records are not supported due to conflicts with UNICODE support.
 
 File Mode Options: (Default is 4)
 

@@ -44,14 +44,9 @@ internal class LenPattern : TerminalPattern
 
         if (_functionName is not null)
         {
-            _functionName(scan.Exec);
-            var result = scan.Exec.SystemStack.Pop();
-            if (!result.Succeeded || !result.Convert(Executive.VarType.INTEGER, out _, out var n, scan.Exec))
-            {
-                scan.Exec.LogRuntimeException(43);
+            if (!EvaluatedArgument.Integer(scan, _functionName, 47, 48, out var n))
                 return MatchResult.Failure(scan);
-            }
-            _length = (long)n;
+            _length = n;
         }
 
         scan.CursorPosition += (int)_length;

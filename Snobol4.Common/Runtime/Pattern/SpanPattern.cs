@@ -48,22 +48,15 @@ internal class SpanPattern : TerminalPattern
     {
         using var profile1 = Profiler.Start4("Span", scan.Exec);
 
-        if (scan.CursorPosition >= scan.Subject.Length)
-            return MatchResult.Failure(scan);
-
         if (_functionName is not null)
         {
-            _functionName(scan.Exec);
-            var result = scan.Exec.SystemStack.Pop();
-
-            if (!result.Succeeded || !result.Convert(Executive.VarType.STRING, out _, out var value, scan.Exec))
-            {
-                scan.Exec.LogRuntimeException(56);
+            if (!EvaluatedArgument.String(scan, _functionName, 56, out var value))
                 return MatchResult.Failure(scan);
-            }
-
-            _charList = (string)value;
+            _charList = value;
         }
+
+        if (scan.CursorPosition >= scan.Subject.Length)
+            return MatchResult.Failure(scan);
 
         if (string.IsNullOrEmpty(_charList))
         {

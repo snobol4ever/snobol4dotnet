@@ -41,14 +41,9 @@ internal class RPosPattern : TerminalPattern
 
         if (_functionName is not null)
         {
-            _functionName(scan.Exec);
-            var result = scan.Exec.SystemStack.Pop();
-            if (!result.Succeeded || !result.Convert(Executive.VarType.INTEGER, out _, out var n, scan.Exec))
-            {
-                scan.Exec.LogRuntimeException(43);
+            if (!EvaluatedArgument.Integer(scan, _functionName, 52, 53, out var n))
                 return MatchResult.Failure(scan);
-            }
-            _position = (long)n;
+            _position = n;
         }
         
         return _position == scan.Subject.Length - scan.CursorPosition

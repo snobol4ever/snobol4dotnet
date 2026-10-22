@@ -14,7 +14,8 @@ public partial class Executive
 
         var l = (long)n;
 
-        if (l is >= 0 and <= int.MaxValue)
+        // no more than the longest object sbl makes (its -m value, 16m by default)
+        if (l >= 0 && l <= MaxObjectLength)
             return (int)l;
 
         LogRuntimeException(outOfRange);

@@ -41,27 +41,16 @@ internal class NotAnyPattern : TerminalPattern
     {
         using var profile1 = Profiler.Start4("NotAny", scan.Exec);
 
+        if (_functionName != null)
+        {
+            if (!EvaluatedArgument.String(scan, _functionName, 49, out var str))
+                return MatchResult.Failure(scan);
+            _charList = str;
+        }
+
         if (scan.CursorPosition >= scan.Subject.Length)
             return MatchResult.Failure(scan);
 
-        if (_functionName == null)
-        {
-            if (_charList.Contains(scan.Subject[scan.CursorPosition]))
-                return MatchResult.Failure(scan);
-            scan.CursorPosition++;
-            return MatchResult.Success(scan);
-        }
-
-        _functionName(scan.Exec);
-        var result = scan.Exec.SystemStack.Pop();
-
-        if (!result.Succeeded || !result.Convert(Executive.VarType.STRING, out _, out var str, scan.Exec))
-        {
-            scan.Exec.LogRuntimeException(49);
-            return MatchResult.Failure(scan);
-        }
-
-        _charList = (string)str;
         if (_charList.Contains(scan.Subject[scan.CursorPosition]))
             return MatchResult.Failure(scan);
         scan.CursorPosition++;

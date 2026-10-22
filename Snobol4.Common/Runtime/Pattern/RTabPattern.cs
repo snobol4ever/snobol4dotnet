@@ -43,14 +43,9 @@ internal class RTabPattern : TerminalPattern
 
         if (_functionName is not null)
         {
-            _functionName(scan.Exec);
-            var result = scan.Exec.SystemStack.Pop();
-            if (!result.Succeeded || !result.Convert(Executive.VarType.INTEGER, out _, out var n, scan.Exec))
-            {
-                scan.Exec.LogRuntimeException(43);
+            if (!EvaluatedArgument.Integer(scan, _functionName, 54, 55, out var n))
                 return MatchResult.Failure(scan);
-            }
-            _position = (long)n;
+            _position = n;
         }
 
         var targetPosition = scan.Subject.Length - _position;

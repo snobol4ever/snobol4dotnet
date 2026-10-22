@@ -52,16 +52,10 @@ internal class BreakPattern : TerminalPattern
         {
             using var profile1 = Profiler.Start4("Break", scan.Exec);
             
-            _functionName(scan.Exec);
-            var result = scan.Exec.SystemStack.Pop();
-
-            if (!result.Convert(Executive.VarType.STRING, out _, out var str, scan.Exec) || string.IsNullOrEmpty((string)str))
-            {
-                scan.Exec.LogRuntimeException(_error);
+            if (!EvaluatedArgument.String(scan, _functionName, _error, out var str))
                 return MatchResult.Failure(scan);
-            }
 
-            _charList = (string)str;
+            _charList = str;
         }
 
         var index = scan.Subject.IndexOfAny(_charList.ToCharArray(), scan.CursorPosition);

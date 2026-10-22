@@ -21,7 +21,7 @@ public partial class Executive
     internal Pattern AmpAbortPattern = new AbortPattern();
     internal string AmpAlphabet;
     internal Pattern AmpArbPattern = new ArbPattern();
-    internal Pattern AmpBalPattern = new BalPattern();
+    internal Pattern AmpBalPattern = BalPattern.Structure();
     internal Pattern AmpFailPattern = new FailPattern();
     internal Pattern AmpFencePattern = new AlternatePattern(new NullPattern(), new AbortPattern());
     internal long AmpFunctionLevel;

@@ -7,6 +7,25 @@ namespace Test.Pattern;
 public class Bal
 {
     [TestMethod]
+    public void TEST_Bal_keyword_is_the_balanced_pattern()
+    {
+        // sbl -b: m1 (A(B)C), m2 (A)(B), m3 () and m4 AB. The &BAL keyword was built as the bare holder of
+        // BAL's parts and ended the run in an InvalidCastException when a match reached it.
+        var build = SetupTests.SetupScript("-b", @"
+        '(A(B)C)D' ? &BAL . m1 'D'
+        '(A)(B)C' ? POS(0) &BAL . m2 'C'
+        '()(' ? POS(0) &BAL . m3 RPOS(1)
+        'AB)' ? POS(0) &BAL . m4 ')'
+end
+");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("(A(B)C)", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("m1")]).Data);
+        Assert.AreEqual("(A)(B)", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("m2")]).Data);
+        Assert.AreEqual("()", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("m3")]).Data);
+        Assert.AreEqual("AB", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("m4")]).Data);
+    }
+
+    [TestMethod]
     public void TEST_Bal_001()
     {
         var testFile = Path.GetTempFileName();

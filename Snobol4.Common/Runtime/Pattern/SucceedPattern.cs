@@ -16,6 +16,9 @@ internal class SucceedPattern : TerminalPattern
     {
         using var profile1 = Profiler.Start4("Success", scan.Exec);
 
+        // SUCCEED matches the null string, and again each time the match backs into it, so a pattern that fails after it tries it
+        // again and never gives up (SPITBOL's SUCCEED does not): it is saved as its own alternate
+        scan.SaveAlternate(node);
         return MatchResult.Success(scan);
     }
 

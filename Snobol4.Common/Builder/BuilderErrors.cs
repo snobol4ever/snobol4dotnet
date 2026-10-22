@@ -162,6 +162,13 @@ public partial class Builder
     // `position`
     internal void Defer(int position, Action report) => _deferred.Add((position, report));
 
+    // Takes back a kept report that is not wanted after all
+    internal void DropDeferred(Action? report)
+    {
+        if (report is not null)
+            _deferred.RemoveAll(kept => ReferenceEquals(kept.Report, report));
+    }
+
     internal void LogControlLineError(int code, string physical, int column, int line, string file, int position, int depth, bool listed)
     {
         // an include that cannot be opened ends the run before it starts, whatever -k says; SPITBOL's source stack keeps the
@@ -290,9 +297,8 @@ public partial class Builder
         if (!CopyErrorsToStandardError)
             return;
         // the copy is cut at the width of the listing too
-        for (; text.Length > BuildOptions.PageWidth && BuildOptions.PageWidth > 0; text = text[BuildOptions.PageWidth..])
-            Console.Error.WriteLine(text[..BuildOptions.PageWidth]);
-        Console.Error.WriteLine(text);
+        foreach (var piece in WrapLine(text, BuildOptions.PageWidth))
+            Console.Error.WriteLine(piece);
         Console.Error.Flush();
     }
 

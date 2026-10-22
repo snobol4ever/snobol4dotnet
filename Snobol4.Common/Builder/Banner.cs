@@ -1,4 +1,6 @@
-﻿namespace Snobol4.Common;
+﻿using System.Text;
+
+namespace Snobol4.Common;
 
 public partial class Builder
 {
@@ -112,10 +114,44 @@ public partial class Builder
 
         // a line longer than the width of the listing is cut into lines of that width, mid-word, as sbl prints it; it takes one
         // line of the page
-        for (; line.Length > BuildOptions.PageWidth && BuildOptions.PageWidth > 0; line = line[BuildOptions.PageWidth..])
-            writer.Write(line[..BuildOptions.PageWidth] + "\n");
-        writer.Write(line + "\n");
+        WriteWrapped(writer, line);
         _listingLinesOnPage++;
+    }
+
+    // The pieces of a line of at most `width` bytes (in UTF-8, as sbl counts them) that it is cut into; one when it fits
+    internal static List<string> WrapLine(string line, int width)
+    {
+        var pieces = new List<string>();
+        if (width <= 0 || Encoding.UTF8.GetByteCount(line) <= width)
+        {
+            pieces.Add(line);
+            return pieces;
+        }
+
+        var start = 0;
+        while (true)
+        {
+            var bytes = 0;
+            var end = start;
+            while (end < line.Length)
+            {
+                var step = char.IsHighSurrogate(line[end]) && end + 1 < line.Length ? 2 : 1;
+                var size = Encoding.UTF8.GetByteCount(line.AsSpan(end, step));
+                if (bytes + size > width)
+                    break;
+                bytes += size;
+                end += step;
+            }
+
+            if (end >= line.Length)
+            {
+                pieces.Add(line[start..]);
+                return pieces;
+            }
+
+            pieces.Add(line[start..end]);
+            start = end;
+        }
     }
 
     // The head of a listing: three blank lines (a form feed under -p and -z), the identity and clock lines unless -h, and three
@@ -161,9 +197,8 @@ public partial class Builder
 
     private void WriteWrapped(TextWriter writer, string line)
     {
-        for (; line.Length > BuildOptions.PageWidth && BuildOptions.PageWidth > 0; line = line[BuildOptions.PageWidth..])
-            writer.Write(line[..BuildOptions.PageWidth] + "\n");
-        writer.Write(line + "\n");
+        foreach (var piece in WrapLine(line, BuildOptions.PageWidth))
+            writer.Write(piece + "\n");
     }
 
     private static void DisplayBanner(TextWriter writer)

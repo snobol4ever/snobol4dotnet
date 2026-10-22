@@ -121,6 +121,7 @@ public class SourceCode
         if (PathList.Count > 0 && EndFound)
             return;
 
+        _parent.DropDeferred(_lastListedLine);
         _parent.LogMissingEnd();
     }
 
@@ -145,6 +146,7 @@ public class SourceCode
         if (EndFound)
             return;
 
+        _parent.DropDeferred(_lastListedLine);
         _parent.LogMissingEnd();
     }
 
@@ -198,6 +200,7 @@ public class SourceCode
             CurrentPhysicalLines = physicalLines;
             CurrentFirstStatementNumber = statementsBefore + 1;
 
+            var endSeenBefore = EndFound;
             ProcessLineWithSubLines(currentLine, _staleIncludeName ?? _lineFileName ?? pathName);
 
             // listed after it is read, so -LIST lists itself and -NOLIST does not (an -INCLUDE lists itself before its lines)
@@ -209,7 +212,12 @@ public class SourceCode
                 // is not the program's
             }
             else
-                ListSource(physicalLines, SourceLines.Count + BlankLineCount > statementsBefore ? statementsBefore + 1 : 0, linesBefore);
+            {
+                // the END of an included file is listed with its number and depth and none of its text: sbl lists the line after it has
+                // read on, and the include is gone by then
+                var listed = !endSeenBefore && EndFound && _includeDepth > 0 ? new List<string> { "" } : physicalLines;
+                ListSource(listed, SourceLines.Count + BlankLineCount > statementsBefore ? statementsBefore + 1 : 0, linesBefore);
+            }
 
             // A comment or control line leaves a carried-over included name in place for the next
             // statement; a statement or a blank (null statement) line uses it up
@@ -472,9 +480,15 @@ public class SourceCode
             var field = NumberField(i == 0 ? statementNumber : 0, _includeDepth);
             // a source line's trailing blanks are trimmed, as SPITBOL reads it
             var text = $"{field}{physicalLines[i].TrimEnd(' ', '\t')}";
-            _parent.Defer(position, () => _parent.WriteListedLine(text, spaced));
+            Action listing = () => _parent.WriteListedLine(text, spaced);
+            _parent.Defer(position, listing);
+            _lastListedLine = listing;
         }
     }
+
+    // The last line queued for the listing: sbl lists a line when it reads the next, so the last line of a source with no END is never
+    // listed
+    private Action? _lastListedLine;
 
     // The eight columns before a listed line: its statement number (none for a line that is no statement) and, inside an included
     // file, the depth of the include in the sixth column ("12   1  ", "     1  ")

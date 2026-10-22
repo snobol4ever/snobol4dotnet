@@ -107,8 +107,9 @@ public sealed class RealConversionStrategy : IConversionStrategy
 
     private static bool ConvertToPattern(RealVar realSelf, out Var varOut, out object valueOut)
     {
-        valueOut = realSelf.Data.ToString(CultureInfo.InvariantCulture);
-        varOut = new PatternVar(new LiteralPattern((string)valueOut));
+        // the pattern matching the real's text, SPITBOL's text of it
+        varOut = new PatternVar(new LiteralPattern(SpitbolRealString(realSelf.Data)));
+        valueOut = ((PatternVar)varOut).Data;
         return true;
     }
 

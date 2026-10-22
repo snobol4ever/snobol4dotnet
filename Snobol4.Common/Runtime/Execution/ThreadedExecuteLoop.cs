@@ -204,7 +204,7 @@ public partial class Executive
                 case OpCode.OpUnaryOpsyn:    Operator(((StringVar)constPool[instr.IntOperand]).Data, 1); break;
 
                 case OpCode.BinaryEquals:    _BinaryEquals();   break;
-                case OpCode.IndexCollection: IndexCollection(); break;
+                case OpCode.IndexCollection: IndexCollection(instr.IntOperand); break;
 
                 case OpCode.ChoiceStart:
                     if (Failure) { SystemStack.Pop(); Failure = false; }

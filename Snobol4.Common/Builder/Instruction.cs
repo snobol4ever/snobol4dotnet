@@ -51,7 +51,7 @@ internal enum OpCode : byte
 
     // --- Assignment / indexing ---
     BinaryEquals    = 55,  // x._BinaryEquals()
-    IndexCollection = 56,  // x.IndexCollection()
+    IndexCollection = 56,  // Operand: the number of subscripts; x.IndexCollection(count)
 
     // --- Statement boundary ---
     Init     = 60,  // Operand: source line number

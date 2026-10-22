@@ -93,7 +93,7 @@ public partial class Builder
     private static readonly MethodInfo _indexCollection =
         typeof(Executive).GetMethod("IndexCollection",
             BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
-            null, [], null)
+            null, [typeof(int)], null)
         ?? throw new MissingMethodException(nameof(Executive), "IndexCollection");
 
     private static readonly MethodInfo _operatorOpsyn =
@@ -962,6 +962,7 @@ public partial class Builder
             case Token.Type.R_ANGLE:
             case Token.Type.R_SQUARE:
                 il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldc_I4, (int)t.IntegerValue);   // the number of subscripts, which the lexer counted
                 il.Emit(OpCodes.Call, _indexCollection);
                 return true;
 

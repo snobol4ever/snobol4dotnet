@@ -18,6 +18,6 @@ public partial class Executive
         foreach (var argument in arguments)
             SystemStack.Push(argument);
 
-        IndexCollection();
+        IndexCollection(arguments.Count);
     }
 }

@@ -394,7 +394,7 @@ internal sealed class ThreadedCodeCompiler
 
                 case Token.Type.R_ANGLE:
                 case Token.Type.R_SQUARE:
-                    Emit(OpCode.IndexCollection);
+                    Emit(new Instruction(OpCode.IndexCollection, (int)t.IntegerValue));   // the number of subscripts, which the lexer counted
                     break;
 
                 case Token.Type.COMMA_CHOICE:

@@ -36,6 +36,33 @@ public partial class Executive
         LogRuntimeException(result);
     }
 
+    // The subscripts of an array or table reference: `count` of them, and the object they subscript, are on the stack. The count is the
+    // lexer's (commas + 1), so a subscripted value that is neither an array nor a table, or an index that is itself one, is known for
+    // what it is.
+    public void IndexCollection(int count)
+    {
+        if (count <= 0)
+        {
+            IndexCollection();
+            return;
+        }
+
+        if (Failure)
+        {
+            SystemStack.Push(new StringVar(false) { Succeeded = false });
+            return;
+        }
+
+        if (Parent.BuildOptions.TraceStatements)
+            Console.Error.WriteLine(@"IndexCollection");
+
+        List<Var> varIndices = new(count);
+        for (var i = 0; i < count; ++i)
+            varIndices.Add(SystemStack.Pop());
+
+        Subscript(SystemStack.Pop(), varIndices);
+    }
+
                     public void IndexCollection()
     {
         // Do not delete. Used by DLL
@@ -67,8 +94,11 @@ public partial class Executive
             varIndices.Add(SystemStack.Pop());
         }
 
-        var collection = SystemStack.Pop();
+        Subscript(SystemStack.Pop(), varIndices);
+    }
 
+    private void Subscript(Var collection, List<Var> varIndices)
+    {
         // An input-associated subscript reads a line, and at end of input the statement fails, as in
         // SPITBOL (T[W] = 0 :S(L) loops until W's file ends)
         if (InputArguments(varIndices))
@@ -85,7 +115,8 @@ public partial class Executive
                 break;
 
             default:
-                throw new ApplicationException("IndexCollection()");
+                LogRuntimeException(235);
+                break;
         }
     }
 

@@ -188,6 +188,8 @@ public class Parser
     {
         _operatorStack.Clear();
         sourceLine.ParseBody = ShuntYardAlgorithm(sourceLine.LexBody);
+        if (sourceLine.ParseBody is [.., { TokenType: Token.Type.IDENTIFIER } or { TokenType: Token.Type.UNARY_OPERATOR, MatchedString: "$" }])
+            sourceLine.ParseBody.Add(new Token(Token.Type.SUBJECT_VALUE, "", 0));
         sourceLine.ParseUnconditionalGoto = ShuntYardAlgorithm(sourceLine.LexUnconditionalGoto);
         sourceLine.ParseSuccessGoto = ShuntYardAlgorithm(sourceLine.LexSuccessGoto);
         sourceLine.ParseFailureGoto = ShuntYardAlgorithm(sourceLine.LexFailureGoto);

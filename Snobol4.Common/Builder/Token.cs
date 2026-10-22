@@ -97,7 +97,10 @@ internal class Token
         SUCCESS_GOTO = 49,
         UNARY_OPERATOR = 51,
         UNARY_STAR = 52,
-        EXPRESSION = 53
+        EXPRESSION = 53,
+        // The end of a statement whose body is only its subject, a variable (INPUT, $X): its value is read, as SPITBOL evaluates
+        // the subject, so an input-associated one reads a record and the statement fails at end of input
+        SUBJECT_VALUE = 54
     }
 
     #endregion

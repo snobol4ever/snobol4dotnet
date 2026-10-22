@@ -143,4 +143,20 @@ END", "one\ntwo\nthree").Replace("\r\n", "\n"));
         Assert.AreEqual("failed", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
         Assert.IsFalse(File.Exists(file));
     }
+
+    [TestMethod]
+    public void TEST_InputEnd_a_statement_that_is_only_INPUT_reads_a_line()
+    {
+        // sbl -b with input l1 to l4: a statement whose body is only an input-associated variable reads a record, and fails at end of
+        // input, as SPITBOL evaluates the subject (rungs ladder__rung29_input_association, _output_association, _detach); snobol4dotnet
+        // read nothing there, so OUTPUT = INPUT gave l1 and the last bare INPUT succeeded
+        Assert.AreEqual("l2\nthird read ok\nnext=l4\nend of input fails a bare INPUT", SetupTests.RunWithInput(@"        INPUT
+        OUTPUT = INPUT
+        INPUT :F(E)
+        OUTPUT = 'third read ok'
+E       OUTPUT = 'next=' INPUT
+        INPUT :S(END)
+        OUTPUT = 'end of input fails a bare INPUT'
+END", "l1\nl2\nl3\nl4").Replace("\r\n", "\n"));
+    }
 }

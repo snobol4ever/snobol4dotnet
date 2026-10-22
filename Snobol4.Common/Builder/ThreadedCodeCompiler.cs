@@ -397,6 +397,10 @@ internal sealed class ThreadedCodeCompiler
                     Emit(new Instruction(OpCode.IndexCollection, (int)t.IntegerValue));   // the number of subscripts, which the lexer counted
                     break;
 
+                case Token.Type.SUBJECT_VALUE:
+                    Emit(OpCode.ReadSubject);
+                    break;
+
                 case Token.Type.COMMA_CHOICE:
                     // If the preceding expression succeeded, skip this alternative.
                     // Emit: pop stack, clear failure, then enter alternative body.

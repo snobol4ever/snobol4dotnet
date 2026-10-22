@@ -102,6 +102,12 @@ public partial class Builder
             null, [typeof(string), typeof(int)], null)
         ?? throw new MissingMethodException(nameof(Executive), "Operator");
 
+    private static readonly MethodInfo _readSubjectMethod =
+        typeof(Executive).GetMethod("ReadSubject",
+            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
+            null, [], null)
+        ?? throw new MissingMethodException(nameof(Executive), "ReadSubject");
+
     private static readonly MethodInfo _choiceStartMethod =
         typeof(Executive).GetMethod("ChoiceStart",
             BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
@@ -833,6 +839,11 @@ public partial class Builder
             case Token.Type.BINARY_EQUAL:
                 il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Call, _binaryEquals);
+                return true;
+
+            case Token.Type.SUBJECT_VALUE:
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Call, _readSubjectMethod);
                 return true;
 
             // ── Unary operators ───────────────────────────────────────

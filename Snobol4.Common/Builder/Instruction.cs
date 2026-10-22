@@ -61,6 +61,9 @@ internal enum OpCode : byte
     ChoiceStart = 62,  // COMMA_CHOICE: if Failure, pop + clear
     ChoiceEnd   = 63,  // Operand: closing brace count
 
+    // --- A statement that is only its subject ---
+    ReadSubject = 64,  // SUBJECT_VALUE: an input-associated subject reads a record (Executive.ReadInputOperand)
+
     // --- Control flow ---
     Jump            = 70,  // Unconditional. Operand: instruction index
     JumpOnSuccess   = 71,  // Jump if NOT failure

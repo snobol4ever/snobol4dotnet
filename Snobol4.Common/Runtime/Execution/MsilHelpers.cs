@@ -121,6 +121,12 @@ public partial class Executive
     }
 
     /// <summary>
+    /// The end of a statement that is only its subject (SUBJECT_VALUE): an input-associated subject reads a record.
+    /// Mirrors the <c>OpCode.ReadSubject</c> case in ThreadedExecuteLoop.
+    /// </summary>
+    internal void ReadSubject() => ReadInputOperand();
+
+    /// <summary>
     /// Statement-boundary initialisation called at the top of every MSIL delegate.
     /// Mirrors the <c>OpCode.Init</c> case in ThreadedExecuteLoop exactly,
     /// including the &amp;STLIMIT check.

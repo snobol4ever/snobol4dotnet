@@ -173,9 +173,10 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("quick", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Data);
-        Assert.AreEqual("quick", ((NameVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Pointer);
+        // under -b a name's text is folded, as sbl -b prints for this program: quick NAME QUICK success
+        Assert.AreEqual("QUICK", ((NameVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Pointer);
         Assert.AreEqual("NAME", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("c")]).Data);
-        Assert.AreEqual("quick", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("d")]).Data);
+        Assert.AreEqual("QUICK", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("d")]).Data);
         Assert.AreEqual("success", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("e")]).Data);
     }
 
@@ -1164,9 +1165,10 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("something", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Data);
-        Assert.AreEqual("something", ((NameVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Pointer);
+        // under -b a name's text is folded, as sbl -b prints for this program: SOMETHING NAME SOMETHING STRING success
+        Assert.AreEqual("SOMETHING", ((NameVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Pointer);
         Assert.AreEqual("NAME", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("c")]).Data);
-        Assert.AreEqual("something", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("d")]).Data);
+        Assert.AreEqual("SOMETHING", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("d")]).Data);
         Assert.AreEqual("STRING", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("e")]).Data);
         Assert.AreEqual("success", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("f")]).Data);
     }

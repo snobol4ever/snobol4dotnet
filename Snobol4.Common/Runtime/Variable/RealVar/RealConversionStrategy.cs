@@ -16,7 +16,7 @@ public sealed class RealConversionStrategy : IConversionStrategy
             Executive.VarType.INTEGER => ConvertToInteger(realSelf, out varOut, out valueOut),
             Executive.VarType.REAL => ConvertToReal(realSelf, out varOut, out valueOut),
             Executive.VarType.PATTERN => ConvertToPattern(realSelf, out varOut, out valueOut),
-            Executive.VarType.NAME => ConvertToName(realSelf, out varOut, out valueOut),
+            Executive.VarType.NAME => ConvertToName(realSelf, out varOut, out valueOut, exec),
             Executive.VarType.EXPRESSION => ConvertToExpression(realSelf, exec, out varOut, out valueOut),
             // a number compiles as its text, as a string does
             Executive.VarType.CODE => new StringVar(SpitbolRealString(realSelf.Data)).Convert(targetType, out varOut, out valueOut, exec),
@@ -108,10 +108,13 @@ public sealed class RealConversionStrategy : IConversionStrategy
         return true;
     }
 
-    // the name whose text is the real's, SPITBOL's text of it: CONVERT(100.0, 'NAME') is .100. (it was .100)
-    private static bool ConvertToName(RealVar realSelf, out Var varOut, out object valueOut)
+    // the name whose text is the real's, SPITBOL's text of it: CONVERT(100.0, 'NAME') is .100. (it was .100), folded while &CASE folds
+    // as every name is (0.1E-9)
+    private static bool ConvertToName(RealVar realSelf, out Var varOut, out object valueOut, Executive exec)
     {
         var stringData = SpitbolRealString(realSelf.Data);
+        if (exec.AmpCaseFolding != 0)
+            stringData = stringData.ToUpperInvariant();
         
         if (stringData.Length == 0)
         {

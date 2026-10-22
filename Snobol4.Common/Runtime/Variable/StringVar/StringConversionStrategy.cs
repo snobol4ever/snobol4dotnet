@@ -43,10 +43,12 @@ public class StringConversionStrategy : IConversionStrategy
                 valueOut = ((PatternVar)varOut).Data;
                 return true;
 
+            // while &CASE folds, the name's text is folded as every name is, as in SPITBOL: CONVERT('abc', 'NAME') is .ABC
             case Executive.VarType.NAME:
                 if (stringSelf.Data.Length == 0)
                     return false;
-                varOut = new NameVar(stringSelf.Data, stringSelf.Key, stringSelf.Collection);
+                varOut = new NameVar(exec.AmpCaseFolding != 0 ? stringSelf.Data.ToUpperInvariant() : stringSelf.Data, stringSelf.Key,
+                    stringSelf.Collection);
                 valueOut = stringSelf.Data;
                 return true;
 

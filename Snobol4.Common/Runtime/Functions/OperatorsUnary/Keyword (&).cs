@@ -143,6 +143,16 @@ public partial class Executive
         return SystemStack.Pop();
     }
 
+    // The predefined pattern variables are constants to SPITBOL's compiler too, holding their keywords' patterns (SIZE(ARB) is 189 as the
+    // statement is compiled); assigned through $'REM', the variable changes and the compiled code does not see it
+    private static readonly HashSet<string> ConstantPatternVariables = ["ABORT", "ARB", "BAL", "FAIL", "FENCE", "REM", "SUCCEED"];
+
+    // The value of the variable when the symbol, as the program spells it, names one of those; else null
+    internal Var? ConstantVariable(string symbol) =>
+        ConstantPatternVariables.Contains(symbol.ToUpperInvariant()) && (Parent.BuildOptions.CaseFolding || !symbol.Any(char.IsLower))
+            ? ConstantKeyword(symbol)
+            : null;
+
     // Helpers
 
     private bool ReadOnlyHandler(bool set)

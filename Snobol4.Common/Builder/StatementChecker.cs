@@ -76,7 +76,15 @@ internal sealed class StatementChecker(Builder parent)
         if (!gotoTarget && !HasCandidate(lexTokens))
             return 0;
         var postfix = _parser.ToPostfix(lexTokens);
-        return postfix is null ? 0 : Walk(postfix, gotoTarget);
+        return postfix is null ? 0 : Walk(postfix, gotoTarget, out _);
+    }
+
+    // The same for a deferred expression's list, with its value when it is a constant: *X of a constant is a constant too
+    private int FirstError(List<Token> lexTokens, out Var? value)
+    {
+        value = null;
+        var postfix = _parser.ToPostfix(lexTokens);
+        return postfix is null ? 0 : Walk(postfix, false, out value);
     }
 
     // Whether the list holds an operator or call that could err: one that is pre-evaluated, one that takes a name, or a deferred
@@ -103,8 +111,9 @@ internal sealed class StatementChecker(Builder parent)
     // or a value that is no name is error 212
     private static bool IsValue(Operand operand) => operand.Kind is Kind.Constant or Kind.Value;
 
-    private int Walk(List<Token> postfix, bool gotoTarget)
+    private int Walk(List<Token> postfix, bool gotoTarget, out Var? result)
     {
+        result = null;
         List<Operand> stack = [];
         foreach (var token in postfix)
         {
@@ -122,17 +131,20 @@ internal sealed class StatementChecker(Builder parent)
                 case Token.Type.NULL:
                     stack.Add(new Operand(Kind.Other, StringVar.Null()));
                     break;
+                // a variable is a name; one of the predefined pattern variables is a constant too (Executive.ConstantVariable)
                 case Token.Type.IDENTIFIER:
-                    stack.Add(new Operand(Kind.Name, Name: token.MatchedString));
+                    stack.Add(new Operand(Kind.Name, parent.Execute!.ConstantVariable(parent.FoldCase(token.MatchedString)), Name: token.MatchedString));
                     break;
 
                 case Token.Type.EXPRESSION:
                 {
-                    // a deferred expression is compiled where it stands, and its statements are checked then
+                    // a deferred expression is compiled where it stands, and its statements are checked then. It is a constant, an
+                    // expression, whatever it holds, as SPITBOL's compiler takes it: *X + 1 is 1 and SIZE(*X) 189 as it is compiled
                     var index = int.Parse(token.MatchedString[4..]);
-                    if (index < parent.ExpressionList.Count && FirstError(parent.ExpressionList[index].ExpressionList, false) is var inner and not 0)
+                    Var? deferred = null;
+                    if (index < parent.ExpressionList.Count && FirstError(parent.ExpressionList[index].ExpressionList, out deferred) is var inner and not 0)
                         return inner;
-                    stack.Add(new Operand(Kind.Name));
+                    stack.Add(new Operand(Kind.Name, Deferred(deferred)));
                     break;
                 }
 
@@ -268,10 +280,11 @@ internal sealed class StatementChecker(Builder parent)
                     break;
                 }
 
+                // *X is a constant, an expression, whatever X is (as for a deferred expression above)
                 case Token.Type.UNARY_STAR:
                     if (stack.Count < 1)
                         return 0;
-                    stack[^1] = new Operand(Kind.Other);
+                    stack[^1] = new Operand(Kind.Other, Deferred(stack[^1].Value));
                     break;
 
                 // the right operand of . and $ is a name; the result is a value
@@ -328,6 +341,7 @@ internal sealed class StatementChecker(Builder parent)
             }
         }
 
+        result = stack.Count == 1 ? stack[0].Value : null;
         return gotoTarget && stack.Count == 1 && stack[0].Kind is Kind.Constant or Kind.Value or Kind.Combination ? ValueWhereNameIsRequired : 0;
     }
 
@@ -342,6 +356,11 @@ internal sealed class StatementChecker(Builder parent)
         stack.RemoveRange(stack.Count - 2, 2);
         return true;
     }
+
+    // *X as the compiler holds it: an expression giving X's value when that is a constant, and failing when it is not, so a pre-evaluated
+    // function that evaluated it (none does) would be abandoned rather than run the program's code as it is compiled
+    private static ExpressionVar Deferred(Var? value) =>
+        new(value is null ? x => x.Failure = true : x => x.SystemStack.Push(value));
 
     // The value of the call, or the number of the error it raised
     private int Evaluate(FunctionTableEntry entry, List<Var> arguments, out Var? value)

@@ -105,6 +105,33 @@ public class PreEvaluation
         Assert.AreEqual("ran 209 26 256 PATTERN", SetupTests.RunWithInput(s));
     }
 
+    // The predefined pattern variables (ABORT ARB BAL FAIL FENCE REM SUCCEED) are constants to SPITBOL's compiler as their keywords are, and
+    // *X of a constant is a constant too, an expression: each was compiled and failed at run time, or did not fail at all (SIZE(ARB)), where
+    // sbl refuses the statement. Found by the infinite_snobol4 generator (*+REM *p, ERROR 4; *'3.' ** '1,000' - -'v', ERROR 15 not 10)
+    [TestMethod]
+    public void TEST_PreEvaluation_a_pattern_variable_and_a_deferred_constant_are_constants()
+    {
+        var s = "        OUTPUT = 'before'\n        V = *+REM\n        W = *'x' + 1\n        X = SIZE(ARB)\n" +
+                "        Y = *'3.' ** '1,000' - -'v'\n        Z = *SIZE('ab') + 'x'\n        OUTPUT = 'after'\nEND";
+        Assert.AreEqual(
+            Head +
+            "2               V = *+REM\n\nTest.sno(2) : ERROR 004 -- affirmation operand is not numeric\n\n" +
+            "3               W = *'x' + 1\n\nTest.sno(3) : ERROR 001 -- addition left operand is not numeric\n\n" +
+            "4               X = SIZE(ARB)\n\nTest.sno(4) : ERROR 189 -- size argument is not a string\n\n" +
+            "5               Y = *'3.' ** '1,000' - -'v'\n\nTest.sno(5) : ERROR 015 -- exponentiation right operand is not numeric\n\n" +
+            "6               Z = *SIZE('ab') + 'x'\n\nTest.sno(6) : ERROR 002 -- addition right operand is not numeric",
+            Run(s));
+    }
+
+    [TestMethod]
+    public void TEST_PreEvaluation_a_deferred_constant_and_a_pattern_variable_still_run_as_before()
+    {
+        var s = "        &ERRLIMIT = 10\n        V = *'x'\n" +
+                "        OUTPUT = DATATYPE(V) ' ' DATATYPE(*SIZE('ab')) ' ' DATATYPE(REM) ' ' DATATYPE(LEN(*'x'))\n" +
+                "        P = *X\n        OUTPUT = DATATYPE(P)\nEND";
+        Assert.AreEqual("EXPRESSION EXPRESSION PATTERN PATTERN\nEXPRESSION", SetupTests.RunWithInput(s));
+    }
+
     [TestMethod]
     public void TEST_PreEvaluation_constants_that_do_not_err_run_as_before()
     {

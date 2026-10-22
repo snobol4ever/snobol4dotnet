@@ -309,9 +309,10 @@ public partial class Executive
         // A SETEXIT handler's :(CONTINUE) resumes at the failure exit of the statement in error, as in
         // SPITBOL: its :F label, else its unconditional goto, else the next statement
         // :(CONTINUE) with no trapped error pending is itself error 37, which a SETEXIT handler traps
-        if (exitCode == -6 && _continueStatement < 0 && overrideThread == null)
+        if (exitCode == -6 && _continueStatement == -1 && overrideThread == null)
         {
-            LogRuntimeException(37);
+            // with no handler armed it is a fatal error whatever &ERRLIMIT is (the run ended silently with &ERRLIMIT above 0)
+            LogRuntimeException(37, fatal: SetExitNumber == 0);
             SystemStack.Pop();
             if (OnErrorGoto > 0)
             {

@@ -8,8 +8,9 @@ public partial class Executive
         var operand = SystemStack.Count - 1;
 
         // A failure that began before this operand (F(1) ~F(2) with F failing) fails the statement, as in
-        // SPITBOL, where evaluation stops at the first failure; only the operand's own failure is negated
-        if (Failure && FailureOrigin < operand)
+        // SPITBOL, where evaluation stops at the first failure; only the operand's own failure is negated, and not an error's
+        // while a SETEXIT handler waits for it ('a' + ~$Q enters the handler with 239)
+        if (Failure && (FailureOrigin < operand || FailureIsError && OnErrorGoto > 0))
             return;
 
         // The operand's value is replaced, never changed, as in SPITBOL: a failed operand gives the null string (so ~~X is the null

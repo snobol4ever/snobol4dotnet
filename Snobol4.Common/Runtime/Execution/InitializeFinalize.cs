@@ -71,6 +71,7 @@ public partial class Executive
         AmpCurrentLineNumber = index;
         ReportLineIndex = -1;
         FailureOrigin = int.MaxValue;
+        FailureIsError = false;
         _statementBegun = true;
         StatementSerial++;
     }

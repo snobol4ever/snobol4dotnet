@@ -16,6 +16,10 @@ public partial class Executive
     internal long ErrorSerial;
     internal long ErrorFunctionLevel;
 
+    // Set while the statement's failure is an error's: with a SETEXIT handler armed, the handler takes it at once, and neither a
+    // negation nor a choice's next alternative goes on from it, as in SPITBOL (Negation, ChoiceStart)
+    internal bool FailureIsError;
+
     public void LogRuntimeException(int code, bool fatal, long? errorType = null)
     {
         if (PreEvaluating)
@@ -43,6 +47,7 @@ public partial class Executive
         ErrorFunctionLevel = AmpFunctionLevel;
         Failure = true;
         FailureOrigin = SystemStack.Count;
+        FailureIsError = true;
         SystemStack.Push(new StringVar(false));
         var ce = new CompilerException(code, 0, LastDiagnostic);
         Parent.MessageHistory.Add(LastDiagnostic);
@@ -174,6 +179,7 @@ public partial class Executive
     {
         Failure = true;
         FailureOrigin = SystemStack.Count;
+        FailureIsError = false;
         var nullVar = new StringVar(false) { Succeeded = false };
         SystemStack.Push(nullVar);
         return nullVar;

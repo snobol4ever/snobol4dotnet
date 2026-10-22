@@ -108,9 +108,10 @@ public sealed class RealConversionStrategy : IConversionStrategy
         return true;
     }
 
+    // the name whose text is the real's, SPITBOL's text of it: CONVERT(100.0, 'NAME') is .100. (it was .100)
     private static bool ConvertToName(RealVar realSelf, out Var varOut, out object valueOut)
     {
-        var stringData = realSelf.Data.ToString(CultureInfo.InvariantCulture);
+        var stringData = SpitbolRealString(realSelf.Data);
         
         if (stringData.Length == 0)
         {
@@ -131,7 +132,8 @@ public sealed class RealConversionStrategy : IConversionStrategy
         exec.Parent.CodeMode = true;
         exec.Parent.Code = new SourceCode(exec.Parent);
         
-        var realString = realSelf.Data.ToString(CultureInfo.InvariantCulture).Trim();
+        // the real's SPITBOL text, which compiles back to the real: 100.0 is 100., which .NET spelled 100, an integer
+        var realString = SpitbolRealString(realSelf.Data);
         exec.Parent.Code.ReadCodeInString($" A_ = *({realString})", exec.Parent.FilesToCompile[^1]);
         exec.Parent.BuildEval();
         

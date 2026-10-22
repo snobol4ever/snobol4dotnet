@@ -35,8 +35,20 @@ public partial class Executive
         // a program-defined function reads its name from the last argument, which Function() appends on
         // a call; an operator OPSYN'd to one (| or ! in CODE or EVAL text) appends it here, as OperatorFast does
         if (handler == ExecuteProgramDefinedFunction)
-            arguments.Add(new StringVar(UserFunctionTable.TryGetValue(functionName, out var definition)
+        {
+            // the function is given the arguments it declares: the operands it lacks are null, the ones it has too many are dropped
+            if (UserFunctionTable.TryGetValue(functionName, out var definition))
+            {
+                while (arguments.Count < definition.Parameters.Count)
+                    arguments.Add(StringVar.Null());
+                if (arguments.Count > definition.Parameters.Count)
+                    arguments.RemoveRange(definition.Parameters.Count, arguments.Count - definition.Parameters.Count);
+            }
+
+            arguments.Add(new StringVar(UserFunctionTable.TryGetValue(functionName, out definition)
                 ? definition.FunctionName : functionName));
+        }
+
         handler(arguments);
     }
 

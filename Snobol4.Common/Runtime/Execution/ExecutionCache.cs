@@ -303,19 +303,19 @@ public partial class Executive
             return;
         }
 
-        // An operator made a synonym of a function (OPSYN('#', 'LPAD', 2)) is given as many arguments as the function declares, as
-        // SPITBOL gives them: the ones the operator lacks are null and the ones it has too many are dropped. A program-defined function
-        // takes the arguments as they come.
-        var arity = operatorName.StartsWith("__", StringComparison.Ordinal) ? 2 : 1;
-        var handler = entry.Handler;
-        var declared = entry.ArgumentCount;
-        if (handler == ExecuteProgramDefinedFunction || declared == arity)
-        {
-            OperatorHandlers[(int)op] = handler;
-            return;
-        }
+        OperatorHandlers[(int)op] = entry.Handler;
+    }
 
-        OperatorHandlers[(int)op] = list =>
+    /// <summary>
+    /// The handler of an operator made a synonym of a function (OPSYN('#', 'LPAD', 2)): the function is given as many arguments as it
+    /// declares, as SPITBOL gives them, the ones the operator lacks null and the ones it has too many dropped. A program-defined
+    /// function is not wrapped (it is told apart by its handler, and takes its arguments as they come).
+    /// </summary>
+    internal FunctionTableEntry.FunctionHandler AdaptArity(FunctionTableEntry.FunctionHandler handler, int declared, int arity)
+    {
+        if (handler == ExecuteProgramDefinedFunction || declared == arity)
+            return handler;
+        return list =>
         {
             while (list.Count < declared)
                 list.Add(StringVar.Null());

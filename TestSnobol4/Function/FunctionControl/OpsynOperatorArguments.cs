@@ -81,4 +81,14 @@ END";
 END";
         Assert.AreEqual(@"ababab", SetupTests.MaskListingHead(SetupTests.RunWithInput(program)));
     }
+
+    // the unary ! and ~ and the others that SPITBOL's scanner takes for operators go the long way round the evaluator, and gave the
+    // function no more than the one operand they have
+    [TestMethod]
+    public void TEST_OpsynOperatorArguments_a_unary_operator_is_padded_on_the_general_path_too()
+    {
+        var build = SetupTests.SetupScript("-b", "        OPSYN('!','DUPL',1)\n        X = !'ab'\n        Y = 'after'\nEND");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("after", ((Snobol4.Common.StringVar)build.Execute!.IdentifierTable[build.FoldCase("Y")]).Data);
+    }
 }

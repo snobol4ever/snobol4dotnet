@@ -99,7 +99,8 @@ public partial class Executive
                 newFunction = "_" + newFunction;
                 FunctionTable.Remove(newFunction);
                 var unusedUnaryOperator = FunctionTable[existingFunction] ?? UndefinedOperator(newFunction, 1);
-                FunctionTable.Add(newFunction, new FunctionTableEntry(this, newFunction, unusedUnaryOperator.Handler, unusedUnaryOperator.ArgumentCount, false));
+                FunctionTable.Add(newFunction, new FunctionTableEntry(this, newFunction, AdaptArity(unusedUnaryOperator.Handler, unusedUnaryOperator.ArgumentCount, 1),
+                    unusedUnaryOperator.ArgumentCount, false));
                 // a program-defined function needs its definition under the operator's key too, as in the binary case
                 if (UserFunctionTable.TryGetValue(existingFunction, out var existingUnaryUserEntry))
                     UserFunctionTable[newFunction] = new UserFunctionTableEntry(
@@ -121,7 +122,8 @@ public partial class Executive
                 newFunction = "__" + newFunction;
                 FunctionTable.Remove(newFunction);
                 var unusedBinaryOperator = FunctionTable[existingFunction] ?? UndefinedOperator(newFunction, 2);
-                FunctionTable.Add(newFunction, new FunctionTableEntry(this, newFunction, unusedBinaryOperator.Handler, unusedBinaryOperator.ArgumentCount, false));
+                FunctionTable.Add(newFunction, new FunctionTableEntry(this, newFunction, AdaptArity(unusedBinaryOperator.Handler, unusedBinaryOperator.ArgumentCount, 2),
+                    unusedBinaryOperator.ArgumentCount, false));
                 // Mirror case 0: copy UserFunctionTableEntry under the operator name so
                 // that ExecuteProgramDefinedFunction can find the definition when the
                 // OPSYN'd binary operator is dispatched via OperatorFast (which bypasses

@@ -99,4 +99,44 @@ public class ExitFunction
         StringAssert.Contains(output, "e.sno(1) : ERROR 106 -- exit action caused irrecoverable error".Replace("e.sno", "Test.sno"));
         Assert.IsFalse(error.ToString().Contains("could not write"), error.ToString());
     }
+
+    [TestMethod]
+    public void TEST_ExitFunction_every_negative_number_writes_a_save_file_and_only_minus_4_goes_on()
+    {
+        // sbl -b: any negative integer writes the file; -4 goes on, all the others end the run. A real is cut toward zero, and a
+        // string that reads as a number is that number (a blank around it does not matter); zero and above are error 105
+        var folder = Path.Combine(Path.GetTempPath(), "exit_" + Guid.NewGuid().ToString("N")[..8]);
+        Directory.CreateDirectory(folder);
+        try
+        {
+            var cases = new (string First, string Output)[]
+            {
+                ("-1", ""), ("-2", ""), ("-5", ""), ("-100", ""), ("-4", "after"), ("-3.9", ""), ("-4.9", "after"), ("-4.0", "after"),
+                ("'-3'", ""), ("'-4'", "after"), ("' -3'", ""), ("'-3 '", ""), ("'-3.0'", ""), ("'-4.9'", "after"), ("'-1e0'", ""),
+                ("'3'", "105"), ("'+3'", "105"), ("'-0'", "105"), ("-0.5", "105"), ("'-.5'", "105"), ("0", "105")
+            };
+            foreach (var (first, expected) in cases)
+            {
+                var file = Path.Combine(folder, "f" + Guid.NewGuid().ToString("N")[..6]);
+                var s = $"        &ERRLIMIT = 5\n        EXIT({first}, '{file}')\n        OUTPUT = IDENT(&ERRTYPE, 105) '105'\n        OUTPUT = DIFFER(&ERRTYPE, 105) 'after'\nEND";
+                Assert.AreEqual(expected, SetupTests.RunWithInput(s), $"EXIT({first})");
+                Assert.AreEqual(expected is "" or "after", File.Exists(file), $"EXIT({first}) file");
+            }
+        }
+        finally
+        {
+            Directory.Delete(folder, true);
+        }
+    }
+
+    [TestMethod]
+    public void TEST_ExitFunction_a_second_argument_that_is_no_string_is_error_288()
+    {
+        foreach (var second in new[] { "ARRAY(2)", "TABLE()", "ARB", "CODE(' X = 1')", "*X" })
+        foreach (var first in new[] { "-4", "-3", "3", "'echo hi'", "'-3x'", "''" })
+        {
+            var s = $"        &ERRLIMIT = 5\n        EXIT({first}, {second})\n        OUTPUT = 'after ' &ERRTYPE\nEND";
+            Assert.AreEqual("after 288", SetupTests.RunWithInput(s), $"{first}, {second}");
+        }
+    }
 }

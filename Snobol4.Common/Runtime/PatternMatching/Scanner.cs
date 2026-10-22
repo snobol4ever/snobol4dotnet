@@ -128,6 +128,9 @@ public class Scanner
     // The nodes the last match built: the statement's pattern and one copy of each pattern it entered
     internal int NodeCount => _ast?.Count ?? 0;
 
+    // The function level the match runs at (Match)
+    private long _matchFunctionLevel;
+
     // S-2-bridge-7-byrd-pattern: tag a pattern node for the wire trace.
     // UnevaluatedPattern reports its function name (e.g. "*snoString").
     // LiteralPattern reports its literal in single-quotes (e.g. 'h', '"').
@@ -173,6 +176,7 @@ public class Scanner
     private MatchResult Match(AbstractSyntaxTreeNode node)
     {
         _state!.ClearAlternates();
+        _matchFunctionLevel = Exec.AmpFunctionLevel;
 
         while (true)
         {
@@ -197,7 +201,14 @@ public class Scanner
             else
             {
                 Exec.Failure = false;
+                var errors = Exec.ErrorSerial;
                 mr = ((TerminalPattern)node.Self).Scan(node.SelfIndex, this);
+
+                // An error the scan raised at the match's own level (SPAN(*Y) with Y null, LEN(*'z')) ends the whole match, as in SPITBOL,
+                // where it failed only this node and the scan went on to the next cursor, raising it again at each; an error inside a
+                // function the scan called failed only that function's statement, and the match goes on
+                if (Exec.ErrorSerial != errors && Exec.ErrorFunctionLevel == _matchFunctionLevel)
+                    return MatchResult.Abort(_state);
 
                 // Record failure of pure terminals for subsequent alt-stack restores.
                 if (mr.Outcome == MatchResult.Status.FAILURE && IsPureTerminal(node.Self))

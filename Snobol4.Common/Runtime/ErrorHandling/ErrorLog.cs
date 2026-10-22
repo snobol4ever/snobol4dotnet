@@ -11,6 +11,11 @@ public partial class Executive
     public void LogRuntimeException(int code) => LogRuntimeException(code, fatal: false);
 
     // `errorType` is the value &ERRTYPE takes where it is not the code reported: assigning &ERRTYPE = 0 reports error 36 and leaves 0
+    // Counts the run-time errors raised, with the function level of the latest, so a pattern match can tell an error its own scan
+    // raised from one raised inside a function the scan called (Scanner.Match)
+    internal long ErrorSerial;
+    internal long ErrorFunctionLevel;
+
     public void LogRuntimeException(int code, bool fatal, long? errorType = null)
     {
         if (PreEvaluating)
@@ -34,6 +39,8 @@ public partial class Executive
             $"{fileName}({counts}/{lineCount}): error {code} -- {AmpErrorText}{Environment.NewLine}{SourceCode[AmpCurrentLineNumber].Split('\n')[1]}";
         Parent.ErrorCodeHistory.Add(code);
         Parent.ColumnHistory.Add(0);
+        ErrorSerial++;
+        ErrorFunctionLevel = AmpFunctionLevel;
         Failure = true;
         FailureOrigin = SystemStack.Count;
         SystemStack.Push(new StringVar(false));

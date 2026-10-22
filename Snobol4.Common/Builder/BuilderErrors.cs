@@ -176,6 +176,13 @@ public partial class Builder
                 () => WriteErrorPage(SourceCode.NumberField(0, depth), physical, line, column, code, file, listed)));
     }
 
+    // An error in a control statement is reported on the page of the line, the caret under the first character of the element it was
+    // found at; the compile goes on, but the program does not run
+    internal void LogControlCardError(int code, string physical, int column, int line, string file, int position, int depth) =>
+        Defer(position, () =>
+            LogCompilerExceptionCore(code, column, CompilerException.ErrorMessage[code], null,
+                () => WriteErrorPage(SourceCode.NumberField(0, depth), physical, line, column, code, file, false)));
+
     // Runs the kept reports that stand before statement `before` (all of them for int.MaxValue), in the order they were kept
     internal void FlushDeferred(int before)
     {

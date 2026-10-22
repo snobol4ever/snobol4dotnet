@@ -17,7 +17,6 @@ public class SourceCode
     // Magic numbers for parsing
     private const int _endStatementLength = 3;
     private const int _endStatementOffset = 3;
-    private const int _caseDirectiveValueOffset = 5;
 
     // Counter for number of lines in a file
     internal int LineCountFile { get; set; }
@@ -65,6 +64,8 @@ public class SourceCode
     private string? _staleIncludeName;   // the included file's name, which sbl gives the next statement after it
     private bool _lastLineIsNote;        // the last line read was a comment or a control line
     private bool _controlLineListed;     // an -INCLUDE has listed its own line
+    private int _cardLine;               // the line the control statement being executed stands on, which -LINE does not move
+    private int _maximumLineLength = int.MaxValue;   // the longest line the source can have, as -INnnn sets it
 
     internal SourceCode(Builder parent)
     {
@@ -248,9 +249,10 @@ public class SourceCode
     /// <param name="reader">Stream reader to read from</param>
     /// <param name="continuationLines">Output: number of lines concatenated</param>
     /// <returns>The complete line including any continuations</returns>
-    private static string ReadLineAndContinuations(StreamReader reader, out int continuationLines, out List<string> physicalLines)
+    private string ReadLineAndContinuations(StreamReader reader, out int continuationLines, out List<string> physicalLines)
     {
-        var line = reader.ReadLine();
+        // a line is cut to the length -INnnn set, the rest of it is lost
+        var line = CutToMaximum(reader.ReadLine());
         continuationLines = 1;
         physicalLines = [line ?? ""];
 
@@ -265,7 +267,7 @@ public class SourceCode
                && !IsCommentOrContinuation(currentLine) && !IsCommand(currentLine)
                && !currentLine.TrimEnd().EndsWith(_semicolonChar))
         {
-            var continued = reader.ReadLine() ?? "";
+            var continued = CutToMaximum(reader.ReadLine()) ?? "";
             physicalLines.Add(continued);
             currentLine += continued.Length > 0 ? continued[1..] : "";
             continuationLines++;
@@ -273,6 +275,8 @@ public class SourceCode
 
         return currentLine;
     }
+
+    private string? CutToMaximum(string? line) => line is not null && line.Length > _maximumLineLength ? line[.._maximumLineLength] : line;
 
     /// <summary>
     /// Adjusts file extension if not present, trying common SNOBOL4 extensions
@@ -314,6 +318,15 @@ public class SourceCode
             return;
         }
 
+        // A control line is read whole, as SPITBOL reads it: a semicolon in it ends nothing
+        if (!codeText && IsCommand(line))
+        {
+            SubLineCount++;
+            CommentContinuationDirectiveCount++;
+            ExecuteDirectives(line, pathName, false, 0);
+            return;
+        }
+
         // A continuation line with no open statement to continue is a statement in error, as in SPITBOL
         if (!codeText && line.Length > 0 && line[0] is _continuationChar or _alternateContinuationChar)
         {
@@ -338,7 +351,17 @@ public class SourceCode
         foreach (var subLine in subLines)
         {
             CurrentSubLineOffset = offset;
-            ProcessSubLine(subLine.TrimEnd(), pathName);
+
+            // a control may follow a semicolon in a source file, and is read to the end of the line; what follows it is lost
+            if (!codeText && IsCommand(subLine))
+            {
+                SubLineCount++;
+                CommentContinuationDirectiveCount++;
+                ExecuteDirectives(line[offset..], pathName, false, offset);
+                return;
+            }
+
+            ProcessSubLine(subLine.TrimEnd(), pathName, codeText);
             offset += subLine.Length + 1;
         }
     }
@@ -348,7 +371,7 @@ public class SourceCode
     /// </summary>
     /// <param name="subLine">The sub-line to process</param>
     /// <param name="pathName">Path to the source file</param>
-    private void ProcessSubLine(string subLine, string pathName)
+    private void ProcessSubLine(string subLine, string pathName, bool codeText)
     {
         if (string.IsNullOrWhiteSpace(subLine))
         {
@@ -364,10 +387,11 @@ public class SourceCode
             return;
         }
 
-        if (IsCommand(subLine))
+        // in the text of CODE a control follows a semicolon; in a source file only a line's first character begins one
+        if (codeText && IsCommand(subLine))
         {
             CommentContinuationDirectiveCount++;
-            ExecuteDirectives(subLine[1..], pathName);
+            ExecuteDirectives(subLine, pathName, true, 0);
             return;
         }
 
@@ -472,129 +496,327 @@ public class SourceCode
 
     #region Directive Processing
 
-    /// <summary>
-    /// Executes compiler directives found in the source
-    /// </summary>
-    /// <param name="line">The directive line (without the leading '-')</param>
-    /// <param name="pathName">Path to the source file</param>
-    private void ExecuteDirectives(string line, string pathName)
+    // What SPITBOL's scane makes of the next element of a control statement
+    private enum CardElement { End, Name, Integer, Real, String, Comma, Other }
+
+    private readonly record struct CardToken(CardElement Kind, string Text = "", long Integer = 0, double Real = 0);
+
+    // A control statement being read: SPITBOL's scnpt, the offset of what is read next, and scnse, where the element read last
+    // began, under which an error in the statement is reported
+    private sealed class ControlCard(string text, int offset)
     {
-        var directiveList = line.Split(',', StringSplitOptions.RemoveEmptyEntries);
+        internal readonly string Text = text;
+        internal readonly int Offset = offset;
+        internal int Position = 1;
+        internal int Start = 1;
+        internal int Error;
 
-        foreach (var directive in directiveList)
+        internal CardToken Scan()
         {
-            var m = CompiledRegex.KeywordPattern().Match(directive);
+            Error = 0;
+            while (Position < Text.Length && Text[Position] is ' ' or '\t')
+                Position++;
+            if (Position >= Text.Length)
+                return new CardToken(CardElement.End);
 
-            if (m.Success)
-                ParseDirective(m.Value, directive, pathName);
+            Start = Position;
+            var c = Text[Position];
+            if (char.IsAsciiLetter(c))
+            {
+                var begin = Position;
+                while (Position < Text.Length && (char.IsAsciiLetterOrDigit(Text[Position]) || Text[Position] is '_' or '.'))
+                    Position++;
+                // a name and a left paren is a call of a function, no control's name
+                if (Position < Text.Length && Text[Position] == '(')
+                {
+                    Position++;
+                    return new CardToken(CardElement.Other);
+                }
+
+                return new CardToken(CardElement.Name, Text[begin..Position]);
+            }
+
+            if (char.IsAsciiDigit(c))
+            {
+                var begin = Position;
+                while (Position < Text.Length && (char.IsAsciiLetterOrDigit(Text[Position]) || Text[Position] is '_' or '.' or '+' or '-'))
+                    Position++;
+                var number = Text[begin..Position];
+                if (long.TryParse(number, NumberStyles.None, CultureInfo.InvariantCulture, out var integer))
+                    return new CardToken(CardElement.Integer, number, integer);
+                if (CompiledRegex.RealConstantPattern().IsMatch(number) &&
+                    double.TryParse(number, NumberStyles.Float, CultureInfo.InvariantCulture, out var real))
+                    return new CardToken(CardElement.Real, number, 0, real);
+                Error = 231;
+                return new CardToken(CardElement.Other);
+            }
+
+            if (c is '\'' or '"')
+            {
+                var end = Text.IndexOf(c, Position + 1);
+                if (end < 0)
+                {
+                    Position = Text.Length;
+                    Error = 232;
+                    return new CardToken(CardElement.Other);
+                }
+
+                var text = Text[(Position + 1)..end];
+                Position = end + 1;
+                return new CardToken(CardElement.String, text);
+            }
+
+            Position++;
+            return new CardToken(c == ',' ? CardElement.Comma : CardElement.Other);
         }
     }
 
     /// <summary>
-    /// Parses and executes a specific directive
+    /// Executes a control statement as SPITBOL's cncrd does. A control is told by the first four letters of its name (-NOEXECUTE,
+    /// -NOEXEC and -NOEXECS are one control), a name SPITBOL does not know is no error, and a number, a string, a call of a function or a
+    /// comma where a name should be is error 247. After a comma comes another control, but after -CASE, -DUMP, -EJECT, -INCLUDE,
+    /// -LINE, -SPACE, -STITL and -TITLE nothing is read: the rest of the line is no one's business.
     /// </summary>
-    /// <param name="match">The matched keyword</param>
-    /// <param name="directive">The full directive text</param>
+    /// <param name="line">The control statement, with the minus that begins it</param>
     /// <param name="pathName">Path to the source file</param>
-    private void ParseDirective(string match, string directive, string pathName)
+    /// <param name="codeText">Whether it stands in the text of CODE rather than in a source file</param>
+    /// <param name="offset">Where on its line the statement begins, for the column of an error</param>
+    private void ExecuteDirectives(string line, string pathName, bool codeText, int offset)
     {
-        // A control in lower case is a control only while names fold, as sbl reads it (Budne's case1:
-        // -case 1 after -case is ignored)
-        if (!_parent.BuildOptions.CaseFolding && match.Any(char.IsLower))
-            return;
+        var card = new ControlCard(line.TrimEnd(), offset);
+        _cardLine = 1 + LineCountFile;
+        void Reject() => RejectCard(card, pathName, codeText);
 
-        var keyword = match.ToLower().Trim();
-        
-        switch (keyword)
+        while (card.Position < card.Text.Length)
         {
-            case "copy":
-            case "include":
-                ProcessIncludeDirective(directive, pathName);
-                break;
+            if (card.Text.Length - card.Position > 2 && card.Text[card.Position] is 'I' or 'i' && card.Text[card.Position + 1] is 'N' or 'n'
+                && char.IsAsciiDigit(card.Text[card.Position + 2]))
+            {
+                // -INnnn, the longest line the source can have: the lines after it are cut to that length
+                card.Position += 2;
+                var length = card.Scan();
+                if (card.Error != 0 || !TrySmallInteger(length, out var maximum))
+                {
+                    Reject();
+                    return;
+                }
 
-            case "case":
-                ProcessCaseDirective(directive);
-                break;
+                _maximumLineLength = (int)maximum;
+            }
+            else
+            {
+                var name = card.Scan();
+                if (card.Error != 0 || name.Kind != CardElement.Name)
+                {
+                    Reject();
+                    return;
+                }
 
-            case "fail":
+                if (!ExecuteControl(card, name.Text, pathName, codeText))
+                    return;
+            }
+
+            // another control follows a comma
+            var next = card.Scan();
+            if (card.Error != 0)
+            {
+                Reject();
+                return;
+            }
+
+            if (next.Kind != CardElement.Comma)
+                return;
+        }
+    }
+
+    /// <summary>
+    /// Does one control. True when another may follow it on the line, false when the line is done, with its error reported if it had one.
+    /// </summary>
+    private bool ExecuteControl(ControlCard card, string written, string pathName, bool codeText)
+    {
+        // names fold only while &CASE is not zero, so that -list is a control then and not otherwise; a name shorter than four letters
+        // is none
+        var name = written.Length < 4 ? "" : written[..4];
+        if (_parent.BuildOptions.CaseFolding)
+            name = name.ToUpperInvariant();
+
+        switch (name)
+        {
+            case "CASE":
+            {
+                // the number is optional: no number is zero
+                var value = 0L;
+                var number = card.Scan();
+                if (card.Error != 0 || number.Kind != CardElement.End && !TrySmallInteger(number, out value))
+                {
+                    RejectCard(card, pathName, codeText);
+                    return false;
+                }
+
+                _parent.BuildOptions.CaseFolding = value != 0;
+                return false;
+            }
+
+            case "COPY":
+            case "INCL":
+            {
+                var file = card.Scan();
+                if (card.Error != 0 || file.Kind != CardElement.String)
+                {
+                    RejectCard(card, pathName, codeText);
+                    return false;
+                }
+
+                ProcessIncludeDirective(file.Text, pathName);
+                return false;
+            }
+
+            case "LINE":
+            {
+                // -LINE n ["file"]: the next line is line n (of file, when named), the lines after it following on, as &LINE and
+                // &FILE read under sbl; the number is set before the file name is read
+                var number = card.Scan();
+                if (card.Error != 0 || number.Kind != CardElement.Integer || number.Integer <= 0)
+                {
+                    RejectCard(card, pathName, codeText);
+                    return false;
+                }
+
+                LineCountFile = (int)Math.Min(number.Integer, int.MaxValue) - 1 - _continuation;
+                var file = card.Scan();
+                if (card.Error != 0 || file.Kind is not (CardElement.End or CardElement.String))
+                {
+                    RejectCard(card, pathName, codeText);
+                    return false;
+                }
+
+                if (file.Kind == CardElement.String)
+                {
+                    _lineFileName = file.Text;
+                    _staleIncludeName = null;
+                }
+
+                return false;
+            }
+
+            case "SPAC":
+            {
+                // blank lines in the listing, which a card without a listing does not read
+                if (!_parent.BuildOptions.ListSource)
+                    return false;
+                var number = card.Scan();
+                if (card.Error != 0 || number.Kind != CardElement.End && !TrySmallInteger(number, out _))
+                {
+                    RejectCard(card, pathName, codeText);
+                    return false;
+                }
+
+                return false;
+            }
+
+            // listing controls, which shape only SPITBOL's listing page
+            case "DUMP":
+            case "EJEC":
+            case "STIT":
+            case "TITL":
+                return false;
+
+            case "FAIL":
                 _parent.BuildOptions.ErrorOnUnhandledFail = true;
-                break;
+                return true;
 
-            case "nofail":
+            case "NOFA":
                 _parent.BuildOptions.ErrorOnUnhandledFail = false;
-                break;
+                return true;
 
-            // -NOEXECUTE compiles and does not run, as the -n switch; the last of the two in the
-            // program wins, as in SPITBOL
-            case "execute":
+            // -NOEXECUTE compiles and does not run, as the -n switch; the last of the two in the program wins, as in SPITBOL
+            case "EXEC":
                 _parent.BuildOptions.SuppressExecution = false;
-                break;
+                return true;
 
-            case "noexecute":
+            case "NOEX":
                 _parent.BuildOptions.SuppressExecution = true;
-                break;
+                return true;
 
-            // -ERRORS runs the program despite compilation errors, as -k does; -NOERRORS, the default,
-            // does not run it
-            case "errors":
+            // -ERRORS runs the program despite compilation errors, as -k does; -NOERRORS, the default, does not run it
+            case "ERRO":
                 _parent.BuildOptions.RunDespiteCompileErrors = true;
-                break;
+                return true;
 
-            case "noerrors":
+            case "NOER":
                 _parent.BuildOptions.RunDespiteCompileErrors = false;
-                break;
+                return true;
 
-            case "list":
+            case "LIST":
                 _parent.BuildOptions.ListSource = true;
-                break;
+                return true;
 
-            case "nolist":
+            case "NOLI":
                 _parent.BuildOptions.ListSource = false;
-                break;
+                return true;
 
-            case "line":
-                ProcessLineDirective(directive);
-                break;
-
-            // Listing controls (-TITLE, -STITL, -PRINT, -DOUBLE, -OPTIMIZE, ...) shape only SPITBOL's listing,
-            // which this compiler does not lay out, and SPITBOL ignores a control it does not know (the manual;
-            // sbl is silent on -HIDE, -PLUSOPS): all are accepted silently, as sbl accepts them
+            // the others (-DOUBLE, -SINGLE, -PRINT, -NOPRINT, -OPTIMISE, -NOOPT, -TRACE) and a name SPITBOL does not know change nothing
             default:
-                break;
+                return true;
         }
     }
 
-    /// <summary>
-    /// -LINE n ["file"]: the next line is line n (of file, when named), the lines after it following on,
-    /// as &LINE and &FILE read under sbl
-    /// </summary>
-    private void ProcessLineDirective(string directive)
+    // SPITBOL's gtsmi on what a control reads as a number: a non-negative integer that fits in a word; a real is cut to one and a
+    // string is read as the number it spells (the null string as zero)
+    private static bool TrySmallInteger(CardToken token, out long value)
     {
-        var m = System.Text.RegularExpressions.Regex.Match(directive, @"^\s*LINE\s+(\d+)(?:\s+[""']([^""']*)[""'])?",
-            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-        if (!m.Success)
+        value = 0;
+        switch (token.Kind)
         {
-            _parent.LogCompilerException(247);
+            case CardElement.Integer:
+                value = token.Integer;
+                break;
+            case CardElement.Real:
+                value = (long)Math.Truncate(token.Real);
+                break;
+            case CardElement.String:
+                var text = token.Text.Trim();
+                if (text.Length == 0)
+                    return true;
+                if (!double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var real))
+                    return false;
+                value = (long)Math.Truncate(real);
+                break;
+            default:
+                return false;
+        }
+
+        return value is >= 0 and <= int.MaxValue;
+    }
+
+    // The error a control statement has at the element read last: the syntax error the scan found, else 247
+    private void RejectCard(ControlCard card, string pathName, bool codeText) =>
+        ControlCardError(card.Error != 0 ? card.Error : 247, card.Offset + card.Start, pathName, codeText);
+
+    // The error of a control statement: on the listing page in a source file, under the first character of the element it was found
+    // at, and the run does not start; in the text of CODE, it is the error of CODE
+    private void ControlCardError(int code, int start, string pathName, bool codeText)
+    {
+        if (codeText)
+        {
+            _parent.LogCompilerException(code);
             return;
         }
 
-        LineCountFile = int.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture) - 1 - _continuation;
-        if (m.Groups[2].Success)
-        {
-            _lineFileName = m.Groups[2].Value;
-            _staleIncludeName = null;
-        }
+        var physical = CurrentPhysicalLines.Count > 0 ? CurrentPhysicalLines[0] : "";
+        _parent.LogControlCardError(code, physical, start + 1, _cardLine, pathName, SourceLines.Count, _includeDepth);
+        // the page has listed the line
+        _controlLineListed = true;
     }
 
     /// <summary>
-    /// Processes an INCLUDE or COPY directive
+    /// Includes a file: an -INCLUDE or -COPY control
     /// </summary>
-    /// <param name="directive">The directive text</param>
-    private void ProcessIncludeDirective(string directive, string pathName)
+    /// <param name="written">The file name as it was written between the quotes</param>
+    private void ProcessIncludeDirective(string written, string pathName)
     {
         // sbl skips a name it has already included, comparing the name as written, and opens it with a
         // blank before the closing quote dropped (a leading one kept): "line2.sno " is a second include
-        var written = CompiledRegex.QuotePattern().Match(directive.Replace('\'', '\"')).Value.Replace("\"", "");
         var include = written.TrimEnd(' ');
         _staleIncludeName = null;
 
@@ -659,24 +881,6 @@ public class SourceCode
         }
 
         return include;
-    }
-
-    /// <summary>
-    /// Processes a CASE directive for case-folding control
-    /// </summary>
-    /// <param name="directive">The directive text</param>
-    // -CASE N: N nonzero folds names from this line on; N zero or absent keeps upper and lower apart
-    private void ProcessCaseDirective(string directive)
-    {
-        var value = 0L;
-        if (directive.Trim().Length > _caseDirectiveValueOffset - 1 &&
-            (!long.TryParse(directive[(_caseDirectiveValueOffset - 1)..].Trim(), out value) || value < 0))
-        {
-            _parent.LogCompilerException(247);
-            return;
-        }
-
-        _parent.BuildOptions.CaseFolding = value != 0;
     }
 
     internal bool CaseFoldingNow => _parent.BuildOptions.CaseFolding;

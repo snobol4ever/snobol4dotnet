@@ -221,15 +221,13 @@ internal partial class CompiledRegex
     #region Utility Patterns
 
     /// <summary>
-    /// Matches a quoted string (simple quote pattern).
+    /// Matches a real constant that begins with a digit: 5. 1.5 1E5 1.5E+5.
     /// </summary>
     /// <returns>
-    /// A regex that matches text between double quotes.
+    /// A regex that matches digits, an optional point and digits, and an optional exponent.
     /// </returns>
-    [GeneratedRegex("""
-                    ".+\"
-                    """)]
-    internal static partial Regex QuotePattern();
+    [GeneratedRegex(@"^\d+(\.\d*)?([eE][+-]?\d+)?$")]
+    internal static partial Regex RealConstantPattern();
 
     /// <summary>
     /// Matches whitespace (spaces and tabs) at the start of a string.

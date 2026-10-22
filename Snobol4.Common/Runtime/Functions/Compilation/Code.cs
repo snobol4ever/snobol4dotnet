@@ -41,7 +41,9 @@ public partial class Executive
         };
 
         Parent.Code = new SourceCode(Parent);
-        Parent.Code.ReadCodeInString(text, Parent.FilesToCompile[^1]);
+        // a control statement in the text can be in error: that is the error of CODE, like any other
+        if (!CompileQuietly(() => { Parent.Code.ReadCodeInString(text, Parent.FilesToCompile[^1]); return true; }))
+            return null;
         Parent.FirstErrorSource = null;
         var numbered = SourceStno.Count;
         if (CompileQuietly(Parent.BuildCode))

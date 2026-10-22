@@ -69,7 +69,7 @@ public class SourceCode
     private bool _lastLineIsNote;        // the last line read was a comment or a control line
     private bool _controlLineListed;     // an -INCLUDE has listed its own line
     private int _cardLine;               // the line the control statement being executed stands on, which -LINE does not move
-    private int _maximumLineLength = int.MaxValue;   // the longest line the source can have, as -INnnn sets it
+    private int _maximumLineLength = 1024;           // the longest line the source can have (SPITBOL's -IN1024), as -INnnn sets it
 
     internal SourceCode(Builder parent)
     {
@@ -281,7 +281,24 @@ public class SourceCode
         return currentLine;
     }
 
-    private string? CutToMaximum(string? line) => line is not null && line.Length > _maximumLineLength ? line[.._maximumLineLength] : line;
+    // A line is as many bytes as SPITBOL reads of it: the rest of a longer one is lost
+    private string? CutToMaximum(string? line)
+    {
+        if (line is null || Encoding.UTF8.GetByteCount(line) <= _maximumLineLength)
+            return line;
+        var bytes = 0;
+        var length = 0;
+        while (length < line.Length)
+        {
+            var size = Encoding.UTF8.GetByteCount(line.AsSpan(length, char.IsHighSurrogate(line[length]) && length + 1 < line.Length ? 2 : 1));
+            if (bytes + size > _maximumLineLength)
+                break;
+            bytes += size;
+            length += char.IsHighSurrogate(line[length]) && length + 1 < line.Length ? 2 : 1;
+        }
+
+        return line[..length];
+    }
 
     /// <summary>
     /// Adjusts file extension if not present, trying common SNOBOL4 extensions

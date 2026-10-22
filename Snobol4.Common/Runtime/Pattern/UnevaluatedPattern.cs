@@ -95,14 +95,11 @@ internal class UnevaluatedPattern : TerminalPattern
             return MatchResult.Failure(scan);
         }
 
-        // Graft the evaluated pattern's nodes into the running scanner's AST, wired
-        // so the last grafted node continues to whatever follows *X (node.Subsequent,
-        // or -1 if *X is the last thing in the pattern).  The Match loop jumps to the
-        // grafted start node via GOTO, keeping the same cursor and alternate stack —
-        // so ARBNO and other backtracking constructs inside *X work correctly.
-        var pattern = (Pattern)p;
-        int graftedStart = scan.Graft(pattern, scan.GetNode(node).Subsequent);
-        return MatchResult.Goto(scan, graftedStart);
+        // Enter the evaluated pattern as a call that returns to whatever follows *X (Scanner.Call).  The Match loop
+        // jumps to its start node via GOTO, keeping the same cursor and alternate stack, so ARBNO and other
+        // backtracking constructs inside *X back up into the pattern that entered it
+        scan.Call(scan.GetNode(node).Subsequent, -1);
+        return MatchResult.Goto(scan, scan.Enter((Pattern)p));
     }
 
     #endregion

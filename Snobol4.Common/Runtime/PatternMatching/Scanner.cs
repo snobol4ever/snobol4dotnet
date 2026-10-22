@@ -110,14 +110,23 @@ public class Scanner
 
     internal int FinishImmediate() => _state?.FinishImmediate() ?? 0;
 
-    // Graft the nodes of subPattern into this scanner's live AST, wiring the last
-    // node's Subsequent to successorNodeIndex (the node that follows *X in the outer
-    // pattern).  Returns the index of the grafted sub-tree's start node so the Match
-    // loop can jump there via MatchResult.Goto.
-    internal int Graft(Pattern subPattern, int successorNodeIndex)
-        => _ast!.Graft(subPattern, successorNodeIndex);
+    // The start node of subPattern's nodes, built the first time it is entered in this match (AbstractSyntaxTree.Enter);
+    // the Match loop jumps there via MatchResult.Goto
+    internal int Enter(Pattern subPattern) => _ast!.Enter(subPattern);
+
+    // Enter a pattern as a call: its end returns to returnNode, failing unless the cursor is then past advanceFrom (an
+    // ARBNO repetition; -1 for none).  A call whose returnNode is -1 is in tail position, its caller's own end, and its
+    // end returns where its caller's would, so it needs no frame.
+    internal void Call(int returnNode, int advanceFrom)
+    {
+        if (returnNode >= 0 && _state is not null)
+            _state.Frames = new ScannerState.Frame(returnNode, advanceFrom, _state.Frames);
+    }
 
     internal AbstractSyntaxTreeNode GetNode(int index) => _ast![index];
+
+    // The nodes the last match built: the statement's pattern and one copy of each pattern it entered
+    internal int NodeCount => _ast?.Count ?? 0;
 
     // S-2-bridge-7-byrd-pattern: tag a pattern node for the wire trace.
     // UnevaluatedPattern reports its function name (e.g. "*snoString").
@@ -200,9 +209,22 @@ public class Scanner
                 case MatchResult.Status.SUCCESS:
                     // PM_EXIT — node Scan succeeded; advancing cursor reflected.
                     MonitorIpc.EmitPmExit(NodeTag(node), _state.CursorPosition);
-                    if (!node.HasSubsequent())
+                    if (node.HasSubsequent())
+                    {
+                        node = node.GetSubsequent()!;
+                        break;
+                    }
+                    // The end of a pattern: the statement's own ends the match; one entered by *X or ARBNO returns
+                    // to its caller, and an ARBNO repetition that did not get past its start fails there
+                    if (_state.Frames is not { } frame)
                         return MatchResult.Success(_state);
-                    node = node.GetSubsequent()!;
+                    _state.Frames = frame.Parent;
+                    if (_state.CursorPosition <= frame.AdvanceFrom)
+                    {
+                        mr = MatchResult.Failure(_state);
+                        goto case MatchResult.Status.FAILURE;
+                    }
+                    node = _ast![frame.ReturnNode];
                     break;
 
                 case MatchResult.Status.FAILURE:

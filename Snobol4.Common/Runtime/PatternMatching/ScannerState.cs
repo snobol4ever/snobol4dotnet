@@ -6,9 +6,10 @@ internal class ScannerState
     public int CursorPosition { get; set; }
     public string Subject { get; }
 
-    // One entry of the alternate stack: the node to resume at the cursor saved with it, or a sentinel.
-    // Base is used only by the entries of an immediate assignment (see StartImmediate).
-    private readonly record struct Alternate(int Node, int Cursor, int Base = -1);
+    // One entry of the alternate stack: the node to resume at the cursor saved with it, or a sentinel, and the frames of
+    // the patterns it was saved inside (see Frame).  Base is used only by the entries of an immediate assignment (see
+    // StartImmediate).
+    private readonly record struct Alternate(int Node, int Cursor, int Base = -1, Frame? Frames = null);
 
     private readonly List<Alternate> _alternates = [];
 
@@ -37,6 +38,15 @@ internal class ScannerState
     // The index of the ImmediateStart entry of the innermost P $ V whose P is being matched, or -1 (SPITBOL's pmhbs)
     private int _immediateBase = -1;
 
+    // A pattern entered by *X or ARBNO runs over the one copy of its nodes (AbstractSyntaxTree.Enter); a frame says where
+    // its end returns to: the node after the *X, or the ARBNO's loop, with the cursor its repetition must get past.  The
+    // frames are a list each activation extends without changing it, so an alternate keeps the list it was saved under
+    // and backup restores it with the cursor, as SPITBOL's history stack keeps a recursive pattern's place.
+    internal sealed record Frame(int ReturnNode, int AdvanceFrom, Frame? Parent);
+
+    // The frames of the patterns being matched, innermost first; null in the statement's own pattern
+    public Frame? Frames { get; set; }
+
     public ScannerState(string subject, int startPosition)
     {
         Subject = subject;
@@ -50,7 +60,7 @@ internal class ScannerState
 
     public void SaveAlternate(int nodeIndex)
     {
-        _alternates.Add(new Alternate(nodeIndex, CursorPosition));
+        _alternates.Add(new Alternate(nodeIndex, CursorPosition, Frames: Frames));
     }
 
     public (int nodeIndex, int cursorPosition) RestoreAlternate()
@@ -66,9 +76,10 @@ internal class ScannerState
             _alternates.RemoveAt(_alternates.Count - 1);
         }
 
-        var (node, cursor, _) = _alternates[^1];
+        var (node, cursor, _, frames) = _alternates[^1];
         _alternates.RemoveAt(_alternates.Count - 1);
         CursorPosition = cursor;
+        Frames = frames;
         return (node, cursor);
     }
 
@@ -89,6 +100,7 @@ internal class ScannerState
         _alternates.Clear();
         _alternates.Add(new Alternate(-1, -1));
         _immediateBase = -1;
+        Frames = null;
     }
 
     // P $ V, entering P (SPITBOL p_ima): stack the cursor P starts at with the immediate base it replaces, and make
@@ -106,7 +118,7 @@ internal class ScannerState
     public int FinishImmediate()
     {
         var start = _immediateBase;
-        var (_, cursor, outer) = _alternates[start];
+        var (_, cursor, outer, _) = _alternates[start];
         _immediateBase = outer;
         if (start == _alternates.Count - 1)
             _alternates.RemoveAt(start);

@@ -9,10 +9,6 @@ internal class ArbNoPattern : TerminalPattern
 
     private readonly Pattern _arbPattern;
 
-    // One repetition pattern per starting cursor, so a repetition re-entered at the same
-    // cursor by backtracking reuses its graft instead of appending another copy.
-    private readonly Dictionary<int, Pattern> _repetitions = [];
-
     #endregion
 
     #region Construction
@@ -50,23 +46,14 @@ internal class ArbNoPattern : TerminalPattern
     {
         using var profile1 = Profiler.Start4("Arbno", scan.Exec);
 
-        // One more repetition, grafted into the running match as
-        //     argument  MUST-ADVANCE-PAST(cursor)  (NULL | ARBNO-node)
-        // so every repetition's alternatives sit on the outer alternate stack and
-        // backtracking reaches into them, as in SPITBOL. Each repetition after the
-        // zeroth must advance the cursor; a null one would re-enter this node at the
-        // same cursor forever, and the zero-repetition arm already matches null.
-        var start = scan.CursorPosition;
-        if (!_repetitions.TryGetValue(start, out var repetition))
-        {
-            repetition = new ConcatenatePattern(
-                _arbPattern,
-                new ConcatenatePattern(new MustAdvancePattern(start), Repeat()));
-            _repetitions[start] = repetition;
-        }
-
-        var graftedStart = scan.Graft(repetition, scan.GetNode(node).Subsequent);
-        return MatchResult.Goto(scan, graftedStart);
+        // One more repetition: the argument entered as a call (Scanner.Call) whose end returns to the loop, the NULL
+        // beside this node in NULL | ARBNO-node, which tries no more and keeps this node as its alternate.  So every
+        // repetition's alternatives sit on the outer alternate stack and backtracking reaches into them, as in
+        // SPITBOL.  Each repetition after the zeroth must advance the cursor; a null one would re-enter this node at
+        // the same cursor forever, and the zero-repetition arm already matches null.
+        var loop = scan.GetNode(scan.GetNode(node).ParentIndex).LeftChild;
+        scan.Call(loop, scan.CursorPosition);
+        return MatchResult.Goto(scan, scan.Enter(_arbPattern));
     }
 
     #endregion
@@ -76,32 +63,4 @@ internal class ArbNoPattern : TerminalPattern
     public override string DebugPattern() => "arbno";
 
     #endregion
-}
-
-/// <summary>
-/// Succeeds only past the cursor its ARBNO repetition started at, so that each
-/// repetition consumes at least one character.
-/// </summary>
-internal sealed class MustAdvancePattern : TerminalPattern
-{
-    private readonly int _start;
-
-    internal MustAdvancePattern(int start)
-    {
-        _start = start;
-    }
-
-    internal override Pattern Clone()
-    {
-        return new MustAdvancePattern(_start);
-    }
-
-    internal override MatchResult Scan(int node, Scanner scan)
-    {
-        return scan.CursorPosition > _start
-            ? MatchResult.Success(scan)
-            : MatchResult.Failure(scan);
-    }
-
-    public override string DebugPattern() => "must-advance";
 }

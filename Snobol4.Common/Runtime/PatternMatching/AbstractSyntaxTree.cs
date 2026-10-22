@@ -5,17 +5,9 @@ internal class AbstractSyntaxTree
     private readonly List<AbstractSyntaxTreeNode> _nodes = [];
     private AbstractSyntaxTreeNode? _startNode;
 
-    // S-2-bridge-7-byrd-pattern: cache repeated grafts of the same (caller-node,
-    // evaluated-sub-pattern) pair.  When *X re-fires inside an unanchored cursor
-    // loop, evaluating to the same Pattern instance, return the previously
-    // grafted start-node index instead of appending another copy of the sub-AST.
-    // Without this cache, beauty self-host appends ~750k nodes for ~120k Graft
-    // calls — the cumulative cost is what kept dot from reaching the byte-
-    // identical milestone within reasonable time.
-    //
-    // Key: (caller_node_index, sub_pattern_reference_identity).
-    // Value: graftedStart (offset into _nodes where the cached sub-AST begins).
-    private Dictionary<(int caller, Pattern sub), int>? _graftCache;
+    // The start node of each pattern entered by *X or ARBNO during this match, by the pattern's identity: its nodes are
+    // built once and every activation of it runs over the same nodes, as SPITBOL runs one pattern structure (see Enter)
+    private Dictionary<Pattern, int>? _entries;
 
     public AbstractSyntaxTreeNode StartNode => _startNode 
         ?? throw new InvalidOperationException("AST not built");
@@ -147,73 +139,40 @@ internal class AbstractSyntaxTree
     }
 
     /// <summary>
-    /// Graft a sub-pattern's nodes into this AST at runtime (used by UnevaluatedPattern).
-    /// Builds a fresh sub-AST for <paramref name="subPattern"/>, offsets all its node
-    /// indices by the current node count, patches terminal nodes whose Subsequent is -1
-    /// to point to <paramref name="successorNodeIndex"/> (the node that follows *X in the
-    /// outer pattern), then appends the new nodes to this AST's node list.
-    /// Returns the index of the grafted sub-tree's start node in the extended AST.
+    /// The start node of <paramref name="subPattern"/>'s nodes in this AST, appending them the first time the pattern is
+    /// entered during the match.  A node whose Subsequent is -1 ends the pattern: the scanner returns from it to the
+    /// node its caller's frame names (Scanner.Call), so the nodes need no successor of their own and one copy serves
+    /// every activation, at any depth of recursion, as SPITBOL's one pattern structure does.  (Each entry was a fresh
+    /// copy wired to its own successor: the copies grew with the work, 2 GB for a 32 KB calculator input.)
     /// </summary>
-    internal int Graft(Pattern subPattern, int successorNodeIndex)
+    internal int Enter(Pattern subPattern)
     {
-        // S-2-bridge-7-byrd-pattern: cache repeated grafts.
-        // Cache key: (successor edge, evaluated sub-pattern).  When the same
-        // *X node re-evaluates to the same Pattern instance (very common in
-        // unanchored cursor scans of `(POS(0)|' ') *upr(tx) (' '|RPOS(0))`),
-        // skip the AST rebuild and return the previous graftedStart.
-        if (_graftCache != null &&
-            _graftCache.TryGetValue((successorNodeIndex, subPattern), out var cached))
-            return cached;
+        _entries ??= new Dictionary<Pattern, int>(ReferenceEqualityComparer.Instance);
+        if (_entries.TryGetValue(subPattern, out var known))
+            return known;
 
-        // Build a standalone sub-AST for the evaluated pattern
         var subAst = new AbstractSyntaxTree();
         subAst.BuildNodeList(subPattern);
         subAst.LinkParentChildren();
         subAst.ComputeSubsequentsAndAlternates();
         subAst.FindStartNode();
 
-        int offset = _nodes.Count;
-
-        // Append sub-AST nodes, remapping all index references by offset
+        var offset = _nodes.Count;
         foreach (var n in subAst._nodes)
         {
-            // Remap structural indices (parent, children) — these are intra-sub-AST
-            int newParent  = n.ParentIndex >= 0  ? n.ParentIndex  + offset : n.ParentIndex;
-            int newLeft    = n.LeftChild  >= 0   ? n.LeftChild    + offset : n.LeftChild;
-            int newRight   = n.RightChild >= 0   ? n.RightChild   + offset : n.RightChild;
-
-            // Remap traversal edges: Subsequent and Alternate.
-            // -1 on Subsequent means "end of pattern" → wire to successorNodeIndex.
-            // -1 on Alternate  means "no alternate in sub-pattern" → leave as -1
-            //   so the outer scanner's alternate stack handles backtracking.
-            int newSub  = n.Subsequent >= 0 ? n.Subsequent + offset : successorNodeIndex;
-            int newAlt  = n.Alternate  >= 0 ? n.Alternate  + offset : -1;
-
-            var grafted = new AbstractSyntaxTreeNode(
-                n.Self,
-                n.SelfIndex + offset,
-                n.ChildType,
-                newParent,
-                _nodes)
+            _nodes.Add(new AbstractSyntaxTreeNode(n.Self, n.SelfIndex + offset, n.ChildType,
+                n.ParentIndex >= 0 ? n.ParentIndex + offset : n.ParentIndex, _nodes)
             {
-                LeftChild  = newLeft,
-                RightChild = newRight,
-                Subsequent = newSub,
-                Alternate  = newAlt
-            };
-            _nodes.Add(grafted);
+                LeftChild  = n.LeftChild  >= 0 ? n.LeftChild  + offset : n.LeftChild,
+                RightChild = n.RightChild >= 0 ? n.RightChild + offset : n.RightChild,
+                Subsequent = n.Subsequent >= 0 ? n.Subsequent + offset : -1,
+                Alternate  = n.Alternate  >= 0 ? n.Alternate  + offset : -1
+            });
         }
 
-        // Return index of the sub-AST's start node in the extended _nodes list
-        var graftedStart = subAst.StartNode.SelfIndex + offset;
-
-        // S-2-bridge-7-byrd-pattern: populate the graft cache so subsequent
-        // re-entries of the same *X node with the same evaluated pattern
-        // reuse this graft instead of appending another copy.
-        _graftCache ??= new Dictionary<(int, Pattern), int>();
-        _graftCache[(successorNodeIndex, subPattern)] = graftedStart;
-
-        return graftedStart;
+        var start = subAst.StartNode.SelfIndex + offset;
+        _entries[subPattern] = start;
+        return start;
     }
 
     public void Dump()

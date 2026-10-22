@@ -132,6 +132,32 @@ public class PreEvaluation
         Assert.AreEqual("EXPRESSION EXPRESSION PATTERN PATTERN\nEXPRESSION", SetupTests.RunWithInput(s));
     }
 
+    // A concatenation or an alternation of constants is a constant, and so is a capture of a constant into a fixed name (a variable, a
+    // keyword, *X), as SPITBOL's compiler builds them: -('a' | 'b') and -ARBNO('a' | 'b') are 10 as they are compiled. A capture into an
+    // element, an indirection or a call is not. Found by the infinite_snobol4 generator (u[a[1]] +m ? -ARBNO('a' | 'b'), 10 not 4)
+    [TestMethod]
+    public void TEST_PreEvaluation_a_pattern_built_of_constants_is_a_constant()
+    {
+        var s = "        OUTPUT = 'before'\n        V = -('a' | 'b')\n        W = ('a' 'b') + 1\n        X = -ARBNO('a' | 'b')\n" +
+                "        Y = -('a' . Z)\n        Z = -(*X . Y)\n        OUTPUT = 'after'\nEND";
+        Assert.AreEqual(
+            Head +
+            "2               V = -('a' | 'b')\n\nTest.sno(2) : ERROR 010 -- negation operand is not numeric\n\n" +
+            "3               W = ('a' 'b') + 1\n\nTest.sno(3) : ERROR 001 -- addition left operand is not numeric\n\n" +
+            "4               X = -ARBNO('a' | 'b')\n\nTest.sno(4) : ERROR 010 -- negation operand is not numeric\n\n" +
+            "5               Y = -('a' . Z)\n\nTest.sno(5) : ERROR 010 -- negation operand is not numeric\n\n" +
+            "6               Z = -(*X . Y)\n\nTest.sno(6) : ERROR 010 -- negation operand is not numeric",
+            Run(s));
+    }
+
+    [TestMethod]
+    public void TEST_PreEvaluation_a_pattern_built_of_constants_still_runs_as_before()
+    {
+        var s = "        &ERRLIMIT = 10\n        V = ('1' '2') + 1\n        W = -('a' . A<1>)\n        OUTPUT = V ' ' &ERRTYPE\n" +
+                "        X = -(X | 'b')\n        OUTPUT = &ERRTYPE ' ' DATATYPE('a' | 'b') ' ' SIZE('a' 'b')\nEND";
+        Assert.AreEqual("13 235\n10 PATTERN 2", SetupTests.RunWithInput(s));
+    }
+
     [TestMethod]
     public void TEST_PreEvaluation_constants_that_do_not_err_run_as_before()
     {

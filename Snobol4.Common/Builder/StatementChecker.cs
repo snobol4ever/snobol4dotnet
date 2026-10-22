@@ -34,8 +34,10 @@ internal sealed class StatementChecker(Builder parent)
     // A combination is Nested when it stands inside parens or the arguments of a call (SPITBOL's c_cnp, no pattern match), and
     // PatternMatch when it is a concatenation at the statement's own level, or an alternation of one (c_cnc, and c_alt over it), which an
     // = takes for a subject and a pattern
+    // Fixed when it is a name that is no computation: a variable, a keyword or a deferred expression, into which a capture of a
+    // constant is a constant pattern (an element, an indirection or a call is found as it runs)
     private sealed record Operand(Kind Kind, Var? Value = null, Operand? Subject = null, string Name = "", bool Nested = false,
-        bool PatternMatch = false);
+        bool PatternMatch = false, bool Fixed = false);
 
     private static readonly Operand ArrayMark = new(Kind.ArrayMark);
 
@@ -133,7 +135,8 @@ internal sealed class StatementChecker(Builder parent)
                     break;
                 // a variable is a name; one of the predefined pattern variables is a constant too (Executive.ConstantVariable)
                 case Token.Type.IDENTIFIER:
-                    stack.Add(new Operand(Kind.Name, parent.Execute!.ConstantVariable(parent.FoldCase(token.MatchedString)), Name: token.MatchedString));
+                    stack.Add(new Operand(Kind.Name, parent.Execute!.ConstantVariable(parent.FoldCase(token.MatchedString)), Name: token.MatchedString,
+                        Fixed: true));
                     break;
 
                 case Token.Type.EXPRESSION:
@@ -144,7 +147,7 @@ internal sealed class StatementChecker(Builder parent)
                     Var? deferred = null;
                     if (index < parent.ExpressionList.Count && FirstError(parent.ExpressionList[index].ExpressionList, out deferred) is var inner and not 0)
                         return inner;
-                    stack.Add(new Operand(Kind.Name, Deferred(deferred)));
+                    stack.Add(new Operand(Kind.Name, Deferred(deferred), Fixed: true));
                     break;
                 }
 
@@ -259,7 +262,8 @@ internal sealed class StatementChecker(Builder parent)
                             if (IsValue(operand) || operand.Kind == Kind.Combination)
                                 return ValueWhereNameIsRequired;
                             stack.Add(token.MatchedString != "&" ? new Operand(Kind.Value)
-                                : new Operand(Kind.Name, operand.Name == "" ? null : parent.Execute!.ConstantKeyword(parent.FoldCase(operand.Name))));
+                                : new Operand(Kind.Name, operand.Name == "" ? null : parent.Execute!.ConstantKeyword(parent.FoldCase(operand.Name)),
+                                    Fixed: true));
                             break;
 
                         // negation and interrogation give a value, whatever the operand: no name
@@ -284,17 +288,19 @@ internal sealed class StatementChecker(Builder parent)
                 case Token.Type.UNARY_STAR:
                     if (stack.Count < 1)
                         return 0;
-                    stack[^1] = new Operand(Kind.Other, Deferred(stack[^1].Value));
+                    stack[^1] = new Operand(Kind.Other, Deferred(stack[^1].Value), Fixed: true);
                     break;
 
                 // the right operand of . and $ is a name; the result is a value
                 case Token.Type.BINARY_PERIOD or Token.Type.BINARY_DOLLAR:
                 {
-                    if (!TakeTwo(stack, out _, out var right))
+                    if (!TakeTwo(stack, out var left, out var right))
                         return 0;
                     if (IsValue(right) || right.Kind == Kind.Combination)
                         return ValueWhereNameIsRequired;
-                    stack.Add(new Operand(Kind.Value));
+                    // a capture of a constant into a fixed name is a constant pattern, as SPITBOL's compiler builds it; which pattern
+                    // does not matter to what is evaluated after it, so it stands for one
+                    stack.Add(new Operand(Kind.Value, left.Value is not null && right.Fixed ? new PatternVar(new NullPattern()) : null));
                     break;
                 }
 
@@ -324,10 +330,16 @@ internal sealed class StatementChecker(Builder parent)
                 // every other operator takes two operands and gives a value that is neither a constant nor a name
                 case Token.Type.BINARY_CONCAT or Token.Type.BINARY_PIPE:
                 {
-                    if (!TakeTwo(stack, out var left, out _))
+                    if (!TakeTwo(stack, out var left, out var right))
                         return 0;
                     var concatenation = token.TokenType == Token.Type.BINARY_CONCAT;
-                    stack.Add(new Operand(Kind.Combination, Nested: token.Index > 0,
+                    // a concatenation or an alternation of constants is a constant, as SPITBOL's compiler builds it: ('a' 'b') + 1 is 1
+                    Var? joined = null;
+                    if (left.Value is not null && right.Value is not null
+                        && Evaluate(parent.Execute!.FunctionTable[concatenation ? "___" : "__|"]!, [left.Value, right.Value], out joined) is var code
+                            and not 0)
+                        return code;
+                    stack.Add(new Operand(Kind.Combination, joined, Nested: token.Index > 0,
                         PatternMatch: concatenation || left.Kind == Kind.Combination && left.PatternMatch));
                     break;
                 }

@@ -1047,15 +1047,17 @@ public partial class Lexer
             return false;
         }
         
+        // an invalid numeric item is reported where it starts, as SPITBOL does
+        var start = _cursorCurrent;
         _cursorCurrent += m.Length;
         var hasDecimalOrExponent = m.Groups[2].Value != "" || m.Groups[3].Value != "";
 
         if (hasDecimalOrExponent)
         {
-            return ProcessRealNumber(sourceLine, m.Value);
+            return ProcessRealNumber(sourceLine, m.Value, start);
         }
 
-        return ProcessInteger(sourceLine, m.Value);
+        return ProcessInteger(sourceLine, m.Value, start);
     }
 
     /// <summary>
@@ -1063,19 +1065,20 @@ public partial class Lexer
     /// </summary>
     /// <param name="sourceLine">The source line containing the number.</param>
     /// <param name="value">The string representation of the number.</param>
+    /// <param name="start">Where the number starts, which is where an invalid one is reported.</param>
     /// <returns><c>true</c> if the number is valid; otherwise, <c>false</c>.</returns>
-    private bool ProcessRealNumber(SourceLine sourceLine, string value)
+    private bool ProcessRealNumber(SourceLine sourceLine, string value, int start)
     {
         if (!Var.ToReal(value, out var realValue))
         {
-            _parent.LogCompilerException(231, _cursorCurrent, sourceLine);
+            _parent.LogCompilerException(231, start, sourceLine);
             return false;
         }
 
         // Consider IEEE Infinity to be an error
         if (double.IsInfinity(realValue))
         {
-            _parent.LogCompilerException(231, _cursorCurrent, sourceLine);
+            _parent.LogCompilerException(231, start, sourceLine);
             return false;
         }
 
@@ -1088,12 +1091,13 @@ public partial class Lexer
     /// </summary>
     /// <param name="sourceLine">The source line containing the integer.</param>
     /// <param name="value">The string representation of the integer.</param>
+    /// <param name="start">Where the integer starts, which is where an invalid one is reported.</param>
     /// <returns><c>true</c> if the integer is valid; otherwise, <c>false</c>.</returns>
-    private bool ProcessInteger(SourceLine sourceLine, string value)
+    private bool ProcessInteger(SourceLine sourceLine, string value, int start)
     {
         if (!Var.ToInteger(value, out var intValue))
         {
-            _parent.LogCompilerException(231, _cursorCurrent, sourceLine);
+            _parent.LogCompilerException(231, start, sourceLine);
             return false;
         }
 

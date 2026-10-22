@@ -256,9 +256,10 @@ public partial class Executive
     // Reads each input-associated argument; at end of input the read fails, as in SPITBOL, and true comes
     // back with the failure already pushed as the operation's result, so the caller does not run it
     // (T[W] = 0 :S(L) ends when W's file does)
-    private bool InputArguments(List<Var> arguments)
+    // `skipLast`: the last argument is a target (the right of . and $), whose name is wanted and not its value, so it reads no line
+    private bool InputArguments(List<Var> arguments, bool skipLast = false)
     {
-        for (var i = 0; i < arguments.Count; ++i)
+        for (var i = 0; i < arguments.Count - (skipLast ? 1 : 0); ++i)
         {
             if (arguments[i].InputChannel == "")
                 continue;

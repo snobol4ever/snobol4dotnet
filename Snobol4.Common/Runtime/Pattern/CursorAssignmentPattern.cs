@@ -53,10 +53,19 @@ internal class AtSign : TerminalPattern
 
         if (symbol != "")
         {
-            var cursorVar = new IntegerVar(scan.CursorPosition) { Symbol = symbol };
+            // the variable keeps its associations, and a cursor given to OUTPUT is written, as any assignment to it is
+            var held = _exec.IdentifierTable[symbol];
+            var cursorVar = new IntegerVar(scan.CursorPosition)
+            {
+                Symbol = symbol,
+                OutputChannel = held.OutputChannel,
+                InputChannel = held.InputChannel
+            };
             _exec.IdentifierTable[symbol] = cursorVar;
             // a VALUE trace on the variable fires, as for any assignment (SPITBOL's asign)
             _exec.TraceIdentifierValue(symbol, cursorVar);
+            if (cursorVar.OutputChannel != "" && _exec.AmpOutput != 0)
+                _exec.WriteToOutputChannel(cursorVar);
         }
 
         // Always succeed without advancing the cursor

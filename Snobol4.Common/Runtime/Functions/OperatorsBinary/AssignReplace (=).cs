@@ -348,7 +348,7 @@ public partial class Executive
     }
 
     // The line an assignment to a variable with an output association writes
-    private void WriteToOutputChannel(Var outputVar)
+    internal void WriteToOutputChannel(Var outputVar)
     {
         // OUTPUT goes to stdout and TERMINAL to stderr, as in SPITBOL and CSNOBOL4
         switch (outputVar.OutputChannel)

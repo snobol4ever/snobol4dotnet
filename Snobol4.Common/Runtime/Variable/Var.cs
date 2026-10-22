@@ -370,10 +370,13 @@ public abstract class Var : IEquatable<Var>
 
     internal static bool ToNumeric(Var varIn, out bool isInteger, out long l, out double d, Executive exec)
     {
-        // Resolve NameVar references
+        // A name is a number by its text, as SPITBOL converts it: .X + 1 is error 1, CONVERT('12', 'NAME') * 2 is 24, and the name of an
+        // element, which has no text, is no number (a call that returns a name by NRETURN gives the variable's value, read before this)
         if (varIn is NameVar nameVar)
         {
-            varIn = exec.IdentifierTable[nameVar.Pointer];
+            if (nameVar.Pointer.Length == 0)
+                return InitializeFailureValues(out isInteger, out l, out d);
+            varIn = new StringVar(nameVar.Pointer);
         }
 
         // An expression (*(...), or a variable that holds one) is not a number, whatever it would evaluate to: only EVAL, a pattern

@@ -23,6 +23,12 @@ public class NameConversionStrategy : IConversionStrategy
             case Executive.VarType.REAL:
                 return ConvertToReal(nameSelf, out varOut, out valueOut, exec);
 
+            // the name of an element has no text, so it is no pattern, as it is no string: 'x' .A<1> is error 9
+            case Executive.VarType.PATTERN when nameSelf.Pointer.Length == 0:
+                varOut = StringVar.Null();
+                valueOut = "";
+                return false;
+
             case Executive.VarType.PATTERN:
                 varOut = new PatternVar(new LiteralPattern(nameSelf.Pointer));
                 valueOut = ((PatternVar)varOut).Data;

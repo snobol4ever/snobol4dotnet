@@ -199,6 +199,10 @@ public partial class Builder
             return;
         IncludeFailed = false;
         MissingEndPending = false;   // the one line says both
+        // sbl says it only when END ends the file: a line after it, a blank one too, is something its stack, still inside the include,
+        // has to read, and it says nothing
+        if (LinesAfterEnd.Count > 0)
+            return;
         Console.Error.WriteLine("No END statement found in source file(s).");
     }
 

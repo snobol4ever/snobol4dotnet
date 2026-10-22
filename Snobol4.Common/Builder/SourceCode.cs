@@ -228,7 +228,8 @@ public class SourceCode
             _staleIncludeName = callerStaleName;
 
         // The lines after END are data: -r gives them to INPUT, as in SPITBOL
-        if (EndFound && _includeDepth == 0 && _parent.LinesAfterEnd.Count == 0)
+        // (a failed include is left open, and END is the program's all the same)
+        if (EndFound && (_includeDepth == 0 || _parent.IncludeFailed) && _parent.LinesAfterEnd.Count == 0)
         {
             while (reader.ReadLine() is { } afterEnd)
                 _parent.LinesAfterEnd.Add(afterEnd);

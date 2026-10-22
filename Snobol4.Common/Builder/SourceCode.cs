@@ -922,7 +922,18 @@ public class SourceCode
         ListSource(physicalLines, 0, statementsBefore);
         var listed = _parent.BuildOptions.ListSource;
         _includeDepth++;
-        
+
+        // includes nest nine deep, a failed one (left open) counted: the tenth is error 284, and its depth stays counted, so the
+        // ones after it are 284 too
+        if (_includeDepth > 9)
+        {
+            var line = physicalLines.Count > 0 ? physicalLines[0] : "";
+            var at = line.IndexOfAny(['\'', '"']);
+            _parent.LogControlLineError(284, line, at >= 0 ? at + 1 : 0, 1 + LineCountFile, pathName, statementsBefore, _includeDepth - 1, listed);
+            _controlLineListed = true;
+            return;
+        }
+
         try
         {
             using var reader = new StreamReader(ResolveIncludePath(include), Encoding.UTF8);

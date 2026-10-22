@@ -297,9 +297,8 @@ public partial class Builder
     {
         if (!CopyErrorsToStandardError)
             return;
-        // the copy is cut at the width of the listing too
-        foreach (var piece in WrapLine(text, BuildOptions.PageWidth))
-            Console.Error.WriteLine(piece);
+        // the copy is cut at the width of the listing too, and of a line cut into pieces only the last is copied
+        Console.Error.WriteLine(WrapLine(text, BuildOptions.PageWidth)[^1]);
         Console.Error.Flush();
     }
 

@@ -113,9 +113,10 @@ public partial class Executive
             var onListing = !(longFormat && (index < 3 || index is 6 or 7 or 8));
             var formFeed = longFormat && index == 3;
             var formFeedLine = longFormat && index == 5;
+            // of a line cut into pieces only the last goes to standard error as well
             for (; rest.Length > width; rest = rest[width..])
             {
-                WriteReportPiece(listing, rest[..width], copy, onListing, formFeed);
+                WriteReportPiece(listing, rest[..width], false, onListing, formFeed);
                 formFeed = false;
             }
 

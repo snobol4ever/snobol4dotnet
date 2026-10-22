@@ -49,14 +49,14 @@ public partial class Executive
                 Parent.Code.ReadCodeInString($" *({stringVar.Data.Trim()})", Parent.FilesToCompile[^1]);
                 Parent.Code.SourceLines[0].DeferredExpression = true;
                 // A string that does not compile makes EVAL fail with &ERRTYPE set to the compile error
-                // (EVAL('1 +') is 221, an out-of-range real 231), printing nothing and counting as no
-                // run-time error, as in SPITBOL
+                // (EVAL('1 +') is 221, an out-of-range real 231), printing nothing; with &ERRLIMIT above 0 the
+                // error is counted and handled like a run-time one, as in SPITBOL (CompileErrorFailure)
                 var compiled = CompileQuietly(() => { Parent.BuildEval(); return true; });
                 Parent.BuildOptions.CaseFolding = previousCaseFolding;
                 if (!compiled)
                 {
                     Parent.CodeMode = false;
-                    NonExceptionFailure();
+                    CompileErrorFailure();
                     return;
                 }
 

@@ -27,4 +27,22 @@ OOPS2   OUTPUT = 'oops 2'  :(END)
 T2      OUTPUT = 'trap 2'
 END").Replace("\r\n", "\n"));
     }
+
+    // sbl -b: with &ERRLIMIT above 0, EVAL or CODE text that does not compile is an error like any other: &ERRLIMIT counts it down
+    // and the armed handler runs before the call fails (was eval failed lim=5, code failed lim=5, no handler)
+    [TestMethod]
+    public void TEST_SetExitEval_a_compile_error_in_eval_or_code_text_is_counted_and_trapped()
+    {
+        Assert.AreEqual("handler 1 t=221 lim=4\neval failed lim=4 t=221\nhandler 2 t=226 lim=3\ncode failed lim=3 t=226",
+            SetupTests.RunWithInput(@"        &ERRLIMIT = 5
+        SETEXIT(.H1)
+        R = EVAL('1 +')                 :S(B)
+        OUTPUT = 'eval failed lim=' &ERRLIMIT ' t=' &ERRTYPE   :(B)
+H1      OUTPUT = 'handler 1 t=' &ERRTYPE ' lim=' &ERRLIMIT     :(CONTINUE)
+B       SETEXIT(.H2)
+        C = CODE(' X = (')              :S(END)
+        OUTPUT = 'code failed lim=' &ERRLIMIT ' t=' &ERRTYPE   :(END)
+H2      OUTPUT = 'handler 2 t=' &ERRTYPE ' lim=' &ERRLIMIT     :(CONTINUE)
+END").Replace("\r\n", "\n"));
+    }
 }

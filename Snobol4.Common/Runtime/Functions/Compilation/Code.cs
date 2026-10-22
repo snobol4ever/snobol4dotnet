@@ -23,11 +23,22 @@ public partial class Executive
 
         if (!converted)
         {
-            NonExceptionFailure();
+            CompileErrorFailure();
             return;
         }
 
         SystemStack.Push(code);
+    }
+
+    // An EVAL or CODE text that does not compile fails the call. With &ERRLIMIT above 0 its compile error is an error like any
+    // other, as in SPITBOL: &ERRLIMIT counts it down and an armed SETEXIT handler is entered (EVAL('1 +') with &ERRLIMIT = 5 leaves
+    // 4 and runs the handler); at 0 the call just fails, the run going on
+    private void CompileErrorFailure()
+    {
+        if (AmpErrorLimit > 0)
+            LogRuntimeException((int)AmpErrorType);
+        else
+            NonExceptionFailure();
     }
 
     // Compiles CODE text onto the end of the program. Text that does not compile gives null, with &ERRTYPE
@@ -59,8 +70,8 @@ public partial class Executive
         return null;
     }
 
-    // Runs a compile for EVAL or CODE with its diagnostics unprinted. A compile error is no run-time error:
-    // it is taken back out of the histories and left in &ERRTYPE and &ERRTEXT, and the compile fails
+    // Runs a compile for EVAL or CODE with its diagnostics unprinted. A compile error is taken back out of the histories and left
+    // in &ERRTYPE and &ERRTEXT, and the compile fails; the caller decides what the error is (CompileErrorFailure)
     internal bool CompileQuietly(Func<bool> build)
     {
         var errorsBefore = Parent.ErrorCodeHistory.Count;

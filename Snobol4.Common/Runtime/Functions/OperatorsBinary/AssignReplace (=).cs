@@ -359,8 +359,6 @@ public partial class Executive
         }
     }
 
-    // The copy of a value an assignment stores: protection and keyword-ness belong to the variable the
-    // value came from (FAIL, &TRIM), not to the value, so X = FAIL then X = 1 is an ordinary assignment
     // An array or table is one object however many variables and elements hold it, so each holder keeps its own handle on it: the
     // same elements and identity, but its own name or place (L = V, then V = TABLE() assigns V and leaves L the array)
     internal static Var Handle(Var aggregate)
@@ -371,6 +369,8 @@ public partial class Executive
         return handle;
     }
 
+    // The copy of a value an assignment stores: protection and keyword-ness belong to the variable the
+    // value came from (FAIL, &TRIM), not to the value, so X = FAIL then X = 1 is an ordinary assignment
     private static Var StoredCopy(Var value)
     {
         var copy = value.Clone();

@@ -366,7 +366,8 @@ end
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("failure", build.Execute!.IdentifierTable[build.FoldCase("d")].ToString());
+        // a number is compiled as its text, so CONVERT(3, 'CODE') is the code of a statement labelled 3, as sbl says
+        Assert.AreEqual("success", build.Execute!.IdentifierTable[build.FoldCase("d")].ToString());
     }
 
     #endregion
@@ -561,7 +562,8 @@ end
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("failure", build.Execute!.IdentifierTable[build.FoldCase("d")].ToString());
+        // a real is compiled as its text too, as sbl says
+        Assert.AreEqual("success", build.Execute!.IdentifierTable[build.FoldCase("d")].ToString());
     }
 
     #endregion

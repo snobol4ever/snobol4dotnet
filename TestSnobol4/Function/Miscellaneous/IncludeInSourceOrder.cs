@@ -6,10 +6,10 @@ namespace Test.Miscellaneous;
 /// <summary>
 /// SPITBOL lists a line and compiles it as it reads, so its errors stand among the statements in the order of the source, an
 /// -INCLUDE is listed before the lines it brings in, and the lines of an included file carry the depth of the include in the sixth
-/// column of the number field. A failed -INCLUDE stays open in its source stack: what follows lists at depth 1, its END is not
-/// listed, and the run ends "No END statement found in source file(s)." on standard error. The expected texts are what sbl -bf printed
-/// for the same files with the streams merged (2&gt;&amp;1), with the head's identity and clock masked; each case runs from a folder of
-/// its own, the program named main.sno as given.
+/// column of the number field. A failed -INCLUDE stays open in its source stack: what follows lists at depth 1, its END is listed
+/// only when a card follows it, and the run ends "No END statement found in source file(s)." on standard error. The expected texts are
+/// what sbl -bf printed for the same files with the streams merged (2&gt;&amp;1), with the head's identity and clock masked; each case
+/// runs from a folder of its own, the program named main.sno as given.
 /// </summary>
 [DoNotParallelize]
 [TestClass]
@@ -66,6 +66,18 @@ public class IncludeInSourceOrder
     {
         var files = new Dictionary<string, string> { ["main.sno"] = "-LIST\n        X = 1\n-INCLUDE 'nosuch.sno'\n        Y = 2\n        OUTPUT = 'x'\nEND\n" };
         Assert.AreEqual("\n\n\n<identity>\n<clock>\n\n\n\n                                                                                                                page 1\n\n        -LIST\n1               X = 1\n        -INCLUDE 'nosuch.sno'\n        -INCLUDE 'nosuch.sno'\n                 !\n                 !\nmain.sno(3,10) : ERROR 285 -- include file cannot be opened\nmain.sno(3,10) : ERROR 285 -- include file cannot be opened\n\n\n2    1          Y = 2\n3    1          OUTPUT = 'x'\nNo END statement found in source file(s).", Run(files));
+    }
+
+    // sbl lists a line when it reads the next: after a failed include the END that is the last line of the file is never listed, and an
+    // END that has a card after it, a blank or a data line too, is, with its depth and its text (sbl -bf, streams merged)
+    [TestMethod]
+    public void TEST_IncludeInSourceOrder_an_end_with_a_card_after_it_is_listed_after_a_failed_include()
+    {
+        foreach (var after in new[] { "\n", "data\n" })
+        {
+            var files = new Dictionary<string, string> { ["main.sno"] = "-LIST\n-INCLUDE 'nosuch.sno'\n        X = 1\n        OUTPUT = 'x'\nEND\n" + after };
+            Assert.AreEqual("\n\n\n<identity>\n<clock>\n\n\n\n                                                                                                                page 1\n\n        -LIST\n        -INCLUDE 'nosuch.sno'\n        -INCLUDE 'nosuch.sno'\n                 !\n                 !\nmain.sno(2,10) : ERROR 285 -- include file cannot be opened\nmain.sno(2,10) : ERROR 285 -- include file cannot be opened\n\n\n1    1          X = 1\n2    1          OUTPUT = 'x'\n3    1  END", Run(files), after);
+        }
     }
 
     [TestMethod]

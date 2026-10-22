@@ -208,16 +208,16 @@ public class SourceCode
             // listed after it is read, so -LIST lists itself and -NOLIST does not (an -INCLUDE lists itself before its lines)
             if (_controlLineListed)
                 _controlLineListed = false;
-            else if (_parent.IncludeFailed && EndFound)
+            else if (_parent.IncludeFailed && EndFound && reader.EndOfStream)
             {
-                // the END that follows a failed include is not listed: sbl's source stack is still inside the include, whose end
-                // is not the program's
+                // the END that ends the file after a failed include is not listed: sbl's source stack is still inside the include,
+                // whose end is not the program's, and lists a line when it reads the next (a card after END, a blank one too, lists it)
             }
             else
             {
                 // the END of an included file is listed with its number and depth and none of its text: sbl lists the line after it has
-                // read on, and the include is gone by then
-                var listed = !endSeenBefore && EndFound && _includeDepth > 0 ? new List<string> { "" } : physicalLines;
+                // read on, and the include is gone by then (one that failed is not: the END keeps its text)
+                var listed = !endSeenBefore && EndFound && _includeDepth > 0 && !_parent.IncludeFailed ? new List<string> { "" } : physicalLines;
                 ListSource(listed, SourceLines.Count + BlankLineCount > statementsBefore ? statementsBefore + 1 : 0, linesBefore);
             }
 

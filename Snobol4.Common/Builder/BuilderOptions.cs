@@ -91,6 +91,16 @@ public class BuilderOptions
     public bool ListSource { get; set; }
 
     /// <summary>
+    /// Gets or sets whether control statements are listed (-PRINT, the default; -NOPRINT turns it off).
+    /// </summary>
+    public bool ListControls { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets whether the listing is double-spaced (-DOUBLE; -SINGLE, the default, ends it).
+    /// </summary>
+    public bool ListDoubleSpaced { get; set; }
+
+    /// <summary>
     /// Gets or sets whether to error on unhandled failures. Controlled by FAIL/NOFAIL directives.
     /// </summary>
     internal bool ErrorOnUnhandledFail { get; set; }

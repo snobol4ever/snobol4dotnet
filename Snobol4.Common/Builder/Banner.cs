@@ -17,25 +17,98 @@ public partial class Builder
     private int _listingPage;
     private int _listingLinesOnPage;
 
+    // What -TITLE and -STITL set for the head of the pages that follow: the title (empty at first), the subtitle (none at first; -TITLE
+    // makes it an empty one, so that its line is blank), and whether the next line listed begins a new page under them
+    private string _listingTitle = "";
+    private string? _listingSubtitle;
+    private bool _listingTitlePending;
+
     private bool LongListing => BuildOptions.PrinterListing || BuildOptions.FormFeedListing;
 
     // The identity line of the listing head: this compiler's own (whether to print SPITBOL's is Lon's question,
     // as for HOST())
     private const string ListingIdentity = "snobol4dotnet version 0.1";
 
+    // The listing is opened by what is listed first: its head and its first page
+    private bool OpenListing()
+    {
+        if (_listingPage != 0)
+            return false;
+        var writer = ListingWriter;
+        WriteListingHead(writer);
+        StartListingPage(writer, BuildOptions.SuppressListingHeader ? 0 : 4);
+        return true;
+    }
+
+    private void NewListingPage()
+    {
+        var writer = ListingWriter;
+        writer.Write(LongListing ? "\f" : "\n\n\n");
+        StartListingPage(writer, 0);
+    }
+
+    // A source line, control statement or comment for the listing, double-spaced under -DOUBLE; it is the first line of a new page
+    // when -TITLE or -STITL came since the last one listed
+    internal void WriteListedLine(string line, bool doubleSpaced)
+    {
+        if (_listingTitlePending)
+        {
+            _listingTitlePending = false;
+            if (_listingPage > 0)
+                NewListingPage();
+        }
+
+        WriteListingLine(line);
+        if (doubleSpaced)
+        {
+            ListingWriter.Write("\n");
+            _listingLinesOnPage++;
+        }
+    }
+
+    // -TITLE and -STITL: the head of the pages that follow
+    internal void SetListingTitle(string title, string? subtitle)
+    {
+        _listingTitle = title;
+        _listingSubtitle = subtitle;
+        _listingTitlePending = true;
+    }
+
+    internal void SetListingSubtitle(string subtitle)
+    {
+        _listingSubtitle = subtitle;
+        _listingTitlePending = true;
+    }
+
+    // -EJECT: a new page (the first page, when nothing is listed yet, is the one the next line opens)
+    internal void ListingEject()
+    {
+        if (!OpenListing())
+            NewListingPage();
+    }
+
+    // -SPACE n: n blank lines, or a new page when they do not fit (and nothing before the page is open)
+    internal void ListingSpace(int lines)
+    {
+        if (OpenListing())
+            return;
+        if (_listingLinesOnPage + lines < BuildOptions.LinesPerPage - (LongListing ? 2 : 5))
+        {
+            ListingWriter.Write(new string('\n', lines));
+            _listingLinesOnPage += lines;
+        }
+        else
+            NewListingPage();
+    }
+
     internal void WriteListingLine(string line)
     {
         var writer = ListingWriter;
-        if (_listingPage == 0)
+        if (OpenListing())
         {
-            WriteListingHead(writer);
-            StartListingPage(writer, BuildOptions.SuppressListingHeader ? 0 : 4);
         }
         else if (_listingPage > 0 && _listingLinesOnPage >= BuildOptions.LinesPerPage - (LongListing ? 2 : 5))
-        {
-            writer.Write(LongListing ? "\f" : "\n\n\n");
-            StartListingPage(writer, 0);
-        }
+            NewListingPage();
 
         // a line longer than the width of the listing is cut into lines of that width, mid-word, as sbl prints it; it takes one
         // line of the page
@@ -61,12 +134,36 @@ public partial class Builder
         writer.Write($"{ListingIdentity}\n{platform}  {now:ddd MMM} {now.Day,2} {now:HH:mm:ss yyyy}\n\n\n\n");
     }
 
+    // The head of a page: the title with "page N" over it at the page width less eight (a title wider than the page is cut into lines
+    // first, and the page text goes over the last of them; it takes what is under it from a title that reaches it), the subtitle if
+    // there is one, and a blank line
     private void StartListingPage(TextWriter writer, int used)
     {
         _listingPage++;
-        var indent = BuildOptions.ListingPageFlushLeft ? "" : new string(' ', Math.Max(0, BuildOptions.PageWidth - 8));
-        writer.Write($"{indent}page {_listingPage}\n\n");
+        var offset = BuildOptions.ListingPageFlushLeft ? 0 : Math.Max(0, BuildOptions.PageWidth - 8);
+        var pageText = $"page {_listingPage}";
+        var title = _listingTitle;
+        for (; title.Length > BuildOptions.PageWidth && BuildOptions.PageWidth > 0; title = title[BuildOptions.PageWidth..])
+            writer.Write(title[..BuildOptions.PageWidth] + "\n");
+        if (title.Length < offset)
+            title = title.PadRight(offset);
+        var line = title[..offset] + pageText + (title.Length > offset + pageText.Length ? title[(offset + pageText.Length)..] : "");
+        WriteWrapped(writer, line);
         _listingLinesOnPage = used;
+        if (_listingSubtitle is not null)
+        {
+            WriteWrapped(writer, _listingSubtitle);
+            _listingLinesOnPage++;
+        }
+
+        writer.Write("\n");
+    }
+
+    private void WriteWrapped(TextWriter writer, string line)
+    {
+        for (; line.Length > BuildOptions.PageWidth && BuildOptions.PageWidth > 0; line = line[BuildOptions.PageWidth..])
+            writer.Write(line[..BuildOptions.PageWidth] + "\n");
+        writer.Write(line + "\n");
     }
 
     private static void DisplayBanner(TextWriter writer)

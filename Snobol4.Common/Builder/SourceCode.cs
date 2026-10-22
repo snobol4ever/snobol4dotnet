@@ -347,7 +347,7 @@ public class SourceCode
         {
             SubLineCount++;
             CommentContinuationDirectiveCount++;
-            ExecuteDirectives(line, pathName, false, 0);
+            ExecuteDirectives(line, pathName, false, 0, line);
             return;
         }
 
@@ -389,7 +389,7 @@ public class SourceCode
             {
                 SubLineCount++;
                 CommentContinuationDirectiveCount++;
-                ExecuteDirectives(line[offset..], pathName, false, offset);
+                ExecuteDirectives(line[offset..], pathName, false, offset, line);
                 return;
             }
 
@@ -423,7 +423,7 @@ public class SourceCode
         if (codeText && IsCommand(subLine))
         {
             CommentContinuationDirectiveCount++;
-            ExecuteDirectives(subLine, pathName, true, 0);
+            ExecuteDirectives(subLine, pathName, true, 0, subLine);
             return;
         }
 
@@ -462,12 +462,17 @@ public class SourceCode
         if (!_parent.BuildOptions.ListSource)
             return;
 
+        // -NOPRINT: control statements are not listed (the line that turns it on again is, as it is listed after it is read)
+        if (statementNumber == 0 && physicalLines.Count > 0 && physicalLines[0].StartsWith('-') && !_parent.BuildOptions.ListControls)
+            return;
+        var spaced = _parent.BuildOptions.ListDoubleSpaced;
+
         for (var i = 0; i < physicalLines.Count; i++)
         {
             var field = NumberField(i == 0 ? statementNumber : 0, _includeDepth);
             // a source line's trailing blanks are trimmed, as SPITBOL reads it
             var text = $"{field}{physicalLines[i].TrimEnd(' ', '\t')}";
-            _parent.Defer(position, () => _parent.WriteListingLine(text));
+            _parent.Defer(position, () => _parent.WriteListedLine(text, spaced));
         }
     }
 
@@ -535,10 +540,11 @@ public class SourceCode
 
     // A control statement being read: SPITBOL's scnpt, the offset of what is read next, and scnse, where the element read last
     // began, under which an error in the statement is reported
-    private sealed class ControlCard(string text, int offset)
+    private sealed class ControlCard(string text, int offset, string image)
     {
         internal readonly string Text = text;
         internal readonly int Offset = offset;
+        internal readonly string Image = image;   // the whole line the control stands on, which -TITLE and -STITL read from its eighth character
         internal int Position = 1;
         internal int Start = 1;
         internal int Error;
@@ -613,9 +619,10 @@ public class SourceCode
     /// <param name="pathName">Path to the source file</param>
     /// <param name="codeText">Whether it stands in the text of CODE rather than in a source file</param>
     /// <param name="offset">Where on its line the statement begins, for the column of an error</param>
-    private void ExecuteDirectives(string line, string pathName, bool codeText, int offset)
+    /// <param name="image">The whole line, which a control after a semicolon stands on</param>
+    private void ExecuteDirectives(string line, string pathName, bool codeText, int offset, string image)
     {
-        var card = new ControlCard(line.TrimEnd(), offset);
+        var card = new ControlCard(line.TrimEnd(), offset, image.TrimEnd());
         _cardLine = 1 + LineCountFile;
         void Reject() => RejectCard(card, pathName, codeText);
 
@@ -733,25 +740,63 @@ public class SourceCode
 
             case "SPAC":
             {
-                // blank lines in the listing, which a card without a listing does not read
+                // blank lines in the listing, which a card without a listing does not read; none, or zero, is one
                 if (!_parent.BuildOptions.ListSource)
                     return false;
+                var lines = 1L;
                 var number = card.Scan();
-                if (card.Error != 0 || number.Kind != CardElement.End && !TrySmallInteger(number, out _))
+                if (card.Error != 0 || number.Kind != CardElement.End && !TrySmallInteger(number, out lines))
                 {
                     RejectCard(card, pathName, codeText);
                     return false;
                 }
 
+                var count = (int)Math.Max(1, lines);
+                _parent.Defer(SourceLines.Count, () => _parent.ListingSpace(count));
                 return false;
             }
 
-            // listing controls, which shape only SPITBOL's listing page
-            case "DUMP":
+            // a new page of the listing
             case "EJEC":
-            case "STIT":
-            case "TITL":
+                if (_parent.BuildOptions.ListSource)
+                    _parent.Defer(SourceLines.Count, () => _parent.ListingEject());
                 return false;
+
+            // the title and the subtitle are what follows the control's seven characters ("-TITLE " and "-STITL "), whatever its
+            // name has been written as; -TITLE makes the subtitle an empty line
+            case "TITL":
+            {
+                var title = card.Image.Length > 7 ? card.Image[7..] : "";
+                _parent.Defer(SourceLines.Count, () => _parent.SetListingTitle(title, ""));
+                return false;
+            }
+
+            case "STIT":
+            {
+                var subtitle = card.Image.Length > 7 ? card.Image[7..] : "";
+                _parent.Defer(SourceLines.Count, () => _parent.SetListingSubtitle(subtitle));
+                return false;
+            }
+
+            case "DUMP":
+                return false;
+
+            // -DOUBLE spaces the lines of the listing that follow, -SINGLE ends it; -NOPRINT keeps control statements out of it
+            case "DOUB":
+                _parent.BuildOptions.ListDoubleSpaced = true;
+                return true;
+
+            case "SING":
+                _parent.BuildOptions.ListDoubleSpaced = false;
+                return true;
+
+            case "NOPR":
+                _parent.BuildOptions.ListControls = false;
+                return true;
+
+            case "PRIN":
+                _parent.BuildOptions.ListControls = true;
+                return true;
 
             case "FAIL":
                 _parent.BuildOptions.ErrorOnUnhandledFail = true;

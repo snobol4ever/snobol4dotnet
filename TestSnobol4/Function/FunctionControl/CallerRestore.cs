@@ -63,6 +63,27 @@ end"));
     }
 
     [TestMethod]
+    public void TEST_CallerRestore_a_local_named_by_nreturn_gives_the_callers_value()
+    {
+        // The name is dereferenced after the return restores the caller's variables (was
+        // set-by-namer,set-by-namer,arg-in-namer2,assigned)
+        Assert.AreEqual(",global,caller-a,assigned", Result(@"
+        DEFINE('NAMER()NV')
+        DEFINE('NAMER2(A)')                :(E)
+NAMER   NV = 'set-by-namer'
+        NAMER = .NV                        :(NRETURN)
+NAMER2  A = 'arg-in-namer2'
+        NAMER2 = .A                        :(NRETURN)
+E       R = NAMER() ','
+        NV = 'global'
+        A = 'caller-a'
+        R = R NAMER() ',' NAMER2('x') ','
+        NAMER() = 'assigned'
+        R = R NV
+end"));
+    }
+
+    [TestMethod]
     public void TEST_CallerRestore_a_call_during_a_match_keeps_the_callers_pending_assignment()
     {
         // *F('L') . R: F's body runs statements mid-match; the outer . must still assign

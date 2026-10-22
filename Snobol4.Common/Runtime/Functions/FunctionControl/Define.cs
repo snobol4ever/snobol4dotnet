@@ -373,9 +373,6 @@ public partial class Executive
         // GOAL-NET-BEAUTY-SELF S-2-bridge-7-fullscan.
         MonitorIpc.EmitReturn(functionName, rtnTypeStr);
 
-        // A NAME an NRETURN hands back gives the named variable's value, which the statement may also
-        // assign (F() = V) or name (.F()), as in SPITBOL; a RETURN of a NAME gives the NAME itself
-        SystemStack.Push(rtnTypeStr == "NRETURN" && returnVar is NameVar returnedName ? NameReturnValue(returnedName) : returnVar);
         AmpFunctionLevel--;
 
         // &FNCLEVEL and then RETURN traces, in SPITBOL's order (retrn: ktrex first), at the returning
@@ -404,6 +401,12 @@ public partial class Executive
             saveVars[i].Symbol = saveSymbols[i];
             IdentifierTable[saveSymbols[i]] = saveVars[i];
         }
+
+        // A NAME an NRETURN hands back gives the named variable's value, which the statement may also
+        // assign (F() = V) or name (.F()), as in SPITBOL; a RETURN of a NAME gives the NAME itself.  The
+        // value is read once the caller's variables are back, so a name of a local or a parameter gives
+        // the caller's value of it, as SPITBOL dereferences the name after the return
+        SystemStack.Push(rtnTypeStr == "NRETURN" && returnVar is NameVar returnedName ? NameReturnValue(returnedName) : returnVar);
 
         // Pop ProgramDefinedFunctionStack — balances the Push at the top of this method.
         // Without this Pop, Peek() returns stale data after the function returns,

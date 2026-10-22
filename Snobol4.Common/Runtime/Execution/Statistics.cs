@@ -38,7 +38,7 @@ public partial class Executive
     {
         _timerExecute.Stop();
 
-        if (!Parent.BuildOptions.ShowExecutionStatistics)
+        if (!Parent.BuildOptions.ShowExecutionStatistics || ExitEndsRun)
             return;
 
         // -x: the end-of-run statistics on the listing stream, as sbl lays them out: three empty lines, "normal end", the run summary

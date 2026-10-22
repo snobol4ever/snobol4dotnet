@@ -139,4 +139,26 @@ public class ExitFunction
             Assert.AreEqual("after 288", SetupTests.RunWithInput(s), $"{first}, {second}");
         }
     }
+
+    [TestMethod]
+    public void TEST_ExitFunction_an_exit_that_ends_the_run_prints_no_dump_and_no_statistics()
+    {
+        // sbl -b: EXIT(-3) and EXIT(command) end the run without the end-of-run dump or the statistics of -x; EXIT(-4) goes on to them
+        var folder = Path.Combine(Path.GetTempPath(), "exit_" + Guid.NewGuid().ToString("N")[..8]);
+        Directory.CreateDirectory(folder);
+        try
+        {
+            var ending = $"        &DUMP = 2\n        OUTPUT = 'before'\n        EXIT(-3, '{folder}/saved')\n        OUTPUT = 'after'\nEND";
+            Assert.AreEqual("before", SetupTests.RunWithInput(ending));
+            Assert.AreEqual("before", SetupTests.RunWithInputDirectives("-b -x", ending));
+            if (!OperatingSystem.IsWindows())
+                Assert.AreEqual("before", SetupTests.RunWithInput("        &DUMP = 2\n        OUTPUT = 'before'\n        EXIT('true')\n        OUTPUT = 'after'\nEND"));
+            var going = $"        &DUMP = 1\n        OUTPUT = 'before'\n        EXIT(-4, '{folder}/saved')\n        OUTPUT = 'after'\nEND";
+            StringAssert.Contains(SetupTests.RunWithInput(going).Replace("\r\n", "\n"), "before\nafter\n\n\n\ndump of natural variables");
+        }
+        finally
+        {
+            Directory.Delete(folder, true);
+        }
+    }
 }

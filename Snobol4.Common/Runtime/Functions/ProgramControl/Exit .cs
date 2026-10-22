@@ -41,7 +41,10 @@ public partial class Executive
             }
 
             if (action != -4)
+            {
+                ExitEndsRun = true;
                 throw new ProgramEndException();
+            }
             SystemStack.Push(StringVar.Null());
             return;
         }
@@ -119,6 +122,11 @@ public partial class Executive
             return;
         }
 
+        ExitEndsRun = true;
         throw new ProgramEndException();
     }
+
+    // Set when EXIT ends the run (a save with -3 or the like, or a command): SPITBOL then leaves at once, with no end-of-run dump and
+    // no statistics of -x
+    internal bool ExitEndsRun;
 }

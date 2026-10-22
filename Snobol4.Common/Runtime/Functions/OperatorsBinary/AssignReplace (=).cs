@@ -59,6 +59,10 @@ public partial class Executive
             return;
         }
 
+        // the subject keeps its associations: a replacement into OUTPUT writes the new text, as an assignment to it does
+        var held = IdentifierTable[resultsVar.Symbol];
+        resultsVar.OutputChannel = held.OutputChannel;
+        resultsVar.InputChannel = held.InputChannel;
         var v = IdentifierTable[resultsVar.Symbol] = resultsVar;
         // a replacement assigns the subject, so its VALUE trace fires, as in SPITBOL
         TraceIdentifierValue(v.Symbol, v);
@@ -73,8 +77,11 @@ public partial class Executive
         // Without this, beauty self-host wire diverges at case.inc:22 step 1497:
         // spl emits VALUE str='ND' after the destructive `=`; dot did not.
         // See GOAL-NET-BEAUTY-SELF S-2-bridge-7-fullscan.
-        if (MonitorIpc.Enabled)
+        if (MonitorIpc.Enabled && string.IsNullOrEmpty(v.OutputChannel))
             MonitorIpc.EmitValue(v.Symbol ?? "", v);
+
+        if (v.OutputChannel != "" && AmpOutput != 0)
+            WriteToOutputChannel(v);
     }
 
     internal void Assign(List<Var> arguments)
@@ -333,9 +340,12 @@ public partial class Executive
             return;
         }
 
-        // Call output function
-        var outputVar = SystemStack.Peek();
+        WriteToOutputChannel(SystemStack.Peek());
+    }
 
+    // The line an assignment to a variable with an output association writes
+    private void WriteToOutputChannel(Var outputVar)
+    {
         // OUTPUT goes to stdout and TERMINAL to stderr, as in SPITBOL and CSNOBOL4
         switch (outputVar.OutputChannel)
         {

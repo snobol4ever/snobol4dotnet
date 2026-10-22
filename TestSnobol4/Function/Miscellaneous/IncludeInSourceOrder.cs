@@ -15,7 +15,7 @@ namespace Test.Miscellaneous;
 [TestClass]
 public class IncludeInSourceOrder
 {
-    private static string Run(Dictionary<string, string> files)
+    internal static string Run(Dictionary<string, string> files)
     {
         var dir = Path.Combine(Path.GetTempPath(), "iso_" + Guid.NewGuid().ToString("N")[..8]);
         Directory.CreateDirectory(dir);

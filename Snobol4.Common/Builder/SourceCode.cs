@@ -218,7 +218,10 @@ public class SourceCode
                 // the END of an included file is listed with its number and depth and none of its text: sbl lists the line after it has
                 // read on, and the include is gone by then (one that failed is not: the END keeps its text)
                 var listed = !endSeenBefore && EndFound && _includeDepth > 0 && !_parent.IncludeFailed ? new List<string> { "" } : physicalLines;
-                ListSource(listed, SourceLines.Count + BlankLineCount > statementsBefore ? statementsBefore + 1 : 0, linesBefore);
+                // a statement of several lines keeps the lines after its first for the lexer: an error found in an earlier line stands
+                // before them
+                ListSource(listed, SourceLines.Count + BlankLineCount > statementsBefore ? statementsBefore + 1 : 0, linesBefore,
+                    SourceLines.Count - linesBefore == 1 ? physicalLines : null);
             }
 
             // A comment or control line leaves a carried-over included name in place for the next
@@ -468,7 +471,7 @@ public class SourceCode
     // depth of the include as well, in the sixth column
     // SPITBOL lists a line as it compiles it, so a statement's errors follow its line: the lines are kept, with the statement they
     // stand before, until the lexer reaches it (Builder.Defer)
-    private void ListSource(List<string> physicalLines, int statementNumber, int position)
+    private void ListSource(List<string> physicalLines, int statementNumber, int position, List<string>? card = null)
     {
         if (!_parent.BuildOptions.ListSource)
             return;
@@ -484,7 +487,10 @@ public class SourceCode
             // a source line's trailing blanks are trimmed, as SPITBOL reads it
             var text = $"{field}{physicalLines[i].TrimEnd(' ', '\t')}";
             Action listing = () => _parent.WriteListedLine(text, spaced);
-            _parent.Defer(position, listing);
+            if (card is not null && i > 0)
+                _parent.DeferCardLine(position + 1, listing, card, i);
+            else
+                _parent.Defer(position, listing);
             _lastListedLine = listing;
         }
     }

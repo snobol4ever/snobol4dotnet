@@ -148,6 +148,10 @@ public partial class Builder
             column = at - start + 1;
         }
 
+        // the lines of the statement up to the one the error was found in are listed before the page, the rest after it; an error found with
+        // the whole statement read (no column) stands after all its lines
+        FlushCardLines(source.PhysicalLines, cursor > 0 ? index : int.MaxValue);
+
         // the last line of a source with no END is never listed, SPITBOL lists a line when it reads the next: the page of an error in it does
         var listed = source.Listed && !(source.EndsTheSource && index == lines.Count - 1);
         // with the listing off the page carries the number of the statement on every line it prints; with it on, only the first line of a
@@ -160,11 +164,25 @@ public partial class Builder
     // and the caret under `column`, the opening quote of the name
     // The reports of control lines that went wrong, kept until the lexer reaches the statement they stand before: SPITBOL compiles
     // as it reads, so its errors list in the order of the source, and the source is read before it is lexed here
-    private readonly List<(int Position, Action Report)> _deferred = [];
+    private readonly List<(int Position, Action Report, List<string>? Card, int LineIndex)> _deferred = [];
 
     // Keeps a report of the source, a listed line or the page of a control line that went wrong, until the lexer reaches statement
     // `position`
-    internal void Defer(int position, Action report) => _deferred.Add((position, report));
+    internal void Defer(int position, Action report) => _deferred.Add((position, report, null, 0));
+
+    // Keeps the listing of line `lineIndex` of the card `card`, a statement of several lines, until the lexer has finished with the
+    // statement or an error in it asks for the lines up to the one it was found in (FlushCardLines)
+    internal void DeferCardLine(int position, Action report, List<string> card, int lineIndex) => _deferred.Add((position, report, card, lineIndex));
+
+    // Lists the kept lines of `card` up to line `lastLine`, before the page of an error found in that line: SPITBOL lists a line when it reads
+    // it, and reads the rest of the statement after reporting the error
+    internal void FlushCardLines(List<string> card, int lastLine)
+    {
+        var due = _deferred.Where(kept => ReferenceEquals(kept.Card, card) && kept.LineIndex <= lastLine).ToList();
+        _deferred.RemoveAll(kept => ReferenceEquals(kept.Card, card) && kept.LineIndex <= lastLine);
+        foreach (var kept in due)
+            kept.Report();
+    }
 
     // Takes back a kept report that is not wanted after all
     internal void DropDeferred(Action? report)

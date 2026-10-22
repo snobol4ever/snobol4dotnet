@@ -950,23 +950,35 @@ public class SourceCode
     /// Finds an include file as SPITBOL does: the name as given (relative to the current
     /// directory), else each directory the SNOLIB environment variable lists, in order
     /// ("The environment variable SNOLIB may be set to a list of sub-directory paths to be
-    /// searched for files given in an -INCLUDE control statement", SPITBOL manual). LOAD
-    /// searches the same list.
+    /// searched for files given in an -INCLUDE control statement", SPITBOL manual), then
+    /// those SETL4PATH lists (the variable the oracle sbl reads) and the folder of the first
+    /// source file (where sbl looks last). LOAD searches the SNOLIB list.
     /// </summary>
     /// <param name="include">The include file name as written</param>
     /// <returns>The path to open; the name itself when no listed directory holds it</returns>
-    private static string ResolveIncludePath(string include)
+    private string ResolveIncludePath(string include)
     {
         if (Path.IsPathRooted(include) || File.Exists(include))
             return include;
 
-        var snolib = Environment.GetEnvironmentVariable("SNOLIB");
-        if (string.IsNullOrEmpty(snolib))
-            return include;
-
-        foreach (var dir in snolib.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries))
+        // the directories SNOLIB lists (the manual), those SETL4PATH lists (the variable of the sbl the oracle is), and then the folder
+        // the first source file is in
+        foreach (var variable in new[] { "SNOLIB", "SETL4PATH" })
         {
-            var candidate = Path.Combine(dir, include);
+            var list = Environment.GetEnvironmentVariable(variable);
+            if (string.IsNullOrEmpty(list))
+                continue;
+            foreach (var dir in list.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries))
+            {
+                var candidate = Path.Combine(dir.Trim().TrimStart('('), include);
+                if (File.Exists(candidate))
+                    return candidate;
+            }
+        }
+
+        if (PathList.Count > 0 && Path.GetDirectoryName(PathList[0]) is { Length: > 0 } sourceDirectory)
+        {
+            var candidate = Path.Combine(sourceDirectory, include);
             if (File.Exists(candidate))
                 return candidate;
         }

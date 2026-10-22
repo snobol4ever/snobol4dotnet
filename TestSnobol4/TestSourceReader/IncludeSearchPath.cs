@@ -54,4 +54,31 @@ end";
             Environment.SetEnvironmentVariable("SNOLIB", old);
         }
     }
+
+    // the sbl the oracle is reads SETL4PATH, not SNOLIB, for its include files (the harness sets it for sbl)
+    [TestMethod]
+    public void TEST_Include_is_found_through_SETL4PATH()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "setl4path_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
+        var (oldLib, oldPath) = (Environment.GetEnvironmentVariable("SNOLIB"), Environment.GetEnvironmentVariable("SETL4PATH"));
+        try
+        {
+            File.WriteAllText(Path.Combine(dir, "setl4path_probe.inc"), "        probe = 'from setl4path'\n");
+            Environment.SetEnvironmentVariable("SNOLIB", null);
+            Environment.SetEnvironmentVariable("SETL4PATH", ".:" + dir);
+            var s = @"
+-INCLUDE 'setl4path_probe.inc'
+end";
+            var build = SetupTests.SetupScript("-b", s);
+            Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+            Assert.AreEqual("from setl4path", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("probe")]).Data);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("SNOLIB", oldLib);
+            Environment.SetEnvironmentVariable("SETL4PATH", oldPath);
+            Directory.Delete(dir, true);
+        }
+    }
 }

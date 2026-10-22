@@ -7,7 +7,9 @@ import os, re, subprocess, sys
 
 SBL = os.environ.get("SBL", "/home/resources/x64/bin/sbl")
 DLL = os.environ.get("DLL", os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../Snobol4/bin/Release/net10.0/Snobol4.dll"))
-env = dict(os.environ, SNOLIB=os.environ.get("SNOLIB", os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../corpus/include")))
+include = os.environ.get("SNOLIB", os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../corpus/include"))
+# the include search path: SNOLIB for the console (the manual), SETL4PATH for the sbl the oracle is, as the harness sets them
+env = dict(os.environ, SNOLIB=include, SETL4PATH=".:" + include)
 pattern = re.compile(r"^(\S+)\((\d+)(?:,(\d+))?\) : ERROR (\d+)", re.M)
 
 

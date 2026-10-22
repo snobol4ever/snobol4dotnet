@@ -22,16 +22,16 @@ public partial class Executive
         {
             var label = Parent.FoldCase(((NameVar)name).Pointer);
 
-            if (LabelTable.TryGetValue(label, out SetExitNumber))
+            // (a label that is not there leaves the handler as it was, and the error is the old handler's to take)
+            if (LabelTable.TryGetValue(label, out var number))
             {
+                SetExitNumber = number;
                 SetExitLabel = label;
                 SystemStack.Push(new StringVar(previousSetExitLabel));
                 return;
             }
         }
 
-        SystemStack.Push(new StringVar(previousSetExitLabel));
         LogRuntimeException(187);
-
     }
 }

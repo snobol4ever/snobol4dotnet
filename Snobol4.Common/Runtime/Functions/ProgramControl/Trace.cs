@@ -11,95 +11,103 @@ public partial class Executive
 {
     internal void Trace(List<Var> arguments)
     {
-
-        // The name is folded as any name is (TRACE('bar') traces BAR under case folding)
-        if (!arguments[0].Convert(VarType.STRING, out _, out var traceNameRaw, this) || (string)traceNameRaw == "")
+        // A null first argument toggles SPITBOL's system trace switch, whatever the other arguments are
+        if (arguments[0] is StringVar { Data: "" })
         {
-            LogRuntimeException(198);
-            return;
-        }
-
-        object traceName = Parent.FoldCase((string)traceNameRaw);
-
-        if (!arguments[1].Convert(VarType.STRING, out _, out var traceType, this))
-        {
-            LogRuntimeException(199);
-            return;
-        }
-
-        // CALL, RETURN and FUNCTION traces name a program-defined function (sbl: error 198 for a
-        // builtin or an undefined name); a VALUE trace may name a variable that is also a function's
-        // name, as its return value is
-        var typeLetter = ((string)traceType).ToUpperInvariant();
-        if (typeLetter is "C" or "CALL" or "R" or "RETURN" or "F" or "FUNCTION" && !UserFunctionTable.ContainsKey((string)traceName))
-        {
-            LogRuntimeException(198);
+            PredicateSuccess();
             return;
         }
 
         // The fourth argument names the trace function, or is null for a printed trace; whether that
         // function is defined is checked when the trace fires, as in SPITBOL (s_tra, trxeq)
-        if (!arguments[3].Convert(VarType.STRING, out _, out var handlerName, this))
+        TraceHandler? handler = null;
+        if (arguments[3] is not StringVar { Data: "" })
         {
-            LogRuntimeException(197);
-            return;
+            if (!NaturalVariableName(arguments[3], out var handlerName))
+            {
+                LogRuntimeException(197);
+                return;
+            }
+
+            handler = new TraceHandler(handlerName, arguments[2]);
         }
 
-        var handler = (string)handlerName == "" ? null : new TraceHandler(Parent.FoldCase((string)handlerName), arguments[2]);
-
-        Assert.IsNotNull(traceName);
-        Assert.IsNotNull(traceType);
-
-        var name = (string)traceName;
-        switch (typeLetter)
+        switch (ChangeTrace(arguments[0], arguments[1], handler, set: true))
         {
-            case "A":
-            case "ACCESS":
-                TraceTableIdentifierAccess[name] = handler;
-                break;
-
-            case "":
-            case "V":
-            case "VALUE":
-                TraceTableIdentifierValue[name] = handler;
-                break;
-
-            // Only the keywords the system changes may be traced, named without the ampersand
-            case "K":
-            case "KEYWORD":
-                if (name is not ("ERRTYPE" or "FNCLEVEL" or "STCOUNT"))
-                {
-                    LogRuntimeException(198);
-                    return;
-                }
-                TraceTableIdentifierKeyword[name] = handler;
-                break;
-
-            case "L":
-            case "LABEL":
-                TraceTableLabel[name] = handler;
-                break;
-
-            case "C":
-            case "CALL":
-                TraceTableFunctionCall[name] = handler;
-                break;
-
-            case "R":
-            case "RETURN":
-                TraceTableFunctionReturn[name] = handler;
-                break;
-
-            case "F":
-            case "FUNCTION":
-                TraceTableFunctionCall[name] = handler;
-                TraceTableFunctionReturn[name] = handler;
-                break;
-
-            default:
+            case TraceOutcome.BadName:
+                LogRuntimeException(198);
+                return;
+            case TraceOutcome.BadType:
                 LogRuntimeException(199);
                 return;
         }
+
+        // TRACE returns the null string
+        PredicateSuccess();
+    }
+
+    private enum TraceOutcome { Done, BadName, BadType }
+
+    // SPITBOL's trace procedure, for TRACE (which sets a trace) and STOPTR (which clears it). The type is taken by its first letter,
+    // folded to upper case: A access, V or a blank (and the null string) value, F, R and C a program function's call and return, L
+    // a label, K a keyword. Any other is a bad type, and that is looked at before the name.
+    private TraceOutcome ChangeTrace(Var nameArgument, Var typeArgument, TraceHandler? handler, bool set)
+    {
+        if (!typeArgument.Convert(VarType.STRING, out _, out var typeText, this))
+            return TraceOutcome.BadType;
+
+        var type = (string)typeText;
+        var letter = type.Length == 0 ? ' ' : char.ToUpperInvariant(type[0]);
+        if (letter is not (' ' or 'A' or 'V' or 'F' or 'R' or 'C' or 'L' or 'K'))
+            return TraceOutcome.BadType;
+
+        // The name is folded as any name is (TRACE('bar') traces BAR under case folding); an element's is no variable's
+        if (!NaturalVariableName(nameArgument, out var name))
+            return TraceOutcome.BadName;
+
+        // CALL, RETURN and FUNCTION traces name a program-defined function (sbl: a builtin or an undefined name is a bad name),
+        // a LABEL trace a label that is defined, a KEYWORD trace one of the keywords the system changes, named without the
+        // ampersand; a VALUE trace may name a variable that is also a function's name, as its return value is
+        if (letter is 'F' or 'R' or 'C' && !UserFunctionTable.ContainsKey(name)
+            || letter == 'L' && !LabelTable.ContainsKey(name)
+            || letter == 'K' && name is not ("ERRTYPE" or "FNCLEVEL" or "STCOUNT"))
+            return TraceOutcome.BadName;
+
+        void Apply(Dictionary<string, TraceHandler?> table)
+        {
+            if (set)
+                table[name] = handler;
+            else
+                table.Remove(name);
+        }
+
+        switch (letter)
+        {
+            case 'A':
+                Apply(TraceTableIdentifierAccess);
+                break;
+            case 'L':
+                Apply(TraceTableLabel);
+                break;
+            case 'K':
+                Apply(TraceTableIdentifierKeyword);
+                break;
+            case 'C':
+                Apply(TraceTableFunctionCall);
+                break;
+            case 'R':
+                Apply(TraceTableFunctionReturn);
+                break;
+            case 'F':
+                Apply(TraceTableFunctionCall);
+                Apply(TraceTableFunctionReturn);
+                break;
+            default:
+                Apply(TraceTableIdentifierValue);
+                break;
+        }
+
+        return TraceOutcome.Done;
     }
 
     // An ACCESS trace line, when the program fetches a traced variable's value: ****4*******  N = 5, as

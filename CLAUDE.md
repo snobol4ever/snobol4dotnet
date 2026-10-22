@@ -13,6 +13,7 @@ SNOBOL4.NET compiles and runs SNOBOL4 with the SPITBOL extensions in C# on .NET 
 dotnet build Snobol4.sln                                   # whole solution, Debug
 dotnet build Snobol4/Snobol4.csproj -c Release             # just the console compiler
 bash scripts/test_in_batches.sh                            # all unit tests (MSTest), in batches of 100
+python3 scripts/sweep/ctxrun.py 5 6                        # differential sweeps against sbl (run in an empty scratch dir; see scripts/sweep/README.md)
 
 # one class, one method, or a name pattern
 dotnet test TestSnobol4/TestSnobol4.csproj --filter "FullyQualifiedName~Test.Pattern.Abort"

@@ -111,6 +111,28 @@ END";
         Assert.AreEqual("AXYC", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("W")]).Data);
     }
 
+    // A $ that fires inside a match used as a value leaves nothing on the stack for the statement's own operators: V gets
+    // the match and W the capture, as sbl -b gives (was V null and W the whole subject)
+    [TestMethod]
+    public void TEST_ImmediateVariableAssociation_in_a_match_used_as_a_value()
+    {
+        var s = @"
+        Q = LEN(3) $ W
+        V = ('ABCDEF' ? Q)
+        X = 'pre' ('ABCDEF' ? LEN(2) $ W2 LEN(1) $ W3) 'post'
+        Y = SIZE('ABCDEF' ? LEN(4) $ W4)
+end";
+
+        var build = SetupTests.SetupScript("-b", s);
+        Assert.AreEqual("ABC", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("V")]).Data);
+        Assert.AreEqual("ABC", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("W")]).Data);
+        Assert.AreEqual("preABCpost", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("X")]).Data);
+        Assert.AreEqual("AB", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("W2")]).Data);
+        Assert.AreEqual("C", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("W3")]).Data);
+        Assert.AreEqual(4L, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("Y")]).Data);
+        Assert.AreEqual("ABCD", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("W4")]).Data);
+    }
+
     [TestMethod]
     public void TEST_ConditionalVariableAssociation_001()
     {

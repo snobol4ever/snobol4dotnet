@@ -60,8 +60,13 @@ internal class ImmediateVariableAssociation2 : NullPattern
             new StringVar(scan.Subject[scan.FinishImmediate()..scan.CursorPosition])
         ];
 
-        // Perform the immediate assignment
+        // Perform the immediate assignment.  Assign leaves the value it assigned on the stack, as the value of an
+        // assignment statement; here it is not a value of the statement, so it comes off again: left there, it became
+        // an operand of the statement's own operators (V = (S ? LEN(3) $ W) assigned the match to W, not V)
+        var depth = scan.Exec.SystemStack.Count;
         scan.Exec.Assign(arguments);
+        while (scan.Exec.SystemStack.Count > depth)
+            scan.Exec.SystemStack.Pop();
 
         // If Assignee evaluation (for deferred forms like *fn(...)) caused a
         // FRETURN failure during Assign, this $-association must fail so the

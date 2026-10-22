@@ -95,7 +95,8 @@ end
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(247, build.ErrorCodeHistory[0]);
+        // TRIM of a pattern is 200 ("trim argument is not a string"), as sbl says
+        Assert.AreEqual(200, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]

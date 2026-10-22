@@ -122,7 +122,7 @@ public partial class Executive
         SourceListingNumbers = [];
         SourceStatementNumbers = [];
         SourceStno = [];
-        SystemStack = [];
+        SystemStack = new();
         StarFunctionList = [];
         StreamReadersBySymbol = [];  // Dictionary associating labels to line numbers
         StreamReadersByChannel = [];  // Dictionary associating labels to line numbers;

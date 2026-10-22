@@ -20,6 +20,7 @@ Run them from an **empty scratch directory** (they write `*.sno`, `*.sbl`, `*.ne
 
 | `syntaxsweep.py FILE` | the statements of FILE (one to a line, `\n` and `\t` for a newline and a tab), each a program on its own, under both engines; prints those whose compile errors (code, line, column) differ |
 | `compilediff.py LIST` | the programs named in LIST compiled without running (`-n`) under both engines, in their own folders with `SNOLIB` (the console) and `SETL4PATH` (the sbl the oracle is) on the corpus includes; prints those whose compile errors differ (the corpus: `find corpus -name '*.sno' -o -name '*.spt'`; the 8-bit and the CR sources are known to differ) |
+| `batchsweep.py SEED PROGRAMS PER [plain]` | mutated statements of the corpus programs, PER to a program, run under `sbl -k` and the console with `&ERRLIMIT` large; prints the first statement of each program whose output differs (found the unary-caret, selection and deferred-assignee crashes and the lost OUTPUT association) |
 | `pagetest.py OUTFILE CASES.py` | writes a C# test class whose expected text is the page `sbl -b` printed for each program of CASES.py (head masked), for errors found when a program is compiled |
 
 A sweep gives the *cases*; a fix still needs a test that is red before and green after, with the oracle's line as its

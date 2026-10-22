@@ -210,6 +210,15 @@ public partial class Executive
             // otherwise fall back to the operator name (e.g. "__~").
             var fnName = UserFunctionTable.TryGetValue(opName, out var ufte)
                 ? ufte.FunctionName : opName;
+            // the function is given the arguments it declares: the operands it lacks are null, the ones it has too many are dropped
+            if (ufte is not null)
+            {
+                while (_reusableArgList.Count < ufte.Parameters.Count)
+                    _reusableArgList.Add(StringVar.Null());
+                if (_reusableArgList.Count > ufte.Parameters.Count)
+                    _reusableArgList.RemoveRange(ufte.Parameters.Count, _reusableArgList.Count - ufte.Parameters.Count);
+            }
+
             _reusableArgList.Add(new StringVar(fnName));
         }
         handler(_reusableArgList);
@@ -288,9 +297,31 @@ public partial class Executive
     {
         if (OperatorHandlers == null) return;
         if (!_operatorNameToOpCode.TryGetValue(operatorName, out var op)) return;
-        if (FunctionTable.TryGetValue(operatorName, out var entry))
-            OperatorHandlers[(int)op] = entry.Handler;
-        else
+        if (!FunctionTable.TryGetValue(operatorName, out var entry))
+        {
             OperatorHandlers[(int)op] = null;
+            return;
+        }
+
+        // An operator made a synonym of a function (OPSYN('#', 'LPAD', 2)) is given as many arguments as the function declares, as
+        // SPITBOL gives them: the ones the operator lacks are null and the ones it has too many are dropped. A program-defined function
+        // takes the arguments as they come.
+        var arity = operatorName.StartsWith("__", StringComparison.Ordinal) ? 2 : 1;
+        var handler = entry.Handler;
+        var declared = entry.ArgumentCount;
+        if (handler == ExecuteProgramDefinedFunction || declared == arity)
+        {
+            OperatorHandlers[(int)op] = handler;
+            return;
+        }
+
+        OperatorHandlers[(int)op] = list =>
+        {
+            while (list.Count < declared)
+                list.Add(StringVar.Null());
+            if (list.Count > declared)
+                list.RemoveRange(declared, list.Count - declared);
+            handler(list);
+        };
     }
 }

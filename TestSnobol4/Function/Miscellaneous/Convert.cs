@@ -431,9 +431,11 @@ end";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         // The literal is read as SPITBOL reads it (one unit in the last place below .NET's correctly
-        // rounded parse); sbl -b prints it as 0.314159e+201 and CONVERT to INTEGER fails
+        // rounded parse); sbl -b prints it as 0.314159e+201, and CONVERT to INTEGER of a real beyond the integers is the least
+        // integer, -9223372036854775808, as the x86 conversion gives it
         Assert.AreEqual("0.314159e+201", build.Execute!.IdentifierTable[build.FoldCase("a")].ToString());
-        Assert.AreEqual("failure", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("d")]).Data);
+        Assert.AreEqual("success", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("d")]).Data);
+        Assert.AreEqual(long.MinValue, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
     }
 
     [TestMethod]

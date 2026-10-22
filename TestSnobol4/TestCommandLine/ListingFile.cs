@@ -107,4 +107,29 @@ END");
                                                                  "-NOLIST\n T = 7\n-LIST\n U = 8\nEND");
         Assert.AreEqual(expected.TrimEnd(), output.Replace("\r\n", "\n"));
     }
+
+    [TestMethod]
+    public void TEST_ListingFile_the_fatal_report_of_the_long_format_uses_form_feeds()
+    {
+        // sbl -bf -p -o=prog: in the long format the listing's three empty lines before the error line are a form feed, and the five after
+        // it are an empty line and a form feed (standard error and the other formats keep the empty lines)
+        var dir = Path.Combine(Path.GetTempPath(), "snolisting_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
+        var oldError = Console.Error;
+        using var error = new StringWriter();
+        Console.SetError(error);
+        try
+        {
+            using var build = SetupTests.SetupScript($"-b -p -o={Path.Combine(dir, "prog")}", "        OUTPUT = 'a'\n        X = FOO(1)\n        OUTPUT = 'b'\nEND");
+            var listing = File.ReadAllText(Path.Combine(dir, "prog.lst")).Replace("\r\n", "\n");
+            StringAssert.Contains(listing, "4       END\n\fTest.sno(2) : ERROR 022 -- undefined function called\n\n\f\nin file              Test.sno\nin line              2\n");
+            StringAssert.Contains(error.ToString().Replace("\r\n", "\n"), "Test.sno(2) : ERROR 022 -- undefined function called\n\n\n");
+            Assert.IsFalse(error.ToString().Contains('\f'));
+        }
+        finally
+        {
+            Console.SetError(oldError);
+            Directory.Delete(dir, true);
+        }
+    }
 }

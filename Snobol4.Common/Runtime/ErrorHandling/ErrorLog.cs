@@ -83,10 +83,11 @@ public partial class Executive
 
     // The report of a fatal run-time error as sbl writes it (CEO-1858): on the listing stream, which is standard output unless
     // -o names a file. Three empty lines, the error line, five empty lines, the position and run summary labelled to column 21,
-    // and an empty line; sbl hard-wraps every line at 120 columns, mid-word.
+    // and an empty line; sbl hard-wraps every line at the page width, 120 columns by default, mid-word.
     private void PrintFatalReport(int code)
     {
-        const int width = 120;
+        // cut at the width of the page: 120, or what -t gives
+        var width = Math.Max(1, Parent.BuildOptions.PageWidth);
         var file = StatementFile(AmpCurrentLineNumber);
         var line = StatementLine(AmpCurrentLineNumber);
         FatalReportPrinted = true;
@@ -102,14 +103,57 @@ public partial class Executive
         // down to REGENERATIONS (not the memory figures), and the last empty line
         var copied = new HashSet<int> { 3, 4, 5, 9, 10, 11, 12, 13, 14, 17 };
         var listing = Parent.ListingWriter;
+        // in the long format (-p) the listing has a form feed for the three empty lines before the error line and the last three of
+        // the five after it; standard error keeps the empty lines
+        var longFormat = Parent.BuildOptions.PrinterListing && Parent.ListingPath != "";
         for (var index = 0; index < report.Length; index++)
         {
             var rest = report[index];
+            var copy = copied.Contains(index);
+            var onListing = !(longFormat && (index < 3 || index is 6 or 7 or 8));
+            var formFeed = longFormat && index == 3;
+            var formFeedLine = longFormat && index == 5;
             for (; rest.Length > width; rest = rest[width..])
-                Parent.WriteReportLine(listing, rest[..width], copied.Contains(index));
-            Parent.WriteReportLine(listing, rest, copied.Contains(index));
+            {
+                WriteReportPiece(listing, rest[..width], copy, onListing, formFeed);
+                formFeed = false;
+            }
+
+            if (formFeedLine)
+            {
+                // an empty line of the report that the long format shows as a form feed alone on its line
+                listing.WriteLine("\f");
+                listing.Flush();
+                Parent.WriteReportLine(TextWriter.Null, rest, copy);
+                continue;
+            }
+
+            WriteReportPiece(listing, rest, copy, onListing, formFeed);
         }
+
         listing.Flush();
+    }
+
+    // A line of the fatal report: on the listing when it belongs there (a form feed in front of the error line in the long format), and on
+    // standard error when it is one of the lines SPITBOL copies there
+    private void WriteReportPiece(TextWriter listing, string text, bool copy, bool onListing, bool formFeed)
+    {
+        if (!onListing)
+        {
+            Parent.WriteReportLine(TextWriter.Null, text, copy);
+            return;
+        }
+
+        if (!formFeed)
+        {
+            Parent.WriteReportLine(listing, text, copy);
+            return;
+        }
+
+        listing.WriteLine("\f" + text);
+        listing.Flush();
+        if (copy)
+            Parent.WriteReportLine(TextWriter.Null, text, true);
     }
 
     public StringVar NonExceptionFailure()

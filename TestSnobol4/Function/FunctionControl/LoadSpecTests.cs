@@ -349,7 +349,7 @@ end");
     }
 
     [TestMethod]
-    public void Unload_NonNaturalVarName_Triggers201()
+    public void Unload_AnyStringNamesAFunction_NoError()
     {
         var lib = Path.GetFullPath(SpitbolLibPath);
         if (!File.Exists(lib)) Assert.Inconclusive($"Native lib not found: {lib}");
@@ -358,8 +358,9 @@ end");
         load('spl_add(INTEGER,INTEGER)INTEGER', '{lib}')
         unload('123bad')
 end");
-        // "123bad" is not a natural variable name → error 201 logged
-        Assert.IsTrue(b.ErrorCodeHistory.Count > 0);
+        // any string is the name of a function to SPITBOL (gtnvr takes it), so "123bad" undefines nothing and is no error;
+        // sbl -b on the same statement reports none
+        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
     }
 
     // ── H. Native call marshal — INTEGER / REAL / STRING return ──────────

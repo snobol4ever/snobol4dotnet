@@ -40,9 +40,16 @@ public partial class Builder
         if (FilesToCompile.Count == 0 || string.IsNullOrWhiteSpace(FilesToCompile[0]))
             return;
 
-        var outputPath = Path.ChangeExtension(
-            Path.GetFullPath(FilesToCompile[0]), ".dll");
+        WriteProgramImage(Path.ChangeExtension(Path.GetFullPath(FilesToCompile[0]), ".dll"));
+    }
 
+    /// <summary>
+    /// Writes the program as a threaded DLL at <paramref name="outputPath"/>: its source and options, which RunDll compiles and
+    /// runs again. EXIT(-3) and EXIT(-4) write a save file this way; the file holds the program, not its state, so running it
+    /// starts the program over where SPITBOL's save file resumes after the EXIT.
+    /// </summary>
+    internal bool WriteProgramImage(string outputPath)
+    {
         // Reconstruct source text from the already-parsed source lines.
         // SourceLine.Text preserves leading whitespace (column-1 = label field),
         // so joining with \n faithfully reconstructs the original format.
@@ -58,11 +65,13 @@ public partial class Builder
         try
         {
             EmitThreadedDll(outputPath, sourceText, filename, options);
+            return true;
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine(
                 $"snobol4: warning — could not write DLL '{outputPath}': {ex.Message}");
+            return false;
         }
     }
 

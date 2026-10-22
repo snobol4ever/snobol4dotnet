@@ -195,7 +195,7 @@ public partial class Executive
             { "ENDFILE", new FunctionTableEntry(this, "endfile", EndFile, 1,  true)},
             { "EQ", new FunctionTableEntry(this, "eq", Eq, 2,  true) },
             { "EVAL", new FunctionTableEntry(this, "eval", Eval, 1,true)},
-            { "EXIT", new FunctionTableEntry(this, "exit", Exit, 1,  true) },
+            { "EXIT", new FunctionTableEntry(this, "exit", Exit, 2,  true) },
             { "EXP", new FunctionTableEntry(this, "exp", Exp, 1,  true) },
             { "FENCE", new FunctionTableEntry(this, "fence",CreateFenceFunction, 1,true)},
             { "FIELD", new FunctionTableEntry(this, "field", Field, 2,true)},

@@ -7,8 +7,8 @@ namespace Snobol4.Common;
 /// blanks, tabs or commas: A (append), B n, C, F n, I, L n, Q n, R n, S followed by DN, DR, DRW or DW,
 /// U, W, X, Y. Anything else makes the specification inappropriate (error 116 for INPUT, 160 for
 /// OUTPUT). A appends; F 1 or F 2 with no file name writes to standard output or standard error, and C,
-/// Q or R (raw mode) writes no line ends; L n is the longest record INPUT returns (the rest of a longer line is ignored); the
-/// others are accepted without effect.
+/// Q or R (raw mode) writes no line ends; L n is the longest record INPUT returns (the rest of a longer line is ignored); R n and
+/// Q n make INPUT read n characters at a time, line ends and all, and C is R 1; the others are accepted without effect.
 /// </summary>
 internal static class FileSpec
 {
@@ -21,8 +21,14 @@ internal static class FileSpec
         TryParse(spec, out fileName, out append, out descriptor, out raw, out _);
 
     // recordLength: the L option's n, the longest record INPUT returns, or 0 when there is none
-    internal static bool TryParse(string spec, out string fileName, out bool append, out long descriptor, out bool raw, out long recordLength)
+    internal static bool TryParse(string spec, out string fileName, out bool append, out long descriptor, out bool raw, out long recordLength) =>
+        TryParse(spec, out fileName, out append, out descriptor, out raw, out recordLength, out _);
+
+    // rawLength: the n of R n or Q n (1 for C), the characters INPUT reads at a time in raw mode, or 0 for line mode
+    internal static bool TryParse(string spec, out string fileName, out bool append, out long descriptor, out bool raw, out long recordLength,
+        out long rawLength)
     {
+        rawLength = 0;
         fileName = spec;
         append = false;
         descriptor = -1;
@@ -79,7 +85,8 @@ internal static class FileSpec
                     break;
 
                 case 'Q' or 'R':
-                    if (ScanInteger(spec, ref i) <= 0)
+                    rawLength = ScanInteger(spec, ref i);
+                    if (rawLength <= 0)
                         return false;
                     raw = true;
                     break;
@@ -109,6 +116,7 @@ internal static class FileSpec
 
                 case 'C':
                     raw = true;
+                    rawLength = 1;
                     break;
 
                 case 'I' or 'U' or 'W' or 'X' or 'Y':

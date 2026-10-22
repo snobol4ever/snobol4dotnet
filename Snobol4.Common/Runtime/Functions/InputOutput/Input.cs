@@ -114,7 +114,7 @@ public partial class Executive
         }
 
         var channel = (string)channelNameStr;
-        if (!FileSpec.TryParse((string)fileNameStr, out var fileName, out _, out var descriptor, out _, out var recordLength))
+        if (!FileSpec.TryParse((string)fileNameStr, out var fileName, out _, out var descriptor, out _, out var recordLength, out var rawLength))
         {
             LogRuntimeException(116);
             return;
@@ -155,6 +155,10 @@ public partial class Executive
         if (fileName == "" && descriptor == 0)
         {
             IdentifierTable[symbol].InputChannel = "+console-input";
+            if (rawLength > 0)
+                RawLengths[symbol] = (int)Math.Min(rawLength, int.MaxValue);
+            else
+                RawLengths.Remove(symbol);
             PredicateSuccess();
             return;
         }
@@ -198,6 +202,10 @@ public partial class Executive
             DropChannelReaders(channel);
             StreamInputs[channel] = stream;
             InputRecordLengths[channel] = recordLength > 0 ? (int)Math.Min(recordLength, int.MaxValue) : DefaultInputRecordLength;
+            if (rawLength > 0)
+                RawLengths[channel] = (int)Math.Min(rawLength, int.MaxValue);
+            else
+                RawLengths.Remove(channel);
             IdentifierTable[symbol].InputChannel = channel;
         }
         catch (Exception)
@@ -270,17 +278,76 @@ public partial class Executive
     internal const int DefaultInputRecordLength = 1024;
     private readonly Dictionary<string, int> InputRecordLengths = [];
 
+    // Raw mode (the R, Q and C options of INPUT): the characters an input request reads, line ends and all, by file channel, and
+    // by variable for standard input. A raw read returns exactly that many characters unless the input ends first, and fails when it
+    // has none; nothing is trimmed.
+    private readonly Dictionary<string, int> RawLengths = [];
+    private string? _consoleRawPending;
+
+    private string? ReadRaw(int length, Func<char[], int, int, int> read)
+    {
+        var text = new System.Text.StringBuilder();
+        var buffer = new char[Math.Min(length, 65536)];
+        while (text.Length < length)
+        {
+            var count = read(buffer, 0, Math.Min(buffer.Length, length - text.Length));
+            if (count <= 0)
+                break;
+            text.Append(buffer, 0, count);
+        }
+
+        return text.Length == 0 ? null : text.ToString();
+    }
+
+    // Standard input in raw mode: the real input a block at a time, or, when a test hands the lines over one by one
+    // (ReadLineDelegate), the lines of the rest of the input joined with their line ends
+    private string? ReadConsoleRaw(int length)
+    {
+        if (ReadLineDelegate is null)
+            return ReadRaw(length, Console.In.Read);
+
+        if (_consoleRawPending is null)
+        {
+            var all = new System.Text.StringBuilder();
+            while (ReadLineDelegate() is { } line)
+                all.Append(line).Append('\n');
+            _consoleRawPending = all.ToString();
+        }
+
+        if (_consoleRawPending.Length == 0)
+            return null;
+        var chunk = _consoleRawPending[..Math.Min(length, _consoleRawPending.Length)];
+        _consoleRawPending = _consoleRawPending[chunk.Length..];
+        return chunk;
+    }
+
     private int InputRecordLength(string channel) =>
         InputRecordLengths.TryGetValue(channel, out var length) ? length : DefaultInputRecordLength;
 
     private Var InputArgument(Var arg)
     {
         string? inputLine;
+        var raw = false;
 
         switch (arg.InputChannel)
         {
             case "":
                 return arg;
+
+            // raw mode reads a block of characters, line ends and all, with no cut and no trim
+            case "+console-input" when !Parent.BuildOptions.InputAfterEndStatement && RawLengths.TryGetValue(arg.Symbol, out var consoleRaw):
+                inputLine = ReadConsoleRaw(consoleRaw);
+                raw = true;
+                break;
+
+            case var channel when RawLengths.TryGetValue(channel, out var fileRaw) && StreamInputs.ContainsKey(channel):
+            {
+                var rawReader = ChannelReader(channel)!;
+                StreamReadersBySymbol[arg.Symbol] = rawReader;
+                inputLine = ReadRaw(fileRaw, rawReader.Read);
+                raw = true;
+                break;
+            }
 
             case "+console-input" when Parent.BuildOptions.InputAfterEndStatement:
                 // -r: INPUT reads the source lines after END, and fails after the last, never
@@ -305,9 +372,9 @@ public partial class Executive
         if (inputLine is not null)
         {
             var limit = InputRecordLength(arg.InputChannel);
-            if (inputLine.Length > limit)
+            if (!raw && inputLine.Length > limit)
                 inputLine = inputLine[..limit];
-            var read = new StringVar(AmpTrim != 0 ? TrimRecord(inputLine) : inputLine);
+            var read = new StringVar(AmpTrim != 0 && !raw ? TrimRecord(inputLine) : inputLine);
             // the line read becomes the variable's value, as in SPITBOL (DUMP lists INPUT = the last line)
             if (arg.Symbol != "" && IdentifierTable.TryGetValue(arg.Symbol, out var variable) && variable.InputChannel == arg.InputChannel)
                 IdentifierTable[arg.Symbol] = new StringVar(read.Data, arg.Symbol)

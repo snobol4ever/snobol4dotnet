@@ -95,7 +95,7 @@ public class Scanner
 
     internal void SealAlternates()
     {
-        _state?.SealAlternates();
+        _state?.SealAlternates(node => _ast![node].Self is ConditionalVariableAssociationBackup1 or ConditionalVariableAssociationBackup2);
     }
 
     internal void MarkAlternates()
@@ -215,8 +215,14 @@ public class Scanner
                     // FENCE.  Pop the seal and continue to the next non-seal entry.  If only
                     // the floor (-1) remains, the match fails at this starting cursor and an
                     // unanchored match tries the next one.
-                    while (alternateIndex == -2)
+                    while (alternateIndex == -2 || alternateIndex <= -4)
                     {
+                        if (alternateIndex <= -4)
+                        {
+                            // an undo kept under the seal (see ScannerState): run its side effect, which fails
+                            var undo = _ast![-4 - alternateIndex];
+                            ((TerminalPattern)undo.Self).Scan(undo.SelfIndex, this);
+                        }
                         if (!_state.HasAlternates())
                         {
                             // PM_FAIL — seal-only stack, nothing left to try from this cursor.

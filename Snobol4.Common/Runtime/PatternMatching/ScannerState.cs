@@ -14,6 +14,9 @@ internal class ScannerState
     //   -2 : seal — on backtrack here, Match returns ABORT outward
     //        (per Gimpel 1973: FENCE = NULL | ABORT — backtrack into a
     //         sealed FENCE terminates the entire match, no cursor retry)
+    //   <= -4 : an undo kept under a seal: the backup of a conditional assignment made inside FENCE(P),
+    //        node index -4 - value.  Backup through FENCE(P) runs it as a side effect only (Scanner.Match);
+    //        it is never entered as a node, whose own alternate would reopen a branch of P that was sealed.
     //   -3 : mark — placed at FENCE entry; SealAlternates pops down to (and through)
     //        the most recent mark, preserving outer alternates saved before FENCE
     //        was entered. Stale marks (left when FENCE'd P fails before Seal fires)
@@ -91,8 +94,12 @@ internal class ScannerState
     // outer alternates.  If no -3 is found (defensive: floor reached),
     // push -2 atop the floor — equivalent to old "wipe" behaviour for
     // patterns built without a paired Mark.
-    public void SealAlternates()
+    // Backup through FENCE(P) still undoes what P did (SPITBOL: backup passes through it), so an
+    // alternate that only undoes a side effect of P — the backup of a conditional assignment, named by
+    // undoes — is kept under the seal, in its order; every other alternate inside P is dropped.
+    public void SealAlternates(Func<int, bool> undoes)
     {
+        List<(int Node, int Cursor)> kept = [];
         while (_alternatePatternStack.Count > 0)
         {
             var top = _alternatePatternStack.Peek();
@@ -104,8 +111,17 @@ internal class ScannerState
             }
             if (top == -1)
                 break; // hit floor — no paired mark; preserve floor
-            _alternatePatternStack.Pop();
-            _alternateCursorStack.Pop();
+            var node = _alternatePatternStack.Pop();
+            var cursor = _alternateCursorStack.Pop();
+            if (node >= 0 && undoes(node))
+                kept.Add((-4 - node, cursor));
+            else if (node <= -4)
+                kept.Add((node, cursor));   // an undo an inner FENCE kept
+        }
+        for (var i = kept.Count - 1; i >= 0; i--)
+        {
+            _alternatePatternStack.Push(kept[i].Node);
+            _alternateCursorStack.Push(kept[i].Cursor);
         }
         _alternatePatternStack.Push(-2);
         _alternateCursorStack.Push(CursorPosition);

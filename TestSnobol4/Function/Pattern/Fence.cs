@@ -160,4 +160,26 @@ end
         Assert.AreEqual("nomatch", ((StringVar)anchored.Execute!.IdentifierTable[anchored.FoldCase("R1")]).Data);
     }
 
+    [TestMethod]
+    public void TEST_Fence_function_backup_undoes_the_conditional_assignments_made_in_it()
+    {
+        // sbl -b: log is R, head is ab and last is c. The first attempt of each match records its assignment inside the
+        // FENCE and fails at RPOS; backup passes through the FENCE and drops that record, so only the last attempt's is kept.
+        var s = @"
+        define('mark(tag)')                    :(mark_end)
+mark    log = log tag
+        mark = .dummy                          :(NRETURN)
+mark_end
+        log = ''
+        'ab' ? 'a' ARBNO('b') FENCE('' . *mark('R') | '') RPOS(0)
+        last = ''
+        'abc' ? ARBNO(LEN(1)) . head FENCE(LEN(1) . last) RPOS(0)
+end
+";
+        var build = SetupTests.SetupScript("-b", s);
+        Assert.AreEqual("R", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("log")]).Data);
+        Assert.AreEqual("ab", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("head")]).Data);
+        Assert.AreEqual("c", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("last")]).Data);
+    }
+
 }

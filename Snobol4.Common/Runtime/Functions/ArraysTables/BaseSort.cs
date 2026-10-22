@@ -28,6 +28,13 @@ public partial class Executive
 
         var array = (ArrayVar)a;
 
+        // the array made from a table to be sorted is no object the dump numbers: only the array SORT returns is one
+        if (arguments[0] is TableVar && array.BlockId == BlockCounterValue)
+        {
+            array.BlockId = 0;
+            BlockCounterValue--;
+        }
+
         // Array must be one or two-dimensional array
         if (array is { Dimensions: > 2 })
         {

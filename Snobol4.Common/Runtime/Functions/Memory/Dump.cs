@@ -165,7 +165,7 @@ public partial class Executive
                     break;
                 case TableVar t when blocks.TryAdd(t.Data, t):
                     foreach (var e in t.Data.Values) pending.Push(e);
-                    foreach (var k in t.Data.Keys) if (k is Var kv) pending.Push(kv);
+                    foreach (var k in t.Data.Keys) if (k is TableKey objectKey) pending.Push(objectKey.Value);
                     break;
                 case ProgramDefinedDataVar d when blocks.TryAdd(d.FieldValues, d):
                     foreach (var e in d.FieldValues.Data) pending.Push(e);
@@ -277,7 +277,7 @@ public partial class Executive
         string s => $"'{s}'",
         long l => l.ToString(CultureInfo.InvariantCulture),
         double d => RealConversionStrategy.SpitbolRealString(d),
-        Var v => PrintValue(v),
+        TableKey objectKey => PrintValue(objectKey.Value),
         _ => key.ToString() ?? ""
     };
 

@@ -12,7 +12,8 @@ public class NameCloningStrategy : ICloningStrategy
             Symbol = nameSelf.Symbol,
             InputChannel = nameSelf.InputChannel,
             OutputChannel = nameSelf.OutputChannel,
-            Expression = nameSelf.Expression
+            Expression = nameSelf.Expression,
+            Identity = nameSelf.Identity
         };
     }
 }

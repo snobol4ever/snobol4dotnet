@@ -29,7 +29,7 @@ public class PatternConversionStrategy : IConversionStrategy
 
     public object GetTableKey(Var self)
     {
-        // Patterns use their unique ID as table key
-        return self.SequenceId;
+        // A pattern is keyed by its identity, which every copy of it keeps (Q = P, then T<Q> is T<P>), as IDENT compares it
+        return new TableKey(((PatternVar)self).Identity, self);
     }
 }

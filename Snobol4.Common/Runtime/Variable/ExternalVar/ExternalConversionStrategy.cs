@@ -12,5 +12,5 @@ public class ExternalConversionStrategy : IConversionStrategy
 
     public string GetDataType(Var self) => "EXTERNAL";
 
-    public object GetTableKey(Var self) => ((ExternalVar)self).Pointer.ToInt64();
+    public object GetTableKey(Var self) => new TableKey(((ExternalVar)self).Pointer.ToInt64(), self);
 }

@@ -67,6 +67,7 @@ public sealed class TableConversionStrategy : IConversionStrategy
     {
         return key switch
         {
+            TableKey objectKey => objectKey.Value,
             long longValue => new IntegerVar(longValue),
             double doubleValue => new RealVar(doubleValue),
             string stringValue => new StringVar(stringValue),
@@ -86,6 +87,6 @@ public sealed class TableConversionStrategy : IConversionStrategy
     public object GetTableKey(Var self)
     {
         // Tables use their unique ID as table key
-        return self.SequenceId;
+        return new TableKey(self.SequenceId, self);
     }
 }

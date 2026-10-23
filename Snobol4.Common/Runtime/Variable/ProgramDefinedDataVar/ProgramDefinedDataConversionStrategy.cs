@@ -25,6 +25,6 @@ public sealed class ProgramDefinedDataConversionStrategy : IConversionStrategy
     public object GetTableKey(Var self)
     {
         // User-defined data is keyed by the object itself, its field store, shared by every copy
-        return ((ProgramDefinedDataVar)self).FieldValues.SequenceId;
+        return new TableKey(((ProgramDefinedDataVar)self).FieldValues.SequenceId, self);
     }
 }

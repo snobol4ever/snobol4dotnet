@@ -150,7 +150,12 @@ public class NameConversionStrategy : IConversionStrategy
 
     public object GetTableKey(Var self)
     {
+        // A name is keyed by what it names: the names of one variable or one element are one key, which no string is (T<.X> is not
+        // T<'X'>); the name of a keyword or of a deferred expression is only itself (Identity, which its copies keep), as in SPITBOL
         var nameSelf = (NameVar)self;
-        return nameSelf.Pointer;
+        object identity = nameSelf.Expression is not null || !nameSelf.HasText && nameSelf.Collection is null
+            ? nameSelf.Identity
+            : (nameSelf.Pointer, nameSelf.Key, nameSelf.Collection?.SequenceId);
+        return new TableKey(identity, self);
     }
 }

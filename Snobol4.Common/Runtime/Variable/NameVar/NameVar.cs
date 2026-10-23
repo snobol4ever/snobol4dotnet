@@ -14,6 +14,9 @@ public sealed class NameVar : Var
     // SPITBOL ($N reads A<I> for the I of that moment, $N = V assigns it); such a name has no text
     internal ExpressionVar? Expression;
 
+    // What makes a name of a keyword or of a deferred expression one and the same as a table key: its own, kept by its copies
+    internal object Identity = new();
+
     #endregion
 
     #region Strategy Instances (Lazy-loaded singletons for performance)
@@ -52,6 +55,7 @@ public sealed class NameVar : Var
         Key = template.Key;
         Collection = template.Collection;
         Expression = template.Expression;
+        Identity = template.Identity;
     }
 
     #endregion

@@ -17,7 +17,7 @@ C="$ROOT/corpus/tests/snobol4"
 H="$ROOT/harness/scripts/corpus_suite_harness.py"
 DLL="$ENGINE/Snobol4/bin/Release/net10.0/Snobol4.dll"
 [ "$#" -gt 0 ] || { echo "usage: $0 <entry>..."; exit 2; }
-dotnet build "$ENGINE/Snobol4/Snobol4.csproj" -c Release -m:4 -v:q > /dev/null 2>&1 || { echo "REFUSE(2): Snobol4 does not build"; exit 2; }
+dotnet build "$ENGINE/Snobol4/Snobol4.csproj" -c Release -m:2 -nodeReuse:false -p:ReadyToRunBuild=false -v:q > /dev/null 2>&1 || { echo "REFUSE(2): Snobol4 does not build"; exit 2; }
 [ -f "$DLL" ] && [ -f "$C/ALL.sno" ] && [ -f "$C/ALL.ref" ] && [ -f "$H" ] || { echo "REFUSE(2): no build, corpus or harness beside $ENGINE"; exit 2; }
 t="$(mktemp -d)"; trap 'rm -rf "${t:?}"' EXIT
 bad=0

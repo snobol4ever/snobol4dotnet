@@ -41,8 +41,10 @@ internal sealed class StatementChecker(Builder parent)
     // constant is a constant pattern (an element, an indirection or a call is found as it runs)
     // Error is the number of the first error found inside the operand, held until SPITBOL's order of generation reaches it: an operand is
     // generated after the ones to its left, and a name is checked for before what is inside it (A . (1 / 0) is 212, (1 / 0) . A 14)
+    // NameConstant is the name a name operator makes of the operand as the statement is compiled: SPITBOL's compiler takes .X of a
+    // variable, of a keyword and of a deferred expression for a constant NAME, so +.X is 4, .X + 1 is 1 and .&ERRTEXT 'z' is 8 then
     private sealed record Operand(Kind Kind, Var? Value = null, Operand? Subject = null, string Name = "", bool Nested = false,
-        bool PatternMatch = false, bool Fixed = false, int Error = 0);
+        bool PatternMatch = false, bool Fixed = false, int Error = 0, Var? NameConstant = null);
 
     private static readonly Operand ArrayMark = new(Kind.ArrayMark);
 
@@ -145,7 +147,7 @@ internal sealed class StatementChecker(Builder parent)
                 // a variable is a name; one of the predefined pattern variables is a constant too (Executive.ConstantVariable)
                 case Token.Type.IDENTIFIER:
                     stack.Add(new Operand(Kind.Name, parent.Execute!.ConstantVariable(parent.FoldCase(token.MatchedString)), Name: token.MatchedString,
-                        Fixed: true));
+                        Fixed: true, NameConstant: new NameVar(parent.FoldCase(token.MatchedString), null, null)));
                     break;
 
                 case Token.Type.EXPRESSION:
@@ -155,7 +157,12 @@ internal sealed class StatementChecker(Builder parent)
                     var index = int.Parse(token.MatchedString[4..]);
                     Var? deferred = null;
                     var inner = index < parent.ExpressionList.Count ? FirstError(parent.ExpressionList[index].ExpressionList, out deferred) : 0;
-                    stack.Add(new Operand(Kind.Name, Deferred(deferred), Fixed: true, Error: inner));
+                    var expression = Deferred(deferred);
+                    // its name is the variable's when it is one (.*X is .X), else a name with no text
+                    var name = index < parent.ExpressionList.Count && parent.ExpressionList[index].ExpressionList is [{ TokenType: Token.Type.IDENTIFIER } variable]
+                        ? new NameVar(parent.FoldCase(variable.MatchedString), null, null)
+                        : new NameVar("", null, null) { Expression = expression };
+                    stack.Add(new Operand(Kind.Name, expression, Fixed: true, Error: inner, NameConstant: name));
                     break;
                 }
 
@@ -296,9 +303,16 @@ internal sealed class StatementChecker(Builder parent)
                                 break;
                             }
 
-                            stack.Add(token.MatchedString != "&" ? new Operand(Kind.Value, Error: operand.Error)
-                                : new Operand(Kind.Name, operand.Name == "" ? null : parent.Execute!.ConstantKeyword(parent.FoldCase(operand.Name)),
-                                    Fixed: true, Error: operand.Error));
+                            // the name of a fixed name (a variable, a keyword, a deferred expression) is a constant NAME, and the cursor
+                            // assignment into one a constant pattern, which stands for it here
+                            stack.Add(token.MatchedString switch
+                            {
+                                "." => new Operand(Kind.Value, operand.Error == 0 ? operand.NameConstant : null, Error: operand.Error),
+                                "@" => new Operand(Kind.Value, operand.Error == 0 && operand.Fixed ? new PatternVar(new NullPattern()) : null,
+                                    Error: operand.Error),
+                                _ => new Operand(Kind.Name, operand.Name == "" ? null : parent.Execute!.ConstantKeyword(parent.FoldCase(operand.Name)),
+                                    Fixed: true, Error: operand.Error, NameConstant: new NameVar("&" + operand.Name, null, null))
+                            });
                             break;
 
                         // negation and interrogation give a value, whatever the operand: no name. The interrogation of a constant is

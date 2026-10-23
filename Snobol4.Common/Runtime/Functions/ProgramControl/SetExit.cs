@@ -11,10 +11,12 @@ public partial class Executive
     {
         var previousSetExitLabel = SetExitLabel;
 
+        // SETEXIT() cancels the handler, as in SPITBOL: an error after it is no trap (the number an error arms its trap from was left)
         if (arguments[0] is StringVar str && str.Data.Length == 0)
         {
             SystemStack.Push(new StringVar(previousSetExitLabel));
             SetExitLabel = "";
+            SetExitNumber = 0;
             return;
         }
 

@@ -113,6 +113,10 @@ internal sealed class StatementChecker(Builder parent)
     // or a value that is no name is error 212
     private static bool IsValue(Operand operand) => operand.Kind is Kind.Constant or Kind.Value;
 
+    // What a name operator or a goto cannot take: a literal, a value, a combination of operands (which only parens can bring there)
+    // or a pattern match, whose value is no name either (.(X ? 'a') and :(X ? 'L') are 212 as they are compiled)
+    private static bool IsNoName(Operand operand) => IsValue(operand) || operand.Kind is Kind.Combination or Kind.Question;
+
     private int Walk(List<Token> postfix, bool gotoTarget, out Var? result)
     {
         result = null;
@@ -255,11 +259,11 @@ internal sealed class StatementChecker(Builder parent)
                             break;
                         }
 
-                        // the name operators take a name: a literal, a value or a combination of operands (which only parens
-                        // can bring there) is error 212. A keyword is a name, and a constant too when its value never changes
-                        // (&ALPHABET, &FENCE: -&FENCE is 10 as the statement is compiled); the others (. and @) give a value
+                        // the name operators take a name: anything else (IsNoName) is error 212. A keyword is a name, and a
+                        // constant too when its value never changes (&ALPHABET, &FENCE: -&FENCE is 10 as the statement is
+                        // compiled); the others (. and @) give a value
                         case "." or "@" or "&":
-                            if (IsValue(operand) || operand.Kind == Kind.Combination)
+                            if (IsNoName(operand))
                                 return ValueWhereNameIsRequired;
                             stack.Add(token.MatchedString != "&" ? new Operand(Kind.Value)
                                 : new Operand(Kind.Name, operand.Name == "" ? null : parent.Execute!.ConstantKeyword(parent.FoldCase(operand.Name)),
@@ -297,7 +301,7 @@ internal sealed class StatementChecker(Builder parent)
                 {
                     if (!TakeTwo(stack, out var left, out var right))
                         return 0;
-                    if (IsValue(right) || right.Kind == Kind.Combination)
+                    if (IsNoName(right))
                         return ValueWhereNameIsRequired;
                     // a capture of a constant into a fixed name is a constant pattern, as SPITBOL's compiler builds it; which pattern
                     // does not matter to what is evaluated after it, so it stands for one
@@ -355,7 +359,7 @@ internal sealed class StatementChecker(Builder parent)
         }
 
         result = stack.Count == 1 ? stack[0].Value : null;
-        return gotoTarget && stack.Count == 1 && stack[0].Kind is Kind.Constant or Kind.Value or Kind.Combination ? ValueWhereNameIsRequired : 0;
+        return gotoTarget && stack.Count == 1 && IsNoName(stack[0]) ? ValueWhereNameIsRequired : 0;
     }
 
     // The two operands on top of the stack, taken off it; false when the postfix form is not what the walk expects

@@ -240,6 +240,22 @@ END";
             Assert.AreEqual(0, SetupTests.SetupScript("-b -n", $"        {statement}\nEND").ErrorCodeHistory.Count, statement);
     }
 
+    // a pattern match gives a value, so it is no name under unary . @ &, at the right of binary . and $, or as a goto: each statement
+    // is 212 as it is compiled, as sbl -b lists them (found by the infinite_snobol4 generator, where dotnet ran them)
+    [TestMethod]
+    public void TEST_NameOperands_a_match_is_no_name()
+    {
+        var build = SetupTests.SetupScript("-b -n", @"        Y = .(X ? 'a')
+        Y = @(X ? 'a')
+        Y = &(X ? 'a')
+        Y = A . (X ? 'a')
+        Y = A $ (X ? 'a')
+        Y = 1     :(X ? 'L')
+L
+END");
+        CollectionAssert.AreEqual(new[] { 212, 212, 212, 212, 212, 212 }, build.ErrorCodeHistory.ToArray());
+    }
+
     // an alternation is no subject unless it is over a concatenation
     [TestMethod]
     public void TEST_NameOperands_an_alternation_that_is_no_pattern_match_as_a_target_is_212()

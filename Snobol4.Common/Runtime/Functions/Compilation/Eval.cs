@@ -9,10 +9,10 @@ public partial class Executive
         var arg = arguments[0];
 
         // A NAME evaluates to the value of what it names, as SPITBOL's expression for the name does; the name of an element of an
-        // array or table is no expression (103)
+        // array or table, or of a keyword, has no text and is no expression (103)
         if (arg is NameVar nameVar)
         {
-            if (nameVar.Pointer == "" && nameVar.Key is not null)
+            if (!nameVar.HasText)
             {
                 LogRuntimeException(103);
                 return;

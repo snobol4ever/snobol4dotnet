@@ -6,7 +6,7 @@ public class NameFormattingStrategy : IFormattingStrategy
     public string ToString(Var self)
     {
         var nameSelf = (NameVar)self;
-        return nameSelf.Collection is null ? nameSelf.Pointer : "NAME";
+        return nameSelf.Collection is null && nameSelf.HasText ? nameSelf.Pointer : "NAME";
     }
 
     public string DumpString(Var self)

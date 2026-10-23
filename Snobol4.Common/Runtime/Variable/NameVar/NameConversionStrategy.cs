@@ -23,8 +23,8 @@ public class NameConversionStrategy : IConversionStrategy
             case Executive.VarType.REAL:
                 return ConvertToReal(nameSelf, out varOut, out valueOut, exec);
 
-            // the name of an element has no text, so it is no pattern, as it is no string: 'x' .A<1> is error 9
-            case Executive.VarType.PATTERN when nameSelf.Pointer.Length == 0:
+            // the name of an element or a keyword has no text, so it is no pattern, as it is no string: 'x' .A<1> is error 9
+            case Executive.VarType.PATTERN when !nameSelf.HasText:
                 varOut = StringVar.Null();
                 valueOut = "";
                 return false;
@@ -52,7 +52,7 @@ public class NameConversionStrategy : IConversionStrategy
 
     private static bool ConvertToString(NameVar nameSelf, out Var varOut, out object valueOut)
     {
-        if (nameSelf.Pointer.Length == 0)
+        if (!nameSelf.HasText)
         {
             varOut = StringVar.Null();
             valueOut = "";
@@ -121,7 +121,7 @@ public class NameConversionStrategy : IConversionStrategy
     private static bool ConvertToCode(NameVar nameSelf, out Var varOut, out object valueOut, Executive exec)
     {
         // the text compiled is the NAME's: CODE(.S) is the statement labelled S, whatever S holds
-        if (nameSelf.Pointer.Length == 0)
+        if (!nameSelf.HasText)
         {
             varOut = StringVar.Null();
             valueOut = "";

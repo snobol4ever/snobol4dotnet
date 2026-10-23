@@ -53,6 +53,10 @@ public sealed class NameVar : Var
 
     #region Name-Specific Methods
 
+    // A name has text when it names a variable: the name of an element (no pointer) or of a keyword (.&ERRTEXT) has none, so it is no
+    // string, number or pattern (SIZE(.&ERRTEXT) is 189, .&ERRTEXT 'z' 8, .&ERRTEXT ? 'x' 241) and prints as NAME, as in SPITBOL
+    internal bool HasText => Pointer.Length > 0 && Pointer[0] != '&';
+
             
     public Var Dereference(Executive executive)
     {

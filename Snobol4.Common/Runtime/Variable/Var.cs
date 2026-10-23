@@ -386,10 +386,11 @@ public abstract class Var : IEquatable<Var>
     internal static bool ToNumeric(Var varIn, out bool isInteger, out long l, out double d, Executive exec)
     {
         // A name is a number by its text, as SPITBOL converts it: .X + 1 is error 1, CONVERT('12', 'NAME') * 2 is 24, and the name of an
-        // element, which has no text, is no number (a call that returns a name by NRETURN gives the variable's value, read before this)
+        // element or a keyword, which has no text, is no number (a call that returns a name by NRETURN gives the variable's value, read
+        // before this)
         if (varIn is NameVar nameVar)
         {
-            if (nameVar.Pointer.Length == 0)
+            if (!nameVar.HasText)
                 return InitializeFailureValues(out isInteger, out l, out d);
             varIn = new StringVar(nameVar.Pointer);
         }

@@ -30,6 +30,10 @@ public class NameComparisonStrategy : IComparisonStrategy
         if (nameSelf.Pointer != nameOther.Pointer)
             return false;
 
+        // the names of deferred expressions are equal only as one name (IDENT(.*A<1>, .*A<1>) fails, as in SPITBOL)
+        if (nameSelf.Expression is not null || nameOther.Expression is not null)
+            return ReferenceEquals(nameSelf, nameOther);
+
         // Check collection reference equality
         if (nameSelf.Collection != nameOther.Collection)
             return false;

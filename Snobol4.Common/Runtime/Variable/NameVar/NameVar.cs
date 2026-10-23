@@ -10,6 +10,10 @@ public sealed class NameVar : Var
 
     internal string Pointer;
 
+    // The name of a deferred expression (.*A<I>, .*SIZE(X)): the expression, evaluated by name each time the name is used, as in
+    // SPITBOL ($N reads A<I> for the I of that moment, $N = V assigns it); such a name has no text
+    internal ExpressionVar? Expression;
+
     #endregion
 
     #region Strategy Instances (Lazy-loaded singletons for performance)
@@ -47,6 +51,7 @@ public sealed class NameVar : Var
         Pointer = template.Pointer;
         Key = template.Key;
         Collection = template.Collection;
+        Expression = template.Expression;
     }
 
     #endregion

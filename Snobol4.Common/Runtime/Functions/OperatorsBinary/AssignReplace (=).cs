@@ -151,10 +151,10 @@ public partial class Executive
         var leftVar = arguments[0];  // Destination Var
 
         // A call in the place of a name (G() = V) that handed back a value by RETURN has nothing to assign through: error 21,
-        // as in SPITBOL, where it assigned the function's own variable
-        if (ReferenceEquals(leftVar, ValueReturned))
+        // as in SPITBOL, where it assigned the function's own variable; so is a value $ of the name of a deferred expression gave
+        if (ValueInNamesPlace(leftVar) is var valueError and not 0)
         {
-            LogRuntimeException(21);
+            LogRuntimeException(valueError);
             return;
         }
 
@@ -450,7 +450,7 @@ public partial class Executive
     // What a deferred target gave can be assigned through: a NAME, a variable, an element or a field, but not the value a
     // program-defined function handed back by RETURN, which carries the function's own variable
     private bool IsName(Var target) =>
-        !ReferenceEquals(target, ValueReturned) && (target is NameVar || target.Symbol != "" || target.Key is not null);
+        ValueInNamesPlace(target) == 0 && (target is NameVar || target.Symbol != "" || target.Key is not null);
 
     private static Var StoredCopy(Var value)
     {

@@ -8,9 +8,25 @@ public partial class Executive
 {
     internal void Name(List<Var> arguments)
     {
+        // The name of a deferred expression (.*E) is the name of the variable when E is one (.*X is .X), else a name that evaluates
+        // E by name each time it is used, as in SPITBOL; a variable that holds an expression is named itself (.V)
+        if (arguments[0] is ExpressionVar { Symbol: "", Key: null } deferred)
+        {
+            SystemStack.Push(SimpleExpressionNames.TryGetValue(deferred.FunctionName, out var variable)
+                ? new NameVar(variable, null, null)
+                : new NameVar("", null, null) { Expression = deferred });
+            return;
+        }
+
         // A call in the place of a name that handed back a value, a builtin's (.SIZE('abc')) or a RETURN's (.G()), is error 21,
         // as in SPITBOL; every other value that is no name (.'abc', .(X Y)) is error 212, found as its statement is compiled
-        if (ReferenceEquals(arguments[0], ValueReturned) || arguments[0].Symbol == "" && (arguments[0].Key == null || arguments[0].Collection == null))
+        if (ValueInNamesPlace(arguments[0]) is var valueError and not 0)
+        {
+            LogRuntimeException(valueError);
+            return;
+        }
+
+        if (arguments[0].Symbol == "" && (arguments[0].Key == null || arguments[0].Collection == null))
         {
             LogRuntimeException(21);
             return;

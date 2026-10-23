@@ -32,6 +32,10 @@ public partial class Executive
                 SystemStack.Push(IdentifierTable[symbol3]);
                 return;
 
+            case NameVar { Expression: { } deferred }:
+                DeferredNameTarget(deferred);
+                return;
+
             case NameVar nameVar:
                 SystemStack.Push(ElementOrVariable(nameVar) ?? IdentifierTable[nameVar.Pointer]);
                 return;
@@ -87,6 +91,31 @@ public partial class Executive
         }
 
         return null;
+    }
+
+    // $ of the name of a deferred expression: the expression evaluated by name now, as SPITBOL evaluates it each time the name is used;
+    // what it gives is the variable or element to read or assign, or a value, which is no name (DeferredNameValue): 249 in a name's
+    // place for an expression that can only give a value, 21 for a call that gave one. An error or a failure in it is the statement's
+    private void DeferredNameTarget(ExpressionVar deferred)
+    {
+        var depth = SystemStack.Count;
+        deferred.FunctionName(this);
+        if (Failure)
+        {
+            if (SystemStack.Count == depth)
+                SystemStack.Push(new StringVar(false) { Succeeded = false });
+            return;
+        }
+
+        var target = SystemStack.Peek();
+        var error = ValueExpressions.Contains(deferred.FunctionName) ? 249
+            : ReferenceEquals(target, ValueReturned) || target is not NameVar && target.Symbol == "" && target.Key is null ? 21
+            : 0;
+        if (error != 0)
+        {
+            DeferredNameValue = target;
+            DeferredNameValueError = error;
+        }
     }
 
     /// <summary>

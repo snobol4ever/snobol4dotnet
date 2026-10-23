@@ -10,9 +10,9 @@ public partial class Executive
         var v0 = arguments[0];
 
         // a call in the place of the name that handed back a value by RETURN is error 21 as the pattern is built, as in SPITBOL (@H(2))
-        if (ReferenceEquals(v0, ValueReturned))
+        if (ValueInNamesPlace(v0) is var valueError and not 0)
         {
-            LogRuntimeException(21);
+            LogRuntimeException(valueError);
             return;
         }
 

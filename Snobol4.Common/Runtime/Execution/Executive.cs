@@ -44,6 +44,16 @@ public partial class Executive
     // The value the latest call of a program-defined function handed back by RETURN: a call in a name's place (a deferred
     // capture target) that gave this gave a value, not a name
     internal Var? ValueReturned;
+
+    // The value $ of the name of a deferred expression gave when the expression gave a value, not a name (.*(X 'q'), .*SIZE(X)),
+    // and the error that value is in a name's place: 249 for an expression that can only give a value, 21 for a call
+    internal Var? DeferredNameValue;
+    internal int DeferredNameValueError;
+
+    // The error of a value in the place of a name: the value a program-defined function handed back by RETURN (21), or one that $ of
+    // the name of a deferred expression gave (DeferredNameValueError); 0 for anything else
+    internal int ValueInNamesPlace(Var target) =>
+        ReferenceEquals(target, ValueReturned) ? 21 : ReferenceEquals(target, DeferredNameValue) ? DeferredNameValueError : 0;
     public int PreviousStarFunctionCount;
     public delegate int StatementCode(Executive x);
     public delegate void DeferredCode(Executive x);

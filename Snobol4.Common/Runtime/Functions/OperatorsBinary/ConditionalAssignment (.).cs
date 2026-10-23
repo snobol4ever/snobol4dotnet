@@ -11,9 +11,9 @@ public partial class Executive
 
         // a call in the place of the name that handed back a value by RETURN is error 21 as the pattern is built, as in SPITBOL
         // (P = LEN(1) . H(2)); it was found only when the match assigned
-        if (ReferenceEquals(arguments[1], ValueReturned))
+        if (ValueInNamesPlace(arguments[1]) is var valueError and not 0)
         {
-            LogRuntimeException(21);
+            LogRuntimeException(valueError);
             return;
         }
 

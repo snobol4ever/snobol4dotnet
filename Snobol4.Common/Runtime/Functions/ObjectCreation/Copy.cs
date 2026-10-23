@@ -3,12 +3,19 @@
 public partial class Executive
 {
     // COPY(x): a new array, table or DATA object holding the same values one level deep (nested arrays,
-    // tables and DATA objects are shared), as SPITBOL's COPY makes it; any other value as it is
+    // tables and DATA objects are shared), as SPITBOL's COPY makes it, and a pattern, an expression or a code that is not IDENT to
+    // its argument (a Clone keeps their identity, as an assignment does); any other value as it is
     internal void Copy(List<Var> arguments)
     {
         if (arguments[0] is not ProgramDefinedDataVar data)
         {
-            SystemStack.Push(arguments[0].Clone());
+            SystemStack.Push(arguments[0] switch
+            {
+                PatternVar pattern => new PatternVar(pattern.Data.Clone()),
+                ExpressionVar expression => new ExpressionVar(expression),
+                CodeVar code => new CodeVar(code),
+                var other => other.Clone()
+            });
             return;
         }
 

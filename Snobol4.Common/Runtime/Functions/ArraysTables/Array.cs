@@ -47,8 +47,13 @@ public partial class Executive
             return;
         }
 
+        // After a failure the element is not taken, but its subscripts and the collection still leave the stack and one failure value
+        // takes their place, as a call's arguments do; left there, a choice or a negation after it read them for its own operand
+        // ((NE(1, 1) U['v'], 'alt') was null, ~(NE(1, 1) U['v']) failed)
         if (Failure)
         {
+            for (var i = 0; i <= count; ++i)
+                SystemStack.Pop();
             SystemStack.Push(new StringVar(false) { Succeeded = false });
             return;
         }

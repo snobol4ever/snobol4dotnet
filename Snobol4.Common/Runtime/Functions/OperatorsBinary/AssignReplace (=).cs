@@ -194,6 +194,10 @@ public partial class Executive
         // Special checks for keywords
         if (leftVar.IsKeyword)
         {
+            // The value of the assignment is the value assigned, as it was given ((&ANCHOR = ' 1') is the string ' 1', (&ERRTEXT = 5)
+            // the integer 5), as in SPITBOL; the keyword keeps the integer or the string it takes from it
+            var assigned = rightVar;
+
             // &ERRTEXT takes a string, or whatever has one (211 for a value that has none)
             if (leftVar.Symbol == "&errtext")
             {
@@ -204,6 +208,7 @@ public partial class Executive
                 }
 
                 HandleErrText(errorText, true);
+                KeywordAssignmentValue(assigned);
                 return;
             }
 
@@ -262,6 +267,7 @@ public partial class Executive
             if (KeywordTable.TryGetValue(leftVar.Symbol, out var handler))
             {
                 handler(rightVar, true);
+                KeywordAssignmentValue(assigned);
                 // Sync-step monitor fire-point for keyword assignment.
                 if (MonitorIpc.Enabled)
                     MonitorIpc.EmitValue(leftVar.Symbol ?? "", rightVar);
@@ -451,6 +457,15 @@ public partial class Executive
     // program-defined function handed back by RETURN, which carries the function's own variable
     internal bool IsName(Var target) =>
         ValueInNamesPlace(target) == 0 && (target is NameVar || target.Symbol != "" || target.Key is not null);
+
+    // The keyword's handler pushed the keyword's own value; the assignment's value is the one assigned, under no name
+    private void KeywordAssignmentValue(Var assigned)
+    {
+        if (Failure)
+            return;
+        SystemStack.Pop();
+        SystemStack.Push(assigned.Unnamed());
+    }
 
     private static Var StoredCopy(Var value)
     {

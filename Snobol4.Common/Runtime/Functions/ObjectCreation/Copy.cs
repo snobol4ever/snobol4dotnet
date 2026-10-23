@@ -9,13 +9,13 @@ public partial class Executive
     {
         if (arguments[0] is not ProgramDefinedDataVar data)
         {
-            SystemStack.Push(arguments[0] switch
+            SystemStack.Push((arguments[0] switch
             {
                 PatternVar pattern => new PatternVar(pattern.Data.Clone()),
                 ExpressionVar expression => new ExpressionVar(expression),
                 CodeVar code => new CodeVar(code),
                 var other => other.Clone()
-            });
+            }).Unnamed());
             return;
         }
 

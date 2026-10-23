@@ -77,6 +77,7 @@ public partial class Executive
             return;
         }
 
-        SystemStack.Push(varOut);
+        // the value converted to the type it has is the argument itself, which names no variable as CONVERT's value
+        SystemStack.Push(varOut.Unnamed());
     }
 }

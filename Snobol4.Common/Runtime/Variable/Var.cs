@@ -192,6 +192,21 @@ public abstract class Var : IEquatable<Var>
 
     internal virtual Var Clone() => CloningStrategy.Clone(this);
 
+    // The same value with no variable's name on it, as a call hands back a value it was given (CONVERT to the type it has, COPY of a
+    // string): a name operator takes it for a value, not for the variable it came from (.CONVERT(X, 'STRING') and .COPY(X) are error 21),
+    // and it keeps its identity and its contents (IDENT(A, CONVERT(A, 'ARRAY')), and an element set through either is set in both)
+    internal Var Unnamed()
+    {
+        if (Symbol.Length == 0 && Key is null && Collection is null)
+            return this;
+        var alias = (Var)MemberwiseClone();
+        alias.Symbol = string.Empty;
+        alias.Key = null;
+        alias.Collection = null;
+        alias.LvalueMark = 0;
+        return alias;
+    }
+
     #endregion
 
     #region Formatting Operations (Strategy Pattern)

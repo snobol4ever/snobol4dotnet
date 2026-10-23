@@ -71,7 +71,7 @@ public sealed class SystemStack : IEnumerable<Var>
         if (succeeded)
             return false;
 
-        Push(new StringVar(false) { Succeeded = false });
+        x.PushFailedValue();
         return true;
     }
 

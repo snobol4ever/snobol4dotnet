@@ -181,6 +181,16 @@ public partial class Executive
             Parent.WriteReportLine(TextWriter.Null, text, true);
     }
 
+    // The failure value that takes the place of operands taken off the stack after a failure (an operator, a call or a subscript that
+    // does not run): the failure began at or below it, so an operand pushed after it is not the one that failed, as a negation asks
+    // (REVERSE(' 12 ') * -~1 * ~6 fails: the ~ of 6 is no negation of the failure ~1 began, which the operators after it moved down)
+    internal void PushFailedValue()
+    {
+        SystemStack.Push(new StringVar(false) { Succeeded = false });
+        if (FailureOrigin > SystemStack.Count - 1)
+            FailureOrigin = SystemStack.Count - 1;
+    }
+
     public StringVar NonExceptionFailure()
     {
         Failure = true;

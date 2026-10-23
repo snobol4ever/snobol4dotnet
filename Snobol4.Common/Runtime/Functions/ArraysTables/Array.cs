@@ -54,7 +54,7 @@ public partial class Executive
         {
             for (var i = 0; i <= count; ++i)
                 SystemStack.Pop();
-            SystemStack.Push(new StringVar(false) { Succeeded = false });
+            PushFailedValue();
             return;
         }
 
@@ -80,7 +80,7 @@ public partial class Executive
         // Mirrors the contract of NonExceptionFailure(): Failure=true + sentinel pushed.
         if (Failure)
         {
-            SystemStack.Push(new StringVar(false) { Succeeded = false });
+            PushFailedValue();
             return;
         }
         if (Parent.BuildOptions.TraceStatements)

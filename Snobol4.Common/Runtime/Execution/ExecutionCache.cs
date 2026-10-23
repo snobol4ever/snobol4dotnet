@@ -189,7 +189,7 @@ public partial class Executive
         if (Failure && argumentCount > 0)
         {
             for (var i = 0; i < argumentCount; ++i) SystemStack.Pop();
-            SystemStack.Push(new StringVar(false) { Succeeded = false });
+            PushFailedValue();
             return;
         }
         if (SystemStack.ExtractArguments(argumentCount, _reusableArgList, this))

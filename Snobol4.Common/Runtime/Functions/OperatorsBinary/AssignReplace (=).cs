@@ -30,7 +30,7 @@ public partial class Executive
         {
             SystemStack.Pop();
             SystemStack.Pop();
-            SystemStack.Push(new StringVar(false) { Succeeded = false });
+            PushFailedValue();
             return;
         }
 

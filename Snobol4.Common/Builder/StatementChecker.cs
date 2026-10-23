@@ -43,8 +43,10 @@ internal sealed class StatementChecker(Builder parent)
     // generated after the ones to its left, and a name is checked for before what is inside it (A . (1 / 0) is 212, (1 / 0) . A 14)
     // NameConstant is the name a name operator makes of the operand as the statement is compiled: SPITBOL's compiler takes .X of a
     // variable, of a keyword and of a deferred expression for a constant NAME, so +.X is 4, .X + 1 is 1 and .&ERRTEXT 'z' is 8 then
+    // IndirectionError is 239 for an indirection of a constant that is no string, number or name ($ARB, $LEN(1), $*X): SPITBOL's compiler
+    // refuses it under unary . and @, which generate it by name, and finds its value as the program runs anywhere else
     private sealed record Operand(Kind Kind, Var? Value = null, Operand? Subject = null, string Name = "", bool Nested = false,
-        bool PatternMatch = false, bool Fixed = false, int Error = 0, Var? NameConstant = null);
+        bool PatternMatch = false, bool Fixed = false, int Error = 0, Var? NameConstant = null, int IndirectionError = 0);
 
     private static readonly Operand ArrayMark = new(Kind.ArrayMark);
 
@@ -115,6 +117,7 @@ internal sealed class StatementChecker(Builder parent)
     }
 
     private const int ValueWhereNameIsRequired = 212;
+    private const int IndirectionOperandIsNotName = 239;
 
     // cdgnm accepts a variable, an array or table reference, a call, a deferred expression, an indirection and a keyword; a literal
     // or a value that is no name is error 212
@@ -303,6 +306,12 @@ internal sealed class StatementChecker(Builder parent)
                                 break;
                             }
 
+                            if (token.MatchedString != "&" && operand.Error == 0 && operand.IndirectionError != 0)
+                            {
+                                stack.Add(new Operand(Kind.Value, Error: operand.IndirectionError));
+                                break;
+                            }
+
                             // the name of a fixed name (a variable, a keyword, a deferred expression) is a constant NAME, and the cursor
                             // assignment into one a constant pattern, which stands for it here
                             stack.Add(token.MatchedString switch
@@ -324,7 +333,8 @@ internal sealed class StatementChecker(Builder parent)
 
                         // an indirection takes a value and is a name
                         case "$":
-                            stack.Add(new Operand(Kind.Name, Error: operand.Error));
+                            stack.Add(new Operand(Kind.Name, Error: operand.Error,
+                                IndirectionError: operand.Value is PatternVar or ExpressionVar ? IndirectionOperandIsNotName : 0));
                             break;
 
                         default:

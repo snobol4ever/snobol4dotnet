@@ -12,6 +12,14 @@ public partial class Executive
     // The function level the innermost evaluated expression runs at: an error at that level is in the expression's own code
     internal long ExpressionFunctionLevel = -1;
 
+    // Whether an error in the innermost evaluated expression's own code ends that evaluation (ErrorEndsEvaluation). In SPITBOL the
+    // error unwinds to the frame of the innermost program-defined function call or of the EVAL, whichever it meets first, and the
+    // statement of a function shares its frame with the call (err04, flprt and gtcef): an EVAL that a function's statement makes goes
+    // on from the error as a statement does, and one in the main program, or inside another evaluated expression at the same function
+    // level, fails as a whole. (An EVAL inside a negation, an interrogation or a choice of a function's statement fails as a whole in
+    // SPITBOL too; that frame is not followed here.)
+    internal bool EvaluationEndsOnError = true;
+
     // The program runs on a thread with a stack large enough for the depth SPITBOL's stack allows (-s bytes of 72-byte frames
     // at the least) at the .NET frames each level takes; the thread that called goes on afterwards with the program's state
     private int OnLargeStack(Func<int> run)
@@ -184,6 +192,9 @@ public partial class Executive
         Failure        = false;   // sub-expression always starts clean
         InitExecutionCache();     // no-op after first call
         var savedExpressionLevel = ExpressionFunctionLevel;
+        var savedEndsOnError = EvaluationEndsOnError;
+        var endsOnError = AmpFunctionLevel == 0 || ExpressionDepth > 0 && ExpressionFunctionLevel == AmpFunctionLevel;
+        EvaluationEndsOnError = endsOnError;
         ExpressionFunctionLevel = AmpFunctionLevel;
         ExpressionDepth++;
         try
@@ -194,6 +205,7 @@ public partial class Executive
         {
             ExpressionDepth--;
             ExpressionFunctionLevel = savedExpressionLevel;
+            EvaluationEndsOnError = savedEndsOnError;
         }
 
         var exprFailure = LastExpressionFailure;

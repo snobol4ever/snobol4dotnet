@@ -22,9 +22,10 @@ public partial class Executive
 
     // An error ends the evaluation it occurs in, so that neither a negation nor a choice's next alternative goes on from it, while a
     // SETEXIT handler waits for it, and when it occurs in the code of an evaluated expression (EVAL of a string or an expression, not
-    // a statement of a function the expression calls), which then fails as a whole, as in SPITBOL: EVAL('~(1 / N)') fails
+    // a statement of a function the expression calls) that ends on an error (EvaluationEndsOnError), which then fails as a whole, as in
+    // SPITBOL: EVAL('~(1 / N)') fails in the main program and is the null string in a function's statement
     internal bool ErrorEndsEvaluation =>
-        FailureIsError && (OnErrorGoto > 0 || ExpressionDepth > 0 && ErrorFunctionLevel == ExpressionFunctionLevel);
+        FailureIsError && (OnErrorGoto > 0 || ExpressionDepth > 0 && ErrorFunctionLevel == ExpressionFunctionLevel && EvaluationEndsOnError);
 
     public void LogRuntimeException(int code, bool fatal, long? errorType = null)
     {

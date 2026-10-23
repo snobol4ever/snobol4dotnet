@@ -1704,11 +1704,14 @@ public partial class Lexer
 
         switch (lexLine[currentPos].TokenType)
         {
+            // a deferred expression already made of a later star (*$~*X: the stars are taken right to left) is an operand like any
+            // other, so the whole of $~*X is deferred, as in SPITBOL
             case Token.Type.SPACE:
             case Token.Type.REAL:
             case Token.Type.STRING:
             case Token.Type.INTEGER:
             case Token.Type.IDENTIFIER:
+            case Token.Type.EXPRESSION:
                 CreateSimpleStarExpression(lexLine, starPos, currentPos + 1);
                 return;
 

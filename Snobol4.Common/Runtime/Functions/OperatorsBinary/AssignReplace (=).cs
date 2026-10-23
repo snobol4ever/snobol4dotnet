@@ -449,7 +449,7 @@ public partial class Executive
     // value came from (FAIL, &TRIM), not to the value, so X = FAIL then X = 1 is an ordinary assignment
     // What a deferred target gave can be assigned through: a NAME, a variable, an element or a field, but not the value a
     // program-defined function handed back by RETURN, which carries the function's own variable
-    private bool IsName(Var target) =>
+    internal bool IsName(Var target) =>
         ValueInNamesPlace(target) == 0 && (target is NameVar || target.Symbol != "" || target.Key is not null);
 
     private static Var StoredCopy(Var value)

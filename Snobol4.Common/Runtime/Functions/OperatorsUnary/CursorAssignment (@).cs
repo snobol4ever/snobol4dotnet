@@ -16,6 +16,13 @@ public partial class Executive
             return;
         }
 
+        // so is a builtin's value (@SIZE('a')): no name, unless it is a deferred expression, found at match time
+        if (v0 is not ExpressionVar && !IsName(v0))
+        {
+            LogRuntimeException(21);
+            return;
+        }
+
         SystemStack.Push(new PatternVar(new AtSign(v0, this)));
     }
 }

@@ -17,6 +17,13 @@ public partial class Executive
             return;
         }
 
+        // so is a builtin's value (LEN(1) . BREAK('a'), . SIZE('a')): no name, unless it is a deferred expression, found at match time
+        if (arguments[1] is not ExpressionVar && !IsName(arguments[1]))
+        {
+            LogRuntimeException(21);
+            return;
+        }
+
         // *X . V defers X to match time, as $ does: evaluating it here read X before the match
         // could set it (Budne's uneval2) and, for *LEN(3) . V, failed with error 212
         if (arguments[0] is ExpressionVar expressionVar)

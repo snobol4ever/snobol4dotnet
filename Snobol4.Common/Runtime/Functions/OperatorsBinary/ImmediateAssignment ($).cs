@@ -16,6 +16,13 @@ public partial class Executive
             return;
         }
 
+        // so is a builtin's value (LEN(1) . BREAK('a'), . SIZE('a')): no name, unless it is a deferred expression, found at match time
+        if (arguments[1] is not ExpressionVar && !IsName(arguments[1]))
+        {
+            LogRuntimeException(21);
+            return;
+        }
+
         if (arguments[0] is ExpressionVar expressionVar)
         {
             arguments[0] = new PatternVar(UnevaluatedPattern.Structure(expressionVar.FunctionName));

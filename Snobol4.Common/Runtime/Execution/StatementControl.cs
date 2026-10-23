@@ -20,6 +20,12 @@ public partial class Executive
     // SPITBOL too; that frame is not followed here.)
     internal bool EvaluationEndsOnError = true;
 
+    // The last error an evaluation ended on and failed for (its ErrorSerial), and the expression depth that evaluation ran at: the
+    // error is that evaluation's failure, so a pattern node whose deferred expression called the EVAL fails, and the match goes on,
+    // as in SPITBOL, where the error unwinds to the frame of that EVAL ('abc' ? (*EVAL("(1 / N, 'b')") | 'c') matches c)
+    internal long AbsorbedErrorSerial = -1;
+    internal int AbsorbedErrorDepth;
+
     // The program runs on a thread with a stack large enough for the depth SPITBOL's stack allows (-s bytes of 72-byte frames
     // at the least) at the .NET frames each level takes; the thread that called goes on afterwards with the program's state
     private int OnLargeStack(Func<int> run)
@@ -211,6 +217,12 @@ public partial class Executive
         var exprFailure = LastExpressionFailure;
         InstructionPointer = savedIP;
         Failure            = exprFailure;
+        // an error in this expression's own code that ended it is this evaluation's failure (AbsorbedErrorSerial)
+        if (exprFailure && FailureIsError && OnErrorGoto == 0 && endsOnError && ErrorFunctionLevel == AmpFunctionLevel)
+        {
+            AbsorbedErrorSerial = ErrorSerial;
+            AbsorbedErrorDepth = ExpressionDepth + 1;
+        }
         // the evaluation that an error ended fails as an ordinary failure of its own to the code that asked for it, so
         // (EVAL('1 / N'), 'f') is f, unless a SETEXIT handler waits for the error
         if (exprFailure && OnErrorGoto == 0)

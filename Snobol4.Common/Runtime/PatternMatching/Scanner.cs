@@ -207,12 +207,15 @@ public class Scanner
             {
                 Exec.Failure = false;
                 var errors = Exec.ErrorSerial;
+                var depth = Exec.ExpressionDepth;
                 mr = ((TerminalPattern)node.Self).Scan(node.SelfIndex, this);
 
                 // An error the scan raised at the match's own level (SPAN(*Y) with Y null, LEN(*'z')) ends the whole match, as in SPITBOL,
                 // where it failed only this node and the scan went on to the next cursor, raising it again at each; an error inside a
-                // function the scan called failed only that function's statement, and the match goes on
-                if (Exec.ErrorSerial != errors && Exec.ErrorFunctionLevel == _matchFunctionLevel)
+                // function the scan called failed only that function's statement, and one an EVAL inside the node's own deferred
+                // expression ended failed only that EVAL (AbsorbedErrorSerial), and the match goes on
+                if (Exec.ErrorSerial != errors && Exec.ErrorFunctionLevel == _matchFunctionLevel
+                    && !(Exec.AbsorbedErrorSerial == Exec.ErrorSerial && Exec.AbsorbedErrorDepth > depth + 1))
                     return MatchResult.Abort(_state);
 
                 // Record failure of pure terminals for subsequent alt-stack restores.

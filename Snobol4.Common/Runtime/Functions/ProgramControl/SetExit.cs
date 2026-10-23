@@ -22,7 +22,9 @@ public partial class Executive
 
         if (arguments[0].Convert(VarType.NAME, out var name, out _, this))
         {
-            var label = Parent.FoldCase(((NameVar)name).Pointer);
+            // a label read from a string folds as &CASE says at that moment, as in SPITBOL: with &CASE 0 under -b, SETEXIT('lab1') finds
+            // no label LAB1 (187)
+            var label = FoldName(((NameVar)name).Pointer);
 
             // (a label that is not there leaves the handler as it was, and the error is the old handler's to take)
             if (LabelTable.TryGetValue(label, out var number))

@@ -9,6 +9,9 @@ public partial class Executive
     // How many expressions (EVAL, deferred expressions of patterns) are being evaluated, the functions they call included
     internal int ExpressionDepth;
 
+    // The function level the innermost evaluated expression runs at: an error at that level is in the expression's own code
+    internal long ExpressionFunctionLevel = -1;
+
     // The program runs on a thread with a stack large enough for the depth SPITBOL's stack allows (-s bytes of 72-byte frames
     // at the least) at the .NET frames each level takes; the thread that called goes on afterwards with the program's state
     private int OnLargeStack(Func<int> run)
@@ -180,6 +183,8 @@ public partial class Executive
         var savedIP    = InstructionPointer;
         Failure        = false;   // sub-expression always starts clean
         InitExecutionCache();     // no-op after first call
+        var savedExpressionLevel = ExpressionFunctionLevel;
+        ExpressionFunctionLevel = AmpFunctionLevel;
         ExpressionDepth++;
         try
         {
@@ -188,11 +193,16 @@ public partial class Executive
         finally
         {
             ExpressionDepth--;
+            ExpressionFunctionLevel = savedExpressionLevel;
         }
 
         var exprFailure = LastExpressionFailure;
         InstructionPointer = savedIP;
         Failure            = exprFailure;
+        // the evaluation that an error ended fails as an ordinary failure of its own to the code that asked for it, so
+        // (EVAL('1 / N'), 'f') is f, unless a SETEXIT handler waits for the error
+        if (exprFailure && OnErrorGoto == 0)
+            FailureIsError = false;
     }
 }
 

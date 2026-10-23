@@ -117,8 +117,9 @@ public partial class Executive
     /// </summary>
     internal void ChoiceStart()
     {
-        // an error that a SETEXIT handler waits for goes no further: the next alternative is not tried, as in SPITBOL
-        if (Failure && !(FailureIsError && OnErrorGoto > 0)) { SystemStack.Pop(); Failure = false; }
+        // an error that ends the evaluation (a SETEXIT handler waits for it, or it is in an evaluated expression) goes no further: the
+        // next alternative is not tried, as in SPITBOL
+        if (Failure && !ErrorEndsEvaluation) { SystemStack.Pop(); Failure = false; }
     }
 
     /// <summary>

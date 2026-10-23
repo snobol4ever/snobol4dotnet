@@ -20,6 +20,12 @@ public partial class Executive
     // negation nor a choice's next alternative goes on from it, as in SPITBOL (Negation, ChoiceStart)
     internal bool FailureIsError;
 
+    // An error ends the evaluation it occurs in, so that neither a negation nor a choice's next alternative goes on from it, while a
+    // SETEXIT handler waits for it, and when it occurs in the code of an evaluated expression (EVAL of a string or an expression, not
+    // a statement of a function the expression calls), which then fails as a whole, as in SPITBOL: EVAL('~(1 / N)') fails
+    internal bool ErrorEndsEvaluation =>
+        FailureIsError && (OnErrorGoto > 0 || ExpressionDepth > 0 && ErrorFunctionLevel == ExpressionFunctionLevel);
+
     public void LogRuntimeException(int code, bool fatal, long? errorType = null)
     {
         if (PreEvaluating)

@@ -214,8 +214,8 @@ public partial class Executive
                 case OpCode.IndexCollection: IndexCollection(instr.IntOperand); break;
 
                 case OpCode.ChoiceStart:
-                    // an error that a SETEXIT handler waits for goes no further (ChoiceStart in MsilHelpers)
-                    if (Failure && !(FailureIsError && OnErrorGoto > 0)) { SystemStack.Pop(); Failure = false; }
+                    // an error that ends the evaluation goes no further (ChoiceStart in MsilHelpers)
+                    if (Failure && !ErrorEndsEvaluation) { SystemStack.Pop(); Failure = false; }
                     break;
 
                 case OpCode.Jump:          InstructionPointer = instr.IntOperand;                     break;

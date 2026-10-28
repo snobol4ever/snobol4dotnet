@@ -71,6 +71,14 @@ public class NameConversionStrategy : IConversionStrategy
 
     private static bool ConvertToInteger(NameVar nameSelf, out Var varOut, out object valueOut, Executive exec)
     {
+        // a name is a number by its text, and the name of an element or a keyword has none: it is no number, not the null string's 0
+        if (!nameSelf.HasText)
+        {
+            varOut = StringVar.Null();
+            valueOut = "";
+            return false;
+        }
+
         var stringVar = new StringVar(nameSelf.Pointer);
         if (!stringVar.Convert(Executive.VarType.INTEGER, out varOut, out valueOut, exec))
         {
@@ -84,6 +92,14 @@ public class NameConversionStrategy : IConversionStrategy
 
     private static bool ConvertToReal(NameVar nameSelf, out Var varOut, out object valueOut, Executive exec)
     {
+        // a name is a number by its text, and the name of an element or a keyword has none: it is no number, not the null string's 0
+        if (!nameSelf.HasText)
+        {
+            varOut = StringVar.Null();
+            valueOut = "";
+            return false;
+        }
+
         var stringVar = new StringVar(nameSelf.Pointer);
         if (!stringVar.Convert(Executive.VarType.REAL, out varOut, out valueOut, exec))
         {

@@ -1722,7 +1722,7 @@ public partial class Lexer
                 return;
 
             case Token.Type.L_PAREN_CHOICE:
-                if (FindMatchingBracket(lexLine, ref currentPos, Token.Type.R_PAREN_CHOICE))
+                if (FindMatchingBracket(lexLine, ref currentPos, Token.Type.R_PAREN_CHOICE) && SkipSubscripts(lexLine, ref currentPos))
                 {
                     CreateStarExpression(lexLine, starPos, currentPos);
                 }
@@ -1730,7 +1730,7 @@ public partial class Lexer
 
             case Token.Type.IDENTIFIER_FUNCTION:
                 currentPos++;
-                if (FindMatchingBracket(lexLine, ref currentPos, Token.Type.R_PAREN_FUNCTION))
+                if (FindMatchingBracket(lexLine, ref currentPos, Token.Type.R_PAREN_FUNCTION) && SkipSubscripts(lexLine, ref currentPos))
                 {
                     CreateStarExpression(lexLine, starPos, currentPos);
                 }
@@ -1739,21 +1739,36 @@ public partial class Lexer
             // *T[C], *A<I,J>, *T['a']['b']: the subscripted element is deferred whole, as in SPITBOL, so the
             // subscript is evaluated at match time (Gimpel's hyphenat matches *DIGRAM_TBL[C] after $ C)
             case Token.Type.IDENTIFIER_ARRAY_OR_TABLE:
-                currentPos++;
-                while (currentPos < lexLine.Count && lexLine[currentPos].TokenType is Token.Type.L_SQUARE or Token.Type.L_ANGLE)
+                if (SkipSubscripts(lexLine, ref currentPos))
                 {
-                    var closing = lexLine[currentPos].TokenType == Token.Type.L_SQUARE ? Token.Type.R_SQUARE : Token.Type.R_ANGLE;
-                    if (!FindMatchingBracket(lexLine, ref currentPos, closing))
-                        return;
-                    currentPos++;
+                    CreateStarExpression(lexLine, starPos, currentPos);
                 }
-                CreateStarExpression(lexLine, starPos, currentPos - 1);
                 return;
 
             default:
                 // For any other token type, we can't create a star expression
                 return;
         }
+    }
+
+    /// <summary>
+    /// Moves past the subscripts that follow an operand: under a star they belong to it, so *T[C], *F(X)[1] and *(A)&lt;2&gt; each
+    /// defer the whole element, as in SPITBOL, not the operand alone.
+    /// </summary>
+    /// <param name="lexLine">The token list to search.</param>
+    /// <param name="position">The operand's last token; updated to the last subscript's closing bracket, if any.</param>
+    /// <returns><c>true</c> if every subscript's closing bracket was found; otherwise, <c>false</c>.</returns>
+    private bool SkipSubscripts(List<Token> lexLine, ref int position)
+    {
+        while (position + 1 < lexLine.Count && lexLine[position + 1].TokenType is Token.Type.L_SQUARE or Token.Type.L_ANGLE)
+        {
+            position++;
+            var closing = lexLine[position].TokenType == Token.Type.L_SQUARE ? Token.Type.R_SQUARE : Token.Type.R_ANGLE;
+            if (!FindMatchingBracket(lexLine, ref position, closing))
+                return false;
+        }
+
+        return true;
     }
 
     /// <summary>

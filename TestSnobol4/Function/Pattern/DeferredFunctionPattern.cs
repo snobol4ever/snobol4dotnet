@@ -58,4 +58,30 @@ public class DeferredFunctionPattern
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("x el deep b3", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
     }
+
+    [TestMethod]
+    public void TEST_DeferredFunctionPattern_subscripted_call_is_deferred()
+    {
+        // sbl -bf: *SORT(T)[1, 2], *F(A)[1], *(A)<2> and *ARRAY(2, 'q')[1] defer the whole element of what the call or the parens
+        // give, as *T[C] does, so EVAL reads it later and a match reads SORT(T)[N, 1] with N set after the star; snobol4dotnet
+        // deferred the call alone and subscripted the expression, error 235 (found by the infinite_snobol4 generator at scope 9,
+        // '7r' ? *SORT(u)[d, 1] | (TAN(0.)))
+        var build = SetupTests.SetupScript("-bf", """
+                 DEFINE('F(Y)')                  :(FE)
+         F       F = Y                           :(RETURN)
+         FE      T = TABLE()
+                 T['k'] = 'v'
+                 T['j'] = 'w'
+                 A = ARRAY(2, 'a')
+                 R = EVAL(*SORT(T)[1, 2]) ' ' EVAL(*F(A)[1]) ' ' EVAL(*(A)<2>) ' ' EVAL(*ARRAY(2, 'q')[1])
+                 E = *SORT(T)[N, 1]
+                 N = 2
+                 R = R ' ' EVAL(E) ' ' DATATYPE(E)
+                 'zkw' LEN(1) *SORT(T)[N, 1] @K
+                 R = R ' ' K
+         END
+         """);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("w a a q k EXPRESSION 2", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
+    }
 }

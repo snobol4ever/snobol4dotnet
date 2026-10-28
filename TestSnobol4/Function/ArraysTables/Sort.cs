@@ -361,6 +361,37 @@ end";
             ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r")]).Data);
     }
 
+    /// <summary>
+    /// A column the array or table does not have is error 258, and the statement fails, as in SPITBOL: SORT(T, 3) and RSORT(T, 0) of
+    /// a table, SORT(A, 3) of a two-column array. Under &amp;ERRLIMIT the program went on and sorted by a column before the first, and
+    /// the console died of an unhandled ArgumentOutOfRangeException (found by the infinite_snobol4 generator at scope 9, RSORT(u, 3)).
+    /// sbl -b answered the line.
+    /// </summary>
+    [TestMethod]
+    public void TEST_Sort_a_column_out_of_range_is_error_258_and_fails()
+    {
+        var build = SetupTests.SetupScript("-b", @"
+        &ERRLIMIT = 10
+        T = TABLE()
+        T['b'] = 2
+        T['a'] = 1
+        X = 'none'
+        X = SORT(T, 3)
+        E1 = &ERRTYPE
+        &ERRTYPE = 0
+        Y = 'none'
+        Y = RSORT(T, 0)
+        E2 = &ERRTYPE
+        &ERRTYPE = 0
+        A = ARRAY('2,2')
+        Z = 'none'
+        Z = SORT(A, 3)
+        E3 = &ERRTYPE
+        R = X ' ' E1 ' ' Y ' ' E2 ' ' Z ' ' E3 ' ' SORT(T, 2)[2, 1]
+end");
+        Assert.AreEqual("none 258 none 258 none 258 b", build.Execute!.IdentifierTable["R"].ToString());
+    }
+
     [TestMethod]
     public void TEST_Sort_table_without_entries_fails()
     {

@@ -59,7 +59,7 @@ public partial class Executive
 
             default:
                 LogRuntimeException(258);
-                break;
+                return;
         }
 
         var sortColumn = column - array.LowerBounds[0];

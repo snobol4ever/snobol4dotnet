@@ -11,13 +11,14 @@ SNOBOL4.NET compiles and runs SNOBOL4 with the SPITBOL extensions in C# on .NET 
 
 ```bash
 dotnet build Snobol4.sln                                   # whole solution, Debug
-dotnet build Snobol4/Snobol4.csproj -c Release             # just the console compiler
+dotnet build Snobol4/Snobol4.csproj -c Release -p:ReadyToRunBuild=false   # just the console compiler, no ReadyToRun pass
 bash scripts/test_in_batches.sh                            # all unit tests (MSTest), in batches of 100
+bash scripts/rungs_entries_equal_ref.sh <entry>...         # named entries of corpus/tests/snobol4/ALL.sno, each run alone under -bf against sbl's ref
 python3 scripts/sweep/ctxrun.py 5 6                        # differential sweeps against sbl (run in an empty scratch dir; see scripts/sweep/README.md)
 
-# one class, one method, or a name pattern
+# one class, or one method (method names repeat across classes: TEST_Abort_001 is in both Abort and Fence)
 dotnet test TestSnobol4/TestSnobol4.csproj --filter "FullyQualifiedName~Test.Pattern.Abort"
-dotnet test TestSnobol4/TestSnobol4.csproj --filter "Name=TEST_Abort_001"
+dotnet test TestSnobol4/TestSnobol4.csproj --filter "FullyQualifiedName=Test.Pattern.Abort.TEST_Abort_001"
 
 # run a program (-b suppresses the sign-on banner)
 dotnet Snobol4/bin/Release/net10.0/Snobol4.dll -b prog.sno < prog.in
@@ -30,8 +31,9 @@ bash build_native.sh                                       # rebuild the committ
 dotnet run --project benchmarks/Benchmarks.csproj -c Release
 ```
 
-- **The suite is not all green.** A known set of tests fails on SPITBOL answers that wait on Lon's rulings (recorded in `.github/GOAL-HQ-DOTNET.md`). Run the affected batch before you change anything and compare failures after, rather than expecting zero.
+- **The suite is green.** At `1a94477` it ran 3,301 tests: 3,289 passed, 0 failed and 12 skipped (README, *Test Results*). A failure is therefore new. Run the affected batch before you change anything, so you know whether your change caused it. The README's table of the eleven program suites graded against `sbl -bf` is the other bar.
 - **Run the suite in batches of 100, never in one `dotnet test` of the whole suite.** Lon, 2026-10-18: *"You better be running tests in batches of 100."* A whole-suite run intermittently hangs or crashes its test host and loses every result. `scripts/test_in_batches.sh` runs each batch in its own bounded host and names any batch that did not complete.
+- **Builds are light by default.** `Directory.Build.rsp` gives every `dotnet build` and `dotnet test` `-maxcpucount:1 -nodeReuse:false -p:UseSharedCompilation=false`, because the machine is shared. A `-m` on the command line overrides it. A Release build of `Snobol4` also runs a ReadyToRun `dotnet publish` after the build and copies the precompiled `Snobol4.dll` and `Snobol4.Common.dll` over the plain ones (the `ReadyToRunBuildOutput` target in `Snobol4/Snobol4.csproj`). That pass is a second compile, and `-p:ReadyToRunBuild=false` skips it while you iterate.
 - `Snobol4W` targets `net10.0-windows` and sets `EnableWindowsTargeting` in its own csproj, so the solution builds on Linux without extra flags.
 - There is no separate linter. `.editorconfig` holds the style rules: file-scoped namespaces, `_camelCase` private fields, `using` outside the namespace.
 - The bridge smokes in `scripts/test_smoke_dot_bridge*.sh` run the Release `Snobol4.dll` against the `beauty` demo. Their defaults (`SNO4_REPO=/home/claude/snobol4dotnet`, `CORPUS=/home/claude/corpus`, `BEAUTY=$CORPUS/programs/snobol4/beauty`) usually need overriding. In the current corpus layout, beauty lives at `corpus/demos/snobol4/beauty`.
@@ -69,6 +71,7 @@ The old Roslyn C#-codegen engine is gone, even though `PR_DESCRIPTION.md`, some 
   - `Scanner` memoizes failures of side-effect-free terminals at a given cursor. A terminal with side effects must not be added to that memo list.
 - **External functions:** `LOAD` lives in `Runtime/Functions/FunctionControl/Load.cs`. It loads .NET assemblies through `ExternalLibrary/IExternalLibrary`, `IStatefulExternalLibrary`, or a reflection-based auto-prototype for plain C#/F#/VB classes. It also loads native C libraries over the SPITBOL XNBLK protocol.
 - **Monitor bridge:** `Runtime/Monitor/MonitorIpc.cs` streams VALUE/CALL/RETURN/LABEL and pattern Byrd-box events to an external sync-step monitor. It stays dormant unless `MONITOR_READY_PIPE` and `MONITOR_GO_PIPE` are set, and the bridge smokes check that it really is dormant.
+- **The `-s` stack:** `Runtime/Execution/StatementControl.cs` runs the program on a thread whose .NET stack is sized from `-s`. `Define.cs` and `UnevaluatedPattern.cs` charge each call level the bytes SPITBOL's stack would take and raise error 246 past `-s`, so recursion depth matches `sbl` rather than the .NET stack.
 - **Snocone:** `Builder/SnoconeLexer.cs` and `SnoconeParser.cs` exist and are unit-tested (`TestSnobol4/TestSnocone`), but nothing in the compile pipeline or command line calls them yet.
 
 ### Tests (`TestSnobol4/`, MSTest)
@@ -86,8 +89,8 @@ The old Roslyn C#-codegen engine is gone, even though `PR_DESCRIPTION.md`, some 
 
 Don't take these as truth. Measure instead.
 
-- `BUILDING.md` says xUnit, about 1,876 tests and a required `-p:EnableWindowsTargeting=true`. The suite is MSTest with over 2,500 tests, and the flag isn't needed. Its `CORPUS=.../snobol4corpus/benchmarks` example names the old corpus layout; the runner now wants the folder holding the `.sno` files, `corpus/benchmarks/snobol4/`.
-- `README.jeff.md` claims "zero failures".
+- `BUILDING.md` says xUnit, about 1,876 tests and a required `-p:EnableWindowsTargeting=true`. The suite is MSTest with 3,301 tests, and the flag isn't needed. Its `CORPUS=.../snobol4corpus/benchmarks` example names the old corpus layout; the runner now wants the folder holding the `.sno` files, `corpus/benchmarks/snobol4/`.
+- `README.jeff.md` gives old counts (1,874 of 1,876 tests, a corpus of 106 programs) and old benchmark timings. `README.md`'s *Test Results* is current.
 - `PR_DESCRIPTION.md` describes a Roslyn fallback switch that no longer exists.
 - The `corpus` submodule (`.gitmodules` → `SNOBOL4-plus/SNOBOL4-corpus`) is a gitlink to an empty folder, and the `Makefile` includes a `../SNOBOL4-corpus/run/sno.mk` that doesn't exist. The corpus is the sibling checkout `../corpus` (`snobol4ever/corpus`).
 - Six `.dll` files are tracked in git: the four `CustomFunction/Spitbol*Lib/libspitbol_*.dll` fixtures, `Snobol4/Test Files/Init.dll` and `TestSnobol4/test2.dll`. `.gitignore` covers `bin/` and `obj/`, so don't add to them.

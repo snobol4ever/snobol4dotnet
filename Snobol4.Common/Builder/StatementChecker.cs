@@ -175,17 +175,28 @@ internal sealed class StatementChecker(Builder parent)
                 case Token.Type.R_ANGLE:
                 case Token.Type.R_SQUARE:
                 {
-                    // the subscripts and the array under them become one name, with the first error of its subscripts
+                    // the subscripts and the array under them become one name, with the first error of the array and its subscripts.
+                    // The array is a variable's (its mark) or the value the brackets follow, as a call's result is in F(X)[1], whose
+                    // element is a name as A[1] is
+                    var count = (int)token.IntegerValue;
+                    if (count < 1 || stack.Count < count + 1 || stack.Skip(stack.Count - count).Any(IsMark))
+                        return 0;
                     var error = 0;
-                    while (stack.Count > 0 && !ReferenceEquals(stack[^1], ArrayMark))
+                    for (var subscript = 0; subscript < count; subscript++)
                     {
                         if (stack[^1].Error != 0)
                             error = stack[^1].Error;
                         stack.RemoveAt(stack.Count - 1);
                     }
 
-                    if (stack.Count == 0)
-                        return 0;
+                    if (!ReferenceEquals(stack[^1], ArrayMark))
+                    {
+                        if (IsMark(stack[^1]))
+                            return 0;
+                        if (stack[^1].Error != 0)
+                            error = stack[^1].Error;
+                    }
+
                     stack[^1] = new Operand(Kind.Name, Error: error);
                     break;
                 }

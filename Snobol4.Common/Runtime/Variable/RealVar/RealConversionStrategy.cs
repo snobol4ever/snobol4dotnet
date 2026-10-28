@@ -137,7 +137,7 @@ public sealed class RealConversionStrategy : IConversionStrategy
         
         // the real's SPITBOL text, which compiles back to the real: 100.0 is 100., which .NET spelled 100, an integer
         var realString = SpitbolRealString(realSelf.Data);
-        exec.Parent.Code.ReadCodeInString($" A_ = *({realString})", exec.Parent.FilesToCompile[^1]);
+        exec.Parent.Code.ReadCodeInString($" A_ = *({realString})", exec.Parent.FilesToCompile[^1], oneLine: true);
         exec.Parent.BuildEval();
         
         exec.Parent.BuildOptions.CaseFolding = previousCaseFolding;

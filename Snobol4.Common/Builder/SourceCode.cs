@@ -56,6 +56,9 @@ public class SourceCode
     // True if an end statement was found
     internal bool EndFound { get; set; }
 
+    // The text being read is that of CODE or of EVAL, one line in which a line end is a character, not white space
+    internal bool OneLineText { get; private set; }
+
     // Builder invoking this class
     private readonly Builder _parent;
 
@@ -161,11 +164,14 @@ public class SourceCode
     /// </summary>
     /// <param name="source">The source code string to process</param>
     /// <param name="pathName">The logical path name for this source</param>
-    internal void ReadCodeInString(string source, string pathName)
+    internal void ReadCodeInString(string source, string pathName, bool oneLine = false)
     {
         InitializeLineCounters();
-        // CODE text keeps its trailing blanks: CODE(' A = 1 ; ') ends in a blank statement, as in SPITBOL
-        var lines = SplitLineByDelimiter(source, '\r', '\n');
+        // CODE text keeps its trailing blanks: CODE(' A = 1 ; ') ends in a blank statement, as in SPITBOL. The text of CODE and of
+        // EVAL is one line (oneLine): a line end in it is no separator but a character, error 230 or a bad label 214, as in SPITBOL;
+        // a saved program's source is read line by line
+        OneLineText = oneLine;
+        var lines = oneLine ? [source] : SplitLineByDelimiter(source, '\r', '\n');
 
         foreach (var line in lines)
         {
@@ -420,7 +426,9 @@ public class SourceCode
             }
 
             var statementsRead = SourceLines.Count;
-            ProcessSubLine(subLine.TrimEnd(), pathName, codeText);
+            // in the text of CODE only blanks and tabs are white space: a line end there is a character (CODE(' X = 1;' CHAR(10)) is a
+            // statement whose label field holds it, a bad label, 214)
+            ProcessSubLine(codeText ? subLine.TrimEnd(' ', '\t') : subLine.TrimEnd(), pathName, codeText);
             // compilation ends at the END statement, as in SPITBOL: nothing after END; on its line is a statement, in a source file or
             // in the text of CODE (CODE(' X = 1 :(L2);END;L2 X = 2') leaves L2 undefined)
             if (EndFound)
@@ -446,7 +454,7 @@ public class SourceCode
     /// <param name="pathName">Path to the source file</param>
     private void ProcessSubLine(string subLine, string pathName, bool codeText)
     {
-        if (string.IsNullOrWhiteSpace(subLine))
+        if (codeText ? subLine.All(c => c is ' ' or '\t') : string.IsNullOrWhiteSpace(subLine))
         {
             BlankLineCount++;
             return;

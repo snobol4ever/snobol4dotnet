@@ -73,7 +73,7 @@ public sealed class IntegerConversionStrategy : IConversionStrategy
                     exec.Parent.CodeMode = true;
                     exec.Parent.Code = new SourceCode(exec.Parent);
                     var trimmedValue = intSelf.Data.ToString(CultureInfo.CurrentCulture).Trim();
-                    exec.Parent.Code.ReadCodeInString($" A_ = *({trimmedValue})", exec.Parent.FilesToCompile[^1]);
+                    exec.Parent.Code.ReadCodeInString($" A_ = *({trimmedValue})", exec.Parent.FilesToCompile[^1], oneLine: true);
                     exec.Parent.BuildEval();
                     exec.Parent.BuildOptions.CaseFolding = previousCaseFolding;
                     varOut = new ExpressionVar(exec.StarFunctionList[^1]);

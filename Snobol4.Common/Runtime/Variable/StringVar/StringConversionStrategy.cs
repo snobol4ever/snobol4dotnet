@@ -92,7 +92,7 @@ public class StringConversionStrategy : IConversionStrategy
         exec.Parent.BuildOptions.CaseFolding = exec.AmpCaseFolding != 0;
         exec.Parent.CodeMode = true;
         exec.Parent.Code = new SourceCode(exec.Parent);
-        exec.Parent.Code.ReadCodeInString($" A_ = *({stringSelf.Data.Trim()})", exec.Parent.FilesToCompile[^1]);
+        exec.Parent.Code.ReadCodeInString($" A_ = *({stringSelf.Data.Trim()})", exec.Parent.FilesToCompile[^1], oneLine: true);
         // text that does not compile fails the conversion with &ERRTYPE set, printing nothing, as in SPITBOL
         var compiled = exec.CompileQuietly(() => { exec.Parent.BuildEval(); return true; });
         exec.Parent.BuildOptions.CaseFolding = previousCaseFolding;

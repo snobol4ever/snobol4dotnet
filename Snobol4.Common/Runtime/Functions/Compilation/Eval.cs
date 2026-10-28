@@ -47,7 +47,7 @@ public partial class Executive
                 Parent.BuildOptions.CaseFolding = AmpCaseFolding != 0;
                 Parent.CodeMode = true;
                 Parent.Code = new SourceCode(Parent);
-                Parent.Code.ReadCodeInString($" *({stringVar.Data.Trim()})", Parent.FilesToCompile[^1]);
+                Parent.Code.ReadCodeInString($" *({stringVar.Data.Trim()})", Parent.FilesToCompile[^1], oneLine: true);
                 Parent.Code.SourceLines[0].DeferredExpression = true;
                 // A string that does not compile makes EVAL fail with &ERRTYPE set to the compile error
                 // (EVAL('1 +') is 221, an out-of-range real 231), printing nothing; with &ERRLIMIT above 0 the

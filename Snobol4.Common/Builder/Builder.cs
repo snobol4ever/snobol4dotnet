@@ -418,7 +418,9 @@ public partial class Builder : IDisposable
 
         // SPITBOL ends each CODE block with an implicit statement that takes the next number, so the
         // following block numbers on after it (CODE(' A = &STNO ; B = &STNO') after a 12-statement program
-        // gives 13 and 14, and the next block starts at 16); its entry keeps the indices aligned
+        // gives 13 and 14, and the next block starts at 16); its entry keeps the indices aligned. A block that ends in its own END
+        // has no implicit statement: the entry takes the END's number, so the next block numbers on from the END (CODE('END') after a
+        // seven-statement program is 8, and the next block begins at 9)
         if (Code.SourceLines.Count > 0)
         {
             var last = Code.SourceLines[^1];
@@ -426,7 +428,7 @@ public partial class Builder : IDisposable
             Execute.SourceFiles.Add(last.PathName);
             Execute.SourceLineNumbers.Add(last.LineCountFile);
             Execute.SourceStatementNumbers.Add(stmtNumber + 1);
-            Execute.SourceStno.Add(stnoBase + Code.SourceLines.Count + Code.BlankLineCount + 1);
+            Execute.SourceStno.Add(stnoBase + Code.SourceLines.Count + Code.BlankLineCount + (Code.EndFound ? 0 : 1));
         }
     }
 

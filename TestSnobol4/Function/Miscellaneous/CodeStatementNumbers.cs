@@ -30,6 +30,21 @@ END").Replace("\r\n", "\n"));
     }
 
     [TestMethod]
+    public void TEST_CodeStatementNumbers_a_block_ending_in_END_has_no_implicit_end()
+    {
+        // sbl -b answers 9 / 13 for this seven-statement program: CODE('END') is statement 8 and ends its block, so the next block
+        // begins at 9; CODE(' OUTPUT = 1;END') takes 11 and 12 and no implicit end, so the next begins at 13. The console gave each
+        // such block an implicit end of its own as well (10 / 15; found by measuring the CODE road of DESIGN-PLAN step 11)
+        Assert.AreEqual("9\n13", SetupTests.RunWithInput(@"        C = CODE('END')
+        D = CODE(' X = &STNO :(BACK)')   :<D>
+BACK    OUTPUT = X
+        E = CODE(' OUTPUT = 1;END')
+        F = CODE(' Y = &STNO :(LAST)')   :<F>
+LAST    OUTPUT = Y
+END").Replace("\r\n", "\n").TrimEnd('\n'));
+    }
+
+    [TestMethod]
     public void TEST_CodeStatementNumbers_failed_compile_is_quiet()
     {
         // sbl -b answers "13 226 syntax error: missing right paren 233 226 16": CODE and CONVERT to CODE or

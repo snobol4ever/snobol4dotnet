@@ -169,6 +169,9 @@ public class SourceCode
 
         foreach (var line in lines)
         {
+            // compilation ends at the END statement: the lines after it are not read
+            if (EndFound)
+                break;
             LineCountFile++;
             CurrentPhysicalLines = [line];
             CurrentFirstStatementNumber = 0;
@@ -418,6 +421,10 @@ public class SourceCode
 
             var statementsRead = SourceLines.Count;
             ProcessSubLine(subLine.TrimEnd(), pathName, codeText);
+            // compilation ends at the END statement, as in SPITBOL: nothing after END; on its line is a statement, in a source file or
+            // in the text of CODE (CODE(' X = 1 :(L2);END;L2 X = 2') leaves L2 undefined)
+            if (EndFound)
+                return;
             if (SourceLines.Count > statementsRead && !ReferenceEquals(subLine, subLines[^1]))
             {
                 // SPITBOL skips the rest of the line after a bad label, and takes the next statement for the rest of one in error at

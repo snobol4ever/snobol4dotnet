@@ -64,6 +64,9 @@ internal enum OpCode : byte
     // --- A statement that is only its subject ---
     ReadSubject = 64,  // SUBJECT_VALUE: an input-associated subject reads a record (Executive.ReadInputOperand)
 
+    // --- A selection's beginning ---
+    ChoiceSkip  = 65,  // L_PAREN_CHOICE: if Failure, push the failed value and jump past the selection. Operand: its end
+
     // --- Control flow ---
     Jump            = 70,  // Unconditional. Operand: instruction index
     JumpOnSuccess   = 71,  // Jump if NOT failure

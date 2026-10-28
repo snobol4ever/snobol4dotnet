@@ -108,6 +108,12 @@ public partial class Builder
             null, [], null)
         ?? throw new MissingMethodException(nameof(Executive), "ReadSubject");
 
+    private static readonly MethodInfo _pushFailedValueMethod =
+        typeof(Executive).GetMethod("PushFailedValue",
+            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
+            null, [], null)
+        ?? throw new MissingMethodException(nameof(Executive), "PushFailedValue");
+
     private static readonly MethodInfo _choiceStartMethod =
         typeof(Executive).GetMethod("ChoiceStart",
             BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
@@ -999,6 +1005,23 @@ public partial class Builder
                 return true;
 
             // ── Choice operator (A,B) ─────────────────────────────────
+            case Token.Type.L_PAREN_CHOICE:
+            {
+                // A selection begins. When the expression has already failed, the selection is not evaluated: its value is the failed
+                // value, and the failure stays the expression's, since it is no failure of the first alternative. The end label is the
+                // selection's own, marked at its close with the label of each comma.
+                var endLabel = il.DefineLabel();
+                var goLabel  = il.DefineLabel();
+                choiceLabels.Push(endLabel);
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldfld, _failureField);
+                il.Emit(OpCodes.Brfalse, goLabel);
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Call, _pushFailedValueMethod);
+                il.Emit(OpCodes.Br, endLabel);
+                il.MarkLabel(goLabel);
+                return true;
+            }
             case Token.Type.COMMA_CHOICE:
             {
                 var skipLabel = il.DefineLabel();
@@ -1028,7 +1051,6 @@ public partial class Builder
             case Token.Type.L_ANGLE_FAILURE:
             case Token.Type.L_ANGLE_SUCCESS:
             case Token.Type.L_ANGLE_UNCONDITIONAL:
-            case Token.Type.L_PAREN_CHOICE:
             case Token.Type.L_PAREN_FAILURE:
             case Token.Type.L_PAREN_FUNCTION:
             case Token.Type.L_PAREN_SUCCESS:

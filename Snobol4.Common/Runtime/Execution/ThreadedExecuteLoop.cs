@@ -213,6 +213,11 @@ public partial class Executive
                 case OpCode.BinaryEquals:    _BinaryEquals();   break;
                 case OpCode.IndexCollection: IndexCollection(instr.IntOperand); break;
 
+                case OpCode.ChoiceSkip:
+                    // a selection that begins after a failure is not evaluated (L_PAREN_CHOICE in BuilderEmitMsil)
+                    if (Failure) { PushFailedValue(); InstructionPointer = instr.IntOperand; }
+                    break;
+
                 case OpCode.ChoiceStart:
                     // an error that ends the evaluation goes no further (ChoiceStart in MsilHelpers)
                     if (Failure && !ErrorEndsEvaluation) { SystemStack.Pop(); Failure = false; }

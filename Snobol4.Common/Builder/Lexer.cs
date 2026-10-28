@@ -21,7 +21,8 @@ public partial class Lexer
     /// </summary>
     /// <param name="Bracket">The bracket character (e.g., "(", "<", "[").</param>
     /// <param name="Context">The token type context for this bracket.</param>
-    private readonly record struct BracketStackEntry(string Bracket, Token.Type Context);
+    /// <param name="Open">The opening token, which a selection's close tells how many alternatives it has.</param>
+    private readonly record struct BracketStackEntry(string Bracket, Token.Type Context, Token? Open = null);
 
     // Lexical analysis state variables
     
@@ -667,6 +668,10 @@ public partial class Lexer
                 return ProcessRegularClosingBracket(sourceLine, Token.Type.R_ANGLE, ">");
 
             case Token.Type.L_PAREN_CHOICE:
+                // a selection's opening parenthesis carries its number of alternatives too, so that the code of a selection knows
+                // where it begins: a failure before it is not the failure of its first alternative
+                if (entry.Open is not null && _commaStack.Count > 0 && _commaStack.Peek() > 1)
+                    entry.Open.IntegerValue = _commaStack.Peek();
                 return ProcessRegularClosingBracket(sourceLine, Token.Type.R_PAREN_CHOICE, ")");
 
             case Token.Type.BINARY_AMPERSAND:
@@ -1022,9 +1027,10 @@ public partial class Lexer
     /// <param name="tokenType">The token type for this bracket.</param>
     private void ProcessOpenBracket(SourceLine sourceLine, string bracket, Token.Type tokenType)
     {
-        _bracketStack.Push(new BracketStackEntry(bracket, tokenType));
+        var open = new Token(tokenType, bracket, _bracketStack.Count + 1);
+        _bracketStack.Push(new BracketStackEntry(bracket, tokenType, open));
         _cursorCurrent++;
-        sourceLine.LexBody.Add(new Token(tokenType, bracket, _bracketStack.Count));
+        sourceLine.LexBody.Add(open);
         _commaStack.Push(1);
     }
 

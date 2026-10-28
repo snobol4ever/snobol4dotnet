@@ -401,6 +401,12 @@ internal sealed class ThreadedCodeCompiler
                     Emit(OpCode.ReadSubject);
                     break;
 
+                case Token.Type.L_PAREN_CHOICE:
+                    // A selection begins: after a failure it is skipped with the failed value as its value, since that failure is no
+                    // failure of its first alternative. Its end is patched at its close with the jump of each comma.
+                    _choiceStack.Push(EmitPlaceholder(OpCode.ChoiceSkip));
+                    break;
+
                 case Token.Type.COMMA_CHOICE:
                     // If the preceding expression succeeded, skip this alternative.
                     // Emit: pop stack, clear failure, then enter alternative body.
@@ -438,7 +444,6 @@ internal sealed class ThreadedCodeCompiler
                 case Token.Type.L_ANGLE_FAILURE:
                 case Token.Type.L_ANGLE_SUCCESS:
                 case Token.Type.L_ANGLE_UNCONDITIONAL:
-                case Token.Type.L_PAREN_CHOICE:
                 case Token.Type.L_PAREN_FAILURE:
                 case Token.Type.L_PAREN_FUNCTION:
                 case Token.Type.L_PAREN_SUCCESS:

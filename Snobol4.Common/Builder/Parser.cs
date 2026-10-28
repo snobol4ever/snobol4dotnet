@@ -223,7 +223,10 @@ public class Parser
                     break;
 
                 case var type when IsLeftDelimiter(type):
-                    // Rule 3: If the token is left parenthesis/bracket, push it
+                    // Rule 3: If the token is left parenthesis/bracket, push it. A selection's opening parenthesis is also output, as
+                    // its close is, so that its code begins where the selection does
+                    if (type == Token.Type.L_PAREN_CHOICE && token.IntegerValue > 1)
+                        outputTokenList.Add(token);
                     _operatorStack.Push(token);
                     break;
 

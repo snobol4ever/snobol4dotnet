@@ -101,19 +101,15 @@ public partial class Executive
         {
             x = -x;
             var whole = Math.Truncate(y);
-            if (Math.Abs(whole) > long.MaxValue)
-            {
-                LogRuntimeException(266);
-                return null;
-            }
-
             if (whole - y != 0)
             {
                 LogRuntimeException(311);
                 return null;
             }
 
-            negative = ((long)whole & 1) != 0;
+            // a whole exponent beyond the integers is even, as every double that large is, so SPITBOL computes the power (-0.5 ** 1E300
+            // is 0., -1.0 ** 1E19 is 1.) and only its result can overflow
+            negative = Math.Abs(whole) <= long.MaxValue && ((long)whole & 1) != 0;
         }
 
         var r = RealVar.Sse(RealVar.Sse(Math.Log(x)) * y);

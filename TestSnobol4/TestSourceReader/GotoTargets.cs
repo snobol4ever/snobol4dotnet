@@ -347,4 +347,25 @@ END";
 
 Test.sno(1) : ERROR 212 -- syntax error: value used where name is required", SetupTests.MaskListingHead(SetupTests.RunWithInput(program)));
     }
+
+    [TestMethod]
+    public void TEST_GotoTargets_a_bracketed_assignment_is_212()
+    {
+        // sbl -b: a bracket just inside a goto's own groups what it holds, so :((X = 1)) is a goto to the value an assignment gives, 212,
+        // in each goto (:S, :F, and inside another bracket); :($(X = 1)), :((L)) and a bracket in a direct goto compile. The console took
+        // that bracket for the call's, with no function before it, and compiled them all (the master's ladder__rung05 entry
+        // goto_a_value_operand_is_error_212..., read against a fresh sbl run)
+        var build = SetupTests.SetupScript("-b -n", @"        Y = 1 :((X = 1))
+        Y = 1 :((X = 'L'))
+        Y = 1 :(((X = 1)))
+        Y = 1 :S((X = 1))
+        Y = 1 :F((X = 1))
+        Y = 1 :($(X = 1))
+        Y = 1 :((L))
+        Y = 1 :S((L))F((L))
+        Y = 1 :<(C)>
+L
+END");
+        CollectionAssert.AreEqual(new[] { 212, 212, 212, 212, 212 }, build.ErrorCodeHistory.ToArray());
+    }
 }

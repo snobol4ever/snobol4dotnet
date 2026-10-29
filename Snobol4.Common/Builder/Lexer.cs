@@ -1658,7 +1658,14 @@ public partial class Lexer
             Token.Type.L_PAREN_CHOICE or
             Token.Type.L_PAREN_FUNCTION or
             Token.Type.UNARY_OPERATOR or
-            Token.Type.UNARY_STAR => Token.Type.L_PAREN_CHOICE,
+            Token.Type.UNARY_STAR or
+            // a goto's own bracket begins an expression, so one right after it groups (:((X = 1)) is a goto to a value, 212)
+            Token.Type.L_PAREN_UNCONDITIONAL or
+            Token.Type.L_PAREN_SUCCESS or
+            Token.Type.L_PAREN_FAILURE or
+            Token.Type.L_ANGLE_UNCONDITIONAL or
+            Token.Type.L_ANGLE_SUCCESS or
+            Token.Type.L_ANGLE_FAILURE => Token.Type.L_PAREN_CHOICE,
             _ => Token.Type.L_PAREN_FUNCTION
         };
     }

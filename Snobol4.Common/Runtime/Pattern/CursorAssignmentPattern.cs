@@ -37,7 +37,10 @@ internal class AtSign : TerminalPattern
         // SPITBOL @N: immediately assign current cursor position (integer) to the
         // named variable. Write directly to IdentifierTable to avoid SystemStack
         // side-effects from the general Assign() path that corrupt pattern matching.
-        var symbol = _assignee is NameVar nv ? nv.Pointer : _assignee.Symbol;
+        // A variable that holds a NAME is itself the target, as Assign has it (A = .I; 'xyz' @A sets A)
+        var symbol = _assignee is NameVar nv && (nv.Symbol == "" || nv.LvalueMark == _exec.StatementSerial)
+            ? nv.Pointer
+            : _assignee.Symbol;
 
         // An element (@A<1>) or a deferred target (@*V, @*$('CUR' N), @*A<2>, @*F() with an NRETURN) is
         // assigned as any target is, as SPITBOL does; the assignment's own stack effects are undone

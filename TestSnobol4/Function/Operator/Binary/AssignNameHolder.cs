@@ -63,6 +63,34 @@ END");
     }
 
     [TestMethod]
+    public void TEST_AssignNameHolder_a_cursor_given_to_a_variable_holding_a_name_sets_the_variable()
+    {
+        // sbl -bf and CSNOBOL4: @A sets A when A holds a NAME, as = . and $ do, whether A is written, reached by $N, or handed back
+        // by an NRETURN; the console assigned the cursor through the NAME A held, to I (found by the infinite_snobol4 campaign at
+        // scope 12, round 7, seed 528243, batch 9 of kind=stmt, line 564)
+        var build = SetupTests.SetupScript("-bf", @"        DEFINE('H()')                     :(H_END)
+H       H = .A                            :(NRETURN)
+H_END   A = .I
+        'xyz' @A
+        S = '1 ' DATATYPE(A) ' [' I ']'
+        A = .I
+        N = .A
+        'xyz' LEN(1) @$N
+        S = S ',2 ' DATATYPE(A) ' [' I ']'
+        A = .I
+        'xyz' LEN(2) @H()
+        S = S ',3 ' DATATYPE(A) ' ' A ' [' I ']'
+        P = LEN(1) @A
+        A = .I
+        'xyz' P
+        S = S ',4 ' DATATYPE(A) ' [' I ']'
+END");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("1 INTEGER [],2 INTEGER [],3 INTEGER 2 [],4 INTEGER []",
+            ((StringVar)build.Execute!.IdentifierTable["S"]).Data);
+    }
+
+    [TestMethod]
     public void TEST_Assign_a_protected_value_leaves_the_target_unprotected()
     {
         // sbl -b answers 1 two three el: a variable or element that was given FAIL, ARB or REM can be

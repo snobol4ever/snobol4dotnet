@@ -370,6 +370,10 @@ internal sealed class StatementChecker(Builder parent)
                     if (!TakeTwo(stack, out var left, out var right))
                         return FirstHeld(stack);
                     var error = left.Error != 0 ? left.Error : IsNoName(right) ? ValueWhereNameIsRequired : right.Error;
+                    // a capture of a constant is built as the statement is compiled and names its target then: an indirection of a constant
+                    // pattern there has no name, 239 (LEN(1) . $ARB; Q . $ARB is found as it runs)
+                    if (error == 0 && left.Value is not null && right.IndirectionError != 0)
+                        error = right.IndirectionError;
                     // a capture of a constant into a fixed name is a constant pattern, as SPITBOL's compiler builds it; which pattern
                     // does not matter to what is evaluated after it, so it stands for one
                     stack.Add(new Operand(Kind.Value, error == 0 && left.Value is not null && right.Fixed ? new PatternVar(new NullPattern()) : null,

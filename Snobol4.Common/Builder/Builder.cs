@@ -59,6 +59,10 @@ public partial class Builder : IDisposable
         }
     }
     public List<string> FilesToCompile = new(4);
+
+    // The line index of the last line compiled: the program's last, then one more for each CODE call, as SPITBOL takes a line for
+    // each text CODE compiles (one that does not compile too; EVAL takes none)
+    internal int CodeTextLine;
     internal string[] Arguments = [];
     // The command line as given (without the program's own path), the index in it of the first source
     // file, and the words after the files that held the program, which are the program's arguments
@@ -333,6 +337,9 @@ public partial class Builder : IDisposable
         Execute.Parent.BuildOptions.ShowExecutionStatistics = BuildOptions.ShowExecutionStatistics;
         if (FilesToCompile.Count > 0)
             Execute.Parent.FilesToCompile.Add(FilesToCompile[^1]);
+        // the text of each CODE is a line of the program's file after its last, as SPITBOL counts it (CodeTextLine)
+        if (Code.SourceLines.Count > 0)
+            CodeTextLine = Code.SourceLines[^1].LineCountFile;
 
         var stmtNumber = StatementCount;
         foreach (var line in Code.SourceLines)
@@ -509,20 +516,16 @@ public partial class Builder : IDisposable
 
         var baseFileName    = Path.GetFileNameWithoutExtension(FilesToCompile[0]);
         var fileNameBuilder = new StringBuilder(baseFileName);
-        string type;
 
         switch (target)
         {
             case CompileTarget.CODE:
                 fileNameBuilder.Append("_CODE").Append(_compilerTarget.CodeNum++);
-                type = "CODE";
                 break;
             case CompileTarget.EVAL:
                 fileNameBuilder.Append("_EVAL").Append(_compilerTarget.EvalNum++);
-                type = "EVAL";
                 break;
             case CompileTarget.PROGRAM:
-                type = string.Empty;
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(target), target, null);
@@ -533,9 +536,6 @@ public partial class Builder : IDisposable
         _compilerTarget.NameSpace     = "N" + _compilerTarget.FileName;
         _compilerTarget.FullClassName = $"N{_compilerTarget.FileName}.C{_compilerTarget.FileName}";
         _compilerTarget.FileName     += ".cs";
-
-        if (target != CompileTarget.PROGRAM)
-            FilesToCompile.Add($"{type}{FilesToCompile.Count}");
     }
 
     #endregion

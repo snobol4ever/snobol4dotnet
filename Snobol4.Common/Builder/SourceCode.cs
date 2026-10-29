@@ -164,9 +164,12 @@ public class SourceCode
     /// </summary>
     /// <param name="source">The source code string to process</param>
     /// <param name="pathName">The logical path name for this source</param>
-    internal void ReadCodeInString(string source, string pathName, bool oneLine = false)
+    internal void ReadCodeInString(string source, string pathName, bool oneLine = false, int lineIndex = -1)
     {
         InitializeLineCounters();
+        // the text of CODE is a line of its own in the program's file (Builder.CodeTextLine)
+        if (lineIndex >= 0)
+            LineCountFile = lineIndex - 1;
         // CODE text keeps its trailing blanks: CODE(' A = 1 ; ') ends in a blank statement, as in SPITBOL. The text of CODE and of
         // EVAL is one line (oneLine): a line end in it is no separator but a character, error 230 or a bad label 214, as in SPITBOL;
         // a saved program's source is read line by line

@@ -393,8 +393,10 @@ internal sealed class StatementChecker(Builder parent)
                         return FirstHeld(stack);
                     var target = left.Kind == Kind.Question ? left.Subject! : left;
                     // a concatenation at the statement's level is the subject and pattern of an =; inside parens or the arguments of a
-                    // call it is SPITBOL's c_cnp, no pattern match, and an alternation that is not over a concatenation is none either
-                    var noName = IsValue(target) || target.Kind == Kind.Combination && (target.Nested || !target.PatternMatch);
+                    // call it is SPITBOL's c_cnp, no pattern match, and an alternation that is not over a concatenation is none either;
+                    // before a ? it is the subject itself, no name (A B ? 'b' = 'Q' is 212)
+                    var noName = IsValue(target) || target.Kind == Kind.Combination
+                                 && (left.Kind == Kind.Question || target.Nested || !target.PatternMatch);
                     stack.Add(new Operand(Kind.Value, Error: noName ? ValueWhereNameIsRequired : FirstHeld([left, right])));
                     break;
                 }

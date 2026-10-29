@@ -804,8 +804,49 @@ public partial class Lexer
 
         if (_startState == 1)
         {
+            // a binary ? further on, outside every bracket and before the replacement, makes the statement that one match, its subject
+            // all that stands before the ?, as in SPITBOL (A B ? 'z' matches A B): the blank here is a concatenation
+            if (ExplicitMatchAhead(sourceLine.Text, _cursorCurrent))
+            {
+                AddImplicitConcatenation(sourceLine);
+                return;
+            }
+
             AddImplicitPatternMatch(sourceLine);
         }
+    }
+
+    /// <summary>
+    /// Whether the statement text from <paramref name="from"/> holds a binary ? (a blank on each side) outside every bracket and
+    /// quote, before the replacement's = and before the goto field.
+    /// </summary>
+    private static bool ExplicitMatchAhead(string text, int from)
+    {
+        var depth = 0;
+        for (var i = from; i < text.Length; i++)
+        {
+            switch (text[i])
+            {
+                case '\'' or '"':
+                    var close = text.IndexOf(text[i], i + 1);
+                    if (close < 0)
+                        return false;
+                    i = close;
+                    break;
+                case '(' or '[' or '<':
+                    depth++;
+                    break;
+                case ')' or ']' or '>':
+                    depth--;
+                    break;
+                case ':' when depth == 0:
+                    return false;
+                case '=' or '?' when depth == 0 && i > 0 && text[i - 1] is ' ' or '\t' && i + 1 < text.Length && text[i + 1] is ' ' or '\t':
+                    return text[i] == '?';
+            }
+        }
+
+        return false;
     }
 
     /// <summary>

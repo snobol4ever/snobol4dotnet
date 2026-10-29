@@ -77,7 +77,7 @@ public partial class Executive
                 if (!compiled)
                 {
                     Parent.CodeMode = false;
-                    TakeOpenBracketError(expressionText);
+                    TakeTextSyntaxError(expressionText);
                     CompileErrorFailure();
                     return;
                 }
@@ -120,43 +120,16 @@ public partial class Executive
         DeferredNameValueError = 249;
     }
 
-    // EVAL and CONVERT compile their text inside *( ), whose closing parenthesis meets a [ or < the text left open before the text's end
-    // does: 224, "unbalanced right parenthesis". SPITBOL reaches the end first, and an open [ or < there is 229, "missing right array
-    // bracket" (EVAL('a['), CONVERT('a[1, ')), as CODE has it; a closer that met the wrong opener inside the text keeps its own error
-    internal void TakeOpenBracketError(string text)
+    // EVAL and CONVERT compile their text inside *( ), and a bracket the text leaves unbalanced meets that parenthesis: an open [ or < is
+    // 224 there for SPITBOL's 229 (EVAL('a[')), and a ) that closes nothing ends the expression early, the rest 220 for SPITBOL's 224
+    // (EVAL(')u')). SPITBOL scans the text itself, as CODE's statement scanner does, so where the wrapped compile fails with one of
+    // those two, the first syntax error the scanner finds in the text as written is the error (EVAL('f(1)(2) )x') is still 220)
+    internal void TakeTextSyntaxError(string text)
     {
-        if (AmpErrorType != 224 || InnermostOpenBracket(text) is not ('[' or '<'))
+        if (AmpErrorType is not (220 or 224) || SyntaxScanner.FirstError(" A_ = " + text) is not { } syntax)
             return;
-        AmpErrorType = 229;
-        AmpErrorText = CompilerException.ErrorMessage[229];
-    }
-
-    // The innermost bracket still open at the end of the text, outside quotes; '\0' for none, or when a closer meets the wrong opener
-    private static char InnermostOpenBracket(string text)
-    {
-        var open = new Stack<char>();
-        for (var i = 0; i < text.Length; i++)
-        {
-            switch (text[i])
-            {
-                case '\'' or '"':
-                    var close = text.IndexOf(text[i], i + 1);
-                    if (close < 0)
-                        return '\0';
-                    i = close;
-                    break;
-                case '(' or '[' or '<':
-                    open.Push(text[i]);
-                    break;
-                case ')' or ']' or '>':
-                    var opener = text[i] switch { ')' => '(', ']' => '[', _ => '<' };
-                    if (open.Count == 0 || open.Pop() != opener)
-                        return '\0';
-                    break;
-            }
-        }
-
-        return open.Count > 0 ? open.Peek() : '\0';
+        AmpErrorType = syntax.Code;
+        AmpErrorText = CompilerException.ErrorMessage[syntax.Code];
     }
 
     internal static bool HasTopLevelComma(string text)

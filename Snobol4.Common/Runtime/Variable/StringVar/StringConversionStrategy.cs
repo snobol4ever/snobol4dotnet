@@ -114,7 +114,7 @@ public class StringConversionStrategy : IConversionStrategy
         exec.Parent.BuildOptions.CaseFolding = previousCaseFolding;
         exec.Parent.CodeMode = false;
         if (!compiled)
-            exec.TakeOpenBracketError(text);
+            exec.TakeTextSyntaxError(text);
         if (!compiled || mark >= 0)
         {
             varOut = StringVar.Null();

@@ -124,4 +124,19 @@ END").Replace("\r\n", "\n").TrimEnd('\n');
         Assert.AreEqual("F t=224 lim=9", OneCall("EVAL", "f(a[1)"));
         Assert.AreEqual("F t=225 lim=9", OneCall("CONVERT", "a[(1]"));
     }
+
+    [TestMethod]
+    public void TEST_ConvertCompileError_a_stray_closing_parenthesis_is_224()
+    {
+        // sbl -bf: a closing parenthesis that closes nothing in the text is 224, "unbalanced right parenthesis", in EVAL and CONVERT as
+        // in CODE, wherever it stands (')u', 'a )b', '(a))b'); a syntax error before it is still the first (EVAL('f(1)(2) )x') is 220).
+        // The console's EVAL and CONVERT closed the parenthesis they compile the text in with it, and the rest was 220, "missing
+        // operator" (found by the infinite_snobol4 campaign at scope 12, seed0 20261110, size 1000, batch 6 of kind=stmt, line 816,
+        // CONVERT(')u', 'EXPRESSION'))
+        Assert.AreEqual("F t=224 lim=9", OneCall("EVAL", ")u"));
+        Assert.AreEqual("F t=224 lim=9", OneCall("CONVERT", ")u"));
+        Assert.AreEqual("F t=224 lim=9", OneCall("EVAL", "a )b"));
+        Assert.AreEqual("F t=224 lim=9", OneCall("CONVERT", "(a))b"));
+        Assert.AreEqual("F t=220 lim=9", OneCall("EVAL", "f(1)(2) )x"));
+    }
 }

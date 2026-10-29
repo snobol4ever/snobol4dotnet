@@ -309,7 +309,7 @@ public partial class Lexer
             ConvertUnaryStarOperatorsToDeferredExpressions(sourceLine.LexUnconditionalGoto);
 
             // an error found pre-evaluating the constants of the statement is an error in it, as in SPITBOL
-            if (preEvaluator.FirstError(sourceLine) is var code and not 0)
+            if (!_parent.SyntaxOnly && preEvaluator.FirstError(sourceLine) is var code and not 0)
             {
                 // found once the whole statement is read, which the last card of a source with no END never is
                 if (!sourceLine.EndsTheSource)

@@ -68,7 +68,11 @@ public partial class Executive
                 // A string that does not compile makes EVAL fail with &ERRTYPE set to the compile error
                 // (EVAL('1 +') is 221, an out-of-range real 231), printing nothing; with &ERRLIMIT above 0 the
                 // error is counted and handled like a run-time one, as in SPITBOL (CompileErrorFailure)
-                var compiled = CompileQuietly(() => { Parent.BuildEval(); return true; });
+                // before a colon or a semicolon only a syntax error is the text's own: EVAL('1 / 0 ; 5') is 103, not 14, as in SPITBOL
+                Parent.SyntaxOnly = statementMark >= 0;
+                bool compiled;
+                try { compiled = CompileQuietly(() => { Parent.BuildEval(); return true; }); }
+                finally { Parent.SyntaxOnly = false; }
                 Parent.BuildOptions.CaseFolding = previousCaseFolding;
                 if (!compiled)
                 {

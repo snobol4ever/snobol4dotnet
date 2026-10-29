@@ -76,6 +76,10 @@ public partial class Builder : IDisposable
     internal List<DeferredExpression> ExpressionList = new(32);
     internal List<List<Token>> ParseExpression = new(32);
     internal bool CodeMode;
+
+    // Set while EVAL or CONVERT compiles the expression before a colon or a semicolon: SPITBOL scans it for a syntax error and goes no
+    // further, so no error that checking the statement would find (1 / 0, LEN(-1), a value where a name is required) is its
+    internal bool SyntaxOnly;
     internal int RecordedExpressionCount = 0;
 
     // The status the console exits with when the run did not get as far as running the program, as sbl's does: 231 when execution

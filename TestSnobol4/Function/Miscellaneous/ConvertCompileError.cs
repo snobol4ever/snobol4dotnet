@@ -78,4 +78,33 @@ END";
 4 F t=226 lim=8
 5 F t=226 lim=8", SetupTests.RunWithInput(program).Replace("\r\n", "\n").TrimEnd('\n'));
     }
+
+    // &ERRTYPE and &ERRLIMIT after one call of `function` on `text` alone, from &ERRLIMIT 10, or S for success
+    private static string OneCall(string function, string text) => SetupTests.RunWithInput($@"        &ERRLIMIT = 10
+        V = {function}('{text}'{(function == "CONVERT" ? ", 'EXPRESSION'" : "")})     :S(Y1)
+        OUTPUT = 'F t=' &ERRTYPE ' lim=' &ERRLIMIT   :(END)
+Y1      OUTPUT = 'S'
+END").Replace("\r\n", "\n").TrimEnd('\n');
+
+    [TestMethod]
+    public void TEST_ConvertCompileError_a_syntax_error_before_a_mark_is_recorded()
+    {
+        // sbl -bf: before a colon or a semicolon that is not the text's last character, SPITBOL scans the expression for a syntax error
+        // and goes no further: CONVERT records it ('4 + ; ', '4 + : x', '4 + ;5' are 221 and count &ERRLIMIT) and otherwise fails quietly
+        // ('4 + ;', '1 / 0 ; 5', 'X Y = ; 5', '; 4'); EVAL gives it, and 103 for anything else, though checking the expression would find
+        // an error ('1 / 0 ; 5' is 103, not 14; 'LEN(-1) ; 5' not 121; 'X Y = ; 5' not 212). The console's CONVERT failed quietly at every
+        // mark and its EVAL gave the checker's error (the master's code_eval_eval_convert_replace_branch_1, CONVERT('4 + ; '))
+        Assert.AreEqual("F t=221 lim=9", OneCall("CONVERT", "4 + ; "));
+        Assert.AreEqual("F t=221 lim=9", OneCall("CONVERT", "4 + : x"));
+        Assert.AreEqual("F t=221 lim=9", OneCall("CONVERT", "4 + ;5"));
+        Assert.AreEqual("F t=0 lim=10", OneCall("CONVERT", "4 + ;"));
+        Assert.AreEqual("F t=0 lim=10", OneCall("CONVERT", "1 / 0 ; 5"));
+        Assert.AreEqual("F t=0 lim=10", OneCall("CONVERT", "X Y = ; 5"));
+        Assert.AreEqual("F t=0 lim=10", OneCall("CONVERT", "; 4"));
+        Assert.AreEqual("F t=221 lim=9", OneCall("EVAL", "4 + ; "));
+        Assert.AreEqual("F t=103 lim=9", OneCall("EVAL", "1 / 0 ; 5"));
+        Assert.AreEqual("F t=103 lim=9", OneCall("EVAL", "LEN(-1) ; 5"));
+        Assert.AreEqual("F t=103 lim=9", OneCall("EVAL", "X Y = ; 5"));
+        Assert.AreEqual("F t=103 lim=9", OneCall("EVAL", "; 4"));
+    }
 }

@@ -88,25 +88,32 @@ public class StringConversionStrategy : IConversionStrategy
             return false;
         }
 
-        // a colon or a semicolon outside every bracket and quote ends the expression: the conversion just fails, before anything is
-        // compiled, leaving &ERRTYPE as it was, as in SPITBOL (CONVERT('4 :(L)', 'EXPRESSION'), CONVERT('0:35', 'EXPRESSION'))
-        if (Executive.TopLevelStatementMark(stringSelf.Data) >= 0)
+        // a colon or a semicolon outside every bracket and quote ends the expression, and the conversion fails leaving &ERRTYPE as it
+        // was (CONVERT('4 :(L)', 'EXPRESSION'), CONVERT('0:35', 'EXPRESSION')); but where the mark is not the text's last character, a
+        // syntax error in the expression before it is recorded as any compile error is (CONVERT('4 + ; ', 'EXPRESSION') is 221), as in
+        // SPITBOL, which scans that far
+        var mark = Executive.TopLevelStatementMark(stringSelf.Data);
+        if (mark >= 0 && stringSelf.Data[^1] is ':' or ';')
         {
             varOut = StringVar.Null();
             valueOut = string.Empty;
             return false;
         }
 
+        var text = mark >= 0 ? stringSelf.Data[..mark] : stringSelf.Data;
         var previousCaseFolding = exec.Parent.BuildOptions.CaseFolding;
         exec.Parent.BuildOptions.CaseFolding = exec.AmpCaseFolding != 0;
         exec.Parent.CodeMode = true;
         exec.Parent.Code = new SourceCode(exec.Parent);
-        exec.Parent.Code.ReadCodeInString($" A_ = *({stringSelf.Data.Trim()})", exec.Parent.FilesToCompile[^1], oneLine: true);
+        exec.Parent.Code.ReadCodeInString($" A_ = *({text.Trim()})", exec.Parent.FilesToCompile[^1], oneLine: true);
         // text that does not compile fails the conversion with &ERRTYPE set, printing nothing, as in SPITBOL
-        var compiled = exec.CompileQuietly(() => { exec.Parent.BuildEval(); return true; });
+        exec.Parent.SyntaxOnly = mark >= 0;
+        bool compiled;
+        try { compiled = exec.CompileQuietly(() => { exec.Parent.BuildEval(); return true; }); }
+        finally { exec.Parent.SyntaxOnly = false; }
         exec.Parent.BuildOptions.CaseFolding = previousCaseFolding;
         exec.Parent.CodeMode = false;
-        if (!compiled)
+        if (!compiled || mark >= 0)
         {
             varOut = StringVar.Null();
             valueOut = string.Empty;

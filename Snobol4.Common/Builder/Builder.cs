@@ -104,6 +104,9 @@ public partial class Builder : IDisposable
     // by statement: :(CONTINUE) evaluates it when it resumes there, as the goto would be
     internal Dictionary<int, List<Token>> FailureExitExpressions = new();
 
+    // A statement's failure exit when it is a direct goto (:<C>, :F<C>): the expression whose value is the CODE :(CONTINUE) resumes at
+    internal Dictionary<int, List<Token>> FailureExitCodes = new();
+
     /// <summary>
     /// True when the compiled thread contains only <c>CallMsil</c> and <c>Halt</c>
     /// opcodes — all control flow has been absorbed into delegates.

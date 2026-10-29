@@ -400,6 +400,36 @@ public partial class Executive
             }
         }
 
+        // a failure exit that is a direct goto (:<C>, :F<C>) is made again: to its CODE, or, when it holds none, error 332, "goto continue
+        // with error in failure goto", a fatal-class error a handler takes like any other until the third strike ends the run, as in SPITBOL
+        if (exitCode == -6 && _continueStatement == ContinueAtCode && overrideThread == null)
+        {
+            _continueStatement = -1;
+            _trapPending = false;
+            ReportLineIndex = _trapStatement;
+            if (ContinueCodeTarget(_trapStatement) is { } resumeAt)
+            {
+                thread = Thread!;
+                InstructionPointer = resumeAt;
+                exitCode = -1;
+                goto Restart;
+            }
+
+            LogRuntimeException(332, fatal: ++_fatalErrors >= 3);
+            if (OnErrorGoto > 0)
+            {
+                ProcessTrappedErrorThreaded();
+                _trapTaken = false;
+                thread = Thread!;
+                exitCode = -1;
+                goto Restart;
+            }
+
+            // no handler: the failure exit is the goto again, struck until the third strike ends the run, as ComputedGotoError's is
+            while (true)
+                LogRuntimeException(332, fatal: ++_fatalErrors >= 3);
+        }
+
         // :(CONTINUE) resumes at the failure exit of the statement in error, which can be a special label (SCONTINUE, RETURN):
         // that label is then taken as the goto it is
         if (exitCode == -6 && _continueStatement is <= -2 and >= -7 && overrideThread == null)
@@ -459,6 +489,27 @@ public partial class Executive
     private const int ContinueAtExpression = -11;
     private const int ContinueExpressionUnresolved = -12;
 
+    // :(CONTINUE) is to make the failure exit of the statement in error, a direct goto (Builder.FailureExitCodes), again
+    private const int ContinueAtCode = -13;
+
+    // Where the direct goto that is a statement's failure exit transfers to, as GotoIndirectCode resolves it, or null when its operand
+    // fails or holds no CODE
+    private int? ContinueCodeTarget(int statement)
+    {
+        if (!Parent.FailureExitCodes.TryGetValue(statement, out var tokens))
+            return null;
+        var depth = SystemStack.Count;
+        RunExpressionThread(new ThreadedCodeCompiler(Parent).CompileSubExpression(tokens));
+        var operand = !Failure && SystemStack.Count > depth ? SystemStack.Pop() : null;
+        while (SystemStack.Count > depth)
+            SystemStack.Pop();
+        Failure = false;
+        if (operand is null || GotoCode(operand) is not { } code)
+            return null;
+        var instrIdx = StatementIndexToInstrIndex(code.StatementNumber);
+        return instrIdx >= 0 ? instrIdx : null;
+    }
+
     // The label the failure exit expression of a statement names, as GotoIndirect resolves it: a statement or a special label
     // (-2 to -7), or ContinueExpressionUnresolved when the expression fails or names no label
     private int ContinueExpressionTarget(int statement)
@@ -501,7 +552,8 @@ public partial class Executive
         _trapStatement = errorStatement;
         _continueStatement = Parent.FailureExits.TryGetValue(errorStatement, out var exitLabel) && exitLabel is not null
             ? LabelTable[Parent.FoldCase(exitLabel)]
-            : Parent.FailureExitExpressions.ContainsKey(errorStatement) ? ContinueAtExpression : errorStatement + 1;
+            : Parent.FailureExitExpressions.ContainsKey(errorStatement) ? ContinueAtExpression
+            : Parent.FailureExitCodes.ContainsKey(errorStatement) ? ContinueAtCode : errorStatement + 1;
         InstructionPointer = StatementIndexToInstrIndex(target);
         _trapTaken = true;
         _trapPending = true;

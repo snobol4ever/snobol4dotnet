@@ -190,6 +190,9 @@ public partial class Builder
             FailureExitExpressions.Remove(stmtIdx);
             if (FailureExits[stmtIdx] is null && FailureExitExpression(line) is { } exitExpression)
                 FailureExitExpressions[stmtIdx] = exitExpression;
+            FailureExitCodes.Remove(stmtIdx);
+            if (FailureExits[stmtIdx] is null && FailureExitCode(line) is { } exitCode)
+                FailureExitCodes[stmtIdx] = exitCode;
 
             TryCache(line.ParseBody, stmtIdx: stmtIdx, isBody: true,
                      directGotoLabel:  directUncondLabel,
@@ -233,6 +236,18 @@ public partial class Builder
         return line.ParseUnconditionalGoto.Count > 0 && !line.DirectGotoFirst && !IsLabel(line.ParseUnconditionalGoto)
             ? line.ParseUnconditionalGoto
             : null;
+    }
+
+    // The statement's failure exit when it is a direct goto, :<C> or :F<C>: the expression whose value is the CODE it transfers to
+    private static List<Token>? FailureExitCode(SourceLine line)
+    {
+        if (line.ParseFailureGoto.Count > 0)
+        {
+            var failureIsDirect = line.ParseSuccessGoto.Count > 0 && line.SuccessFirst ? line.DirectGotoSecond : line.DirectGotoFirst;
+            return failureIsDirect ? line.ParseFailureGoto : null;
+        }
+
+        return line.ParseUnconditionalGoto.Count > 0 && line.DirectGotoFirst ? line.ParseUnconditionalGoto : null;
     }
 
     private static void DetectGotoForms(SourceLine line,

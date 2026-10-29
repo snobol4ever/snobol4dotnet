@@ -1,3 +1,4 @@
+using Snobol4.Common;
 using Test.TestLexer;
 
 namespace Test.Pattern;
@@ -59,5 +60,33 @@ Y2      OUTPUT = '2 S X=' X ' lim=' &ERRLIMIT ' t=' &ERRTYPE
 END";
         Assert.AreEqual(@"1 S X=y lim=9 t=2
 2 F X=m lim=8 t=2", SetupTests.RunWithInput(program).Replace("\r\n", "\n").TrimEnd('\n'));
+    }
+
+    [TestMethod]
+    public void TEST_ErrorInsideAMatch_under_a_negation_leaves_the_statement_whole()
+    {
+        // sbl -bf: an error that ends a match inside the operand of a negation is that operand's failure, which the negation takes, and
+        // the assignment made before it stands (a, b); in the code of an EVAL the error ends the evaluation, which fails (c); without the
+        // negation the statement fails (d). The console left the error's value on the stack under the match's failure, so the statement's
+        // own assignment took E for its target and E was null (a, b), and the error was a plain failure, which the negation took (cs)
+        // (found by the infinite_snobol4 campaign at scope 12, seed0 20261106, batch 6 of kind=match, line 421)
+        var build = SetupTests.SetupScript("-bf", @"        &ERRLIMIT = 20
+        N = -1
+        X = ~((E = 'xxi') ('abc' ? LEN(*N)))    :F(F1)
+        S = 'a' E
+F1      E =
+        X = ~((E = 'xxi') (E ? LEN(*N)))        :F(F2)
+        S = S ',b' E
+F2      E =
+        X = EVAL(""~((E = 'xxi') (E ? LEN(*N)))"")    :S(S3)
+        S = S ',c' E                            :(F3)
+S3      S = S ',cs' E
+F3      E =
+        X = ((E = 'xxi') ('abc' ? LEN(*N)))     :S(S4)
+        S = S ',d' E                            :(F4)
+S4      S = S ',ds' E
+F4
+END");
+        Assert.AreEqual("axxi,bxxi,cxxi,dxxi", ((StringVar)build.Execute!.IdentifierTable["S"]).Data);
     }
 }

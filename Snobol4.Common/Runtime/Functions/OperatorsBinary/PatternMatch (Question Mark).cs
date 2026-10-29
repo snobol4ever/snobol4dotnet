@@ -66,13 +66,22 @@ public partial class Executive
         AlphaStack = [];
         Scanner scanner = new(this);
 
+        var stackDepth = SystemStack.Count;
+        var errors = ErrorSerial;
         var mr = scanner.PatternMatch((string)subjectValue, (Pattern)patternValue, 0, anchor != 0);
 
         if (mr.Outcome != MatchResult.Status.SUCCESS)
         {
             BetaStack = savedBetaStack;
             AlphaStack = savedAlphaStack;
+            // an error that ended the match left its value on the stack: the match's failure takes its place, and stays the error's
+            // (unless a handler continued from it), so a negation takes it as an operand's failure and an EVAL's code ends on it, as in
+            // SPITBOL; left under the failure, the value was the target of the statement's own assignment (~((E = 'x') (E ? LEN(*N))))
+            var endedOnError = ErrorSerial != errors && FailureIsError;
+            while (SystemStack.Count > stackDepth)
+                SystemStack.Pop();
             NonExceptionFailure();
+            FailureIsError = endedOnError;
             return;
         }
 

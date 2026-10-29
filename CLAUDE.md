@@ -31,7 +31,7 @@ bash build_native.sh                                       # rebuild the committ
 dotnet run --project benchmarks/Benchmarks.csproj -c Release
 ```
 
-- **The suite is green.** At `1a94477` it ran 3,301 tests: 3,289 passed, 0 failed and 12 skipped (README, *Test Results*). A failure is therefore new. Run the affected batch before you change anything, so you know whether your change caused it. The README's table of the eleven program suites graded against `sbl -bf` is the other bar.
+- **The suite is green.** At `c9e85c9` it ran 3,343 tests: 3,331 passed, 0 failed and 12 skipped (README, *Test Results*). A failure is therefore new. Run the affected batch before you change anything, so you know whether your change caused it. The README's table of the eleven program suites graded against `sbl -bf` is the other bar.
 - **Run the suite in batches of 100, never in one `dotnet test` of the whole suite.** Lon, 2026-10-18: *"You better be running tests in batches of 100."* A whole-suite run intermittently hangs or crashes its test host and loses every result. `scripts/test_in_batches.sh` runs each batch in its own bounded host and names any batch that did not complete.
 - **Builds are light by default.** `Directory.Build.rsp` gives every `dotnet build` and `dotnet test` `-maxcpucount:1 -nodeReuse:false -p:UseSharedCompilation=false`, because the machine is shared. A `-m` on the command line overrides it. A Release build of `Snobol4` also runs a ReadyToRun `dotnet publish` after the build and copies the precompiled `Snobol4.dll` and `Snobol4.Common.dll` over the plain ones (the `ReadyToRunBuildOutput` target in `Snobol4/Snobol4.csproj`). That pass is a second compile, and `-p:ReadyToRunBuild=false` skips it while you iterate.
 - `Snobol4W` targets `net10.0-windows` and sets `EnableWindowsTargeting` in its own csproj, so the solution builds on Linux without extra flags.
@@ -89,7 +89,7 @@ The old Roslyn C#-codegen engine is gone, even though `PR_DESCRIPTION.md`, some 
 
 Don't take these as truth. Measure instead.
 
-- `BUILDING.md` says xUnit, about 1,876 tests and a required `-p:EnableWindowsTargeting=true`. The suite is MSTest with 3,301 tests, and the flag isn't needed. Its `CORPUS=.../snobol4corpus/benchmarks` example names the old corpus layout; the runner now wants the folder holding the `.sno` files, `corpus/benchmarks/snobol4/`.
+- `BUILDING.md` says xUnit, about 1,876 tests and a required `-p:EnableWindowsTargeting=true`. The suite is MSTest with 3,343 tests, and the flag isn't needed. Its `CORPUS=.../snobol4corpus/benchmarks` example names the old corpus layout; the runner now wants the folder holding the `.sno` files, `corpus/benchmarks/snobol4/`.
 - `README.jeff.md` gives old counts (1,874 of 1,876 tests, a corpus of 106 programs) and old benchmark timings. `README.md`'s *Test Results* is current.
 - `PR_DESCRIPTION.md` describes a Roslyn fallback switch that no longer exists.
 - The `corpus` submodule (`.gitmodules` → `SNOBOL4-plus/SNOBOL4-corpus`) is a gitlink to an empty folder, and the `Makefile` includes a `../SNOBOL4-corpus/run/sno.mk` that doesn't exist. The corpus is the sibling checkout `../corpus` (`snobol4ever/corpus`).

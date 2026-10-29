@@ -12,7 +12,7 @@ One major difference is that SNOBOL4.NET is slower than SPITBOL. This is the tra
 
 SNOBOL4.NET is tested two ways: with its own unit tests, and by running whole SNOBOL4 programs and comparing their output with SPITBOL's.
 
-**Unit tests.** `TestSnobol4` (MSTest), run in batches at commit `1a94477` on 2026-10-23: **3,301 tests, 3,289 passed, 0 failed, 12 skipped.**
+**Unit tests.** `TestSnobol4` (MSTest), run in batches at commit `c9e85c9` on 2026-10-29: **3,343 tests, 3,331 passed, 0 failed, 12 skipped.**
 
 **Program suites.** Each program is run by SNOBOL4.NET, and its output is compared with the output of SPITBOL x64 (`sbl -bf`), the reference implementation. Programs SPITBOL gives no answer for are excluded rather than counted: SPITBOL refuses or crashes on them, or their expected output is not known. They appear in the *Excluded* column. The suites were graded on 2026-10-22 by the snobol4ever test harness, which runs the same programs against SNOBOL4.NET and against SCRIP. *Graded at* names the SNOBOL4.NET commit each suite was last graded on.
 

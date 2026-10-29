@@ -112,9 +112,9 @@ public partial class Executive
 
     internal void Assign(List<Var> arguments)
     {
-        // A deferred target (. *X, $ *X) is evaluated for the name it gives; a variable that merely holds an
-        // expression is itself the target, as in SPITBOL (V = *(X + 1) then V = *Y assigns V)
-        while (arguments[0] is ExpressionVar { Symbol: "" } expressionVar1)
+        // A deferred target (. *X, $ *X) is evaluated for the name it gives; a variable, an element or a field that merely holds an
+        // expression is itself the target, as in SPITBOL (V = *(X + 1) then V = *Y assigns V; A[1] = *N then A[1] = 'm' assigns A[1])
+        while (arguments[0] is ExpressionVar { Symbol: "", Key: null } expressionVar1)
         {
             var depth = SystemStack.Count;
             expressionVar1.FunctionName(this);

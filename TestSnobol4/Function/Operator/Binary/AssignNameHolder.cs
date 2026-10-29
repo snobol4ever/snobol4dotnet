@@ -29,6 +29,40 @@ end");
     }
 
     [TestMethod]
+    public void TEST_AssignNameHolder_an_element_or_field_holding_an_expression_is_assigned_itself()
+    {
+        // sbl -bf: an element, a table entry or a field that holds an expression is itself the target of = and of . and $ in a
+        // pattern, as a variable that holds one is; only a deferred expression written as the target (. *N, $ *P) is evaluated for
+        // its name. The console evaluated the expression an element or field held and assigned N through it, leaving the element as it
+        // was (found by the infinite_snobol4 campaign at scope 12, seed0 20261031, batch 3 of kind=stmt, line 150)
+        var build = SetupTests.SetupScript("-bf", @"        N = 'o'
+        A = ARRAY(2)
+        A[1] = *N
+        A[1] = 'm'
+        S = '1 N=' N ' A1=' DATATYPE(A[1]) ' ' A[1]
+        T = TABLE()
+        T['k'] = *N
+        T['k'] = 'm'
+        S = S ',2 N=' N ' Tk=' T['k']
+        DATA('PT(U,V)')
+        G = PT(CONVERT('N', 'EXPRESSION'), 1)
+        U(G) = 'm'
+        S = S ',3 N=' N ' U=' U(G)
+        A[1] = *N
+        'abc' ? LEN(1) . A[1]
+        S = S ',4 N=' N ' A1=' A[1]
+        A[1] = *N
+        'abc' ? LEN(2) $ A[1]
+        S = S ',5 N=' N ' A1=' A[1]
+        'abc' ? LEN(1) . *N
+        S = S ',6 N=' N
+END");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("1 N=o A1=STRING m,2 N=o Tk=m,3 N=o U=m,4 N=o A1=a,5 N=o A1=ab,6 N=a",
+            ((StringVar)build.Execute!.IdentifierTable["S"]).Data);
+    }
+
+    [TestMethod]
     public void TEST_Assign_a_protected_value_leaves_the_target_unprotected()
     {
         // sbl -b answers 1 two three el: a variable or element that was given FAIL, ARB or REM can be

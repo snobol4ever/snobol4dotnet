@@ -14,11 +14,11 @@ SNOBOL4.NET is tested two ways: with its own unit tests, and by running whole SN
 
 **Unit tests.** `TestSnobol4` (MSTest), run in batches at commit `c9e85c9` on 2026-10-29: **3,343 tests, 3,331 passed, 0 failed, 12 skipped.**
 
-**Program suites.** Each program is run by SNOBOL4.NET, and its output is compared with the output of SPITBOL x64 (`sbl -bf`), the reference implementation. Programs SPITBOL gives no answer for are excluded rather than counted: SPITBOL refuses or crashes on them, or their expected output is not known. They appear in the *Excluded* column. The suites were graded on 2026-10-22 by the snobol4ever test harness, which runs the same programs against SNOBOL4.NET and against SCRIP. *Graded at* names the SNOBOL4.NET commit each suite was last graded on.
+**Program suites.** Each program is run by SNOBOL4.NET, and its output is compared with the output of SPITBOL x64 (`sbl -bf`), the reference implementation. Programs SPITBOL gives no answer for are excluded rather than counted: SPITBOL refuses or crashes on them, or their expected output is not known. They appear in the *Excluded* column. The suites were graded between 2026-10-22 and 2026-10-29 by the snobol4ever test harness, which runs the same programs against SNOBOL4.NET and against SCRIP. *Graded at* names the SNOBOL4.NET commit each suite was last graded on.
 
 | Suite | What it is | Passed | Excluded | Graded at |
 |---|---|---:|---:|---|
-| SnoRungs | the SNOBOL4 master suite: construct-by-construct programs and regression witnesses | 2,092 / 2,092 | 1 | `cccc709` |
+| SnoRungs | the SNOBOL4 master suite: construct-by-construct programs and regression witnesses | 2,185 / 2,185 | 1 | `06e21c1` |
 | Gimpel | the programs of Gimpel's *Algorithms in SNOBOL4*, with their test drivers | 144 / 144 | 1 | `38cdeac` |
 | Flake | the snoflake suite: small programs that each exercise one feature | 126 / 126 | 54 | `a3f5f8f` |
 | Budne | Philip L. Budne's CSNOBOL4 2.3.3 test suite | 68 / 68 | 64 | `38cdeac` |
@@ -29,7 +29,7 @@ SNOBOL4.NET is tested two ways: with its own unit tests, and by running whole SN
 | TPgm | SPITBOL's four standard diagnostic programs | 8 / 8 | 0 | `cb2da46` |
 | AIS | the aisnobol programs (an ATN parser among them) | 8 / 8 | 1 | `d0c88de` |
 | Dotnet | programs from this repository's own collection | 6 / 6 | 8 | `b2b059f` |
-| **Total** | | **2,548 / 2,548** | **137** | |
+| **Total** | | **2,641 / 2,641** | **137** | |
 
 Every suite passes all of its graded programs.
 

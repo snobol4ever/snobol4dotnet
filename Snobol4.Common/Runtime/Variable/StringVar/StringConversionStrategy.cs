@@ -113,6 +113,8 @@ public class StringConversionStrategy : IConversionStrategy
         finally { exec.Parent.SyntaxOnly = false; }
         exec.Parent.BuildOptions.CaseFolding = previousCaseFolding;
         exec.Parent.CodeMode = false;
+        if (!compiled)
+            exec.TakeOpenBracketError(text);
         if (!compiled || mark >= 0)
         {
             varOut = StringVar.Null();

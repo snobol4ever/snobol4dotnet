@@ -107,4 +107,21 @@ END").Replace("\r\n", "\n").TrimEnd('\n');
         Assert.AreEqual("F t=103 lim=9", OneCall("EVAL", "X Y = ; 5"));
         Assert.AreEqual("F t=103 lim=9", OneCall("EVAL", "; 4"));
     }
+
+    [TestMethod]
+    public void TEST_ConvertCompileError_an_open_bracket_at_the_end_is_229()
+    {
+        // sbl -bf: a text whose innermost bracket still open at its end is [ or < is 229, "missing right array bracket", in EVAL and
+        // CONVERT as in CODE ('a[', 'a<', 'a[1, '); an open parenthesis is 226 ('f('), and a closer that meets the wrong opener is its own
+        // error ('f(a[1)' 224, 'a[(1]' 225). The console's EVAL and CONVERT said 224 for an open bracket: the parenthesis closing the text
+        // they compile met it first (found by the infinite_snobol4 campaign at scope 12, seed0 20261109, size 1000, batch 7 of kind=stmt,
+        // line 582, CONVERT('a[', 'EXPRESSION'))
+        Assert.AreEqual("F t=229 lim=9", OneCall("EVAL", "a["));
+        Assert.AreEqual("F t=229 lim=9", OneCall("CONVERT", "a["));
+        Assert.AreEqual("F t=229 lim=9", OneCall("EVAL", "a<"));
+        Assert.AreEqual("F t=229 lim=9", OneCall("CONVERT", "a[1, "));
+        Assert.AreEqual("F t=226 lim=9", OneCall("EVAL", "f("));
+        Assert.AreEqual("F t=224 lim=9", OneCall("EVAL", "f(a[1)"));
+        Assert.AreEqual("F t=225 lim=9", OneCall("CONVERT", "a[(1]"));
+    }
 }

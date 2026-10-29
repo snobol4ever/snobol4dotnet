@@ -315,6 +315,11 @@ public partial class Executive
             if (instrIdx >= 0) return instrIdx;
             return target;
         }
+        // an error the statement had, which SETEXIT has trapped, takes the statement's place: the goto is not made, as ResolveLabel's
+        // is not (X = LT(1, 'a') :<C> is the trapped 148, not 24 and then 332)
+        if (_trapTaken)
+            return int.MinValue;
+
         ComputedGotoError(errorCode);
         return -1;
     }

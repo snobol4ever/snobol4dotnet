@@ -82,4 +82,17 @@ public class SelectionAlternatives
         Assert.AreEqual("@a\n@b", SetupTests.RunWithInput(
             "        &ERRLIMIT = 100\n        OUTPUT = '@a'\n        ?( ,F(X) G(X) )\n        OUTPUT = '@b'\nEND").Replace("\r\n", "\n"));
     }
+
+    [TestMethod]
+    public void TEST_SelectionAlternatives_a_long_alternative_compiles()
+    {
+        // sbl -bf: a selection whose later alternatives are long is compiled and tried as any other; the console's code for a selection
+        // jumped over the next alternative's start with a one-byte branch, which a long alternative put out of reach, and the statement
+        // ended the run in a NotSupportedException (found by the infinite_snobol4 campaign at scope 12, seed0 20261102, batch 7 of
+        // kind=stmt, line 240)
+        Assert.AreEqual("x=[...qv...qvpv  ]\n@b", Run("        P = 'pv'\n" +
+            "        X = (DIFFER(Z), (DIFFER(Q), DUPL(REPLACE(TRIM(LPAD(P, 5, '.')), 'p', 'q'), SIZE(REVERSE(P))) RPAD(P, 4)))"));
+        Assert.AreEqual("x=[last]\n@b", Run("        P = 'pv'\n" +
+            "        X = (DIFFER(Z), DIFFER(Q) DUPL(REPLACE(TRIM(LPAD(P, 5, '.')), 'p', 'q'), SIZE(REVERSE(P))) RPAD(P, 4), 'last')"));
+    }
 }

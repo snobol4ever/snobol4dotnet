@@ -1048,7 +1048,9 @@ public partial class Builder
                 choiceLabels.Push(skipLabel);
                 il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Ldfld, _failureField);
-                il.Emit(OpCodes.Brfalse_S, skipLabel);
+                // the label is marked at the selection's closing parenthesis, past every later alternative, which can be more than a
+                // one-byte branch reaches
+                il.Emit(OpCodes.Brfalse, skipLabel);
                 il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Call, _choiceStartMethod);
                 return true;

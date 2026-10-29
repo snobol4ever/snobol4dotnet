@@ -206,4 +206,30 @@ end
         var v = (StringVar)build.Execute!.IdentifierTable[build.FoldCase("a")];
         Assert.AreEqual("n squared is 225", v.Data);
     }
+
+    [TestMethod]
+    public void TEST_Eval_called_by_name_of_a_value_is_249()
+    {
+        // sbl -bf: EVAL called by name evaluates its expression by name, so an expression that gives a value is error 249, "expression
+        // evaluated by name returned value", wherever a name is required: .EVAL('1 + 2'), .EVAL(5), .EVAL(*(1 + 2)), . EVAL(...) and
+        // $ EVAL(...) in a pattern, @EVAL(...) and EVAL(...) = 4; an expression that is a variable gives its name (EVAL('X') = 'y'
+        // assigns X). The console said 21 for each, and 212 for the assignment (the master's
+        // eval_datatype_indirect_replace_branch_1, read against a fresh sbl run)
+        var build = SetupTests.SetupScript("-bf", @"        &ERRLIMIT = 100
+        SETEXIT('H')
+        N = .EVAL('1 + 2')
+        N = .EVAL(5)
+        N = .EVAL(*(1 + 2))
+        'abc' ? LEN(1) . EVAL('1 + 2')
+        'abc' ? LEN(1) $ EVAL('1 + 2')
+        'abc' ? @EVAL('1 + 2')
+        EVAL('1 + 2') = 4
+        X = 'x'
+        EVAL('X') = 'y'
+        S = S ' X=' X                       :(END)
+H       S = S ' ' &ERRTYPE
+        SETEXIT('H')                        :(CONTINUE)
+END");
+        Assert.AreEqual(" 249 249 249 249 249 249 249 X=y", ((StringVar)build.Execute!.IdentifierTable["S"]).Data);
+    }
 }

@@ -26,10 +26,12 @@ public partial class Executive
         {
             case IntegerVar integerVar:
                 SystemStack.Push(new IntegerVar(integerVar.Data));
+                MarkValueEvaluated();
                 return;
 
             case RealVar realVar:
                 SystemStack.Push(new RealVar(realVar.Data));
+                MarkValueEvaluated();
                 return;
 
             case StringVar stringVar:
@@ -86,16 +88,31 @@ public partial class Executive
 
                 StarFunctionList[^1](this);
                 Parent.CodeMode = false;
+                MarkValueEvaluated();
                 return;
 
             case ExpressionVar expression:
                 expression.FunctionName(this);
+                MarkValueEvaluated();
                 return;
 
             default:
                 LogRuntimeException(103);
                 return;
         }
+    }
+
+    // EVAL called by name evaluates its expression by name: one that gives a value, no name, is error 249 wherever a name is required
+    // (.EVAL('1 + 2'), LEN(1) . EVAL('1 + 2'), EVAL('1 + 2') = 4), as in SPITBOL, as $ of the name of a deferred expression is
+    private void MarkValueEvaluated()
+    {
+        if (Failure || SystemStack.Count == 0)
+            return;
+        var result = SystemStack.Peek();
+        if (result is NameVar || result.Symbol != "" || result.Key is not null)
+            return;
+        DeferredNameValue = result;
+        DeferredNameValueError = 249;
     }
 
     internal static bool HasTopLevelComma(string text)

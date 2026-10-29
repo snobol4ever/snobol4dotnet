@@ -68,6 +68,9 @@ public partial class Executive
         {
             if (AmpErrorLimit > 0)
                 AmpErrorLimit--;
+            // an armed handler takes the error where it is, as in SPITBOL (RunHandlerAtError)
+            if (OnErrorGoto > 0)
+                RunHandlerAtError();
             return;
         }
 

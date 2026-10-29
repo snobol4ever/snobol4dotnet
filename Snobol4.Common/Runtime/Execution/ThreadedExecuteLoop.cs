@@ -67,7 +67,7 @@ public partial class Executive
                 }
                 // instr.Op == OpCode.CallMsil (guaranteed by ThreadIsMsilOnly)
                 var next = msilDelegates[instr.IntOperand](this);
-                if (_trapTaken) { _trapTaken = false; thread = Thread!; continue; }   // the SETEXIT trap wins over the statement's goto
+                if (_trapTaken) { _trapTaken = false; thread = Thread!; if (_trapExitCode != 0) goto Done; continue; }   // the SETEXIT trap wins over the statement's goto
                 if (next == int.MinValue) continue;       // fall through
                 if (next < 0) { exitCode = next; goto Done; }
                 thread = Thread!;                         // AppendCompile may have extended Thread
@@ -234,7 +234,7 @@ public partial class Executive
                 case OpCode.CallMsil:
                 {
                     var next = Parent.MsilDelegates[instr.IntOperand](this);
-                    if (_trapTaken) { _trapTaken = false; thread = Thread!; break; }   // the SETEXIT trap wins over the statement's goto
+                    if (_trapTaken) { _trapTaken = false; thread = Thread!; if (_trapExitCode != 0) goto Done; break; }   // the SETEXIT trap wins over the statement's goto
                     if (next == int.MinValue) break;          // fall through — IP already advanced
                     if (next < 0) { exitCode = next; goto Done; } // halt / RETURN / FRETURN etc.
                     thread = Thread!;                         // AppendCompile may have extended Thread
@@ -316,6 +316,13 @@ public partial class Executive
         }
 
         Done:
+        // a trapped error's transfer that is an exit code (a handler's :(RETURN), :(END), :(ABORT)) is this loop's exit
+        if (_trapExitCode != 0 && overrideThread == null)
+        {
+            exitCode = _trapExitCode;
+            _trapExitCode = 0;
+        }
+
         // A SETEXIT handler's :(CONTINUE) resumes at the failure exit of the statement in error, as in
         // SPITBOL: its :F label, else its unconditional goto, else the next statement
         // :(ABORT) ends the run with the error that is pending, which is then fatal; with none it is error 36, which a handler takes once
@@ -539,10 +546,83 @@ public partial class Executive
         return (starts != null && stmtIdx < starts.Length) ? starts[stmtIdx] : -1;
     }
 
-    private void ProcessTrappedErrorThreaded()
+    // SPITBOL takes a trapped error where it is: the handler runs at once, and its :(CONTINUE) resumes there by failing the operation in
+    // error, so a negation or a choice inside the statement takes that failure and the statement goes on (Y = ~$H() after error 239
+    // succeeds). Here the handler's statements run from its label until the first of them transfers: CONTINUE returns to the error as
+    // an ordinary failure; any other transfer is kept, the statement ends on the error as before, and ProcessTrappedErrorThreaded makes
+    // that transfer instead of entering the handler. A thread that is not all MSIL statements keeps the handler for the statement's end.
+    internal void RunHandlerAtError()
     {
-        var target = OnErrorGoto;
-        OnErrorGoto  = 0;
+        var handler = OnErrorGoto;
+        var start = Parent.ThreadIsMsilOnly && Thread != null ? StatementIndexToInstrIndex(handler) : -1;
+        if (start < 0 || start >= Thread!.Length || Thread[start].Op != OpCode.CallMsil)
+            return;
+
+        // the trap fires as ProcessTrappedErrorThreaded fires it: SETEXIT disarmed, the error pending for a later CONTINUE
+        FireTrap();
+        OnErrorGoto = 0;
+        var (savedIP, savedFailure, savedOrigin, savedIsError) = (InstructionPointer, Failure, FailureOrigin, FailureIsError);
+        var (savedLine, savedReport, savedDepth) = (AmpCurrentLineNumber, ReportLineIndex, SystemStack.Count);
+        var transfer = RunHandlerSegment(start);
+        while (SystemStack.Count > savedDepth)
+            SystemStack.Pop();
+        (InstructionPointer, Failure, FailureOrigin, FailureIsError) = (savedIP, savedFailure, savedOrigin, savedIsError);
+        // the statement is the handler's last until the next begins (&STNO, the report's "in statement"), as in SPITBOL
+        ReportLineIndex = savedReport;
+
+        if (transfer == -6)
+        {
+            // :(CONTINUE): the error is the operation's failure, which a negation or a choice may take; no error is pending any more,
+            // and an error the rest of the statement in error raises (its goto again) is placed at that statement's line
+            ReportLineIndex = savedReport >= 0 ? savedReport : savedLine;
+            FailureIsError = false;
+            _trapPending = false;
+            _continueStatement = -1;
+            return;
+        }
+
+        // any other transfer is the statement's once it ends on the error: OnErrorGoto marks the trap for its end
+        _handlerTransfer = transfer;
+        _handlerTransferSet = true;
+        OnErrorGoto = handler;
+    }
+
+    // Runs the handler's statements from instruction `start` until one transfers, and gives that transfer: an instruction index, or an exit
+    // code (-1 END, -2 to -4 a return, -5 ABORT, -6 CONTINUE, -7 SCONTINUE)
+    private int RunHandlerSegment(int start)
+    {
+        InstructionPointer = start;
+        while (InstructionPointer >= 0 && InstructionPointer < Thread!.Length)
+        {
+            var instr = Thread[InstructionPointer++];
+            if (instr.Op != OpCode.CallMsil)
+                return -1;
+            var next = Parent.MsilDelegates[instr.IntOperand](this);
+            if (_trapTaken)
+            {
+                // an error of the handler's own statement took a transfer of its own: that is the handler's
+                _trapTaken = false;
+                var taken = _trapExitCode != 0 ? _trapExitCode : InstructionPointer;
+                _trapExitCode = 0;
+                return taken;
+            }
+
+            if (next != int.MinValue)
+                return next;
+        }
+
+        return -1;
+    }
+
+    // The transfer a handler run at the error made, made when the statement in error ends (RunHandlerAtError)
+    private int _handlerTransfer;
+    private bool _handlerTransferSet;
+
+    // An exit code (a return, END, ABORT, SCONTINUE) a trapped error's transfer is, which the loop then exits with
+    private int _trapExitCode;
+
+    private void FireTrap()
+    {
         // firing the trap disarms SETEXIT: its stored label is reset to null, so the handler is taken once
         // and SETEXIT then answers the null string, as in SPITBOL
         SetExitLabel = "";
@@ -554,9 +634,33 @@ public partial class Executive
             ? LabelTable[Parent.FoldCase(exitLabel)]
             : Parent.FailureExitExpressions.ContainsKey(errorStatement) ? ContinueAtExpression
             : Parent.FailureExitCodes.ContainsKey(errorStatement) ? ContinueAtCode : errorStatement + 1;
+        _trapPending = true;
+    }
+
+    private void ProcessTrappedErrorThreaded()
+    {
+        if (_handlerTransferSet)
+        {
+            // the handler already ran at the error: its transfer is the statement's
+            _handlerTransferSet = false;
+            OnErrorGoto = 0;
+            if (_handlerTransfer >= 0)
+                InstructionPointer = _handlerTransfer;
+            else
+            {
+                InstructionPointer = -1;
+                _trapExitCode = _handlerTransfer;
+            }
+
+            _trapTaken = true;
+            return;
+        }
+
+        var target = OnErrorGoto;
+        OnErrorGoto  = 0;
+        FireTrap();
         InstructionPointer = StatementIndexToInstrIndex(target);
         _trapTaken = true;
-        _trapPending = true;
     }
 
     // An error is waiting for :(CONTINUE) or :(SCONTINUE) (SPITBOL's r_cnt); the failure exit it resumes at can itself be a

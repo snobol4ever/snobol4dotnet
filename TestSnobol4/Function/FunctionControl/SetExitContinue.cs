@@ -90,4 +90,51 @@ FE      Z = 1
         OUTPUT = 'F [' F() '] G [' G() ']'
 END").Replace("\r\n", "\n"));
     }
+
+    [TestMethod]
+    public void TEST_SetExit_continue_resumes_at_the_innermost_failure_point()
+    {
+        // sbl -b: the handler runs where the error is, and :(CONTINUE) resumes there by failing the operation in error, so a negation
+        // (1) or a choice (2) inside the statement takes that failure and the statement goes on, and a handler of two statements (7)
+        // does the same; an interrogation (3), a pattern match the error ended (4) and a plain statement (5) fail, and a handler that
+        // leaves elsewhere (6) is entered with the statement's assignment not made. The console ran the handler when the statement
+        // ended and took the statement's failure exit (1, 2 and 7 failed; found by measuring the CODE road of DESIGN-PLAN step 11)
+        Assert.AreEqual("ERROR 239\n1 succ []\nERROR 239\n2 succ [b]\nERROR 239\n3 fail\nERROR 239\n4 fail\nERROR 239\n5 fail\n" +
+                        "ERR2 239 Y=[y]\nERR3 239\nERR3 two\n7 succ []", SetupTests.RunWithInput(@"        &ERRLIMIT = 20
+        DEFINE('H()')                       :(HE)
+H       H = .E
+        DIFFER(H)                           :S(NRETURN)F(FRETURN)
+HE      SETEXIT('ERR')
+        Y = ~$H()                           :S(S1)F(F1)
+S1      OUTPUT = '1 succ [' Y ']'           :(N2)
+F1      OUTPUT = '1 fail'                   :(N2)
+ERR     OUTPUT = 'ERROR ' &ERRTYPE
+        SETEXIT('ERR')                      :(CONTINUE)
+N2      Y = ($H(), 'b')                     :S(S2)F(F2)
+S2      OUTPUT = '2 succ [' Y ']'           :(N3)
+F2      OUTPUT = '2 fail'
+N3      Y = ?$H()                           :S(S3)F(F3)
+S3      OUTPUT = '3 succ [' Y ']'           :(N4)
+F3      OUTPUT = '3 fail'
+N4      'abc' ? (*$H() | 'b') . Z           :S(S4)F(F4)
+S4      OUTPUT = '4 succ [' Z ']'           :(N5)
+F4      OUTPUT = '4 fail'
+N5      Y = $H() 'x'                        :S(S5)F(F5)
+S5      OUTPUT = '5 succ [' Y ']'           :(N6)
+F5      OUTPUT = '5 fail'
+N6      SETEXIT('ERR2')
+        Y = 'y'
+        Y = ~$H()                           :S(S6)F(F6)
+S6      OUTPUT = '6 succ [' Y ']'           :(N7)
+F6      OUTPUT = '6 fail'                   :(N7)
+ERR2    OUTPUT = 'ERR2 ' &ERRTYPE ' Y=[' Y ']'  :(N7)
+N7      SETEXIT('ERR3')
+        Y = ~$H()                           :S(S7)F(F7)
+S7      OUTPUT = '7 succ [' Y ']'           :(END)
+F7      OUTPUT = '7 fail'                   :(END)
+ERR3    OUTPUT = 'ERR3 ' &ERRTYPE
+        OUTPUT = 'ERR3 two'
+        SETEXIT('ERR3')                     :(CONTINUE)
+END").Replace("\r\n", "\n").TrimEnd('\n'));
+    }
 }

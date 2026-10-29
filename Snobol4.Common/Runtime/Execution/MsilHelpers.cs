@@ -231,12 +231,20 @@ public partial class Executive
     // An error that is the run's end unless a SETEXIT handler is armed to take it (the handler is armed once)
     internal void TrappedOrFatalError(int errorCode)
     {
-        if (SetExitNumber > 0)
+        // a handler that takes the error and continues resumes at the failure exit of the goto in error, which is that goto again: the
+        // error recurs while a handler takes it, as in SPITBOL, and is the run's end once none does
+        while (SetExitNumber > 0)
         {
             LogRuntimeException(errorCode);
             if (OnErrorGoto > 0)
+            {
                 ProcessTrappedErrorThreaded();
-            return;
+                return;
+            }
+
+            // inside an expression's evaluation an error never ends the run: the statement fails
+            if (ExpressionDepth > 0)
+                return;
         }
 
         AmpErrorLimit = 0;

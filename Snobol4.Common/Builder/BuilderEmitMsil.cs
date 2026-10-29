@@ -193,6 +193,11 @@ public partial class Builder
             FailureExitCodes.Remove(stmtIdx);
             if (FailureExits[stmtIdx] is null && FailureExitCode(line) is { } exitCode)
                 FailureExitCodes[stmtIdx] = exitCode;
+            if (line.LexBody.Any(token => token.TokenType == Token.Type.COMMA_CHOICE
+                                          || token.TokenType == Token.Type.UNARY_OPERATOR && token.MatchedString == "~"))
+                FailurePointStatements.Add(stmtIdx);
+            else
+                FailurePointStatements.Remove(stmtIdx);
 
             TryCache(line.ParseBody, stmtIdx: stmtIdx, isBody: true,
                      directGotoLabel:  directUncondLabel,

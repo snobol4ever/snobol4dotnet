@@ -549,11 +549,20 @@ public partial class Executive
 
     // SPITBOL takes a trapped error where it is: the handler runs at once, and its :(CONTINUE) resumes there by failing the operation in
     // error, so a negation or a choice inside the statement takes that failure and the statement goes on (Y = ~$H() after error 239
-    // succeeds). Here the handler's statements run from its label until the first of them transfers: CONTINUE returns to the error as
-    // an ordinary failure; any other transfer is kept, the statement ends on the error as before, and ProcessTrappedErrorThreaded makes
-    // that transfer instead of entering the handler. A thread that is not all MSIL statements keeps the handler for the statement's end.
+    // succeeds). Here the handler's statements run from its label: CONTINUE returns to the error as an ordinary failure; any other
+    // transfer is kept, the statement ends on the error as before, and ProcessTrappedErrorThreaded makes that transfer instead of
+    // entering the handler. In a statement that holds a negation or a choice the handler runs on through its own gotos until it
+    // continues or leaves, as SPITBOL keeps that failure point for it; in any other, where CONTINUE resumes at the statement's failure
+    // exit wherever it is taken, the handler runs until the first of its statements transfers. A thread that is not all MSIL
+    // statements keeps the handler for the statement's end. A handler that leaves for the program without continuing runs the program
+    // on inside the statement in error, as SPITBOL's stack keeps that statement's failure frame; an error there runs its own handler
+    // deeper, and once it has taken the continuation over, the run below it hands its next statement to the loop at the first
+    // statement boundary it reaches. A handler that never continues (one that loops back to the statement in error) would go deeper
+    // with each error, so past MaxHandlerDepth runs an error keeps its handler for the statement's end, and the runs below unwind
     internal void RunHandlerAtError()
     {
+        if (_handlerDepth >= MaxHandlerDepth)
+            return;
         var handler = OnErrorGoto;
         var start = Parent.ThreadIsMsilOnly && Thread != null ? StatementIndexToInstrIndex(handler) : -1;
         if (start < 0 || start >= Thread!.Length || Thread[start].Op != OpCode.CallMsil)
@@ -561,17 +570,29 @@ public partial class Executive
 
         // the trap fires as ProcessTrappedErrorThreaded fires it: SETEXIT disarmed, the error pending for a later CONTINUE
         FireTrap();
+        var serial = _trapSerial;
         OnErrorGoto = 0;
         var (savedIP, savedFailure, savedOrigin, savedIsError) = (InstructionPointer, Failure, FailureOrigin, FailureIsError);
         var (savedLine, savedReport, savedDepth) = (AmpCurrentLineNumber, ReportLineIndex, SystemStack.Count);
-        var transfer = RunHandlerSegment(start);
+        int transfer;
+        _handlerDepth++;
+        try
+        {
+            transfer = RunHandlerSegment(start, Parent.FailurePointStatements.Contains(_trapStatement), serial);
+        }
+        finally
+        {
+            _handlerDepth--;
+        }
+
         while (SystemStack.Count > savedDepth)
             SystemStack.Pop();
         (InstructionPointer, Failure, FailureOrigin, FailureIsError) = (savedIP, savedFailure, savedOrigin, savedIsError);
         // the statement is the handler's last until the next begins (&STNO, the report's "in statement"), as in SPITBOL
         ReportLineIndex = savedReport;
 
-        if (transfer == -6)
+        // a CONTINUE goes on from this error only while it is the one pending: a later error took the continuation over or used it up
+        if (transfer == -6 && _trapPending && _trapSerial == serial)
         {
             // :(CONTINUE): the error is the operation's failure, which a negation or a choice may take; no error is pending any more,
             // and an error the rest of the statement in error raises (its goto again) is placed at that statement's line. In the code
@@ -590,32 +611,57 @@ public partial class Executive
         OnErrorGoto = handler;
     }
 
-    // Runs the handler's statements from instruction `start` until one transfers, and gives that transfer: an instruction index, or an exit
-    // code (-1 END, -2 to -4 a return, -5 ABORT, -6 CONTINUE, -7 SCONTINUE)
-    private int RunHandlerSegment(int start)
+    // Runs the handler's statements from instruction `start` until one transfers, or with `throughGotos` until one exits, and gives that
+    // transfer: an instruction index, or an exit code (-1 END, -2 to -4 a return, -5 ABORT, -6 CONTINUE, -7 SCONTINUE). Once the trap
+    // `serial` fired is no longer the error pending, no CONTINUE can go on from it, and the next statement is the transfer
+    private int RunHandlerSegment(int start, bool throughGotos, long serial)
     {
         InstructionPointer = start;
         while (InstructionPointer >= 0 && InstructionPointer < Thread!.Length)
         {
+            if (_trapSerial != serial || !_trapPending)
+                return InstructionPointer;
+            var at = InstructionPointer;
             var instr = Thread[InstructionPointer++];
-            if (instr.Op != OpCode.CallMsil)
+            if (instr.Op == OpCode.Halt)
                 return -1;
+            // a CODE the handler ran made the thread more than MSIL statements: the main loop goes on from here when the statement ends
+            if (instr.Op != OpCode.CallMsil)
+                return at;
             var next = Parent.MsilDelegates[instr.IntOperand](this);
             if (_trapTaken)
             {
                 // an error of the handler's own statement took a transfer of its own: that is the handler's
                 _trapTaken = false;
-                var taken = _trapExitCode != 0 ? _trapExitCode : InstructionPointer;
-                _trapExitCode = 0;
-                return taken;
+                if (_trapExitCode != 0)
+                {
+                    var code = _trapExitCode;
+                    _trapExitCode = 0;
+                    return code;
+                }
+
+                if (!throughGotos)
+                    return InstructionPointer;
+                continue;
             }
 
-            if (next != int.MinValue)
+            if (next == int.MinValue)
+                continue;
+            if (next < 0 || !throughGotos)
                 return next;
+            InstructionPointer = next;
         }
 
         return -1;
     }
+
+    // Counts the traps fired, so that a handler run at its error knows whether a CONTINUE is still that error's (RunHandlerAtError)
+    private long _trapSerial;
+
+    // The handlers running at an error, one inside another (RunHandlerAtError), and how many may: each holds the .NET frames of the
+    // statement it runs in, about 6 KB
+    private int _handlerDepth;
+    private const int MaxHandlerDepth = 1000;
 
     // The transfer a handler run at the error made, made when the statement in error ends (RunHandlerAtError)
     private int _handlerTransfer;
@@ -633,6 +679,7 @@ public partial class Executive
         // an error of the goto that :(CONTINUE) resumed at is the error of the statement that was in error
         var errorStatement = ReportLineIndex >= 0 ? ReportLineIndex : AmpCurrentLineNumber;
         _trapStatement = errorStatement;
+        _trapSerial++;
         _continueStatement = Parent.FailureExits.TryGetValue(errorStatement, out var exitLabel) && exitLabel is not null
             ? LabelTable[Parent.FoldCase(exitLabel)]
             : Parent.FailureExitExpressions.ContainsKey(errorStatement) ? ContinueAtExpression

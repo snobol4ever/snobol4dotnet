@@ -107,6 +107,10 @@ public partial class Builder : IDisposable
     // A statement's failure exit when it is a direct goto (:<C>, :F<C>): the expression whose value is the CODE :(CONTINUE) resumes at
     internal Dictionary<int, List<Token>> FailureExitCodes = new();
 
+    // The statements whose body holds a negation or a choice, a failure point of its own inside the statement where :(CONTINUE) may
+    // resume after an error: a SETEXIT handler of an error in one runs at the error until it continues (RunHandlerAtError)
+    internal HashSet<int> FailurePointStatements = [];
+
     /// <summary>
     /// True when the compiled thread contains only <c>CallMsil</c> and <c>Halt</c>
     /// opcodes — all control flow has been absorbed into delegates.

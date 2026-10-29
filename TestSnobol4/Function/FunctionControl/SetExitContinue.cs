@@ -183,4 +183,38 @@ S3      OUTPUT = 'succ3 [' Y ']'            :(END)
 F3      OUTPUT = 'fail3'
 END").Replace("\r\n", "\n").TrimEnd('\n'));
     }
+
+    [TestMethod]
+    public void TEST_SetExit_continue_after_a_handler_goto_resumes_at_the_innermost_failure_point()
+    {
+        // sbl -bf: a handler that goes to another statement of its own before :(CONTINUE) still resumes at the failure point of the
+        // error inside the statement, so ~$H() succeeds (1, 2); and a handler that loops back to the statement in error 2,999 times
+        // before it continues, deeper than the console holds handlers inside one another, does the same (3). The console ran the
+        // handler only until its first goto and took the statement's failure exit (fail2, fail3, fail 3000)
+        Assert.AreEqual("ERROR 239 in statement 6\nsucc2 []\nERROR 239 in statement 11\nsucc3", SetupTests.RunWithInputDirectives("-bf", @"        &ERRLIMIT = 10
+        DEFINE('H()')                       :(HE)
+H       H = .E
+        DIFFER(H)                           :S(NRETURN)F(FRETURN)
+HE      SETEXIT('ERR')
+N2      Y = ~$H()                           :S(S2)F(F2)
+S2      OUTPUT = 'succ2 [' Y ']'            :(N3)
+F2      OUTPUT = 'fail2'                    :(N3)
+ERR     OUTPUT = 'ERROR ' &ERRTYPE ' in statement ' &LASTNO     :(ERR2)
+ERR2    SETEXIT('ERR')                      :(CONTINUE)
+N3      Z = ~$H()                           :S(S3)F(F3)
+S3      OUTPUT = 'succ3'                    :(END)
+F3      OUTPUT = 'fail3'
+END").Replace("\r\n", "\n").TrimEnd('\n'));
+        Assert.AreEqual("succ 3000", SetupTests.RunWithInputDirectives("-bf", @"        &ERRLIMIT = 10000
+        N = 0
+        SETEXIT('ERR')
+LOOP    I = I + 1
+        Y = ~(1 / N)                        :S(S1)F(F1)
+S1      OUTPUT = 'succ ' I                  :(END)
+F1      OUTPUT = 'fail ' I                  :(END)
+ERR     LT(I, 3000)                         :F(ERR2)
+        SETEXIT('ERR')                      :(LOOP)
+ERR2    SETEXIT('ERR')                      :(CONTINUE)
+END").Replace("\r\n", "\n").TrimEnd('\n'));
+    }
 }

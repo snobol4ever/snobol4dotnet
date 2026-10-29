@@ -54,6 +54,26 @@ end");
     }
 
     [TestMethod]
+    public void TEST_SetExit_an_error_no_handler_takes_uses_the_continuation_up()
+    {
+        // sbl -bf: an error no handler takes (the handler did not arm SETEXIT again) goes on at once from where it is, so a later
+        // :(CONTINUE) has no error to go on from and is error 37; the console went on from the error the handler had taken (fail)
+        var output = SetupTests.RunWithInputDirectives("-bf", @"        &ERRLIMIT = 5
+        N = 0
+        SETEXIT('ERR')
+        Y = ~(1 / N)                        :S(S1)F(F1)
+S1      OUTPUT = 'succ [' Y ']'             :(END)
+F1      OUTPUT = 'fail'                     :(END)
+ERR     OUTPUT = 'ERR ' &ERRTYPE            :(ERR2)
+ERR2    Z = 2 / N
+        OUTPUT = 'after untrapped ' &ERRTYPE  :(CONTINUE)
+END").Replace("\r\n", "\n");
+        StringAssert.StartsWith(output, "ERR 14\nafter untrapped 14\n");
+        StringAssert.Contains(output, "Test.sno(9) : ERROR 037 -- goto continue with no preceding error");
+        Assert.IsFalse(output.Contains("fail"));
+    }
+
+    [TestMethod]
     public void TEST_SetExit_firing_disarms_the_trap()
     {
         // sbl -bf: taking a SETEXIT trap resets its stored label to null, so SETEXIT('') in the handler answers

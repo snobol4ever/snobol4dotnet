@@ -67,7 +67,17 @@ public partial class Executive
         if ((AmpErrorLimit > 0 || ExpressionDepth > 0) && !fatal)
         {
             if (AmpErrorLimit > 0)
+            {
                 AmpErrorLimit--;
+                // an error no handler takes goes on at once from where it is, which uses the continuation up: a :(CONTINUE) or
+                // :(SCONTINUE) after it has no error to go on from, as in SPITBOL (err07 takes lcnt1 when no SETEXIT is armed)
+                if (OnErrorGoto == 0)
+                {
+                    _trapPending = false;
+                    _continueStatement = -1;
+                }
+            }
+
             // an armed handler takes the error where it is, as in SPITBOL (RunHandlerAtError)
             if (OnErrorGoto > 0)
                 RunHandlerAtError();

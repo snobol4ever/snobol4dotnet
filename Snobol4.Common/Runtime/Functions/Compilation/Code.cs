@@ -87,7 +87,8 @@ public partial class Executive
         if (Parent.ErrorCodeHistory.Count == errorsBefore)
             return built;
 
-        var code = Parent.ErrorCodeHistory[^1];
+        // the first error, as SPITBOL's compiler stops at the first statement in error (CODE(' N = EXP(1E300);L2 X = LN(-0.5)') is 305)
+        var code = Parent.ErrorCodeHistory[errorsBefore];
         var added = Parent.ErrorCodeHistory.Count - errorsBefore;
         Parent.ErrorCodeHistory.RemoveRange(errorsBefore, added);
         Parent.ColumnHistory.RemoveRange(Parent.ColumnHistory.Count - added, added);

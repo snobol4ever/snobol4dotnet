@@ -44,6 +44,24 @@ END").Replace("\r\n", "\n").TrimEnd('\n'));
     }
 
     [TestMethod]
+    public void TEST_CodeFailedLabels_the_error_is_the_first_statement_in_errors()
+    {
+        // sbl -bf: a CODE text with two statements in error fails with the first one's error, as SPITBOL's compiler stops there: 305
+        // for EXP(1E300) before 315 for LN(-0.5). The console kept the last (found by the infinite_snobol4 campaign at scope 12, seed0
+        // 20261101, batch 6 of kind=stmt, line 178)
+        Assert.AreEqual("1 FAIL 305\n2 FAIL 305\n3 FAIL 315", SetupTests.RunWithInputDirectives("-bf", @"        T1 = "" N = SIZE(EXP(1E300));L2 X = LN(-0.5)""
+        T2 = "" N = EXP(1E300);L2 X = LN(-0.5)""
+        T3 = "" N = 1;L2 X = LN(-0.5)""
+        I = 0
+L       I = I + 1
+        GT(I, 3)                            :S(END)
+        C = CODE($('T' I))                  :S(OK)
+        OUTPUT = I ' FAIL ' &ERRTYPE        :(L)
+OK      OUTPUT = I ' ok'                    :(L)
+END").Replace("\r\n", "\n").TrimEnd('\n'));
+    }
+
+    [TestMethod]
     public void TEST_CodeFailedLabels_the_statement_in_error_is_error_7_when_reached()
     {
         // sbl -bf: the statement after a label before the error runs, and the statement in error is reached next, which is error 7,

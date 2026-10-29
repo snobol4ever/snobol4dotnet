@@ -573,9 +573,11 @@ public partial class Executive
         if (transfer == -6)
         {
             // :(CONTINUE): the error is the operation's failure, which a negation or a choice may take; no error is pending any more,
-            // and an error the rest of the statement in error raises (its goto again) is placed at that statement's line
+            // and an error the rest of the statement in error raises (its goto again) is placed at that statement's line. In the code
+            // of an evaluated expression that ends on an error the error still ends it, and the evaluation fails as a whole, as in
+            // SPITBOL (EVAL('~$H()') fails)
             ReportLineIndex = savedReport >= 0 ? savedReport : savedLine;
-            FailureIsError = false;
+            FailureIsError = ExpressionDepth > 0 && ErrorFunctionLevel == ExpressionFunctionLevel && EvaluationEndsOnError;
             _trapPending = false;
             _continueStatement = -1;
             return;

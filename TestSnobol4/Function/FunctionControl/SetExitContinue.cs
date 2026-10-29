@@ -137,4 +137,30 @@ ERR3    OUTPUT = 'ERR3 ' &ERRTYPE
         SETEXIT('ERR3')                     :(CONTINUE)
 END").Replace("\r\n", "\n").TrimEnd('\n'));
     }
+
+    [TestMethod]
+    public void TEST_SetExit_continue_after_an_error_in_evaluated_code_fails_the_evaluation()
+    {
+        // sbl -b: an error in the code of an evaluated expression ends that evaluation, which fails as a whole, and a handler's
+        // :(CONTINUE) resumes at that failure, so a negation (1), a choice (2) or a negated expression (3) inside it does not take
+        // the error's failure. The handler run at the error let them take it (snobol4dotnet 2705048: succ [], succ2 [c], succ3 [])
+        Assert.AreEqual("ERROR 239\nfail\nERROR 239\nfail2\nERROR 239\nfail3", SetupTests.RunWithInput(@"        &ERRLIMIT = 10
+        DEFINE('H()')                       :(HE)
+H       H = .E
+        DIFFER(H)                           :S(NRETURN)F(FRETURN)
+HE      SETEXIT('ERR')
+        Y = EVAL('~$H()')                   :S(S1)F(F1)
+S1      OUTPUT = 'succ [' Y ']'             :(N2)
+F1      OUTPUT = 'fail'                     :(N2)
+ERR     OUTPUT = 'ERROR ' &ERRTYPE
+        SETEXIT('ERR')                      :(CONTINUE)
+N2      Y = EVAL(""(DIFFER($H()), 'c')"")     :S(S2)F(F2)
+S2      OUTPUT = 'succ2 [' Y ']'            :(N3)
+F2      OUTPUT = 'fail2'
+N3      E = *(~$H())
+        Y = EVAL(E)                         :S(S3)F(F3)
+S3      OUTPUT = 'succ3 [' Y ']'            :(END)
+F3      OUTPUT = 'fail3'
+END").Replace("\r\n", "\n").TrimEnd('\n'));
+    }
 }

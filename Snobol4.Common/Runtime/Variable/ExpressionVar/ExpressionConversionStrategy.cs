@@ -13,6 +13,14 @@ public sealed class ExpressionConversionStrategy : IConversionStrategy
             return true;
         }
 
+        // an expression is a pattern that evaluates it when it is matched, as *X is in a pattern: CONVERT(*X, 'PATTERN') in SPITBOL
+        if (targetType == Executive.VarType.PATTERN)
+        {
+            varOut = new PatternVar(UnevaluatedPattern.Structure(((ExpressionVar)self).FunctionName));
+            valueOut = ((PatternVar)varOut).Data;
+            return true;
+        }
+
         varOut = StringVar.Null();
         valueOut = "";
         return false;

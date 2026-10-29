@@ -84,4 +84,23 @@ public class DeferredFunctionPattern
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("w a a q k EXPRESSION 2", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
     }
+
+    [TestMethod]
+    public void TEST_DeferredFunctionPattern_an_expression_converts_to_a_pattern()
+    {
+        // sbl -bf: CONVERT(*X, 'PATTERN') is a PATTERN that evaluates X when it is matched, as *X does in a pattern, so
+        // 'aqb' ? CONVERT(*X, 'PATTERN') . R matches q after X = 'q'; the console's EXPRESSION converted only to EXPRESSION,
+        // and the conversion failed (found by measuring the CODE road of DESIGN-PLAN random-codegen-scope step 11,
+        // CONVERT(CONVERT(a[i], 'EXPRESSION'), 'PATTERN'))
+        var build = SetupTests.SetupScript("-bf", """
+                 E = CONVERT('i', 'EXPRESSION')
+                 R = DATATYPE(E) ' ' DATATYPE(CONVERT(E, 'PATTERN')) ' ' DATATYPE(CONVERT(*X, 'PATTERN'))
+                 X = 'q'
+                 'aqb' ? CONVERT(*X, 'PATTERN') . M
+                 R = R ' ' M
+         END
+         """);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("EXPRESSION PATTERN PATTERN q", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
+    }
 }

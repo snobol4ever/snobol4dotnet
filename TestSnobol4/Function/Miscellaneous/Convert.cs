@@ -1629,6 +1629,8 @@ end";
     [TestMethod]
     public void TEST_Convert_Expression_Pattern()
     {
+        // sbl -b answers success: an EXPRESSION converts to a PATTERN that evaluates it when matched (the manual's table lists only
+        // EXPRESSION to EXPRESSION; the oracle decides). This test expected failure until sbl ran this exact program, 2026-10-29
         var s = @"
         d = 'failure'
         a = *(len(k) pos(m))
@@ -1639,7 +1641,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("failure", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("d")]).Data);
+        Assert.AreEqual("success", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("d")]).Data);
     }
 
     [TestMethod]

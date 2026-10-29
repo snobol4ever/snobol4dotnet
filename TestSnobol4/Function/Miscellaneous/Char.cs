@@ -46,6 +46,28 @@ end";
     }
 
     [TestMethod]
+    public void TEST_Char_a_real_beyond_the_integers_is_out_of_range()
+    {
+        // sbl -b: CHAR(1E150) is error 282, as the program is compiled and when the real arrives in a variable; the console cut the
+        // integer it converted to 32 bits, which put 1E150 in range, and gave a character (found by the infinite_snobol4 campaign at
+        // scope 12, seed0 20261102, batch 3 of kind=stmt, line 172, where % is OPSYN'd to CHAR: %SQRT(1E300))
+        var build = SetupTests.SetupScript("-b", @"
+        b = char(1E150)
+end");
+        CollectionAssert.AreEqual(new[] { 282 }, build.ErrorCodeHistory.ToArray());
+        Assert.AreEqual(231, build.ExitStatus);
+
+        build = SetupTests.SetupScript("-b", @"
+        &ERRLIMIT = 10
+        n = 1E150
+        b = char(n)
+        n = -1E150
+        c = char(n)
+end");
+        CollectionAssert.AreEqual(new[] { 282, 282 }, build.ErrorCodeHistory.ToArray());
+    }
+
+    [TestMethod]
     public void TEST_Char_5_ascii_space()
     {
         // CHAR(32) = space

@@ -13,7 +13,8 @@ public partial class Executive
             return;
         }
 
-        var i = (int)(long)c;
+        // the range is that of the whole integer: cut to 32 bits first, a real beyond them (CHAR(1E150)) fell in range
+        var i = (long)c;
 
         if (i is < 0 or >= 32768)
         {

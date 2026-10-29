@@ -325,13 +325,14 @@ public partial class Executive
 
         // A SETEXIT handler's :(CONTINUE) resumes at the failure exit of the statement in error, as in
         // SPITBOL: its :F label, else its unconditional goto, else the next statement
-        // :(ABORT) ends the run with the error that is pending, which is then fatal; with none it is error 36, which a handler takes once
+        // :(ABORT) ends the run with the error &ERRTYPE holds, which is then fatal, whether a handler took it, CONTINUE went on from it
+        // or none was armed, as in SPITBOL (labo1 reads kvert); with &ERRTYPE 0 it is error 36, which a handler takes once
         if (exitCode == -5 && overrideThread == null)
         {
-            if (_trapPending && Parent.ErrorCodeHistory.Count > 0)
+            if (AmpErrorType != 0)
             {
                 _trapPending = false;
-                LogRuntimeException(Parent.ErrorCodeHistory[^1], fatal: true, AmpErrorType);
+                LogRuntimeException((int)AmpErrorType, fatal: true);
             }
 
             TrappedOrFatalError(36);

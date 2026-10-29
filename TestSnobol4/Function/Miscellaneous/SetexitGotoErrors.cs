@@ -24,6 +24,27 @@ public class SetexitGotoErrors
     }
 
     [TestMethod]
+    public void TEST_SetexitGotoErrors_abort_ends_the_run_with_the_error_errtype_holds()
+    {
+        // sbl -b: ABORT ends the run with the error &ERRTYPE holds, whether no handler was armed for it (1), a handler took it and
+        // CONTINUE went on from it (2), or the program assigned it (3); the console said 36 for each, the error it reports with
+        // &ERRTYPE 0 (4)
+        var output = Run("\t&ERRLIMIT = 5\n\tN = 0\n\tY = 1 / N\n\tOUTPUT = 'here ' &ERRTYPE\t:(ABORT)\nEND\n");
+        StringAssert.StartsWith(output, "here 14\n");
+        StringAssert.Contains(output, "Test.sno(4) : ERROR 014 -- division caused integer overflow");
+        output = Run("\t&ERRLIMIT = 5\n\tN = 0\n\tSETEXIT('ERR')\n\tY = 1 / N\n\tOUTPUT = 'after ' &ERRTYPE\t:(ABORT)\n" +
+                     "ERR\tOUTPUT = 'ERR ' &ERRTYPE\t:(CONTINUE)\nEND\n");
+        StringAssert.StartsWith(output, "ERR 14\nafter 14\n");
+        StringAssert.Contains(output, "Test.sno(5) : ERROR 014 -- division caused integer overflow");
+        output = Run("\t&ERRLIMIT = 5\n\t&ERRTYPE = 77\n\tOUTPUT = 'here ' &ERRTYPE\t:(ABORT)\nEND\n");
+        StringAssert.StartsWith(output, "here 77\n");
+        StringAssert.Contains(output, "Test.sno(3) : ERROR 077 -- data argument is missing a left paren");
+        output = Run("\t&ERRLIMIT = 5\n\tN = 0\n\tY = 1 / N\n\t&ERRTYPE = 0\n\tOUTPUT = 'here ' &ERRTYPE\t:(ABORT)\nEND\n");
+        StringAssert.StartsWith(output, "here 0\n");
+        StringAssert.Contains(output, "Test.sno(5) : ERROR 036 -- goto abort with no preceding error");
+    }
+
+    [TestMethod]
     public void TEST_SetexitGotoErrors_abort_with_no_error_pending_is_error_36()
     {
         var output = Run("\tOUTPUT = 'a'\n\t:(ABORT)\n\tOUTPUT = 'b'\nEND\n");

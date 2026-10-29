@@ -257,17 +257,13 @@ public partial class Executive
     internal void ComputedGotoError(int code)
     {
         LogRuntimeException(code);
-        if (OnErrorGoto > 0)
-        {
-            // a SETEXIT handler takes the error as it takes any other
-            ProcessTrappedErrorThreaded();
-            return;
-        }
 
-        // no handler: the failure exit of a goto is the goto again, which errs as error 332, a fatal-class error, until the third strike
-        // (SPITBOL's errft, shared with SCONTINUE); the first two are trapped while &ERRLIMIT lasts
-        while (true)
+        // with no handler, or one that continued, the failure exit of a goto is the goto again, which errs as error 332, a fatal-class
+        // error, until the third strike (SPITBOL's errft, shared with SCONTINUE); the first two are trapped while &ERRLIMIT lasts. A
+        // SETEXIT handler takes the error as it takes any other, and one that leaves makes its transfer when the statement ends
+        while (OnErrorGoto == 0)
             LogRuntimeException(332, fatal: ++_fatalErrors >= 3);
+        ProcessTrappedErrorThreaded();
     }
 
     // RETURN, FRETURN and NRETURN outside every function (&FNCLEVEL 0) end the run with error 242

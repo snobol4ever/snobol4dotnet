@@ -46,6 +46,24 @@ END").Replace("\r\n", "\n");
     }
 
     [TestMethod]
+    public void TEST_DirectGoto_in_error_ends_where_the_handler_ends_the_run()
+    {
+        // sbl -bf answers ERROR 24 / ERROR 332 / ERROR 332 and ends at the handler's :S(END) before the third strike: a handler run at
+        // the goto's error that leaves makes its transfer. The console went on to a third 332, fatal, after the handler's END
+        // (snobol4dotnet 2705048; the witness ladder__rung16_dotnet_continue_retakes_a_direct_goto_in_error)
+        var output = SetupTests.RunWithInputDirectives("-bf", @"        &ERRLIMIT = 10
+        SETEXIT('ERR')
+        X = 1                :<Z>
+        OUTPUT = 'after'     :(END)
+ERR     N = N + 1
+        OUTPUT = 'ERROR ' &ERRTYPE
+        GE(N, 3)             :S(END)
+        SETEXIT('ERR')       :(CONTINUE)
+END").Replace("\r\n", "\n");
+        Assert.AreEqual("ERROR 24\nERROR 332\nERROR 332", output.TrimEnd('\n'));
+    }
+
+    [TestMethod]
     public void TEST_DirectGoto_is_not_made_after_a_trapped_error()
     {
         // sbl -b answers ERROR 148 / ERROR2 148 / ERROR3 148: an error SETEXIT traps takes the statement's place, so its direct goto

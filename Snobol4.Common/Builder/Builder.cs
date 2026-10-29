@@ -402,8 +402,12 @@ public partial class Builder : IDisposable
         // or the previous block's implicit end), as SPITBOL numbers them; a blank statement (CODE(' A ; ; B'))
         // takes a number too, though it compiles to nothing
         var stnoBase = Execute.SourceStno.Count > 0 ? Execute.SourceStno[^1] : 0;
+        // a text that does not compile defines the labels of the statements before the one in error and no other, as SPITBOL's compiler
+        // has defined them when it meets the error (CODE(' X = 1;L2 Y = SQRT(-0.5);L3 Z = 1') leaves L2 and L3 as they were)
+        var inError = false;
         foreach (var line in Code.SourceLines)
         {
+            inError |= line.CompileError;
             if (!line.Compiled)
             {
                 var codeCount = 1 + line.LineCountFile - line.BlankLineCount - line.CommentContinuationDirectiveCount;
@@ -413,7 +417,7 @@ public partial class Builder : IDisposable
                 Execute.SourceLineNumbers.Add(line.LineCountFile);
                 Execute.SourceStatementNumbers.Add(stmtNumber + 1);
                 Execute.SourceStno.Add(stnoBase + (stmtNumber - stmtOffset) + 1 + line.BlankLineCount);
-                if (line.Label.Length > 0)
+                if (line.Label.Length > 0 && !inError)
                 {
                     var folded = line.CaseFolding ? line.Label.ToUpper() : line.Label;
                     if (folded is not "END")

@@ -1,3 +1,4 @@
+using Snobol4.Common;
 using Test.TestLexer;
 
 namespace Test.Miscellaneous;
@@ -135,5 +136,23 @@ END";
 7 0 none
 8 0 none
 9 0 ababab", SetupTests.RunWithInput(program).Replace("\r\n", "\n").TrimEnd('\n'));
+    }
+
+    [TestMethod]
+    public void TEST_NameAsNumber_integer_of_a_name_is_its_text()
+    {
+        // sbl -bf: a name made of a variable's text is that text, so INTEGER(.$'3'), INTEGER(.$' 5 ') and INTEGER(.$'-4') succeed and
+        // INTEGER(.$'3.5') and INTEGER(.X) fail; the name of an element or a keyword has no text and fails. The console failed every name
+        // (the master's array_convert_dupl_replace_1, read against a fresh sbl run)
+        var build = SetupTests.SetupScript("-bf", @"        A = ARRAY(2)
+        S = INTEGER(.$'3') 'a'
+        S = S (INTEGER(.$'3.5') 'b', 'n')
+        S = S (INTEGER(.X) 'c', 'n')
+        S = S (INTEGER(.$' 5 ') 'd', 'n')
+        S = S (INTEGER(.A[1]) 'e', 'n')
+        S = S (INTEGER(.$'-4') 'f', 'n')
+        S = S (INTEGER(.&ANCHOR) 'g', 'n')
+END");
+        Assert.AreEqual("anndnfn", ((StringVar)build.Execute!.IdentifierTable["S"]).Data);
     }
 }

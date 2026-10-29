@@ -35,6 +35,12 @@ public partial class Lexer
     /// Indicates whether an equal sign has been found (for assignment or pattern replacement).
     /// </summary>
     private bool _equalFound;
+
+    /// <summary>
+    /// Set by an = outside every bracket until the first blank there: when another = lies ahead, that blank is the implicit pattern
+    /// match of a replacement inside the replacement.
+    /// </summary>
+    private bool _replacementStart;
     
     /// <summary>
     /// Indicates whether an implicit pattern match operator has been inserted.
@@ -190,6 +196,7 @@ public partial class Lexer
         _commaStack.Clear();
         _cursorCurrent = 0;
         _equalFound = false;
+        _replacementStart = false;
         _failureGotoEnd = 0;
         _failureGotoStart = 0;
         _patternMatchFound = false;
@@ -798,6 +805,18 @@ public partial class Lexer
 
         if (_patternMatchFound || _equalFound || _bracketStack.Count > 0)
         {
+            // the first blank after an = outside every bracket ends the subject of a replacement inside the replacement when another =
+            // lies ahead before any ?, as in SPITBOL: X = A B = 1 replaces B in A, and X is A's new value
+            if (_replacementStart && _bracketStack.Count == 0 && _startState == 1)
+            {
+                _replacementStart = false;
+                if (OperatorAhead(sourceLine.Text, _cursorCurrent) == '=')
+                {
+                    AddImplicitPatternMatch(sourceLine);
+                    return;
+                }
+            }
+
             AddImplicitConcatenation(sourceLine);
             return;
         }
@@ -820,7 +839,13 @@ public partial class Lexer
     /// Whether the statement text from <paramref name="from"/> holds a binary ? (a blank on each side) outside every bracket and
     /// quote, before the replacement's = and before the goto field.
     /// </summary>
-    private static bool ExplicitMatchAhead(string text, int from)
+    private static bool ExplicitMatchAhead(string text, int from) => OperatorAhead(text, from) == '?';
+
+    /// <summary>
+    /// The first binary ? or = (a blank on each side) in the statement text from <paramref name="from"/>, outside every bracket and
+    /// quote and before the goto field, or '\0' for none.
+    /// </summary>
+    private static char OperatorAhead(string text, int from)
     {
         var depth = 0;
         for (var i = from; i < text.Length; i++)
@@ -830,7 +855,7 @@ public partial class Lexer
                 case '\'' or '"':
                     var close = text.IndexOf(text[i], i + 1);
                     if (close < 0)
-                        return false;
+                        return '\0';
                     i = close;
                     break;
                 case '(' or '[' or '<':
@@ -840,13 +865,13 @@ public partial class Lexer
                     depth--;
                     break;
                 case ':' when depth == 0:
-                    return false;
+                    return '\0';
                 case '=' or '?' when depth == 0 && i > 0 && text[i - 1] is ' ' or '\t' && i + 1 < text.Length && text[i + 1] is ' ' or '\t':
-                    return text[i] == '?';
+                    return text[i];
             }
         }
 
-        return false;
+        return '\0';
     }
 
     /// <summary>
@@ -1365,6 +1390,7 @@ public partial class Lexer
         if (tokenType == Token.Type.BINARY_EQUAL)
         {
             _equalFound = true;
+            _replacementStart = _bracketStack.Count == 0;
         }
 
         if (tokenType == Token.Type.BINARY_QUESTION)

@@ -48,4 +48,34 @@ END";
 6 F t=222 lim=5
 7 F t=222 lim=4", SetupTests.RunWithInput(program).Replace("\r\n", "\n").TrimEnd('\n'));
     }
+
+    [TestMethod]
+    public void TEST_ConvertCompileError_a_goto_or_a_semicolon_fails_quietly()
+    {
+        // sbl -b: a colon or a semicolon outside every bracket and quote ends the expression CONVERT takes, and the conversion just
+        // fails, leaving &ERRTYPE and &ERRLIMIT as they were, whatever comes before it ('4 :(L)', '4 + ;', '0:35', the prototype of an
+        // array); inside parentheses it is the compile error 226. The console compiled the text inside parentheses, error 226 counted
+        // each time (found by measuring the CODE road of DESIGN-PLAN random-codegen-scope step 11, CONVERT(PROTOTYPE(a), 'EXPRESSION'))
+        var program = @"        &ERRLIMIT = 10
+        V = CONVERT('4 +', 'EXPRESSION')            :S(Y1)
+        OUTPUT = '1 F t=' &ERRTYPE ' lim=' &ERRLIMIT
+Y1      V = CONVERT('4 :(L)', 'EXPRESSION')         :S(Y2)
+        OUTPUT = '2 F t=' &ERRTYPE ' lim=' &ERRLIMIT  :(E2)
+Y2      OUTPUT = '2 S'
+E2      V = CONVERT('4 + ;', 'EXPRESSION')          :S(Y3)
+        OUTPUT = '3 F t=' &ERRTYPE ' lim=' &ERRLIMIT  :(E3)
+Y3      OUTPUT = '3 S'
+E3      V = CONVERT('(4 :(L))', 'EXPRESSION')       :S(Y4)
+        OUTPUT = '4 F t=' &ERRTYPE ' lim=' &ERRLIMIT  :(E4)
+Y4      OUTPUT = '4 S'
+E4      V = CONVERT('0:35', 'EXPRESSION')           :S(Y5)
+        OUTPUT = '5 F t=' &ERRTYPE ' lim=' &ERRLIMIT  :(END)
+Y5      OUTPUT = '5 S'
+END";
+        Assert.AreEqual(@"1 F t=221 lim=9
+2 F t=221 lim=9
+3 F t=221 lim=9
+4 F t=226 lim=8
+5 F t=226 lim=8", SetupTests.RunWithInput(program).Replace("\r\n", "\n").TrimEnd('\n'));
+    }
 }

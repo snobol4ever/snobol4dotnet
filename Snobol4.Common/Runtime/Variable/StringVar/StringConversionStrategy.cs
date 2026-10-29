@@ -88,6 +88,15 @@ public class StringConversionStrategy : IConversionStrategy
             return false;
         }
 
+        // a colon or a semicolon outside every bracket and quote ends the expression: the conversion just fails, before anything is
+        // compiled, leaving &ERRTYPE as it was, as in SPITBOL (CONVERT('4 :(L)', 'EXPRESSION'), CONVERT('0:35', 'EXPRESSION'))
+        if (Executive.TopLevelStatementMark(stringSelf.Data) >= 0)
+        {
+            varOut = StringVar.Null();
+            valueOut = string.Empty;
+            return false;
+        }
+
         var previousCaseFolding = exec.Parent.BuildOptions.CaseFolding;
         exec.Parent.BuildOptions.CaseFolding = exec.AmpCaseFolding != 0;
         exec.Parent.CodeMode = true;

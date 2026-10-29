@@ -424,6 +424,9 @@ public partial class Builder : IDisposable
                 Execute.SourceLineNumbers.Add(line.LineCountFile);
                 Execute.SourceStatementNumbers.Add(stmtNumber + 1);
                 Execute.SourceStno.Add(stnoBase + (stmtNumber - stmtOffset) + 1 + line.BlankLineCount);
+                // the statement in error is reached as one is under -k: error 7 (a label before it runs on into it)
+                if (line.CompileError)
+                    Execute.ErroneousStatements.Add(stmtNumber);
                 if (line.Label.Length > 0 && !inError)
                 {
                     var folded = line.CaseFolding ? line.Label.ToUpper() : line.Label;

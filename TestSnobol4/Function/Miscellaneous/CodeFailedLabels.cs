@@ -42,4 +42,20 @@ BACK    OUTPUT = 'back'                    :(END)
 ERR     OUTPUT = 'ERROR ' &ERRTYPE
 END").Replace("\r\n", "\n").TrimEnd('\n'));
     }
+
+    [TestMethod]
+    public void TEST_CodeFailedLabels_the_statement_in_error_is_error_7_when_reached()
+    {
+        // sbl -bf: the statement after a label before the error runs, and the statement in error is reached next, which is error 7,
+        // "compilation error encountered during execution", as a statement in error is under -k; the console ran the statement after
+        // it (after). Found by the infinite_snobol4 campaign at scope 12, seed0 20261030, batch 7 of kind=stmt, line 328
+        Assert.AreEqual("code failed 305\nY=[]\nH 7 Y=[2]", SetupTests.RunWithInputDirectives("-bf", @"        &ERRLIMIT = 10
+        C = CODE("" X = 1;L2 Y = 2;L3 D = EXP(1E300); OUTPUT = 'after'"")   :S(S)F(F)
+S       OUTPUT = 'code ok'                  :(J)
+F       OUTPUT = 'code failed ' &ERRTYPE
+J       SETEXIT('H')
+        OUTPUT = 'Y=[' Y ']'                :(L2)
+H       OUTPUT = 'H ' &ERRTYPE ' Y=[' Y ']'  :(END)
+END").Replace("\r\n", "\n").TrimEnd('\n'));
+    }
 }

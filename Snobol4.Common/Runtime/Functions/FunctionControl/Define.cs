@@ -339,13 +339,14 @@ public partial class Executive
         var returnVar = IdentifierTable[returnVarName];
 
         string rtnTypeStr;
+        var returnedValue = false;
         switch (nextIndex)
         {
             case -2:
                 AmpReturnType = "RETURN";
                 rtnTypeStr = "RETURN";
                 returnVar.Succeeded = true;
-                ValueReturned = returnVar;
+                returnedValue = true;
                 Failure = callerFailure;   // preserve caller's Failure; UDF success doesn't clear it
                 break;
 
@@ -390,6 +391,11 @@ public partial class Executive
                 TraceLine(rtnTypeStr == "FRETURN" ? $"FRETURN {returnVarName}" : $"{rtnTypeStr} {returnVarName} = {PrintValue(returnVar)}");
         }
         AmpCurrentLineNumber = current;
+
+        // The value is the call's own only once the RETURN trace is done: its function may name the traced function (.F is a variable
+        // there, not a call that returned a value) and the calls it makes return values of their own
+        if (returnedValue)
+            ValueReturned = returnVar;
 
         // Clear the function name variable once the RETURN trace (whose function may read it) is done
         IdentifierTable[returnVarName] = StringVar.Null(returnVarName);

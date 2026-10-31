@@ -105,4 +105,56 @@ end";
          """);
         Assert.AreEqual("INTEGER INTEGER 73 1048576 134217728 8 254", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
     }
+
+    [TestMethod]
+    public void TEST_Collect_answers_the_same_storage_twice_with_nothing_between()
+    {
+        // COLLECT() read GC.GetTotalMemory(true), which counts the part of a thread's allocation context not yet used, so two calls with
+        // nothing between them differed by 520 or 1024 words now and then and gimpel's TIMEGC printed a negative count of freed storage
+        // about a run in three. Run on its own the engine answers the same figure to a handful of words (the command line reads 40 of 40
+        // TIMEGC runs alike); this test host has threads of its own that move the process's heap now and then, so after the first
+        // hundred calls (the interpreter warming up) the last sixty may swing by more than 128 words a few times: 2, 5, 8 and 6 in four
+        // runs on the measure now used, against 27, 36, 32 and 29 on GC.GetTotalMemory, so the bar is 15
+        var build = SetupTests.SetupScript("-bf", """
+                 I = 0
+                 SWINGS = 0
+                 PREV = COLLECT()
+         LOOP    I = I + 1
+                 NOW = COLLECT()
+                 D = NOW - PREV
+                 PREV = NOW
+                 LE(I,100)                  :S(NEXT)
+                 DIFFS = DIFFS ' ' D
+                 GT(D,128)                  :S(SWING)
+                 LT(D,-128)                 :S(SWING)
+         NEXT    LT(I,160)                  :S(LOOP)F(DONE)
+         SWING   SWINGS = SWINGS + 1        :(NEXT)
+         DONE
+         END
+         """);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        var swings = ((IntegerVar)build.Execute!.IdentifierTable["SWINGS"]).Data;
+        Assert.IsTrue(swings <= 15, swings + " of 60 changes of COLLECT() exceed 128 words:" + ((StringVar)build.Execute!.IdentifierTable["DIFFS"]).Data);
+    }
+
+    [TestMethod]
+    public void TEST_Collect_sees_the_storage_of_a_released_array_as_freed()
+    {
+        // the figure that stopped jittering is still the storage the program holds: releasing a 3,000 element array is at least
+        // 2,000 words more free at the next COLLECT(), once the interpreter has warmed up
+        var build = SetupTests.SetupScript("-bf", """
+                 I = 0
+         WARM    I = I + 1
+                 COLLECT()
+                 LT(I,100)                  :S(WARM)
+                 A = ARRAY(3000)
+                 HELD = COLLECT()
+                 A =
+                 FREED = COLLECT() - HELD
+         END
+         """);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        var freed = ((IntegerVar)build.Execute!.IdentifierTable["FREED"]).Data;
+        Assert.IsTrue(freed >= 2000, "words freed: " + freed);
+    }
 }

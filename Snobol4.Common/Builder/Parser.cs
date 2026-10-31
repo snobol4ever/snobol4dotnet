@@ -149,8 +149,15 @@ public class Parser
             foreach (var sourceLine in _parent.Code.SourceLines.Where(sourceLine => !sourceLine.Compiled))
                 ParseLine(sourceLine);
 
-            foreach (var expression in _parent.ExpressionList.Where(expression => !expression.Parsed))
+            var expressions = _parent.ExpressionList;
+            while (_parent.ExpressionsParsedPrefix < expressions.Count && expressions[_parent.ExpressionsParsedPrefix].Parsed)
+                _parent.ExpressionsParsedPrefix++;
+            for (var i = _parent.ExpressionsParsedPrefix; i < expressions.Count; i++)
             {
+                var expression = expressions[i];
+                _parent.ExpressionsExamined++;
+                if (expression.Parsed)
+                    continue;
                 _parent.ParseExpression.Add(ShuntYardAlgorithm(expression.ExpressionList));
                 expression.Parsed = true;
             }

@@ -75,6 +75,10 @@ public partial class Builder : IDisposable
     public Executive? Execute;
     internal List<DeferredExpression> ExpressionList = new(32);
     internal List<List<Token>> ParseExpression = new(32);
+    // Parse takes up where it stopped: the entries of ExpressionList before ExpressionsParsedPrefix are all parsed, and
+    // ExpressionsExamined counts the entries it has looked at over all its calls, one parsed is looked at once
+    internal int ExpressionsParsedPrefix;
+    internal long ExpressionsExamined;
     internal bool CodeMode;
 
     // Set while EVAL or CONVERT compiles the expression before a colon or a semicolon: SPITBOL scans it for a syntax error and goes no

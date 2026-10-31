@@ -35,12 +35,14 @@ public partial class Builder
             ResolveTokenList(line.ParseUnconditionalGoto);
         }
 
-        // Also resolve deferred expressions (star functions used in patterns)
-        foreach (var expr in ParseExpression)
-        {
-            ResolveTokenList(expr);
-        }
+        // Also resolve deferred expressions (star functions used in patterns): the ones parsed since the last call, because the slot
+        // tables only grow and one resolved is resolved for good; the whole list again at every EVAL made the n-th EVAL cost n times the first
+        for (; ExpressionsResolved < ParseExpression.Count; ExpressionsResolved++)
+            ResolveTokenList(ParseExpression[(int)ExpressionsResolved]);
     }
+
+    // How many deferred expressions, from the first of ParseExpression, ResolveSlots has resolved
+    internal long ExpressionsResolved;
 
     // -----------------------------------------------------------------------
     // Private helpers

@@ -1,7 +1,5 @@
 ﻿namespace Snobol4.Common;
 
-using System.Management;
-
 //"erroneous argument for host" /* 254 */,
 //"error during execution of host" /* 255 */,
 
@@ -68,25 +66,16 @@ public partial class Executive
 
         if (arguments[0] is StringVar { Data: "" })
         {
-            var cpuName = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
-
-            if (OperatingSystem.IsWindows())
+            // SPITBOL's three fields, computer type, operating system and implementation (sbl -bf: x86-64:unix :Macro SPITBOL 15.01 #),
+            // each this engine's own; none holds a colon
+            var computer = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture switch
             {
-                var moc = new ManagementObjectSearcher("select * from Win32_Processor").Get();
-                foreach (var obj in moc)
-                {
-                    try
-                    {
-                        cpuName = obj["Name"].ToString();
-                    }
-                    catch
-                    {
-                        // ignored
-                    }
-                }
-            }
-
-            SystemStack.Push(new StringVar(@$"{cpuName}:{Environment.OSVersion}:SNOBOL4.net:Version 0.1#"));
+                System.Runtime.InteropServices.Architecture.X64 => "x86-64",
+                System.Runtime.InteropServices.Architecture.X86 => "x86",
+                var a => a.ToString().ToLowerInvariant()
+            };
+            var system = Environment.OSVersion.ToString().Replace(':', ' ');
+            SystemStack.Push(new StringVar($"{computer}:{system}:SNOBOL4.net Version 0.1 #"));
             return;
         }
 

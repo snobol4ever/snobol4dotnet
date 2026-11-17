@@ -60,6 +60,12 @@ internal sealed partial class SyntaxScanner
     // does not run over one
     private int[] _lineEnds = [];
 
+    // Under folding END is read in any case; under -f (no folding) sbl reads END and end alone as the END line, and End is a label
+    private bool _folding = true;
+
+    internal static bool IsEndWord(string word, bool folding) =>
+        folding ? word.Equals("END", StringComparison.OrdinalIgnoreCase) : word is "END" or "end";
+
     private SyntaxScanner(string text) => _text = text;
 
     /// <summary>
@@ -67,12 +73,12 @@ internal sealed partial class SyntaxScanner
     /// name SPITBOL could read is left to the lexer. The END statement may carry the name of the label the run starts at, which must
     /// be one the program has defined (`defined` says so): anything else after END is error 215.
     /// </summary>
-    internal static Error? FirstError(string text, Func<string, bool>? defined = null, int[]? lineEnds = null)
+    internal static Error? FirstError(string text, Func<string, bool>? defined = null, int[]? lineEnds = null, bool folding = true)
     {
         if (text.Length == 0)
             return null;
 
-        var scanner = new SyntaxScanner(text) { _defined = defined, _lineEnds = lineEnds ?? [] };
+        var scanner = new SyntaxScanner(text) { _defined = defined, _lineEnds = lineEnds ?? [], _folding = folding };
         try
         {
             return scanner.Statement();
@@ -92,7 +98,7 @@ internal sealed partial class SyntaxScanner
                 return null;
             while (_position < _text.Length && _text[_position] is not (' ' or '\t' or ';'))
                 _position++;
-            if (_text[.._position].Equals("END", StringComparison.OrdinalIgnoreCase))
+            if (IsEndWord(_text[.._position], _folding))
                 return EndStatement();
         }
 

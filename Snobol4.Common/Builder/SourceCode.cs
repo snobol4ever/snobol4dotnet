@@ -443,7 +443,7 @@ public class SourceCode
                 var added = SourceLines[^1];
                 if (added.Text.Length > 0 && added.Text[0] is not (' ' or '\t') && !char.IsAsciiLetterOrDigit(added.Text[0]))
                     return;
-                swallowed = SyntaxScanner.FirstError(added.SyntaxText, null, Lexer.LineEnds(added)) is { SwallowsNext: true };
+                swallowed = SyntaxScanner.FirstError(added.SyntaxText, null, Lexer.LineEnds(added), added.CaseFolding) is { SwallowsNext: true };
             }
 
             offset += subLine.Length + 1;
@@ -570,16 +570,8 @@ public class SourceCode
         if (!m.Success)
             return false;
 
-        // SNOBOL4 END statement keyword is always uppercase, regardless of
-        // -F (fold) / -f (no-fold). Per RULES.md "Always uppercase END":
-        // .sno files always write END in uppercase. Under fold mode the
-        // source is also uppered before comparison so OrdinalIgnoreCase is
-        // safe; under no-fold mode the source case is preserved and only
-        // exact "END" is the keyword.
-        var trimmedValue = m.Value.TrimEnd();
-        return _parent.BuildOptions.CaseFolding
-            ? trimmedValue.Equals("END", StringComparison.OrdinalIgnoreCase)
-            : trimmedValue == "END";
+        // Under folding END is read in any case; under -f (no folding) sbl reads END and end as the END line and End as a label
+        return SyntaxScanner.IsEndWord(m.Value.TrimEnd(), _parent.BuildOptions.CaseFolding);
     }
 
     /// <summary>

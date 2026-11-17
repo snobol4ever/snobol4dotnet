@@ -279,7 +279,7 @@ public partial class Lexer
             }
 
             // a syntax error is reported as SPITBOL meets it, at the element it meets it at
-            if (SyntaxScanner.FirstError(sourceLine.SyntaxText, name => _parent.Code.Labels.ContainsKey(_parent.FoldCase(name)), LineEnds(sourceLine)) is { } syntax)
+            if (SyntaxScanner.FirstError(sourceLine.SyntaxText, name => _parent.Code.Labels.ContainsKey(_parent.FoldCase(name)), LineEnds(sourceLine), sourceLine.CaseFolding) is { } syntax)
             {
                 allLexed = false;
                 sourceLine.CompileError = true;

@@ -684,6 +684,11 @@ public class SourceCode
             }
 
             Position++;
+            // a character no token begins with is error 230, illegal character, as sbl's scanner reads the card: a control character
+            // (a carriage return ending the line), a byte above 126, a backquote, a backslash, a brace, an underscore
+            if (c is not (',' or '(' or ')' or '[' or ']' or '<' or '>' or ':' or ';' or '*' or '=' or '?' or '&' or '|' or '@' or '#'
+                    or '/' or '%' or '!' or '$' or '~' or '^' or '+' or '-' or '.'))
+                Error = 230;
             return new CardToken(c == ',' ? CardElement.Comma : CardElement.Other);
         }
     }
@@ -701,7 +706,8 @@ public class SourceCode
     /// <param name="image">The whole line, which a control after a semicolon stands on</param>
     private void ExecuteDirectives(string line, string pathName, bool codeText, int offset, string image)
     {
-        var card = new ControlCard(line.TrimEnd(), offset, image.TrimEnd());
+        // only blanks and tabs end a control: a carriage return is a character of it, as sbl -bf reads it (the title of -TITLE X CR holds it)
+        var card = new ControlCard(line.TrimEnd(' ', '\t'), offset, image.TrimEnd(' ', '\t'));
         _cardLine = 1 + LineCountFile;
         void Reject() => RejectCard(card, pathName, codeText);
 
@@ -1077,13 +1083,13 @@ public class SourceCode
     }
 
     internal bool CaseFoldingNow => _parent.BuildOptions.CaseFolding;
+    internal bool ErrorsRunNow => _parent.BuildOptions.RunDespiteCompileErrors;
     internal bool ListingOn => _parent.BuildOptions.ListSource;
 
     #endregion
 
     #region String Parsing Utilities
 
-    internal bool ErrorsRunNow => _parent.BuildOptions.RunDespiteCompileErrors;
     private static readonly List<string> _extensions =
     [
         "",

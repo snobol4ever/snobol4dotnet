@@ -728,6 +728,10 @@ public class SourceCode
 
             if (next.Kind != CardElement.Comma)
                 return;
+
+            // a minus may begin the control after the comma, and more than one: -LIST,-EJECT and -LIST,--EJECT read as -LIST,EJECT (sbl -bf)
+            while (card.Position < card.Text.Length && card.Text[card.Position] is ' ' or '\t' or '-')
+                card.Position++;
         }
     }
 

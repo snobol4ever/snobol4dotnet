@@ -722,4 +722,41 @@ OK      OUTPUT = 'ok'
 END";
         Assert.AreEqual(@"failed 247", SetupTests.MaskListingHead(SetupTests.RunWithInput(program)));
     }
+
+    // A control's options chain with commas, and a minus may begin the one after the comma: -LIST,-EJECT lists and ejects, as sbl -bf
+    // reads it (and -LIST,EJECT, -LIST, -EJECT and -LIST,--EJECT alike); snobol4dotnet read the minus for no name, error 247. The
+    // expected page is sbl's (gate_cases_snobol4 test_gate_snobol4_list_listing_matches_sbl__p_chain)
+    [TestMethod]
+    public void TEST_ControlStatements_a_chained_control_may_begin_with_a_minus()
+    {
+        var program = @"-LIST,-EJECT
+ A = 1
+-TITLE x,-LIST
+	B = 2
+ OUTPUT = A + B
+END";
+        Assert.AreEqual(@"
+
+
+<identity>
+<clock>
+
+
+
+                                                                                                                page 1
+
+        -LIST,-EJECT
+1        A = 1
+
+
+
+x,-LIST                                                                                                         page 2
+
+
+        -TITLE x,-LIST
+2       	B = 2
+3        OUTPUT = A + B
+4       END
+3", SetupTests.MaskListingHead(SetupTests.RunWithInputDirectives("-bf", program)).TrimEnd('\n', '\r'));
+    }
 }

@@ -46,6 +46,12 @@ public partial class Lexer
     /// Indicates whether an implicit pattern match operator has been inserted.
     /// </summary>
     private bool _patternMatchFound;
+
+    /// <summary>
+    /// Whether a binary | or &amp;, an operator below concatenation, stands at the outermost level of the subject: a blank after it is a
+    /// concatenation in its right operand, never the end of the subject (S | 'q' 'z' has no pattern, as in SPITBOL).
+    /// </summary>
+    private bool _lowOperatorInSubject;
     
     /// <summary>
     /// The position in the lexeme list where the colon was found.
@@ -200,6 +206,7 @@ public partial class Lexer
         _failureGotoEnd = 0;
         _failureGotoStart = 0;
         _patternMatchFound = false;
+        _lowOperatorInSubject = false;
         sourceLine.LexFailureGoto.Clear();
         sourceLine.LexSuccessGoto.Clear();
         sourceLine.LexUnconditionalGoto.Clear();
@@ -847,6 +854,13 @@ public partial class Lexer
                 return;
             }
 
+            // a blank in the right operand of a | or & of the subject's outermost level is a concatenation in that operand
+            if (_lowOperatorInSubject)
+            {
+                AddImplicitConcatenation(sourceLine);
+                return;
+            }
+
             AddImplicitPatternMatch(sourceLine);
         }
     }
@@ -1414,6 +1428,9 @@ public partial class Lexer
         {
             _patternMatchFound = true;
         }
+
+        if (tokenType is Token.Type.BINARY_PIPE or Token.Type.BINARY_AMPERSAND && _bracketStack.Count == 0 && !_patternMatchFound && !_equalFound)
+            _lowOperatorInSubject = true;
 
         sourceLine.LexBody.Add(new Token(tokenType, match.Groups[1].Value, _bracketStack.Count));
         return true;

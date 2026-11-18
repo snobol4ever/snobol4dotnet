@@ -152,6 +152,13 @@ public partial class Executive
             return;
         }
 
+        // a file named - is standard input, as in SPITBOL's osopen: the unit reads it as under the F 0 option
+        if (fileName == "-")
+        {
+            fileName = "";
+            descriptor = 0;
+        }
+
         // No file name and the F 0 option (' -f0') reads standard input, as in SPITBOL; the unit it names is then open, so another file
         // specification for it is error 289, as for a unit a file is open on
         if (fileName == "" && descriptor == 0)

@@ -229,7 +229,11 @@ public partial class Executive
         // Create a new stream, associated it with the channel, and associate the channel with the identifier
         try
         {
-            var stream = new FileStream(Path.GetFullPath(fileName), (FileMode)fileModeInt, FileAccess.Write, (FileShare)fileShareInt);
+            // a file named - is standard error, written through the channel's buffer of 1024 bytes (SPITBOL's osopen and IOBUFSIZ), so
+            // what the program writes there appears when the buffer fills or the run ends, after the termination dump
+            Stream stream = fileName == "-"
+                ? new BufferedStream(new StandardErrorStream(), StandardErrorStream.ChannelBufferSize)
+                : new FileStream(Path.GetFullPath(fileName), (FileMode)fileModeInt, FileAccess.Write, (FileShare)fileShareInt);
             StreamOutputs[channel] = stream;
             IdentifierTable[symbol].OutputChannel = channel;
         }
@@ -242,4 +246,32 @@ public partial class Executive
 
         PredicateSuccess();
     }
+}
+
+// Standard error as a channel's stream: the bytes a channel writes reach Console.Error as text, so they stand in order with TERMINAL's
+// lines and whatever else the run writes there
+internal sealed class StandardErrorStream : Stream
+{
+    // SPITBOL's IOBUFSIZ, the buffer of a channel
+    internal const int ChannelBufferSize = 1024;
+
+    private readonly System.Text.Decoder _decoder = System.Text.Encoding.UTF8.GetDecoder();
+
+    public override bool CanRead => false;
+    public override bool CanSeek => false;
+    public override bool CanWrite => true;
+    public override long Length => throw new NotSupportedException();
+    public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+
+    public override void Write(byte[] buffer, int offset, int count)
+    {
+        var chars = new char[_decoder.GetCharCount(buffer, offset, count)];
+        _decoder.GetChars(buffer, offset, count, chars, 0);
+        Console.Error.Write(chars);
+    }
+
+    public override void Flush() => Console.Error.Flush();
+    public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+    public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+    public override void SetLength(long value) => throw new NotSupportedException();
 }

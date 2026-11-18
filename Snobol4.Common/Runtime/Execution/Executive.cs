@@ -89,6 +89,8 @@ public partial class Executive
     // Map of channel names to streams. A stream is either
     // a StreamReader or a StreamWriter, but not both.
     internal Dictionary<string, Stream> StreamInputs;
+    // The units an F 0 option opened on standard input (INPUT(.X, 5, '[-f0]')): in use as a file's unit is, until ENDFILE, as in SPITBOL
+    internal HashSet<string> ConsoleInputUnits = [];
     internal Dictionary<string, Stream> StreamOutputs;
     internal Dictionary<string, StreamReader> StreamReadersBySymbol;
     internal Dictionary<string, StreamReader> StreamReadersByChannel;

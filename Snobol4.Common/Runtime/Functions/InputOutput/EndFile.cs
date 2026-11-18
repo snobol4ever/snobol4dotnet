@@ -24,6 +24,13 @@ public partial class Executive
             return;
         }
 
+        // a unit an F 0 option opened on standard input is closed by ENDFILE as a file's is
+        if (ConsoleInputUnits.Remove(channel) && !StreamInputs.ContainsKey(channel) && !StreamOutputs.ContainsKey(channel))
+        {
+            PredicateSuccess();
+            return;
+        }
+
         if (!StreamInputs.ContainsKey(channel) && !StreamOutputs.ContainsKey(channel))
         {
             LogRuntimeException(98);

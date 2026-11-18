@@ -152,14 +152,34 @@ public partial class Executive
             return;
         }
 
-        // No file name and the F 0 option (' -f0') reads standard input, as in SPITBOL
+        // No file name and the F 0 option (' -f0') reads standard input, as in SPITBOL; the unit it names is then open, so another file
+        // specification for it is error 289, as for a unit a file is open on
         if (fileName == "" && descriptor == 0)
         {
+            if (channel != "")
+            {
+                if (ConsoleInputUnits.Contains(channel) || StreamInputs.ContainsKey(channel) || StreamOutputs.ContainsKey(channel))
+                {
+                    LogRuntimeException(289);
+                    return;
+                }
+
+                ConsoleInputUnits.Add(channel);
+            }
+
             IdentifierTable[symbol].InputChannel = "+console-input";
             if (rawLength > 0)
                 RawLengths[symbol] = (int)Math.Min(rawLength, int.MaxValue);
             else
                 RawLengths.Remove(symbol);
+            PredicateSuccess();
+            return;
+        }
+
+        // no file specification for a unit an F 0 option opened joins it: standard input
+        if (fileName == "" && (string)fileNameStr == "" && ConsoleInputUnits.Contains(channel))
+        {
+            IdentifierTable[symbol].InputChannel = "+console-input";
             PredicateSuccess();
             return;
         }
@@ -192,7 +212,7 @@ public partial class Executive
         }
 
         // If the filename is not blank, thw channel cannot be in use
-        if (StreamInputs.ContainsKey(channel) || StreamOutputs.ContainsKey(channel))
+        if (StreamInputs.ContainsKey(channel) || StreamOutputs.ContainsKey(channel) || ConsoleInputUnits.Contains(channel))
         {
             LogRuntimeException(289);
             return;

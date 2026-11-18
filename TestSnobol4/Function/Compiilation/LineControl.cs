@@ -82,4 +82,24 @@ end");
         }
         finally { File.Delete(file); }
     }
+
+    // the name an included file leaves the next statement is the name in force at its end, its own -LINE's: an include that renames
+    // itself bar and ends on a comment line gives the next statement bar (sbl -b)
+    [TestMethod]
+    public void TEST_LineControl_an_include_leaves_the_name_its_line_control_gave_it()
+    {
+        var directory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TestSnobol4");
+        Directory.CreateDirectory(directory);
+        var file = Path.Combine(directory, "line_named.sno");
+        File.WriteAllText(file, "-LINE 5 \"bar\"\n        R = R ' [' &FILE ']'\n*\n");
+        try
+        {
+            var build = SetupTests.SetupScript("-b", @"-INCLUDE ""line_named.sno""
+        R = R ' b ' &FILE ':' &LINE
+        R = R ' c ' &FILE ':' &LINE
+end");
+            Assert.AreEqual(" [bar] b bar:2 c Test.sno:3", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
+        }
+        finally { File.Delete(file); }
+    }
 }

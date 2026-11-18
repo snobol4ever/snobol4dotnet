@@ -250,12 +250,12 @@ public class SourceCode
 
         // When an included file ends on a comment or control line, sbl names the including file's next
         // statement after the included file, keeping its own line number (Budne's include and line:
-        // line2.sno ends with *)
         // line2.sno ends with *); so does one whose last line ends in a semicolon, or in a comment after one: a statement begins there,
-        // and sbl takes the file of a statement where it begins
+        // and sbl takes the file of a statement where it begins. The name is the one in force at the included file's end, its own -LINE's
+        // when it gave itself one (snolib's UNIQUE.INC ends as UNIQUE.lss, which FENCE.INC's next statement is named)
         if (_includeDepth > 0)
             (LineCountFile, _continuation, _lineFileName, _staleIncludeName) =
-                (callerLineCount, callerContinuation, callerLineFileName, _lastLineIsNote || _lastLineOpensAStatement ? pathName : null);
+                (callerLineCount, callerContinuation, callerLineFileName, _lastLineIsNote || _lastLineOpensAStatement ? _lineFileName ?? pathName : null);
         else
             _staleIncludeName = callerStaleName;
 

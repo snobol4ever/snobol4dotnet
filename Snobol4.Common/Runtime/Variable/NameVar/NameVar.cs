@@ -17,6 +17,12 @@ public sealed class NameVar : Var
     // What makes a name of a keyword or of a deferred expression one and the same as a table key: its own, kept by its copies
     internal object Identity = new();
 
+    // What the name names when it is the name of an element: the collection and the key. They are the name's own, apart from Key and
+    // Collection, which say where this value is stored, as for every value: a name stored in a table or an array element keeps what
+    // it names (T<'n'> = .hold, then IDENT(T<'n'>, .hold) succeeds and $T<'n'> reads hold, as in SPITBOL)
+    internal object? TargetKey;
+    internal Var? TargetCollection;
+
     #endregion
 
     #region Strategy Instances (Lazy-loaded singletons for performance)
@@ -41,8 +47,8 @@ public sealed class NameVar : Var
     internal NameVar(string pointer, object? key, Var? collection)
     {
         Pointer = pointer;
-        Key = key;
-        Collection = collection;
+        TargetKey = key;
+        TargetCollection = collection;
     }
 
 
@@ -52,8 +58,8 @@ public sealed class NameVar : Var
         InputChannel = template.InputChannel;
         Symbol = template.Symbol;
         Pointer = template.Pointer;
-        Key = template.Key;
-        Collection = template.Collection;
+        TargetKey = template.TargetKey;
+        TargetCollection = template.TargetCollection;
         Expression = template.Expression;
         Identity = template.Identity;
     }
@@ -70,17 +76,17 @@ public sealed class NameVar : Var
     public Var Dereference(Executive executive)
     {
         // Fast path: pointer dereference (most common case)
-        if (Collection is null)
+        if (TargetCollection is null)
         {
             return executive.IdentifierTable[Pointer];
         }
 
         // Slower path: collection element access
-        return Collection switch
+        return TargetCollection switch
         {
-            ArrayVar arrayVar => arrayVar.Data[(int)(long)Key!],
-            TableVar tableVar => tableVar.GetOrDefault(Key!),
-            ProgramDefinedDataVar pdVar => pdVar.FieldValues.Data[(int)(long)Key!],
+            ArrayVar arrayVar => arrayVar.Data[(int)(long)TargetKey!],
+            TableVar tableVar => tableVar.GetOrDefault(TargetKey!),
+            ProgramDefinedDataVar pdVar => pdVar.FieldValues.Data[(int)(long)TargetKey!],
             _ => StringVar.Null()
         };
     }
@@ -88,7 +94,7 @@ public sealed class NameVar : Var
             
     public bool IsCollectionReference()
     {
-        return Collection is not null;
+        return TargetCollection is not null;
     }
 
             

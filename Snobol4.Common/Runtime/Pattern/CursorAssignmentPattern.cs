@@ -44,7 +44,7 @@ internal class AtSign : TerminalPattern
 
         // An element (@A<1>) or a deferred target (@*V, @*$('CUR' N), @*A<2>, @*F() with an NRETURN) is
         // assigned as any target is, as SPITBOL does; the assignment's own stack effects are undone
-        if (_assignee is ExpressionVar || _assignee.Collection is not null)
+        if (_assignee is ExpressionVar || (_assignee is NameVar an && !(an.Collection is not null && an.LvalueMark == _exec.StatementSerial) ? an.TargetCollection : _assignee.Collection) is not null)
         {
             var depth = _exec.SystemStack.Count;
             _exec.Assign([_assignee, new IntegerVar(scan.CursorPosition)]);

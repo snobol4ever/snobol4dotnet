@@ -35,11 +35,11 @@ public class NameComparisonStrategy : IComparisonStrategy
             return ReferenceEquals(nameSelf, nameOther);
 
         // Check collection reference equality
-        if (nameSelf.Collection != nameOther.Collection)
+        if (nameSelf.TargetCollection != nameOther.TargetCollection)
             return false;
 
         // Check key equality (handles null correctly)
-        return Equals(nameSelf.Key, nameOther.Key);
+        return Equals(nameSelf.TargetKey, nameOther.TargetKey);
     }
 
 

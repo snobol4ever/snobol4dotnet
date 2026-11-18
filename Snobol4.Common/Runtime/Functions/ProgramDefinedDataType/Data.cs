@@ -194,10 +194,10 @@ public partial class Executive
         // the node we want — reading through the field slot would give 'v's current value, not
         // the node, and cycling back to another NameVar. Use Collection directly instead.
         Var arg0 = arguments[0];
-        if (arg0 is NameVar nv0 && nv0.Collection is null)
+        if (arg0 is NameVar nv0 && nv0.TargetCollection is null)
             arg0 = nv0.Dereference(this);
         ProgramDefinedDataVar programDefinedDataVar;
-        if (arg0 is NameVar nv1 && nv1.Collection is ProgramDefinedDataVar pdFromCollection)
+        if (arg0 is NameVar nv1 && nv1.TargetCollection is ProgramDefinedDataVar pdFromCollection)
             programDefinedDataVar = pdFromCollection;
         else if (arg0 is ProgramDefinedDataVar pdDirect)
             programDefinedDataVar = pdDirect;

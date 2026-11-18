@@ -54,13 +54,13 @@ public partial class Executive
     /// </summary>
     private Var? ElementOrVariable(NameVar nameVar)
     {
-        if (nameVar.Pointer == "" && nameVar.Key is not null)
+        if (nameVar.Pointer == "" && nameVar.TargetKey is not null)
         {
-            switch (nameVar.Collection)
+            switch (nameVar.TargetCollection)
             {
                 case ArrayVar arrayVar:
                 {
-                    var key = (long)nameVar.Key;
+                    var key = (long)nameVar.TargetKey;
                     var stored = arrayVar.Data[(int)key];
                     var v = stored is ArrayVar or TableVar ? Handle(stored) : stored is ProgramDefinedDataVar ? stored : stored.Clone();
                     v.Key = key;
@@ -71,10 +71,10 @@ public partial class Executive
 
                 case TableVar tableVar:
                 {
-                    var v = tableVar.Data.TryGetValue(nameVar.Key, out var stored)
+                    var v = tableVar.Data.TryGetValue(nameVar.TargetKey, out var stored)
                         ? stored is ArrayVar or TableVar ? Handle(stored) : stored.Clone()
                         : tableVar.Fill.Clone();
-                    v.Key = nameVar.Key;
+                    v.Key = nameVar.TargetKey;
                     v.Collection = tableVar;
                     v.LvalueMark = StatementSerial;
                     return v;

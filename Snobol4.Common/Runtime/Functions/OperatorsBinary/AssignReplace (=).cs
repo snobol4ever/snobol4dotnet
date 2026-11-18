@@ -286,7 +286,13 @@ public partial class Executive
             leftVar.Collection = null;
         }
 
-        switch (leftVar.Collection)
+        // The place this assignment stores into: an element this statement read is that element (its Key and Collection), and a
+        // NAME is assigned through what it names (an NRETURN result, $ of a name): its target, which is not where the name is stored
+        var (lvalueKey, lvalueCollection) = leftVar is NameVar leftName && !(leftName.Collection is not null && leftName.LvalueMark == StatementSerial)
+            ? (leftName.TargetKey, leftName.TargetCollection)
+            : (leftVar.Key, leftVar.Collection);
+
+        switch (lvalueCollection)
         {
             case ArrayVar arrayVar:
             {
@@ -295,26 +301,23 @@ public partial class Executive
                 // storing it directly and then stamping Key/Collection onto it creates a
                 // self-referential cycle: arrayVar.Data[i] → NameVar(Collection=arrayVar, Key=i)
                 // → arrayVar.Data[i] → ... indefinitely (ShiftReduce S-10 root cause).
-                // The NAME of a variable is a value like another and stays a NAME in the element (L<1> = .F, then DATATYPE(L<1>) is NAME,
-                // and $L<1> = 'x' sets F); only the NAME of an element, which has no pointer, is read through.
-                var rval = rightVar is NameVar { Pointer: "" } rvNv ? rvNv.Dereference(this) : rightVar;
-                // Clone rightVar before mutating Key/Collection so the source variable's
-                // VarSlotArray slot (if rightVar came from PushVar) is not contaminated.
-                var arrVal = rval is ArrayVar or TableVar ? Handle(rval) : StoredCopy(rval);
-                arrVal.Key        = leftVar.Key;
-                arrVal.Collection = leftVar.Collection;
-                arrayVar.Data[(int)(long)leftVar.Key!] = arrVal;
+                // A NAME is a value like another and stays a NAME in the element, what it names its own (L<1> = .F, then DATATYPE(L<1>)
+                // is NAME and $L<1> = 'x' sets F; L<2> = .A<1>, then $L<2> reads A<1>), as in SPITBOL. Clone rightVar before
+                // mutating Key/Collection so the source variable's VarSlotArray slot (if rightVar came from PushVar) is not contaminated.
+                var arrVal = rightVar is ArrayVar or TableVar ? Handle(rightVar) : StoredCopy(rightVar);
+                arrVal.Key        = lvalueKey;
+                arrVal.Collection = lvalueCollection;
+                arrayVar.Data[(int)(long)lvalueKey!] = arrVal;
                 SystemStack.Push(arrVal);
                 break;
             }
 
             case TableVar tableVar:
             {
-                var rval = rightVar is NameVar { Pointer: "" } rvNv ? rvNv.Dereference(this) : rightVar;
-                var tblVal = rval is ArrayVar or TableVar ? Handle(rval) : StoredCopy(rval);
-                tblVal.Key        = leftVar.Key;
-                tblVal.Collection = leftVar.Collection;
-                tableVar.Data[leftVar.Key!] = tblVal;
+                var tblVal = rightVar is ArrayVar or TableVar ? Handle(rightVar) : StoredCopy(rightVar);
+                tblVal.Key        = lvalueKey;
+                tblVal.Collection = lvalueCollection;
+                tableVar.Data[lvalueKey!] = tblVal;
                 SystemStack.Push(tblVal);
                 break;
             }
@@ -328,15 +331,12 @@ public partial class Executive
                 // Strip array/table bookkeeping from the stored scalar value.
                 // A value read from A<K> carries .Collection=arrayVar and .Key=k so
                 // that Assign can write back through it when used as an lvalue.
-                // When stored into a plain scalar variable (not a NameVar, which needs
-                // its own Key/Collection to track its referent), those fields must be
-                // cleared — otherwise a later use of the scalar as an lvalue routes
-                // into the array write branch instead of the scalar IdentifierTable path.
-                if (newVar is not NameVar)
-                {
-                    newVar.Key        = null;
-                    newVar.Collection = null;
-                }
+                // When stored into a plain scalar variable those fields must be cleared, a
+                // NAME's too (what it names is its own, TargetKey and TargetCollection) —
+                // otherwise a later use of the scalar as an lvalue routes into the array
+                // write branch instead of the scalar IdentifierTable path.
+                newVar.Key        = null;
+                newVar.Collection = null;
                 newVar.OutputChannel = leftVar.OutputChannel;
                 newVar.InputChannel = leftVar.InputChannel;
                 IdentifierTable[newVar.Symbol] = newVar;

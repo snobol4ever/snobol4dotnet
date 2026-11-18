@@ -312,14 +312,14 @@ public partial class Executive
     // FIELD(BLOCK)
     private string PrintName(NameVar n)
     {
-        switch (n.Collection)
+        switch (n.TargetCollection)
         {
-            case ArrayVar { DataOwner: { } owner } when n.Key is long field:
+            case ArrayVar { DataOwner: { } owner } when n.TargetKey is long field:
                 return $"{owner.Definition.FieldNames[(int)field]}({PrintBlockName(owner)})";
-            case ArrayVar a when n.Key is long flat:
+            case ArrayVar a when n.TargetKey is long flat:
                 return $"{PrintBlockName(a)}<{ArraySubscripts(a, (int)flat)}>";
-            case TableVar t when n.Key is not null:
-                return $"{PrintBlockName(t)}<{PrintTableKey(n.Key)}>";
+            case TableVar t when n.TargetKey is not null:
+                return $"{PrintBlockName(t)}<{PrintTableKey(n.TargetKey)}>";
             default:
                 return n.Pointer;
         }

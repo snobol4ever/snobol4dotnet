@@ -58,16 +58,16 @@ public class NameArithmeticStrategy : IArithmeticStrategy
     private static Var GetDereferencedValue(NameVar nameVar, Executive executive)
     {
         // Fast path: pointer dereference (most common case)
-        if (nameVar.Collection is null)
+        if (nameVar.TargetCollection is null)
         {
             return executive.IdentifierTable[nameVar.Pointer];
         }
 
         // Slower path: collection element access
-        return nameVar.Collection switch
+        return nameVar.TargetCollection switch
         {
-            ArrayVar arrayVar => arrayVar.Data[(int)(long)nameVar.Key!],
-            TableVar tableVar => tableVar.Data.TryGetValue(nameVar.Key!, out var value)
+            ArrayVar arrayVar => arrayVar.Data[(int)(long)nameVar.TargetKey!],
+            TableVar tableVar => tableVar.Data.TryGetValue(nameVar.TargetKey!, out var value)
                 ? value
                 : tableVar.Fill.Clone(),
             _ => StringVar.Null()

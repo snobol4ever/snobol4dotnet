@@ -61,8 +61,8 @@ public class NameConversionStrategy : IConversionStrategy
 
         varOut = new StringVar(nameSelf.Pointer)
         {
-            Collection = nameSelf.Collection,
-            Key = nameSelf.Key
+            Collection = nameSelf.TargetCollection,
+            Key = nameSelf.TargetKey
         };
         valueOut = nameSelf.Pointer;
         return true;
@@ -169,9 +169,9 @@ public class NameConversionStrategy : IConversionStrategy
         // A name is keyed by what it names: the names of one variable or one element are one key, which no string is (T<.X> is not
         // T<'X'>); the name of a keyword or of a deferred expression is only itself (Identity, which its copies keep), as in SPITBOL
         var nameSelf = (NameVar)self;
-        object identity = nameSelf.Expression is not null || !nameSelf.HasText && nameSelf.Collection is null
+        object identity = nameSelf.Expression is not null || !nameSelf.HasText && nameSelf.TargetCollection is null
             ? nameSelf.Identity
-            : (nameSelf.Pointer, nameSelf.Key, nameSelf.Collection?.SequenceId);
+            : (nameSelf.Pointer, nameSelf.TargetKey, nameSelf.TargetCollection?.SequenceId);
         return new TableKey(identity, self);
     }
 }

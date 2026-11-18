@@ -7,7 +7,7 @@ public class NameCloningStrategy : ICloningStrategy
     {
         var nameSelf = (NameVar)self;
 
-        return new NameVar(nameSelf.Pointer, nameSelf.Key, nameSelf.Collection)
+        return new NameVar(nameSelf.Pointer, nameSelf.TargetKey, nameSelf.TargetCollection)
         {
             Symbol = nameSelf.Symbol,
             InputChannel = nameSelf.InputChannel,

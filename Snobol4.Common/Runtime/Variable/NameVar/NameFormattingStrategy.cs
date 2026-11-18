@@ -6,24 +6,24 @@ public class NameFormattingStrategy : IFormattingStrategy
     public string ToString(Var self)
     {
         var nameSelf = (NameVar)self;
-        return nameSelf.Collection is null && nameSelf.HasText ? nameSelf.Pointer : "NAME";
+        return nameSelf.TargetCollection is null && nameSelf.HasText ? nameSelf.Pointer : "NAME";
     }
 
     public string DumpString(Var self)
     {
         var nameSelf = (NameVar)self;
 
-        if (nameSelf.Collection is not null && nameSelf.Key is not null)
+        if (nameSelf.TargetCollection is not null && nameSelf.TargetKey is not null)
         {
             // Format as collection reference
-            var keyStr = nameSelf.Key switch
+            var keyStr = nameSelf.TargetKey switch
             {
                 long l => l.ToString(),
                 double d => d.ToString(),
                 string s => $"'{s}'",
-                _ => nameSelf.Key.ToString()
+                _ => nameSelf.TargetKey.ToString()
             };
-            return $".{nameSelf.Collection.Symbol}[{keyStr}]";
+            return $".{nameSelf.TargetCollection.Symbol}[{keyStr}]";
         }
 
         return $".{nameSelf.Pointer}";
@@ -34,9 +34,9 @@ public class NameFormattingStrategy : IFormattingStrategy
         var nameSelf = (NameVar)self;
         var symbol = string.IsNullOrEmpty(nameSelf.Symbol) ? "<no name>" : nameSelf.Symbol;
 
-        if (nameSelf.Collection is not null && nameSelf.Key is not null)
+        if (nameSelf.TargetCollection is not null && nameSelf.TargetKey is not null)
         {
-            return $"NAME Symbol: {symbol}  Collection: {nameSelf.Collection.Symbol}  Key: {nameSelf.Key}  Succeeded: {nameSelf.Succeeded}";
+            return $"NAME Symbol: {symbol}  Collection: {nameSelf.TargetCollection.Symbol}  Key: {nameSelf.TargetKey}  Succeeded: {nameSelf.Succeeded}";
         }
 
         return $"NAME Symbol: {symbol}  Pointer: '{nameSelf.Pointer}'  Succeeded: {nameSelf.Succeeded}";

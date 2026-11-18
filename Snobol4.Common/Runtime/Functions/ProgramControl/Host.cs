@@ -109,6 +109,13 @@ public partial class Executive
             return;
         }
 
+        // the null string names no variable: error 254, as in SPITBOL (HOST(4, '')); a name not set fails
+        if ((string)nameObj == "")
+        {
+            LogRuntimeException(254);
+            return;
+        }
+
         var value = Environment.GetEnvironmentVariable((string)nameObj);
         if (value is null)
         {
@@ -162,7 +169,9 @@ public partial class Executive
         {
             0 => options.HeapIncrementBytes,
             1 => options.HeapMaxBytes,
-            2 => 0,
+            // a .NET process has no one address for its heap: the base is its first byte, 1, and the top its cap, so the top is not
+            // below the base and their difference is the heap's span (sbl answers the addresses; GT(HOST(-1,2),0) holds on both)
+            2 => 1,
             3 => options.HeapMaxBytes,
             4 => options.StackSizeBytes,
             5 or 7 => 0,

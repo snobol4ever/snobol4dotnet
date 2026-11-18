@@ -64,7 +64,9 @@ public partial class Executive
 
         // An error inside the evaluation of an expression (EVAL, a deferred expression in a pattern) never ends the run, whatever
         // &ERRLIMIT is, in SPITBOL: the statement fails and &ERRLIMIT counts down no further than 0
-        if ((AmpErrorLimit > 0 || ExpressionDepth > 0) && !fatal)
+        // So does one in a function while a compile error in a function's statement has left SPITBOL's stage at compile: err04 fails
+        // the statement of the innermost function (CompileStageLeftOn)
+        if ((AmpErrorLimit > 0 || ExpressionDepth > 0 || CompileStageLeftOn && AmpFunctionLevel > 0) && !fatal)
         {
             if (AmpErrorLimit > 0)
             {

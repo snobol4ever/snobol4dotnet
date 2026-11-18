@@ -39,7 +39,15 @@ public partial class Executive
             LogRuntimeException((int)AmpErrorType);
         else
             NonExceptionFailure();
+        // in a function's statement SPITBOL's err04 finds the function's call before the compile's own and leaves the stage at
+        // compile; in the main program it finds the compile's and puts the stage back (sbl.min err04, errc4)
+        CompileStageLeftOn = AmpFunctionLevel > 0;
     }
+
+    // Set while SPITBOL's stage is left at execute-time compile by a compile error in a function's statement: every error is then
+    // taken as a compile's, and at &ERRLIMIT 0 one in a function fails the statement of the innermost function, printing nothing
+    // (LogRuntimeException), until a compile at run time succeeds and puts the stage back to execute
+    internal bool CompileStageLeftOn;
 
     // Compiles CODE text onto the end of the program. Text that does not compile gives null, with &ERRTYPE
     // and &ERRTEXT set to the compile error and nothing printed, as in SPITBOL (CODE(' X = (') fails, 226)
@@ -85,7 +93,11 @@ public partial class Executive
         finally { Parent.QuietCompile = false; }
 
         if (Parent.ErrorCodeHistory.Count == errorsBefore)
+        {
+            // a compile that succeeds puts SPITBOL's stage back to execute
+            CompileStageLeftOn = false;
             return built;
+        }
 
         // the first error, as SPITBOL's compiler stops at the first statement in error (CODE(' N = EXP(1E300);L2 X = LN(-0.5)') is 305)
         var code = Parent.ErrorCodeHistory[errorsBefore];

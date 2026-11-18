@@ -243,6 +243,7 @@ public class SourceCode
             // statement; a statement or a blank (null statement) line uses it up
             _lastCardWasStatement = SourceLines.Count > linesBefore && !IsCommand(currentLine);
             _lastLineIsNote = currentLine.Length > 0 && currentLine[0] is '*' or '-';
+            _lastLineOpensAStatement = _lineEndsInANewStatement;
             if (!_lastLineIsNote)
                 _staleIncludeName = null;
         }
@@ -250,9 +251,11 @@ public class SourceCode
         // When an included file ends on a comment or control line, sbl names the including file's next
         // statement after the included file, keeping its own line number (Budne's include and line:
         // line2.sno ends with *)
+        // line2.sno ends with *); so does one whose last line ends in a semicolon, or in a comment after one: a statement begins there,
+        // and sbl takes the file of a statement where it begins
         if (_includeDepth > 0)
             (LineCountFile, _continuation, _lineFileName, _staleIncludeName) =
-                (callerLineCount, callerContinuation, callerLineFileName, _lastLineIsNote ? pathName : null);
+                (callerLineCount, callerContinuation, callerLineFileName, _lastLineIsNote || _lastLineOpensAStatement ? pathName : null);
         else
             _staleIncludeName = callerStaleName;
 
@@ -387,10 +390,15 @@ public class SourceCode
     /// </summary>
     /// <param name="line">The line to process</param>
     /// <param name="pathName">Path to the source file</param>
+    // Whether the line just read ended in a semicolon, or in a comment after one, so that a statement begins where it ends
+    private bool _lineEndsInANewStatement;
+    private bool _lastLineOpensAStatement;
+
     private void ProcessLineWithSubLines(string line, string pathName, bool codeText = false)
     {
         SubLineCount = 0;
         CurrentSubLineTail = "";
+        _lineEndsInANewStatement = false;
 
         // In SNOBOL4, a comment line has '*' in column 1. Such lines must be
         // skipped BEFORE semicolon splitting — otherwise "* comment; key/value"
@@ -428,7 +436,10 @@ public class SourceCode
         // CODE text keeps them (CODE(' X = 1 ; ') has a blank second statement), as SPITBOL numbers them
         var subLines = SplitLineByDelimiter(line, labelFields: true, _semicolonChar);
         if (subLines.Count > 1 && (codeText ? subLines[^1].Length == 0 : subLines[^1].All(c => c is ' ' or '\t')))
+        {
             subLines.RemoveAt(subLines.Count - 1);
+            _lineEndsInANewStatement = true;
+        }
 
         var offset = 0;
         var swallowed = false;
@@ -449,6 +460,7 @@ public class SourceCode
             if (!codeText && offset > 0 && subLine.Length > 0 && subLine[0] == '*')
             {
                 CommentContinuationDirectiveCount++;
+                _lineEndsInANewStatement = true;
                 return;
             }
 

@@ -37,4 +37,49 @@ end");
         }
         finally { File.Delete(file); }
     }
+
+    // a semicolon begins a statement, and sbl takes its file where it begins: an included file whose last line ends in a semicolon,
+    // or in a comment after one, leaves the next statement after it carrying its name, as a last comment line does (sbl -b)
+    [TestMethod]
+    public void TEST_LineControl_an_include_ending_in_a_semicolon_names_the_next_statement()
+    {
+        var directory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TestSnobol4");
+        Directory.CreateDirectory(directory);
+        var file = Path.Combine(directory, "line_semi.sno");
+        foreach (var tail in new[] { " ;", " ;* c", " ;   " })
+        {
+            File.WriteAllText(file, "        R = R ' [' &FILE ']'" + tail + "\n");
+            try
+            {
+                var build = SetupTests.SetupScript("-b", @"        R = R ' a ' &FILE
+-INCLUDE ""line_semi.sno""
+        R = R ' b ' &FILE
+        R = R ' c ' &FILE
+end");
+                Assert.AreEqual(0, build.ErrorCodeHistory.Count, tail);
+                Assert.AreEqual(" a Test.sno [line_semi.sno] b line_semi.sno c Test.sno", ((StringVar)build.Execute!.IdentifierTable["R"]).Data, tail);
+            }
+            finally { File.Delete(file); }
+        }
+    }
+
+    // a semicolon at the end of a line of the including file carries no included name on: after an include that ends on a comment
+    // line, the statement after it carries the included name and the statement after that the program's (sbl -b)
+    [TestMethod]
+    public void TEST_LineControl_a_semicolon_in_the_including_file_carries_no_included_name()
+    {
+        var directory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TestSnobol4");
+        Directory.CreateDirectory(directory);
+        var file = Path.Combine(directory, "line_note.sno");
+        File.WriteAllText(file, "        R = R ' [' &FILE ']'\n*\n");
+        try
+        {
+            var build = SetupTests.SetupScript("-b", @"-INCLUDE ""line_note.sno""
+        R = R ' b ' &FILE ;
+        R = R ' c ' &FILE
+end");
+            Assert.AreEqual(" [line_note.sno] b line_note.sno c Test.sno", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
+        }
+        finally { File.Delete(file); }
+    }
 }

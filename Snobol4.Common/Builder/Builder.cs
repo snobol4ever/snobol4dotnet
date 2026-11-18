@@ -392,14 +392,19 @@ public partial class Builder : IDisposable
             stmtNumber++;
         }
 
+        // The special labels are spelled in upper case; under folding a lower case spelling folds to them, but under -f (no folding)
+        // :(return), :(continue) and :(abort) name ordinary labels, error 038 when undefined, as in SPITBOL (sbl -bf); end alone still
+        // reaches the END line, a line spelled end being the END line there too
         foreach (var (key, val) in new (string, int)[]
         {
-            ("end",-1), ("return",-2), ("freturn",-3), ("nreturn",-4),
-            ("abort",-5), ("continue",-6), ("scontinue",-7),
+            ("end",-1),
             ("END",-1), ("RETURN",-2), ("FRETURN",-3), ("NRETURN",-4),
             ("ABORT",-5), ("CONTINUE",-6), ("SCONTINUE",-7),
         })
             Execute.LabelTable[key] = val;
+        if (BuildOptions.CaseFolding)
+            foreach (var (key, val) in new (string, int)[] { ("return",-2), ("freturn",-3), ("nreturn",-4), ("abort",-5), ("continue",-6), ("scontinue",-7) })
+                Execute.LabelTable[key] = val;
 
         // :(END) goes to the END statement, which runs like any other: it is counted in &STCOUNT and is the
         // statement &STNO and &LINE name at the end of the run, as in SPITBOL (falling into END did so already)

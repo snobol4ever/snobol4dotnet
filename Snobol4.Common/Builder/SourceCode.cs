@@ -102,6 +102,8 @@ public class SourceCode
                 var fullPath = Path.GetFullPath(fileName);
                 PathList.Add(fullPath);
                 using StreamReader sourceFileReader = new(fullPath, Encoding.UTF8);
+                if (used == 0)
+                    PassOverHashBang(sourceFileReader);
                 // the file is named as it was given: &FILE and the error reports print that spelling, as SPITBOL does
                 ReadFile(sourceFileReader, fileName);
                 used++;
@@ -145,6 +147,7 @@ public class SourceCode
         PathList.Add(fileInfo.FullName);
 
         using var reader = new StreamReader(scriptStream, Encoding.UTF8);
+        PassOverHashBang(reader);
         ReadFile(reader, AdjustFileExtension(script));
 
         if (EndFound)
@@ -280,6 +283,23 @@ public class SourceCode
     /// <param name="reader">Stream reader to read from</param>
     /// <param name="continuationLines">Output: number of lines concatenated</param>
     /// <returns>The complete line including any continuations</returns>
+    // A first line of the program that begins #! is passed over and not counted, as sbl -bf reads it (#!x then X = 1 + is ERROR 221 at
+    // line 1); a later one, or one in an included file, is a statement with a bad label
+    private static void PassOverHashBang(StreamReader reader)
+    {
+        var stream = reader.BaseStream;
+        if (!stream.CanSeek)
+            return;
+        var start = stream.Position;
+        var head = new byte[5];
+        var n = stream.Read(head, 0, head.Length);
+        stream.Position = start;
+        reader.DiscardBufferedData();
+        var at = n >= 3 && head[0] == 0xEF && head[1] == 0xBB && head[2] == 0xBF ? 3 : 0;
+        if (n >= at + 2 && head[at] == '#' && head[at + 1] == '!')
+            ReadSourceLine(reader);
+    }
+
     // A line of source ends at a line feed alone, as SPITBOL reads it: a carriage return before it is a character of the line (sbl -bf
     // lists a CRLF file's lines with the CR in them, and the CR is error 230, illegal character, where a statement holds it)
     private static string? ReadSourceLine(StreamReader reader)

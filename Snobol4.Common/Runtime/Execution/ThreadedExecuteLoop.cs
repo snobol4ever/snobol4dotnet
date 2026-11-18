@@ -9,6 +9,9 @@
 /// </summary>
 public partial class Executive
 {
+    // whether the run has started at END's entry label: the first entry of the main thread alone takes it
+    private bool _entryLabelTaken;
+
     internal int ThreadedExecuteLoop(int startAt = 0, bool useFastPath = true, Instruction[]? overrideThread = null)
     {
         var thread    = overrideThread ?? Thread!;
@@ -28,8 +31,11 @@ public partial class Executive
         // Instruction[], and redirecting IP into StatementInstructionStarts would run
         // the wrong instructions and recurse infinitely via ExecuteProgramDefinedFunction.
         InstructionPointer = startAt;
-        if (startAt == 0 && overrideThread == null)
+        // END's entry label is where the program's run starts, once: a function whose body is the first statement is called at
+        // instruction 0 too, and runs its body, as in SPITBOL (DEFINE('PRINT(MSG)','PRINT.INIT') with PRINT.INIT the first statement)
+        if (startAt == 0 && overrideThread == null && !_entryLabelTaken)
         {
+            _entryLabelTaken = true;
             var entryKey = Parent.FoldCase(Parent.EntryLabel);
             if (!string.IsNullOrEmpty(entryKey))
             {

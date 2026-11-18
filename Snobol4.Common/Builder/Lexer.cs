@@ -336,7 +336,9 @@ public partial class Lexer
         if (!m.Success)
             return true;
         var label = _parent.FoldCase(m.Value);
-        if (_parent.Code.Labels.ContainsKey(label))
+        // in a CODE text a label may stand twice, the later statement being the label's (sbl -bf: CODE('A OUTPUT = 1 :(E) ;A OUTPUT = 2
+        // :(E)') then :(A) prints 2); in a source it is error 217
+        if (_parent.Code.Labels.ContainsKey(label) && !_parent.CompilingCode)
         {
             _parent.LogCompilerException(217, 0, sourceLine);
             return false;
@@ -439,7 +441,8 @@ public partial class Lexer
 
                 var label = _parent.FoldCase(m.Value);
 
-                if (_parent.Code.Labels.ContainsKey(label))
+                // a label may stand twice in a CODE text, the later statement being the label's, as in SPITBOL (DeclareLabel)
+                if (_parent.Code.Labels.ContainsKey(label) && !_parent.CompilingCode)
                 {
                     _parent.LogCompilerException(217, _cursorCurrent, sourceLine);
                     return false;

@@ -259,9 +259,13 @@ public partial class Builder : IDisposable
         catch (Exception e) { ReportProgrammingError(e); }
     }
 
+    // Whether the text being compiled is a CODE text, in which a label may stand twice (the later statement is the label's), as in SPITBOL
+    internal bool CompilingCode;
+
     internal bool BuildCode()
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
+        CompilingCode = true;
         try
         {
             GetNameSpaceAndClassName(CompileTarget.CODE);
@@ -280,6 +284,7 @@ public partial class Builder : IDisposable
         }
         catch (CompilerException) { }
         catch (Exception e) { ReportProgrammingError(e); }
+        finally { CompilingCode = false; }
         return false;
     }
 

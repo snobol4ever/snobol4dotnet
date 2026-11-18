@@ -12,6 +12,9 @@
 
 public partial class Executive
 {
+    // The channels open for output in raw mode, whose records are written with no line end
+    internal readonly HashSet<string> RawOutputChannels = [];
+
     internal void OutputFileOpen(List<Var> arguments)
     {
         // arguments[0] Identifier name
@@ -235,6 +238,11 @@ public partial class Executive
                 ? new BufferedStream(new StandardErrorStream(), StandardErrorStream.ChannelBufferSize)
                 : new FileStream(Path.GetFullPath(fileName), (FileMode)fileModeInt, FileAccess.Write, (FileShare)fileShareInt);
             StreamOutputs[channel] = stream;
+            // raw mode (the R n, Q n or C option) writes no line ends, as in SPITBOL
+            if (raw)
+                RawOutputChannels.Add(channel);
+            else
+                RawOutputChannels.Remove(channel);
             IdentifierTable[symbol].OutputChannel = channel;
         }
         catch (Exception)

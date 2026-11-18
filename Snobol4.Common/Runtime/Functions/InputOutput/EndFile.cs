@@ -62,6 +62,7 @@ public partial class Executive
             var streamWriter = StreamOutputs[channel];
             streamWriter.Close();
             StreamOutputs.Remove(channel);
+            RawOutputChannels.Remove(channel);
         }
 
         PredicateSuccess();

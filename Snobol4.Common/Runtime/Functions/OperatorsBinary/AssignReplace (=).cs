@@ -440,7 +440,9 @@ public partial class Executive
                 break;
             
             default:
-                StreamOutputs[outputVar.OutputChannel].Write(Encoding.UTF8.GetBytes(outputVar + Environment.NewLine));
+                StreamOutputs[outputVar.OutputChannel].Write(Encoding.UTF8.GetBytes(RawOutputChannels.Contains(outputVar.OutputChannel)
+                    ? outputVar.ToString()
+                    : outputVar + Environment.NewLine));
                 break;
         }
     }

@@ -235,8 +235,7 @@ public partial class Executive
         }
         catch (Exception)
         {
-            // SPITBOL silently takes :F on file-open failure; do not print error text
-            AmpErrorType = 160;
+            // SPITBOL silently takes :F on file-open failure, printing nothing and leaving &ERRTYPE as it was (sbl -bf)
             NonExceptionFailure();
             return;
         }

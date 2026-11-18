@@ -124,12 +124,17 @@ public partial class Builder
     // ! under the error column (empty when the error has none); "file(line,col) : ERROR nnn -- text"; and an empty line. A line
     // that -LIST has already listed is not listed again. The joined text of a continued statement has a blank for the first character
     // of each continuation line, and an error found at the end of the text is reported at its last character, as sbl does.
+    // The cursor of an error found with the whole statement read, which has no column
+    internal const int WholeStatementRead = -1;
+
     private void WriteStatementInError(int code, int cursor, SourceLine source)
     {
         var lines = source.PhysicalLines;
         if (lines.Count == 0)
             lines = [source.Text];
-        var index = 0;
+        // an error found with the whole statement read (folding its constants) stands on its last card, which the page lists and names, as
+        // sbl -bf does (X = 'a' ! / + 'b' is ERROR 015 at the + card)
+        var index = cursor == WholeStatementRead ? lines.Count - 1 : 0;
         var column = 0;
         if (cursor > 0)
         {

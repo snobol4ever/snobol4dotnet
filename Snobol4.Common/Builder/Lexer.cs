@@ -313,7 +313,7 @@ public partial class Lexer
             {
                 // found once the whole statement is read, which the last card of a source with no END never is
                 if (!sourceLine.EndsTheSource)
-                    _parent.LogCompilerException(code, 0, sourceLine);
+                    _parent.LogCompilerException(code, Builder.WholeStatementRead, sourceLine);
                 allLexed = false;
                 sourceLine.CompileError = true;
                 sourceLine.LexBody.Clear();

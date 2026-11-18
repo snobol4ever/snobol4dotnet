@@ -1144,9 +1144,12 @@ public class SourceCode
 
             switch (line[index])
             {
+                // a string runs to its closing quote, and one never closed to the end of the line: X = "a ; B = ( is one
+                // statement, in error 232, as in SPITBOL
                 case '"':
                 case '\'':
-                    index = SkipStringLiteral(line, index);
+                    var close = line.IndexOf(line[index], index + 1);
+                    index = close < 0 ? line.Length - 1 : close;
                     break;
 
                 default:
@@ -1161,18 +1164,6 @@ public class SourceCode
 
         splitLine.Add(line[baseIndex..]);
         return splitLine;
-    }
-
-    /// <summary>
-    /// Skips over a string literal in the line
-    /// </summary>
-    /// <param name="line">The line being processed</param>
-    /// <param name="index">Current position in the line</param>
-    /// <returns>Index after the string literal</returns>
-    private static int SkipStringLiteral(string line, int index)
-    {
-        var m = CompiledRegex.StringLiteralPattern().Match(line[index..]);
-        return m.Success ? m.Length + index - 1 : index;
     }
 
     #endregion

@@ -69,4 +69,12 @@ end";
         var build = SetupTests.SetupScript("-bf", "[X\"a ; B = (" + Environment.NewLine + "END");
         CollectionAssert.AreEqual(new[] { 214 }, build.ErrorCodeHistory.ToArray());
     }
+
+    // a string never closed runs to the end of the line, semicolons and all: X = "a ; B = ( is one statement, 232 alone (sbl -bf)
+    [TestMethod]
+    public void TEST_An_unclosed_string_runs_to_the_end_of_the_line()
+    {
+        var build = SetupTests.SetupScript("-bf", " X = \"a ; B = ( ; C = (" + Environment.NewLine + "END");
+        CollectionAssert.AreEqual(new[] { 232 }, build.ErrorCodeHistory.ToArray());
+    }
 }

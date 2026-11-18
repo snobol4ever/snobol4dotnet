@@ -177,7 +177,7 @@ public class SourceCode
         // EVAL is one line (oneLine): a line end in it is no separator but a character, error 230 or a bad label 214, as in SPITBOL;
         // a saved program's source is read line by line
         OneLineText = oneLine;
-        var lines = oneLine ? [source] : SplitLineByDelimiter(source, '\r', '\n');
+        var lines = oneLine ? [source] : SplitLineByDelimiter(source, labelFields: false, '\r', '\n');
 
         foreach (var line in lines)
         {
@@ -426,7 +426,7 @@ public class SourceCode
         // Each segment between semicolons is a statement, a blank one included, but nothing after a final
         // semicolon is none; a source line's trailing blanks are trimmed first (X = 1 ;  ends at X = 1), while
         // CODE text keeps them (CODE(' X = 1 ; ') has a blank second statement), as SPITBOL numbers them
-        var subLines = SplitLineByDelimiter(line, _semicolonChar);
+        var subLines = SplitLineByDelimiter(line, labelFields: true, _semicolonChar);
         if (subLines.Count > 1 && (codeText ? subLines[^1].Length == 0 : subLines[^1].All(c => c is ' ' or '\t')))
             subLines.RemoveAt(subLines.Count - 1);
 
@@ -1123,16 +1123,25 @@ public class SourceCode
     /// Splits a line by the specified delimiter characters, respecting string literals
     /// </summary>
     /// <param name="line">The line to split</param>
+    /// <param name="labelFields">Whether each segment begins in column 1, where a label runs to the first blank or tab and a
+    /// quote in it opens no string (L'A X = 'one' ; Y = "two'" is two statements, as in SPITBOL)</param>
     /// <param name="delimiters">The delimiter characters</param>
     /// <returns>List of split segments, each keeping its trailing blanks (whether a blank last segment is a
     /// statement depends on the caller)</returns>
-    private static List<string> SplitLineByDelimiter(string line, params char[] delimiters)
+    private static List<string> SplitLineByDelimiter(string line, bool labelFields, params char[] delimiters)
     {
         List<string> splitLine = [];
         var baseIndex = 0;
 
         for (var index = 0; index < line.Length; ++index)
         {
+            // the label field of a statement, one that begins with a letter or a digit: a delimiter in it still ends the statement
+            if (labelFields && index == baseIndex && char.IsAsciiLetterOrDigit(line[index]))
+                while (index < line.Length && line[index] is not (' ' or '\t') && !delimiters.Contains(line[index]))
+                    ++index;
+            if (index >= line.Length)
+                break;
+
             switch (line[index])
             {
                 case '"':

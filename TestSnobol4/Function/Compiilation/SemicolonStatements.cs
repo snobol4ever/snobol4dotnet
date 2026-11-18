@@ -32,4 +32,17 @@ public class SemicolonStatements
         var files = new Dictionary<string, string> { ["main.sno"] = "-LIST\n\tA = 1\n\tENDFILE(9;8;C = 3)\n\tB = 2\nEND\n" };
         Assert.AreEqual("\n\n\n<identity>\n<clock>\n\n\n\n                                                                                                                page 1\n\n        -LIST\n1       \tA = 1\n2       \tENDFILE(9;8;C = 3)\n2       \tENDFILE(9;8;C = 3)\n        \t         !\n        \t         !\nmain.sno(3,11) : ERROR 226 -- syntax error: missing right paren\nmain.sno(3,11) : ERROR 226 -- syntax error: missing right paren\n\n\n\n\n        \t              !\n        \t              !\nmain.sno(3,16) : ERROR 221 -- syntax error: missing operand\nmain.sno(3,16) : ERROR 221 -- syntax error: missing operand\n\n\n4       \tB = 2\n5       END", IncludeInSourceOrder.Run(files));
     }
+
+    // the empty line that stands for a line a page has shown takes no line of the page and opens none: of twenty lines [X ; } (214,
+    // then 230 on the same line), sbl -bf puts eight on a page, so page 2 opens with the line of statement 17
+    [TestMethod]
+    public void TEST_SemicolonStatements_the_empty_line_of_a_second_error_takes_no_line_of_the_page()
+    {
+        var files = new Dictionary<string, string> { ["main.sno"] = string.Concat(Enumerable.Repeat("[X ; }\n", 20)) + "END\n" };
+        var lines = IncludeInSourceOrder.Run(files).Split('\n');
+        var page2 = Array.FindIndex(lines, l => l.TrimEnd().EndsWith("page 2"));
+        Assert.IsTrue(page2 > 0, "a second page");
+        Assert.AreEqual("", lines[page2 + 1]);
+        Assert.AreEqual("17      [X ; }", lines[page2 + 2], "page 2 opens with the line of statement 17");
+    }
 }

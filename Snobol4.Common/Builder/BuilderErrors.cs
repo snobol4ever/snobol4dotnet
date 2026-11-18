@@ -323,9 +323,11 @@ public partial class Builder
     // (empty when there is none), the error line, and an empty line
     private void WriteErrorPage(string numberField, string physical, int line, int column, int code, string file, bool listed, bool repeated = false)
     {
-        // a statement that -LIST has already listed is not listed again, but its line is still copied
+        // a statement that -LIST has already listed is not listed again, but its line is still copied; the empty line that stands
+        // for a line a page has shown takes no line of the page and opens no page: the reports of one line stand on one page (sbl
+        // -bf puts eight lines [X ; } on a page, sixteen reports)
         if (repeated)
-            WriteReportPageLine("", newPageAllowed: true);
+            WriteReportPageLine("", newPageAllowed: false, counted: false);
         else
             WriteReportPageLine($"{numberField}{physical.TrimEnd(' ', '\t')}", listed, newPageAllowed: true);
         // under -e, errors to the list file only, sbl leaves an empty line before the pointer, which the page does not count

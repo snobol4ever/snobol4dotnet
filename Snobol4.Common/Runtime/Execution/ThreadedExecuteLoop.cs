@@ -275,6 +275,15 @@ public partial class Executive
 
                 case OpCode.GotoIndirect:
                 {
+                    // the value a function called by name RETURNs in a goto field is error 21, as in SPITBOL (ResolveLabelFromStack)
+                    if (ReferenceEquals(SystemStack.Peek(), ValueReturned))
+                    {
+                        SystemStack.Pop();
+                        ComputedGotoError(21);
+                        if (!_trapTaken) InstructionPointer = -1;
+                        break;
+                    }
+
                     var sym    = SystemStack.Peek().Symbol;
                     var target = LabelTable[sym];
                     SystemStack.Pop();

@@ -281,6 +281,15 @@ public partial class Executive
     /// </summary>
     internal int ResolveLabelFromStack(int errorCode = 38)
     {
+        // a function called in a goto field is called by name: the value one RETURNs there is error 21, as in SPITBOL (its symbol is
+        // the function's own name, no label the program named)
+        if (ReferenceEquals(SystemStack.Peek(), ValueReturned))
+        {
+            SystemStack.Pop();
+            ComputedGotoError(21);
+            return -1;
+        }
+
         var sym    = SystemStack.Peek().Symbol;
         var target = LabelTable[sym];
         SystemStack.Pop();

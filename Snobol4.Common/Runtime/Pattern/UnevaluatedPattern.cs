@@ -65,11 +65,17 @@ internal class UnevaluatedPattern : TerminalPattern
             scan.StarRepeats = 0;
         }
 
-        // Evaluate the function to get the actual pattern
+        // Evaluate the function to get the actual pattern; a failure leaves on the stack nothing of the evaluation (the operands of a
+        // predicate that failed, *EQ(1,2)), or the match's own value would be read from under it (sbl -bf: 'ab' ? (*EQ(1,2) | 'b') is b)
+        var depth0 = scan.Exec.SystemStack.Count;
         _functionName(scan.Exec);
 
         if (scan.Exec.Failure)
+        {
+            while (scan.Exec.SystemStack.Count > depth0)
+                scan.Exec.SystemStack.Pop();
             return MatchResult.Failure(scan);
+        }
 
         var evaluatedExpression = scan.Exec.SystemStack.Pop();
         // If the deferred code pushed an ExpressionVar (e.g. *P where P is a plain variable), evaluate it
@@ -84,9 +90,14 @@ internal class UnevaluatedPattern : TerminalPattern
                 scan.Exec.LogRuntimeException(246, fatal: true);
                 return MatchResult.Failure(scan);
             }
+            var depth1 = scan.Exec.SystemStack.Count;
             exprVar.FunctionName(scan.Exec);
             if (scan.Exec.Failure)
+            {
+                while (scan.Exec.SystemStack.Count > depth1)
+                    scan.Exec.SystemStack.Pop();
                 return MatchResult.Failure(scan);
+            }
             evaluatedExpression = scan.Exec.SystemStack.Pop();
         }
         if (!evaluatedExpression.Convert(Executive.VarType.PATTERN, out _, out var p, scan.Exec))

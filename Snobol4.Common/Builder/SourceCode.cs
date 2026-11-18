@@ -280,10 +280,23 @@ public class SourceCode
     /// <param name="reader">Stream reader to read from</param>
     /// <param name="continuationLines">Output: number of lines concatenated</param>
     /// <returns>The complete line including any continuations</returns>
+    // A line of source ends at a line feed alone, as SPITBOL reads it: a carriage return before it is a character of the line (sbl -bf
+    // lists a CRLF file's lines with the CR in them, and the CR is error 230, illegal character, where a statement holds it)
+    private static string? ReadSourceLine(StreamReader reader)
+    {
+        if (reader.EndOfStream)
+            return null;
+        var line = new StringBuilder();
+        int c;
+        while ((c = reader.Read()) >= 0 && c != '\n')
+            line.Append((char)c);
+        return line.ToString();
+    }
+
     private string ReadLineAndContinuations(StreamReader reader, out int continuationLines, out List<string> physicalLines)
     {
         // a line is cut to the length -INnnn set, the rest of it is lost
-        var line = CutToMaximum(reader.ReadLine());
+        var line = CutToMaximum(ReadSourceLine(reader));
         continuationLines = 1;
         physicalLines = [line ?? ""];
 
@@ -297,9 +310,9 @@ public class SourceCode
         // statement, after which SPITBOL reads no more of the program
         while (!reader.EndOfStream && reader.Peek() is _continuationChar or _alternateContinuationChar
                && !IsCommentOrContinuation(currentLine) && !IsCommand(currentLine)
-               && !currentLine.TrimEnd().EndsWith(_semicolonChar) && !IsEndStatement(currentLine))
+               && !currentLine.TrimEnd(' ', '\t').EndsWith(_semicolonChar) && !IsEndStatement(currentLine))
         {
-            var continued = CutToMaximum(reader.ReadLine()) ?? "";
+            var continued = CutToMaximum(ReadSourceLine(reader)) ?? "";
             physicalLines.Add(continued);
             currentLine += continued.Length > 0 ? " " + continued[1..] : "";
             continuationLines++;
@@ -394,7 +407,7 @@ public class SourceCode
         // semicolon is none; a source line's trailing blanks are trimmed first (X = 1 ;  ends at X = 1), while
         // CODE text keeps them (CODE(' X = 1 ; ') has a blank second statement), as SPITBOL numbers them
         var subLines = SplitLineByDelimiter(line, _semicolonChar);
-        if (subLines.Count > 1 && (codeText ? subLines[^1].Length == 0 : string.IsNullOrWhiteSpace(subLines[^1])))
+        if (subLines.Count > 1 && (codeText ? subLines[^1].Length == 0 : subLines[^1].All(c => c is ' ' or '\t')))
             subLines.RemoveAt(subLines.Count - 1);
 
         var offset = 0;
@@ -431,7 +444,9 @@ public class SourceCode
             var statementsRead = SourceLines.Count;
             // in the text of CODE only blanks and tabs are white space: a line end there is a character (CODE(' X = 1;' CHAR(10)) is a
             // statement whose label field holds it, a bad label, 214)
-            ProcessSubLine(codeText ? subLine.TrimEnd(' ', '\t') : subLine.TrimEnd(), pathName, codeText);
+            // a line ends at its last character that is no blank or tab: sbl -bf reads a carriage return, form feed or vertical tab
+            // there as error 230, illegal character
+            ProcessSubLine(subLine.TrimEnd(' ', '\t'), pathName, codeText);
             // compilation ends at the END statement, as in SPITBOL: nothing after END; on its line is a statement, in a source file or
             // in the text of CODE (CODE(' X = 1 :(L2);END;L2 X = 2') leaves L2 undefined)
             if (EndFound)
@@ -457,7 +472,8 @@ public class SourceCode
     /// <param name="pathName">Path to the source file</param>
     private void ProcessSubLine(string subLine, string pathName, bool codeText)
     {
-        if (codeText ? subLine.All(c => c is ' ' or '\t') : string.IsNullOrWhiteSpace(subLine))
+        // blank is blanks and tabs alone: a line that is a carriage return is a statement whose label is bad (214), as sbl -bf reads it
+        if (subLine.All(c => c is ' ' or '\t'))
         {
             BlankLineCount++;
             return;

@@ -2408,17 +2408,14 @@ D: 4", SetupTests.RunWithInput(s));
     }
 
     [TestMethod]
+    // CSNOBOL4's crlf.sno, whose lines end in a carriage return: sbl -bf reads the CR as a character of the line, error 230 at (1,30),
+    // and the END line, end CR, as no END (216), so nothing runs; the corpus excludes the program as NOT_SPITBOL_DIALECT. The answer
+    // this test held was CSNOBOL4's
     public void TEST_Csnobol4_crlf()
     {
-        var s = @"loop	output = input		:s(loop)
-end";
-        var input = @"this line has no CR
-this line ends in a CR
-this line has no CR
-";
-        Assert.AreEqual(@"this line has no CR
-this line ends in a CR
-this line has no CR", SetupTests.RunWithInput(s, input));
+        var s = "loop\toutput = input\t\t:s(loop)\r\nend\r";
+        var build = SetupTests.SetupScript("-bf", s);
+        Assert.AreEqual("230 216", string.Join(" ", build.ErrorCodeHistory));
     }
 
     [TestMethod]

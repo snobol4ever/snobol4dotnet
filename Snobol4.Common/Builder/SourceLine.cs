@@ -123,7 +123,7 @@ public class SourceLine
         PathName = pathName;
         CaseFolding = code.CaseFoldingNow;
         // the text of CODE or EVAL keeps a line end at its end: it is a character there (CODE(' X = 1' CHAR(13) CHAR(10)) is 230)
-        Text = code.OneLineText ? text.TrimEnd(' ', '\t') : text.TrimEnd();
+        Text = text.TrimEnd(' ', '\t');
         SyntaxText = Text + code.CurrentSubLineTail;
 
         // Mutable collections initialized during parsing

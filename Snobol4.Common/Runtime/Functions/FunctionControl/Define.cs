@@ -122,12 +122,11 @@ public partial class Executive
     // CALL trace, at the calling statement and level: ****11******  F('arg',7)
     private void TraceCall(string functionName, string returnVarName, List<Var> arguments, int parametersCount)
     {
-        if (!TraceThisCall(TraceTableFunctionCall, functionName, out var callHandler))
+        // the line is spelled before a trace function runs, since its call reuses the argument list
+        if (AmpFunctionTrace <= 0 && (AmpTrace <= 0 || !TraceTableFunctionCall.ContainsKey(functionName)))
             return;
-        if (callHandler != null)
-            CallTraceHandler(callHandler, functionName);
-        else
-            TraceLine($"{returnVarName}({string.Join(",", arguments.Take(parametersCount).Select(PrintValue))})");
+        var line = $"{returnVarName}({string.Join(",", arguments.Take(parametersCount).Select(PrintValue))})";
+        TraceCallOrReturn(TraceTableFunctionCall, functionName, () => TraceLine(line), null);
     }
 
     // The bytes of SPITBOL's stack the program-defined functions being run have taken, and the bytes it starts with
@@ -383,14 +382,14 @@ public partial class Executive
         var current = AmpCurrentLineNumber;
         AmpCurrentLineNumber = returningStatement;
         TraceKeyword("FNCLEVEL", AmpFunctionLevel);
-        if (TraceThisCall(TraceTableFunctionReturn, functionName, out var returnHandler))
-        {
-            if (returnHandler != null)
-                CallTraceHandler(returnHandler, functionName);
-            else
-                TraceLine(rtnTypeStr == "FRETURN" ? $"FRETURN {returnVarName}" : $"{rtnTypeStr} {returnVarName} = {PrintValue(returnVar)}");
-        }
+        var traceFunctionRan = TraceCallOrReturn(TraceTableFunctionReturn, functionName,
+            () => TraceLine(rtnTypeStr == "FRETURN" ? $"FRETURN {returnVarName}" : $"{rtnTypeStr} {returnVarName} = {PrintValue(returnVar)}"), current);
         AmpCurrentLineNumber = current;
+
+        // A RETURN trace's function may assign the returning function's variable, and the call then returns what it holds
+        // (TF sets F = 'changed-by-tf', and R = F('abc','def') is changed-by-tf), as in SPITBOL
+        if (traceFunctionRan && rtnTypeStr == "RETURN" && IdentifierTable.TryGetValue(returnVarName, out var afterTrace))
+            returnVar = afterTrace;
 
         // The value is the call's own only once the RETURN trace is done: its function may name the traced function (.F is a variable
         // there, not a call that returned a value) and the calls it makes return values of their own
@@ -442,19 +441,33 @@ public partial class Executive
     // A call or return is traced when &FTRACE is on (each line counts it down) or when TRACE named the
     // function for this event and &TRACE is on (each line counts &TRACE down), as in SPITBOL
     // An &FTRACE line is always printed; a TRACE'd call or return may name a trace function instead
-    private bool TraceThisCall(Dictionary<string, TraceHandler?> table, string functionName, out TraceHandler? handler)
+    // A CALL or RETURN event of a program-defined function, as SPITBOL answers it: a TRACE of the function with a trace function calls
+    // that function first, then &FTRACE prints the event's line, and with no trace function a TRACE prints the line once, &FTRACE on or
+    // off (sbl -bf: TRACE('F', 'CALL') under &FTRACE prints F(1) once); after a RETURN trace's function the line is the caller's
+    // statement (afterHandler), as sbl prints it
+    private bool TraceCallOrReturn(Dictionary<string, TraceHandler?> table, string functionName, Action printLine, int? afterHandler)
     {
-        handler = null;
+        TraceHandler? handler = null;
+        var keyed = AmpTrace > 0 && table.TryGetValue(functionName, out handler);
+        if (keyed && handler != null)
+        {
+            AmpTrace--;
+            CallTraceHandler(handler, functionName);
+            if (afterHandler is { } line)
+                AmpCurrentLineNumber = line;
+        }
+
         if (AmpFunctionTrace > 0)
         {
             AmpFunctionTrace--;
-            return true;
+            printLine();
+        }
+        else if (keyed && handler == null)
+        {
+            AmpTrace--;
+            printLine();
         }
 
-        if (AmpTrace <= 0 || !table.TryGetValue(functionName, out handler))
-            return false;
-
-        AmpTrace--;
-        return true;
+        return keyed && handler != null;
     }
 }

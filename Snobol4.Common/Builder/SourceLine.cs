@@ -21,6 +21,9 @@ public class SourceLine
     // Case folding as it stood when the line was read: a -CASE control acts from its own line on
     internal bool CaseFolding { get; }
 
+    // Whether -ERRORS (or -k) was in force when the line was read: an error in it then does not inhibit execution (SPITBOL's cswer)
+    internal bool ErrorsRun { get; }
+
     // Handler of -FAIL/-NOFAIL on ***current*** line
     internal bool ErrorOnUnhandledFail { get; init; }
 
@@ -122,6 +125,7 @@ public class SourceLine
         SubLineOffset = code.CurrentSubLineOffset;
         PathName = pathName;
         CaseFolding = code.CaseFoldingNow;
+        ErrorsRun = code.ErrorsRunNow;
         // the text of CODE or EVAL keeps a line end at its end: it is a character there (CODE(' X = 1' CHAR(13) CHAR(10)) is 230)
         Text = text.TrimEnd(' ', '\t');
         SyntaxText = Text + code.CurrentSubLineTail;

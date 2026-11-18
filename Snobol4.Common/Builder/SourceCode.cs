@@ -1083,6 +1083,7 @@ public class SourceCode
 
     #region String Parsing Utilities
 
+    internal bool ErrorsRunNow => _parent.BuildOptions.RunDespiteCompileErrors;
     private static readonly List<string> _extensions =
     [
         "",

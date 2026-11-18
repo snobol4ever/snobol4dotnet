@@ -92,6 +92,9 @@ public partial class Builder
     // statements before it)
     internal SourceLine? FirstErrorSource;
 
+    // The compilation errors that inhibit execution: those found while -NOERRORS was in force
+    internal int ErrorsInhibitingExecution;
+
     /// <summary>
     /// Core logic for logging a compiler exception.
     /// </summary>
@@ -107,6 +110,10 @@ public partial class Builder
 
         var ce = new CompilerException(code, cursorCurrent, message);
         SaveExceptionHistory(ce);
+        // an error found while -NOERRORS is in force inhibits execution, as SPITBOL's erra3 adds cswer to noxeq; -ERRORS (or -k) in force
+        // at its statement lets the program run
+        if (!(source?.ErrorsRun ?? BuildOptions.RunDespiteCompileErrors))
+            ErrorsInhibitingExecution++;
         if (QuietCompile)
             return;
         // an error in a statement is reported on the listing page, as sbl does; one with no statement stays on standard error
@@ -430,6 +437,7 @@ public partial class Builder
         }
 
         ErrorCodeHistory.Add(_unexpectedExceptionErrorCode);
+        ErrorsInhibitingExecution++;   // a fault of the compiler never lets the program run
         ColumnHistory.Add(0);
         MessageHistory.Add(e.Message);
     }

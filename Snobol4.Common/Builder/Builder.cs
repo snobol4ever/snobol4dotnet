@@ -194,8 +194,8 @@ public partial class Builder : IDisposable
             _timerBuild.Stop();
             PrintCompilationStatistics();
             // -n or -NOEXECUTE: compile (and write -w's file) but do not run, as in SPITBOL; nor does a
-            // program with compilation errors run, unless -k or -ERRORS asks for it
-            if (!BuildOptions.SuppressExecution && !SourceFailed && (ErrorCodeHistory.Count == 0 || BuildOptions.RunDespiteCompileErrors))
+            // program with compilation errors run, unless -k or -ERRORS was in force at each of them, as in SPITBOL
+            if (!BuildOptions.SuppressExecution && !SourceFailed && ErrorsInhibitingExecution == 0)
             {
                 Execute.StartTimer();
                 Execute.ExecuteLoop(0);

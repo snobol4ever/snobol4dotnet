@@ -93,10 +93,9 @@ public partial class Executive
                 break;
         }
 
-        // function name cannot redefine a protected (system) function
-        // Exception: FENCE may be redefined as a user function (SNOBOL4/SPITBOL compatibility)
+        // function name cannot redefine a protected (system) function, FENCE among them (sbl -bf: DEFINE('FENCE(X)') is 248)
         var existingEntry = FunctionTable[functionName];
-        if (existingEntry is not null && existingEntry.IsProtected && functionName != "FENCE")
+        if (existingEntry is not null && existingEntry.IsProtected)
         {
             LogRuntimeException(248);
             return;

@@ -37,7 +37,7 @@ internal partial class CompiledRegex
     /// Group 1: Optional condition ("s", "S", "f", or "F").
     /// Group 2: Opening delimiter ("(" or "&lt;").
     /// </returns>
-    [GeneratedRegex(@"^:[ \t]*([sSfF])?[ \t]*([(<])")]
+    [GeneratedRegex(@"^:[ \t]*([sSfF])?[ \t]*([(<\[])")]
     internal static partial Regex GoToFirstPattern();
 
     /// <summary>
@@ -48,7 +48,7 @@ internal partial class CompiledRegex
     /// Group 1: Optional condition ("s", "S", "f", or "F").
     /// Group 2: Opening delimiter ("(" or "&lt;").
     /// </returns>
-    [GeneratedRegex(@"^[ \t]*([sSfF]?)[ \t]*([(<])")]
+    [GeneratedRegex(@"^[ \t]*([sSfF]?)[ \t]*([(<\[])")]
     internal static partial Regex GoToSecondPattern();
 
     #endregion

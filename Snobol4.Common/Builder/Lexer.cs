@@ -623,6 +623,19 @@ public partial class Lexer
                 {
                     return false;
                 }
+
+                // the bracket that closes a direct goto opened by [ ends the goto as > ends one opened by <
+                // (an unconditional direct goto is pushed as L_PAREN_UNCONDITIONAL, its directness in DirectGotoFirst; no subscript's [ is)
+                if (_bracketStack.Peek().Context is Token.Type.L_ANGLE_SUCCESS or Token.Type.L_ANGLE_FAILURE or Token.Type.L_ANGLE_UNCONDITIONAL
+                    or Token.Type.L_PAREN_UNCONDITIONAL)
+                {
+                    _cursorCurrent++;
+                    if (!ProcessClosingBracket(sourceLine))
+                    {
+                        return false;
+                    }
+                    break;
+                }
                 
                 if (_commaStack.Count > 0)
                 {
@@ -757,7 +770,7 @@ public partial class Lexer
             return false;
         }
         
-        sourceLine.DirectGotoSecond = m.Groups[0].Value.Contains('<');
+        sourceLine.DirectGotoSecond = m.Groups[0].Value.Contains('<') || m.Groups[0].Value.Contains('[');
 
         if (!string.Equals(m.Groups[1].Value, expectedSf, StringComparison.OrdinalIgnoreCase))
         {
@@ -967,7 +980,8 @@ public partial class Lexer
         var (bracketType, newState) = bracket switch
         {
             "(" => (_parenCondition[condition], 10),
-            "<" => (_angleCondition[condition], 11),
+            // a direct goto is in angle or square brackets, as sbl reads it: :<C> and :[C] alike
+            "<" or "[" => (_angleCondition[condition], 11),
             _ => ((Token.Type?)null, 0)
         };
 
@@ -1461,7 +1475,7 @@ public partial class Lexer
             return false;
         }
 
-        sourceLine.DirectGotoFirst = m.Groups[0].Value.Contains('<');
+        sourceLine.DirectGotoFirst = m.Groups[0].Value.Contains('<') || m.Groups[0].Value.Contains('[');
         sourceLine.SuccessFirst = m.Groups[0].Value.Contains('s', StringComparison.OrdinalIgnoreCase);
         _colonFound = true;
         _colonPosition = sourceLine.LexBody.Count;

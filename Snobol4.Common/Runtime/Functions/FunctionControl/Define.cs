@@ -414,9 +414,12 @@ public partial class Executive
         // value is read once the caller's variables are back, so a name of a local or a parameter gives
         // the caller's value of it, as SPITBOL dereferences the name after the return.  A string or number
         // an NRETURN hands back names the variable it spells, as $ would (F = 'ZZ' :(NRETURN) names ZZ)
-        SystemStack.Push(rtnTypeStr == "NRETURN" && (returnVar as NameVar ?? SpelledName(returnVar)) is { } returnedName
-            ? NameReturnValue(returnedName)
-            : returnVar);
+        // An NRETURN of a value that is no name and spells none (the null string, an array, a table, a pattern, an expression) is error
+        // 243, function result in NRETURN is not name, as in SPITBOL; a string, an integer or a real gives the name it spells
+        var nreturnedName = rtnTypeStr == "NRETURN" ? returnVar as NameVar ?? SpelledName(returnVar) : null;
+        SystemStack.Push(nreturnedName is not null ? NameReturnValue(nreturnedName) : returnVar);
+        if (rtnTypeStr == "NRETURN" && nreturnedName is null)
+            LogRuntimeException(243);
 
         // Pop ProgramDefinedFunctionStack — balances the Push at the top of this method.
         // Without this Pop, Peek() returns stale data after the function returns,

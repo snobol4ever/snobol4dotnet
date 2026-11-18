@@ -126,6 +126,12 @@ public class BuilderOptions
     public int LinesPerPage { get; set; } = 60;
 
     /// <summary>
+    /// Gets or sets the value of &amp;DUMP before the first statement. Command line: -D# (default 0),
+    /// as sbl's "-D# set &amp;DUMP to # before the first statement"
+    /// </summary>
+    public long InitialDump { get; set; }
+
+    /// <summary>
     /// Gets or sets page width in characters for listings. Command line: -tN (default 120)
     /// </summary>
     public int PageWidth { get; set; } = 120;

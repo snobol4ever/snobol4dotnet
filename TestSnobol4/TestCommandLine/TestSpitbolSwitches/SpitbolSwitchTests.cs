@@ -340,4 +340,29 @@ public class SpitbolSwitchTests
         Assert.IsTrue(b.BuildOptions.ShowCompilerStatistics,  "-a should imply -c");
         Assert.IsTrue(b.BuildOptions.ShowExecutionStatistics, "-a should imply -x");
     }
+
+    // ── -D#  &DUMP before the first statement ───────────────────────────────
+
+    [TestMethod]
+    public void TEST_Switch_D_Default()
+    {
+        var b = Parse("-b");
+        Assert.AreEqual(0L, b.BuildOptions.InitialDump, "&DUMP starts at 0 without -D");
+    }
+
+    [TestMethod]
+    public void TEST_Switch_D_SetsInitialDump()
+    {
+        var b = Parse("-b -D2");
+        Assert.AreEqual(2L, b.BuildOptions.InitialDump);
+    }
+
+    [TestMethod]
+    public void TEST_Switch_D_SeedsAmpDumpBeforeTheFirstStatement()
+    {
+        // sbl -bf -D1: "-D# set &DUMP to # before the first statement"; the program reads it and may change it
+        var build = SetupTests.SetupScript("-b -D1", "        A = &DUMP\n        &DUMP = 0\n        B = &DUMP\nend\n");
+        Assert.AreEqual(1L, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("A")]).Data);
+        Assert.AreEqual(0L, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("B")]).Data);
+    }
 }

@@ -322,6 +322,9 @@ public partial class Builder : IDisposable
         exec.AmpMaxLength = BuildOptions.MaxObjectBytes;
         exec.MaxObjectLength = BuildOptions.MaxObjectBytes;
 
+        // -D#: &DUMP before the first statement, as sbl's -D
+        exec.AmpDump = BuildOptions.InitialDump;
+
         // -f: CaseFolding OFF → seed &CASE=0 so EVAL/CODE compile with the same
         // case-sensitivity setting as the main program.  Without this, EVAL would
         // temporarily restore CaseFolding=true (because AmpCaseFolding defaults to 1),

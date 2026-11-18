@@ -16,6 +16,7 @@
 // -b   SuppressSignOnMessage
 // -c   ShowCompilerStatistics
 // -cs  WriteCSharpCode [NEW. DIFFERS FROM ORIGINAL SPITBOL]
+// -DN  InitialDump — &DUMP set to N before the first statement, as sbl -D#
 // -dN  HeapMaxBytes (default 64m) — recorded; .NET GC manages heap
 // -e   ErrorsToStdout — errors/trace go to stdout instead of stderr
 // -f   CaseFolding OFF
@@ -170,6 +171,13 @@ public partial class Builder
 
             case "-c":
                 BuildOptions.ShowCompilerStatistics = true;
+                break;
+
+            case "-D":
+                if (TryParseNumericArg(command, 2, out var dump))
+                    BuildOptions.InitialDump = dump;
+                else
+                    ReportBadArg(command);
                 break;
 
             case "-d":
@@ -365,6 +373,7 @@ public partial class Builder
 
                            Memory:
                            -dN max heap bytes (default 64m)        -iN heap increment (default 128k)
+                           -DN set &DUMP to N before the first statement
                            -mN max object size → &MAXLNGTH (4m)    -sN stack size (default 32k)
 
                            Save files:

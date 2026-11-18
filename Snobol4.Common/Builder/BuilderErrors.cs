@@ -332,13 +332,32 @@ public partial class Builder
         if (BuildOptions.ErrorsToStdout && !repeated)
             WriteReportPageLine("", counted: false);
 
+        // the column and the blanks before the pointer count the line's bytes in UTF-8, as sbl -bf counts them (a character of three
+        // bytes before the error moves it three columns); a tab stays a tab
         var pointer = new StringBuilder();
         if (column > 0)
         {
             pointer.Append(' ', 8);
+            var bytes = 0;
             for (var i = 0; i < column - 1; i++)
-                pointer.Append(i < physical.Length && physical[i] == '\t' ? '\t' : ' ');
+            {
+                if (i >= physical.Length)
+                {
+                    pointer.Append(' ');
+                    bytes++;
+                    continue;
+                }
+
+                var c = physical[i];
+                var width = char.IsHighSurrogate(c) && i + 1 < physical.Length && char.IsLowSurrogate(physical[i + 1])
+                    ? Encoding.UTF8.GetByteCount(physical.AsSpan(i++, 2))
+                    : Encoding.UTF8.GetByteCount(physical.AsSpan(i, 1));
+                pointer.Append(c == '\t' ? '\t' : ' ', c == '\t' ? 1 : width);
+                bytes += width;
+            }
+
             pointer.Append('!');
+            column = bytes + 1;
         }
         WriteReportPageLine(pointer.ToString());
         var where = column > 0 ? $"{line},{column}" : $"{line}";

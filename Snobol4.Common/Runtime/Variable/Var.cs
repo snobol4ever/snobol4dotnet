@@ -220,13 +220,31 @@ public abstract class Var : IEquatable<Var>
     #region Static Helper Methods
 
 
+    // A sign and one or more blanks or tabs after it, and nothing else ('- ', ' - ', '+ '), which SPITBOL's gtnum reads as 0; a sign
+    // alone ('-') or at the end (' -') is no number
+    private static bool SignAndBlanksOnly(ReadOnlySpan<char> s)
+    {
+        var rest = s.TrimStart(" \t");
+        return rest.Length >= 2 && rest[0] is '+' or '-' && rest[1..].Trim(" \t").IsEmpty;
+    }
+
     internal static bool ToInteger(ReadOnlySpan<char> inString, out long integerOut)
     {
-        // The null string, or one of blanks and tabs only, is 0, as in SPITBOL
-        if (inString.Trim(" \t").IsEmpty)
+        // The null string, or one of blanks and tabs only, is 0, as in SPITBOL, and so is a sign with blanks after it
+        if (inString.Trim(" \t").IsEmpty || SignAndBlanksOnly(inString))
         {
             integerOut = 0;
             return true;
+        }
+
+        // gtnum reads blanks, tabs, a sign and digits alone: .NET's TryParse also forgives other white space and trailing NULs ('12' CHAR(0))
+        foreach (var c in inString)
+        {
+            if (c is not ((>= '0' and <= '9') or ' ' or '\t' or '+' or '-'))
+            {
+                integerOut = 0;
+                return false;
+            }
         }
 
         return long.TryParse(inString, NumberStyles.Integer, CultureInfo.InvariantCulture, out integerOut);
@@ -271,7 +289,7 @@ public abstract class Var : IEquatable<Var>
                     if (inString[i] is not (' ' or '\t'))
                         return false;
                 if (!digits)
-                    return false;
+                    return SignAndBlanksOnly(inString);   // a sign with blanks after it reads 0.0, as gtnum reads it
                 // 9223372036854775808 is no integer, and a string of digits with no point or exponent is no real: it is not a number
                 if (!negative && integer == long.MinValue)
                     return false;

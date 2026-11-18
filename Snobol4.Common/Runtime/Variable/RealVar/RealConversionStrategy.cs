@@ -86,6 +86,16 @@ public sealed class RealConversionStrategy : IConversionStrategy
         // A real beyond the integers converts to the smallest integer, as the x86 conversion SPITBOL uses does (CONVERT(1.0E19, 'INTEGER')
         // is -9223372036854775808, and so DUPL('x', 1.0E100) fails and LPAD('x', 1.0E100) pads nothing)
         var intValue = rounded is >= -9223372036854775808.0 and < 9223372036854775808.0 ? (long)rounded : long.MinValue;
+
+        // a real whose truncation is 2147483648 is no integer in SPITBOL (sbl -bf: CONVERT(2147483648.5, 'INTEGER') fails, 2147483647.5
+        // is 2147483647 and 2147483649.5 is 2147483649)
+        if (intValue == 2147483648L)
+        {
+            varOut = StringVar.Null();
+            valueOut = "";
+            return false;
+        }
+
         varOut = IntegerVar.Create(intValue);
         valueOut = intValue;
         return true;

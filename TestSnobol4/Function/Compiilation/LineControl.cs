@@ -102,4 +102,25 @@ end");
         }
         finally { File.Delete(file); }
     }
+
+    // a -LINE with a file name between an include and the next statement renumbers that statement but leaves it the included name,
+    // and names the statements after it (sbl -b: lib.sno:10, then foo:11)
+    [TestMethod]
+    public void TEST_LineControl_a_line_control_after_an_include_keeps_the_included_name()
+    {
+        var directory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TestSnobol4");
+        Directory.CreateDirectory(directory);
+        var file = Path.Combine(directory, "line_kept.sno");
+        File.WriteAllText(file, "        X = 1\n*\n");
+        try
+        {
+            var build = SetupTests.SetupScript("-b", @"-INCLUDE ""line_kept.sno""
+-LINE 10 ""foo""
+        R = R ' b ' &FILE ':' &LINE
+        R = R ' c ' &FILE ':' &LINE
+end");
+            Assert.AreEqual(" b line_kept.sno:10 c foo:11", ((StringVar)build.Execute!.IdentifierTable["R"]).Data);
+        }
+        finally { File.Delete(file); }
+    }
 }

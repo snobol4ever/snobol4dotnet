@@ -856,11 +856,10 @@ public class SourceCode
                     return false;
                 }
 
+                // the statements after it carry the name, but not one an included file has left the next statement: sbl took that
+                // statement's file where it began, at the included file's end (-INCLUDE, -LINE 10 "foo", X: X is the include's, line 10)
                 if (file.Kind == CardElement.String)
-                {
                     _lineFileName = file.Text;
-                    _staleIncludeName = null;
-                }
 
                 return false;
             }

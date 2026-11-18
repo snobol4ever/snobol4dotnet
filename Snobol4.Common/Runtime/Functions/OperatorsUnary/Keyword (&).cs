@@ -52,21 +52,44 @@ public partial class Executive
     internal long AmpOutput = 1;   // 0 suspends every output association, as in SPITBOL
     internal long AmpProfile;
 
-    // SPITBOL counts the statements from the one that sets &STLIMIT, not from the start of the run: the limit-th statement
-    // after it is error 244, unless the limit is below the count at the time it is set, when it is never reached. The error is like
-    // any other while &ERRLIMIT allows it, twice at most: &STCOUNT becomes the limit that was passed, the limit goes up by ten and
-    // the budget starts again at the new limit; the third time, or with &ERRLIMIT at 0, it ends the run
+    // The statement limit as SPITBOL keeps it (sbl.min stmgo, stgo4, stgcc, asg16, trc09, stcov). kvstc is what is left of the limit,
+    // the limit less the count, and it is taken down only when the countdown stmct runs out, by stmcs, the countdown's start. stgcc
+    // starts the countdown at 1 when &STCOUNT is traced or &PROFILE is on, so the limit is then checked at every statement against what is
+    // left; else at the limit itself, so the limit-th statement after the one that sets &STLIMIT is error 244 whatever the count was
+    // (unless the limit is below the count, when what is left is negative and is never counted). The error is like any other while
+    // &ERRLIMIT allows it, twice at most: &STCOUNT becomes the limit that was passed, the limit goes up by ten and ten are left; the third
+    // time, or with &ERRLIMIT at 0, it ends the run
     private long _statementLimit = 2147483647;
+    private long _statementsLeft = 2147483647;   // kvstc
+    private long _countdownStart = 2147483647;   // stmcs
     internal long AmpStatementLimit
     {
         get => _statementLimit;
         set
         {
+            _statementsLeft = value - AmpStatementCount;
             _statementLimit = value;
-            StatementLimitArmed = value >= AmpStatementCount;
-            StatementsToLimit = value;
+            StatementLimitArmed = _statementsLeft >= 0;
             StatementLimitHits = 0;
+            RecomputeStatementCountdown();
         }
+    }
+
+    // stgcc: the countdown starts at 1 when every statement must be looked at, else at the limit
+    internal void RecomputeStatementCountdown()
+    {
+        _countdownStart = AmpProfile != 0 || _statementLimit >= 0 && TraceTableIdentifierKeyword.ContainsKey("STCOUNT")
+            ? 1
+            : _statementLimit >= 0 ? _statementLimit : 2147483647;
+        StatementsToLimit = _countdownStart;
+    }
+
+    // trc09: a TRACE or STOPTR of STCOUNT first takes the statements run since the countdown began from what is left
+    internal void StatementCountTraceChanged()
+    {
+        if (_statementLimit >= 0)
+            _statementsLeft -= _countdownStart - StatementsToLimit;
+        RecomputeStatementCountdown();
     }
 
     internal bool StatementLimitArmed = true;
@@ -80,11 +103,19 @@ public partial class Executive
     // the limit is ten higher, as SPITBOL leaves them
     internal StatementLimit StatementLimitReached()
     {
-        if (AmpStatementLimit <= 0 || !StatementLimitArmed || --StatementsToLimit > 0)
+        if (AmpStatementLimit <= 0 || --StatementsToLimit > 0)
+            return StatementLimit.Within;
+        var counted = _countdownStart;
+        StatementsToLimit = _countdownStart;
+        if (!StatementLimitArmed || _statementsLeft < 0)
+            return StatementLimit.Within;
+        _statementsLeft -= counted;
+        if (_statementsLeft > 0)
             return StatementLimit.Within;
         AmpStatementCount = AmpStatementLimit;
         _statementLimit += 10;
-        StatementsToLimit = _statementLimit;
+        _statementsLeft = 10;
+        RecomputeStatementCountdown();
         return ++StatementLimitHits >= 3 || AmpErrorLimit <= 0 ? StatementLimit.PassedForGood : StatementLimit.Passed;
     }
     internal long AmpTrace;
@@ -482,6 +513,9 @@ public partial class Executive
         {
             if (IntegerHandler(value, out var integerVar)) return;
             AmpProfile = integerVar.Data;
+            // asg21: a profile that is not zero recomputes the countdown (stgcc), with no refining of what is left
+            if (AmpProfile != 0)
+                RecomputeStatementCountdown();
         }
 
         SystemStack.Push(new IntegerVar(AmpProfile, "&profile", true));

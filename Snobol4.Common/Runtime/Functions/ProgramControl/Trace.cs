@@ -104,6 +104,8 @@ public partial class Executive
                 break;
             case 'K':
                 Apply(TraceTableIdentifierKeyword);
+                if (name == "STCOUNT")
+                    StatementCountTraceChanged();
                 break;
             case 'C':
                 Apply(TraceTableFunctionCall);

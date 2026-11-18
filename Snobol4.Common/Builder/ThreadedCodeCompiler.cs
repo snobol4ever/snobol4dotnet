@@ -62,6 +62,14 @@ internal sealed class ThreadedCodeCompiler
                 Emit(new Instruction(OpCode.Finalize));
             EmitGotos(line, si);
         }
+        // SPITBOL ends a block with an implicit statement, numbered after its last (PopulateCodeMetadata): control that runs off the
+        // block starts it as it starts END, so it is counted, checked against &STLIMIT and read as &STNO, and the program ends there. A
+        // block that ends in its own END has none
+        if (!_parent.Code.EndFound)
+        {
+            _statementStart.Add(_thread.Count);
+            Emit(new Instruction(OpCode.Init, stmtOffset + lines.Count));
+        }
         Emit(new Instruction(OpCode.Halt));
 
         // Pass 2: patch jump targets within the new fragment

@@ -30,6 +30,9 @@ public partial class Executive
         if (arguments[0].Convert(VarType.STRING, out _, out var stringLeftValue, this) &&
             arguments[1].Convert(VarType.STRING, out _, out var stringRightValue, this))
         {
+            // a result longer than &MAXLNGTH is error 205, as SPITBOL's alocs answers it
+            if (StringTooLong((long)((string)stringLeftValue).Length + ((string)stringRightValue).Length))
+                return;
             SystemStack.Push(new StringVar((string)stringLeftValue + (string)stringRightValue));
             return;
         }

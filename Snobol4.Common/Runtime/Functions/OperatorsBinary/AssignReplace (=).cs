@@ -308,6 +308,8 @@ public partial class Executive
                 arrVal.Key        = lvalueKey;
                 arrVal.Collection = lvalueCollection;
                 arrayVar.Data[(int)(long)lvalueKey!] = arrVal;
+                if (TraceTableElementValue.Count > 0)
+                    TraceElementValue(arrayVar, lvalueKey!, arrVal);
                 SystemStack.Push(arrVal);
                 break;
             }
@@ -318,6 +320,8 @@ public partial class Executive
                 tblVal.Key        = lvalueKey;
                 tblVal.Collection = lvalueCollection;
                 tableVar.Data[lvalueKey!] = tblVal;
+                if (TraceTableElementValue.Count > 0)
+                    TraceElementValue(tableVar, lvalueKey!, tblVal);
                 SystemStack.Push(tblVal);
                 break;
             }

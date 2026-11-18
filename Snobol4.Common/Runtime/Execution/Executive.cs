@@ -96,6 +96,9 @@ public partial class Executive
     // Each traced name maps to its trace function, or to null for a printed trace
     internal Dictionary<string, TraceHandler?> TraceTableIdentifierAccess;
     internal Dictionary<string, TraceHandler?> TraceTableIdentifierValue;
+    // A VALUE trace of an element (TRACE(.A[2]), TRACE(.T['k'], 'VALUE')): keyed by the collection's storage and the slot, so every handle
+    // on that array or table fires it and a new array bound to the same variable does not, as in SPITBOL
+    internal Dictionary<(object Store, object Key), TraceHandler?> TraceTableElementValue;
     internal Dictionary<string, TraceHandler?> TraceTableIdentifierKeyword;
     internal Dictionary<string, TraceHandler?> TraceTableLabel;
     internal Dictionary<string, TraceHandler?> TraceTableFunctionCall;
@@ -143,6 +146,7 @@ public partial class Executive
         TraceTableIdentifierAccess = [];
         TraceTableIdentifierKeyword = [];
         TraceTableIdentifierValue = [];
+        TraceTableElementValue = [];
         TraceTableLabel = [];
         TraceTableFunctionCall = [];
         TraceTableFunctionReturn = [];

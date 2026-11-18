@@ -61,6 +61,19 @@ public partial class Executive
         if (letter is not (' ' or 'A' or 'V' or 'F' or 'R' or 'C' or 'L' or 'K'))
             return TraceOutcome.BadType;
 
+        // The name of an element takes a VALUE trace of that slot of that array or table (TRACE(.A[2]), TRACE(.T['k'], 'VALUE')), as in
+        // SPITBOL; it takes no other type
+        if (nameArgument is NameVar { Pointer: "", Expression: null, TargetCollection: { } collection, TargetKey: { } slot })
+        {
+            if (letter is not (' ' or 'V') || ElementStore(collection) is not { } store)
+                return TraceOutcome.BadName;
+            if (set)
+                TraceTableElementValue[(store, slot)] = handler;
+            else
+                TraceTableElementValue.Remove((store, slot));
+            return TraceOutcome.Done;
+        }
+
         // The name is folded as any name is (TRACE('bar') traces BAR under case folding); an element's is no variable's
         if (!NaturalVariableName(nameArgument, out var name))
             return TraceOutcome.BadName;
@@ -141,6 +154,29 @@ public partial class Executive
             return;
 
         AmpTrace--;
+        if (handler != null)
+            CallTraceHandler(handler, name);
+        else
+            TraceLine($"{name} = {PrintValue(value)}");
+    }
+
+    // The storage of an array or a table, which every handle on it shares
+    private static object? ElementStore(Var collection) => collection switch
+    {
+        ArrayVar arrayVar => arrayVar.Data,
+        TableVar tableVar => tableVar.Data,
+        _ => null
+    };
+
+    // A VALUE trace line for an element, after the program assigns a traced slot: ****6*******  A<2> = 5, the element named as its block
+    // is named, as sbl prints it
+    internal void TraceElementValue(Var collection, object slot, Var value)
+    {
+        if (AmpTrace <= 0 || ElementStore(collection) is not { } store || !TraceTableElementValue.TryGetValue((store, slot), out var handler))
+            return;
+
+        AmpTrace--;
+        var name = PrintName(new NameVar("", slot, collection));
         if (handler != null)
             CallTraceHandler(handler, name);
         else

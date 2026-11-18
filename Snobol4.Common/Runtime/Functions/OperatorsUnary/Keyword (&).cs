@@ -26,6 +26,13 @@ public partial class Executive
     internal Pattern AmpFencePattern = new AlternatePattern(new NullPattern(), new AbortPattern());
     internal long AmpFunctionLevel;
     internal int AmpLastLineNumber = -1;    // index of the previous statement executed; -1 before the first
+
+    // SPITBOL's trxeq calls a trace function with the dummy code block trxdc as the code block, so the function's return (retrn) sets
+    // &LINE from that block's line word, the static word after it, which reads 2 in sbl x64, and trxq1 restores the statement number but
+    // not the line: &LINE reads 2 until the next statement starts, and that statement reads it as &LASTLINE
+    internal const int TraceReturnLine = 2;
+    internal int? LineAfterTraceCall;
+    internal int? LastLineAfterTraceCall;
     internal string AmpLowerCaseLetters;
     internal int AmpCurrentLineNumber;
     internal Pattern AmpRemPattern = new RemPattern();
@@ -292,7 +299,7 @@ public partial class Executive
     internal void HandleLastLine(Var value, bool set)
     {
         if (ReadOnlyHandler(set)) return;
-        SystemStack.Push(new IntegerVar(StatementLine(AmpLastLineNumber), "&lastline", true, true));
+        SystemStack.Push(new IntegerVar(LastLineAfterTraceCall ?? StatementLine(AmpLastLineNumber), "&lastline", true, true));
     }
 
     internal void HandleLCase(Var value, bool set)
@@ -328,7 +335,7 @@ public partial class Executive
     internal void HandleLine(Var value, bool set)
     {
         if (ReadOnlyHandler(set)) return;
-        SystemStack.Push(new IntegerVar(StatementLine(AmpCurrentLineNumber), "&line", true, true));
+        SystemStack.Push(new IntegerVar(LineAfterTraceCall ?? StatementLine(AmpCurrentLineNumber), "&line", true, true));
     }
 
     internal void HandleSucceed(Var value, bool set)

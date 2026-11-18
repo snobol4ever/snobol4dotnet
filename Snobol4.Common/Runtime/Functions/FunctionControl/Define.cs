@@ -331,6 +331,9 @@ public partial class Executive
         // interrupts) reads it as &LASTNO, as in SPITBOL; the calling statement is the current one again
         AmpLastLineNumber = returningStatement;
         AmpCurrentLineNumber = callerStatement;
+        // retrn: &LASTLINE is the line in force, &LINE the caller's (a trace function's caller is trxdc: CallTraceHandler)
+        LastLineAfterTraceCall = LineAfterTraceCall;
+        LineAfterTraceCall = null;
         StatementSerial = callerSerial;
         AlphaStack = callerAlphaStack;
         BetaStack = callerBetaStack;

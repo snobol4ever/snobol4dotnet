@@ -69,6 +69,9 @@ public partial class Executive
     {
         AmpLastLineNumber = _statementBegun ? AmpCurrentLineNumber : -1;
         AmpCurrentLineNumber = index;
+        // stmgo: &LASTLINE is the line in force, which a trace function's return left at trxdc's (TraceReturnLine)
+        LastLineAfterTraceCall = LineAfterTraceCall;
+        LineAfterTraceCall = null;
         ReportLineIndex = -1;
         FailureOrigin = int.MaxValue;
         FailureIsError = false;

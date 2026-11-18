@@ -247,6 +247,9 @@ public partial class Executive
             arguments.Add(StringVar.Null());
         arguments.Add(new StringVar(handler.Function));
         entry.Handler(arguments);
+        // a program-defined function returns through retrn to trxdc, whose line word &LINE then reads (TraceReturnLine)
+        if (UserFunctionTable.ContainsKey(handler.Function))
+            LineAfterTraceCall = TraceReturnLine;
 
         while (SystemStack.Count > depth)
             SystemStack.Pop();

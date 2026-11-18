@@ -311,6 +311,9 @@ public partial class Executive
         // reads it as &LASTNO, as in SPITBOL
         var callerStatement = AmpCurrentLineNumber;
         var callerSerial = StatementSerial;
+        // the body's own statements are no deferred code; the caller's code block, when it is one, is the line the call returns to
+        var callerCodeLine = DeferredCodeLine;
+        DeferredCodeLine = null;
         int nextIndex;
         try
         {
@@ -319,6 +322,7 @@ public partial class Executive
         finally
         {
             StackBytesUsed -= frameBytes;
+            DeferredCodeLine = callerCodeLine;
         }
 
         // A goto to END inside the body ends the whole program, as in SPITBOL, not just the call; the END
@@ -334,6 +338,9 @@ public partial class Executive
         // retrn: &LASTLINE is the line in force, &LINE the caller's (a trace function's caller is trxdc: CallTraceHandler)
         LastLineAfterTraceCall = LineAfterTraceCall;
         LineAfterTraceCall = null;
+        // called from a deferred expression or EVAL's code, the function returns to that code's line, as in SPITBOL
+        if (callerCodeLine is { } codeLine)
+            LineAfterTraceCall = codeLine;
         StatementSerial = callerSerial;
         AlphaStack = callerAlphaStack;
         BetaStack = callerBetaStack;

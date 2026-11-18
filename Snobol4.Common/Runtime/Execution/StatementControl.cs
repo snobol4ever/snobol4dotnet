@@ -192,6 +192,18 @@ public partial class Executive
     ///   Failure is cleared on entry so Function() does not bail out when the outer
     ///   pattern-match context has Failure=true.
     /// </summary>
+    // The line of the code block a deferred expression or EVAL's code belongs to while it runs, or null in a statement's own code: a
+    // function called from it returns to that line, as SPITBOL's retrn sets &LINE from the calling code block (CallUserFunction)
+    internal int? DeferredCodeLine;
+
+    internal void RunDeferredCode(Instruction[] subThread, int line)
+    {
+        var saved = DeferredCodeLine;
+        DeferredCodeLine = line;
+        try { RunExpressionThread(subThread); }
+        finally { DeferredCodeLine = saved; }
+    }
+
     internal void RunExpressionThread(Instruction[] subThread)
     {
         var savedIP    = InstructionPointer;

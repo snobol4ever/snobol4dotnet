@@ -310,10 +310,14 @@ public partial class Lexer
                 sourceLine.LexUnconditionalGoto.Clear();
                 continue;
             }
+            var expressionsBefore = _parent.ExpressionList.Count;
             ConvertUnaryStarOperatorsToDeferredExpressions(sourceLine.LexBody);
             ConvertUnaryStarOperatorsToDeferredExpressions(sourceLine.LexFailureGoto);
             ConvertUnaryStarOperatorsToDeferredExpressions(sourceLine.LexSuccessGoto);
             ConvertUnaryStarOperatorsToDeferredExpressions(sourceLine.LexUnconditionalGoto);
+            // a deferred expression's code block is its statement's: a function it calls returns to the statement's line
+            for (var k = expressionsBefore; k < _parent.ExpressionList.Count; k++)
+                _parent.ExpressionList[k].CodeLine = sourceLine.LineCountFile + 1;
 
             // an error found pre-evaluating the constants of the statement is an error in it, as in SPITBOL
             if (!_parent.SyntaxOnly && preEvaluator.FirstError(sourceLine) is var code and not 0)

@@ -252,7 +252,9 @@ public partial class Builder : IDisposable
             Parse(this);
             ResolveSlots();
             EmitMsilForAllStatements();
-            CompileStarFunctions(new ThreadedCodeCompiler(this));
+            // the code of EVAL is compiled at the line the compiler stands at, the program's last or the last CODE text's, as in
+            // SPITBOL: a function it calls returns to that line
+            CompileStarFunctions(new ThreadedCodeCompiler(this), CodeTextLine + 1);
             // an EVAL'd expression is no statement: it takes no statement number, as in SPITBOL
         }
         catch (CompilerException) { }
@@ -501,13 +503,17 @@ public partial class Builder : IDisposable
 
     #region Star-function compilation
 
-    private void CompileStarFunctions(ThreadedCodeCompiler tc)
+    private void CompileStarFunctions(ThreadedCodeCompiler tc, int? evalLine = null)
     {
         if (Execute == null) return;
         for (int i = Execute.StarFunctionList.Count; i < ParseExpression.Count; i++)
         {
             var subThread = tc.CompileSubExpression(ParseExpression[i]);
-            Executive.DeferredCode function = x => x.RunExpressionThread(subThread);
+            // the line of the code the expression belongs to (DeferredExpression.CodeLine), which a function it calls returns to
+            int? codeLine = evalLine ?? (i < ExpressionList.Count && ExpressionList[i].CodeLine > 0 ? ExpressionList[i].CodeLine : null);
+            Executive.DeferredCode function = codeLine is { } line
+                ? x => x.RunDeferredCode(subThread, line)
+                : x => x.RunExpressionThread(subThread);
             Execute.StarFunctionList.Add(function);
             if (ParseExpression[i] is [{ TokenType: Token.Type.IDENTIFIER } variable])
                 Execute.SimpleExpressionNames[function] = FoldCase(variable.MatchedString);

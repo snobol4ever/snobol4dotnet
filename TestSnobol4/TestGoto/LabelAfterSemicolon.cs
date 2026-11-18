@@ -77,4 +77,29 @@ end";
         var build = SetupTests.SetupScript("-bf", " X = \"a ; B = ( ; C = (" + Environment.NewLine + "END");
         CollectionAssert.AreEqual(new[] { 232 }, build.ErrorCodeHistory.ToArray());
     }
+
+    // a bad label that begins with a bracket, a parenthesis, a comma or a colon ends at the semicolon after it, and the statement
+    // after that is compiled: [X ; B = ( ; C = 3 is 214, then 226, C = 3 taken with B = ( (sbl -bf); one that begins with any
+    // other character skips the rest of the line: %X ; B = ( is 214 alone
+    [TestMethod]
+    public void TEST_A_bad_label_that_begins_with_a_bracket_ends_at_its_semicolon()
+    {
+        foreach (var c in new[] { "(", ")", ",", ":", "<", ">", "[", "]" })
+        {
+            var build = SetupTests.SetupScript("-bf", c + "X ; B = ( ; C = 3" + Environment.NewLine + "END");
+            CollectionAssert.AreEqual(new[] { 214, 226 }, build.ErrorCodeHistory.ToArray(), c);
+        }
+        var after = SetupTests.SetupScript("-bf", " A = 1 ;(X ; B = (" + Environment.NewLine + "END");
+        CollectionAssert.AreEqual(new[] { 214, 226 }, after.ErrorCodeHistory.ToArray(), "after a semicolon");
+    }
+
+    [TestMethod]
+    public void TEST_A_bad_label_that_begins_with_an_operator_skips_the_rest_of_the_line()
+    {
+        foreach (var c in new[] { "%", "=", "$", "{", "/" })
+        {
+            var build = SetupTests.SetupScript("-bf", c + "X ; B = (" + Environment.NewLine + "END");
+            CollectionAssert.AreEqual(new[] { 214 }, build.ErrorCodeHistory.ToArray(), c);
+        }
+    }
 }

@@ -474,10 +474,16 @@ public class SourceCode
             if (SourceLines.Count > statementsRead && !ReferenceEquals(subLine, subLines[^1]))
             {
                 // SPITBOL skips the rest of the line after a bad label, and takes the next statement for the rest of one in error at
-                // its semicolon: neither the rest nor that statement is a statement, and they have no number
+                // its semicolon: neither the rest nor that statement is a statement, and they have no number. A bad label that begins
+                // with a bracket, a parenthesis, a comma or a colon ends at its semicolon, and the statement after it is compiled
                 var added = SourceLines[^1];
                 if (added.Text.Length > 0 && added.Text[0] is not (' ' or '\t') && !char.IsAsciiLetterOrDigit(added.Text[0]))
-                    return;
+                {
+                    if (added.Text[0] is not ('(' or ')' or ',' or ':' or '<' or '>' or '[' or ']'))
+                        return;
+                    offset += subLine.Length + 1;
+                    continue;
+                }
                 swallowed = SyntaxScanner.FirstError(added.SyntaxText, null, Lexer.LineEnds(added), added.CaseFolding) is { SwallowsNext: true };
             }
 

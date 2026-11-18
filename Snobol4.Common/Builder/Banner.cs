@@ -107,7 +107,13 @@ public partial class Builder
     {
         var writer = ListingWriter;
         if (OpenListing())
+            _listingTitlePending = false;
+        // a -TITLE or -STITL since the last line opens a new page under the new head, for a report of a statement in error as for a
+        // listed line (sbl -bf)
+        else if (newPageAllowed && _listingTitlePending)
         {
+            _listingTitlePending = false;
+            NewListingPage();
         }
         else if (newPageAllowed && _listingPage > 0 && _listingLinesOnPage >= BuildOptions.LinesPerPage - (LongListing ? 2 : 5))
             NewListingPage();

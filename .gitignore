@@ -390,3 +390,7 @@ dotnet-install-install.sh
 # the seat's own local folders at its top stay out of git
 /.claude/
 /.scratch/
+
+# Not part of the repository (Lon 2026-11-19): the build notes are gone, and CLAUDE.md is the seat's own local guidance
+/BUILDING.md
+/CLAUDE.md

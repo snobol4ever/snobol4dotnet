@@ -12,9 +12,9 @@ SNOBOL4.NET compiles and runs SNOBOL4 with the SPITBOL extensions in C# on .NET 
 ```bash
 dotnet build Snobol4.sln                                   # whole solution, Debug
 dotnet build Snobol4/Snobol4.csproj -c Release -p:ReadyToRunBuild=false   # just the console compiler, no ReadyToRun pass
-bash scripts/test_in_batches.sh                            # all unit tests (MSTest), in batches of 100
-bash scripts/rungs_entries_equal_ref.sh <entry>...         # named entries of corpus/tests/snobol4/ALL.sno, each run alone under -bf against sbl's ref
-python3 scripts/sweep/ctxrun.py 5 6                        # differential sweeps against sbl (run in an empty scratch dir; see scripts/sweep/README.md)
+bash /home/harness/scripts/test_snobol4dotnet_unit_batches.sh       # all unit tests (MSTest), in batches of 100
+bash /home/harness/scripts/test_snobol4dotnet_rungs_entries.sh <entry>...   # named entries of the SNOBOL4 master, each graded alone on this port (mode 3) against sbl's ref
+python3 /home/harness/scripts/snobol4dotnet_sweep/ctxrun.py 5 6     # differential sweeps against sbl (run in an empty scratch dir; see its README.md)
 
 # one class, or one method (method names repeat across classes: TEST_Abort_001 is in both Abort and Fence)
 dotnet test TestSnobol4/TestSnobol4.csproj --filter "FullyQualifiedName~Test.Pattern.Abort"
@@ -32,13 +32,13 @@ dotnet run --project BenchmarkSuite1/BenchmarkSuite1.csproj -c Release -- --filt
 ```
 
 - **The suite is green.** At `91f872e` it ran 3,451 tests: 3,439 passed, 0 failed and 12 skipped. A failure is therefore new. Run the affected batch before you change anything, so you know whether your change caused it. The other bar is the 35 program suites graded against `sbl -bf`, the `<suite>@dotnet` rows of `/home/resources/progress/SUITES.tsv` that the seat's Stop banner shows: on 2026-11-19 all 35 at 100%, 4,166 of 4,166 at `1b8d437`.
-- **Run the suite in batches of 100, never in one `dotnet test` of the whole suite.** Lon, 2026-10-18: *"You better be running tests in batches of 100."* A whole-suite run intermittently hangs or crashes its test host and loses every result. `scripts/test_in_batches.sh` runs each batch in its own bounded host and names any batch that did not complete.
+- **Run the suite in batches of 100, never in one `dotnet test` of the whole suite.** Lon, 2026-10-18: *"You better be running tests in batches of 100."* A whole-suite run intermittently hangs or crashes its test host and loses every result. `/home/harness/scripts/test_snobol4dotnet_unit_batches.sh` runs each batch in its own bounded host and names any batch that did not complete.
 - **Builds are light by default.** `Directory.Build.rsp` gives every `dotnet build` and `dotnet test` `-maxcpucount:1 -nodeReuse:false -p:UseSharedCompilation=false`, because the machine is shared. A `-m` on the command line overrides it. A Release build of `Snobol4` also runs a ReadyToRun `dotnet publish` after the build and copies the precompiled `Snobol4.dll` and `Snobol4.Common.dll` over the plain ones (the `ReadyToRunBuildOutput` target in `Snobol4/Snobol4.csproj`). That pass is a second compile, and `-p:ReadyToRunBuild=false` skips it while you iterate.
 - `Snobol4W` targets `net10.0-windows` and sets `EnableWindowsTargeting` in its own csproj, so the solution builds on Linux without extra flags.
 - The repo holds no corpus. The corpus is the sibling checkout `../corpus` (`/home/corpus`, `snobol4ever/corpus`), which the scripts above read.
 - BenchmarkDotNet runs each benchmark in a child project it generates, and finds `BenchmarkSuite1.csproj` by name under the repository root: a copy of the repository inside the git-ignored `.scratch/` makes a second one, and every run then stops with "Found more than one matching project file". Run it from a root with no such copy (a clean copy of `git ls-files` serves), or pass `--inProcess`.
 - There is no separate linter. `.editorconfig` holds the style rules: file-scoped namespaces, `_camelCase` private fields, `using` outside the namespace.
-- The bridge smokes in `scripts/test_smoke_dot_bridge*.sh` run the Release `Snobol4.dll` against the `beauty` demo. Their defaults (`SNO4_REPO=/home/claude/snobol4dotnet`, `CORPUS=/home/claude/corpus`, `BEAUTY=$CORPUS/programs/snobol4/beauty`) usually need overriding. In the current corpus layout, beauty lives at `corpus/demos/snobol4/beauty`.
+- The repo holds no scripts: the port's scripts live in harness (Lon, 2026-11-19), each finding this clone by `S4E_DOTNET_ROOT` (default `/home/claude_dotnet`): the unit batches and the rungs witness above, `bench_snobol4dotnet_bar.sh` (a speed row's instruction-count bar), the six monitor-bridge smokes `test_smoke_snobol4dotnet_bridge*.sh` (the bridge stays dormant, and each wire record it emits), and the sweeps and test-class writers in `snobol4dotnet_sweep/`.
 
 ## Architecture
 

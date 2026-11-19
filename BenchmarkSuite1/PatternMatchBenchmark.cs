@@ -1,9 +1,13 @@
 using BenchmarkDotNet.Attributes;
 using Snobol4.Common;
+#if VSDIAGNOSTICS
 using Microsoft.VSDiagnostics;
+#endif
 
 namespace Snobol4.Benchmarks;
+#if VSDIAGNOSTICS
 [CPUUsageDiagnoser]
+#endif
 public class PatternMatchBenchmark
 {
     private Executive _executive = null !;
@@ -17,7 +21,7 @@ public class PatternMatchBenchmark
     public void Setup()
     {
         // Initialize Executive (required for pattern matching)
-        _executive = new Executive();
+        _executive = new Executive(new Builder());
         _scanner = new Scanner(_executive);
         // Simple literal pattern: "test"
         _simplePattern = new LiteralPattern("test");

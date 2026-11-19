@@ -5,9 +5,21 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 
+  <!-- Visual Studio's CPU-usage diagnoser is a Windows COM component: elsewhere its type initializer throws and stops the whole run,
+       so it is referenced, and [CPUUsageDiagnoser] applied, only when the suite is built on Windows -->
+  <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+    <DefineConstants>$(DefineConstants);VSDIAGNOSTICS</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.15.2" />
-    <PackageReference Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" Version="18.0.36525.3" />
+    <PackageReference Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" Version="18.0.36525.3" Condition="'$(OS)' == 'Windows_NT'" />
+  </ItemGroup>
+
+  <!-- the scaled programs and their answers, cut from sbl -bf, read by ScaledBottleneckBenchmark -->
+  <ItemGroup>
+    <EmbeddedResource Include="scripts\*.sno" LogicalName="scripts.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="scripts\*.ref" LogicalName="scripts.%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>

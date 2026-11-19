@@ -1,8 +1,8 @@
-namespace Snobol4.Benchmarks2;
+namespace Snobol4.Benchmarks;
 
 /// <summary>
 /// SNOBOL4 benchmark scripts. Each constant is a complete SNOBOL4 program
-/// used by Program.cs to measure performance via BenchmarkHelper.Measure().
+/// timed by WorkloadBenchmark, BottleneckBenchmark and RuntimeCompileBenchmark.
 ///
 /// Five workload profiles:
 ///   Roman          — recursive functions, heavy identifier/function dispatch

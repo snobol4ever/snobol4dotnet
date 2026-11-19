@@ -55,14 +55,15 @@ bash build_native.sh
 ## Running Benchmarks
 
 ```bash
-# Wall-clock runner (no BenchmarkDotNet dependency)
-dotnet run --project benchmarks/Benchmarks.csproj -c Release
+# BenchmarkDotNet; with no arguments every benchmark runs, and BenchmarkDotNet's own options narrow it
+dotnet run --project BenchmarkSuite1/BenchmarkSuite1.csproj -c Release
+dotnet run --project BenchmarkSuite1/BenchmarkSuite1.csproj -c Release -- --filter '*PatternMatch*'
+dotnet run --project BenchmarkSuite1/BenchmarkSuite1.csproj -c Release -- --filter '*' --job short
 
-# Requires snobol4corpus alongside snobol4dotnet:
-#   git clone https://github.com/snobol4ever/snobol4corpus ../snobol4corpus
-# Or set CORPUS env var:
-CORPUS=/path/to/snobol4corpus/benchmarks \
-  dotnet run --project benchmarks/Benchmarks.csproj -c Release
+# CorpusBenchmark reads the kernels of snobol4ever/corpus, benchmarks/snobol4/*.sno: it finds
+# corpus/benchmarks/snobol4 walking up from the runner, or set CORPUS to that folder:
+CORPUS=/path/to/corpus/benchmarks/snobol4 \
+  dotnet run --project BenchmarkSuite1/BenchmarkSuite1.csproj -c Release -- --filter '*Corpus*'
 ```
 
 ## Project Layout
@@ -72,6 +73,6 @@ Snobol4.sln                  — solution (all projects)
 Snobol4/                     — main runtime (Executive, Builder, patterns)
 Snobol4.Common/              — shared types (Var hierarchy, strategies)
 TestSnobol4/                 — xUnit test suite (~1876 tests)
-benchmarks/                  — wall-clock benchmark runner
+BenchmarkSuite1/             — BenchmarkDotNet benchmarks (patterns, programs, corpus kernels)
 CustomFunction/              — native + managed external function fixtures
 ```

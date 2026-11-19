@@ -27,8 +27,8 @@ dotnet Snobol4/bin/Release/net10.0/Snobol4.dll prog.dll      # runs a saved prog
 
 bash build_native.sh                                       # rebuild the committed native .so fixtures (gcc)
 
-# wall-clock benchmarks; finds corpus/benchmarks/snobol4/ above the runner, or the folder CORPUS names
-dotnet run --project benchmarks/Benchmarks.csproj -c Release
+# BenchmarkDotNet benchmarks: every one with no arguments, or narrowed (CorpusBenchmark finds corpus/benchmarks/snobol4/ above the runner, or the folder CORPUS names)
+dotnet run --project BenchmarkSuite1/BenchmarkSuite1.csproj -c Release -- --filter '*Workload*' --job short
 ```
 
 - **The suite is green.** At `91f872e` it ran 3,451 tests: 3,439 passed, 0 failed and 12 skipped. A failure is therefore new. Run the affected batch before you change anything, so you know whether your change caused it. The other bar is the 35 program suites graded against `sbl -bf`, the `<suite>@dotnet` rows of `/home/resources/progress/SUITES.tsv` that the seat's Stop banner shows: on 2026-11-19 all 35 at 100%, 4,166 of 4,166 at `1b8d437`.
@@ -36,6 +36,7 @@ dotnet run --project benchmarks/Benchmarks.csproj -c Release
 - **Builds are light by default.** `Directory.Build.rsp` gives every `dotnet build` and `dotnet test` `-maxcpucount:1 -nodeReuse:false -p:UseSharedCompilation=false`, because the machine is shared. A `-m` on the command line overrides it. A Release build of `Snobol4` also runs a ReadyToRun `dotnet publish` after the build and copies the precompiled `Snobol4.dll` and `Snobol4.Common.dll` over the plain ones (the `ReadyToRunBuildOutput` target in `Snobol4/Snobol4.csproj`). That pass is a second compile, and `-p:ReadyToRunBuild=false` skips it while you iterate.
 - `Snobol4W` targets `net10.0-windows` and sets `EnableWindowsTargeting` in its own csproj, so the solution builds on Linux without extra flags.
 - The repo holds no corpus. The corpus is the sibling checkout `../corpus` (`/home/corpus`, `snobol4ever/corpus`), which the scripts above read.
+- BenchmarkDotNet runs each benchmark in a child project it generates, and finds `BenchmarkSuite1.csproj` by name under the repository root: a copy of the repository inside the git-ignored `.scratch/` makes a second one, and every run then stops with "Found more than one matching project file". Run it from a root with no such copy (a clean copy of `git ls-files` serves), or pass `--inProcess`.
 - There is no separate linter. `.editorconfig` holds the style rules: file-scoped namespaces, `_camelCase` private fields, `using` outside the namespace.
 - The bridge smokes in `scripts/test_smoke_dot_bridge*.sh` run the Release `Snobol4.dll` against the `beauty` demo. Their defaults (`SNO4_REPO=/home/claude/snobol4dotnet`, `CORPUS=/home/claude/corpus`, `BEAUTY=$CORPUS/programs/snobol4/beauty`) usually need overriding. In the current corpus layout, beauty lives at `corpus/demos/snobol4/beauty`.
 
@@ -90,6 +91,6 @@ The old Roslyn C#-codegen engine is gone, even though some comments still mentio
 
 Don't take these as truth. Measure instead.
 
-- `BUILDING.md` says xUnit, about 1,876 tests and a required `-p:EnableWindowsTargeting=true`. The suite is MSTest with 3,451 tests, and the flag isn't needed. Its `CORPUS=.../snobol4corpus/benchmarks` example names the old corpus layout; the runner now wants the folder holding the `.sno` files, `corpus/benchmarks/snobol4/`.
+- `BUILDING.md` says xUnit, about 1,876 tests and a required `-p:EnableWindowsTargeting=true`. The suite is MSTest with 3,451 tests, and the flag isn't needed.
 - `README.md` is Jeff Cooper's original, untouched, as of his commit `5ef4dc0` (2026-03-01). It holds no test counts or benchmarks. Its INPUT and OUTPUT section numbers the extra arguments one lower than the code reads them: the file mode is the fourth argument (`arguments[3]` in `Input.cs` and `Output.cs`), the file share the fifth, and OUTPUT's end-of-line option the sixth.
 - Six `.dll` files are tracked in git: the four `CustomFunction/Spitbol*Lib/libspitbol_*.dll` fixtures, `Snobol4/Test Files/Init.dll` and `TestSnobol4/test2.dll`. `.gitignore` covers `bin/` and `obj/`, so don't add to them.

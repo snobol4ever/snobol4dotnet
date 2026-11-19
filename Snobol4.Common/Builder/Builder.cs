@@ -4,6 +4,7 @@ using System.Runtime.Loader;
 using System.Text;
 
 [assembly: InternalsVisibleTo("TestSnobol4")]
+[assembly: InternalsVisibleTo("BenchmarkSuite1")]
 
 namespace Snobol4.Common;
 

@@ -8,7 +8,42 @@ As a rule, any statement about SPITBOL in the SPITBOL manual, applies to SNOBOL4
 
 One major difference is that SNOBOL4.NET is slower than SPITBOL. This is the trade-off of using a high level language and safe programming practices. Hopefully, people will find the source code readable, and some will improve the code for readability and speed.
 
-## Test Results
+## Chapter 1: Installation
+
+### About This Manual
+#### Scope
+
+[Replace with:]
+
+This manual covers the .NET implementation of SNOBOL4 and the SPITBOL extensions. SNOBOL4.NET runs on Windows, Linux, and Mac OS.
+
+### MS-DOS, Windows 95, Windows NT
+
+[Deleted]
+
+### Windows 11 or later
+
+The Windows version consist of three files:
+
+* Snobol4.exe
+* Snobol4W.exe
+* Snobol.Common.dll
+
+These three files should be stored in the same folder and the folder placed anywhere accessible from the search path. Snobol4.exe is the command line version and Snobol4W is the Windows version. Snobol4.Common.dll is the code in common with both.
+
+### Installing SPITBOL
+
+[Deleted]
+
+### DOS-Extended SPITBOL-386
+
+[Deleted]
+
+### SPITBOL-8088
+
+[Deleted]
+
+### Checkout
 
 SNOBOL4.NET is graded by the snobol4ever test harness on 35 suites of SNOBOL4 programs, 4,166 programs in all, collected from the sources named below. Each program's output is compared with what SPITBOL x64 prints for it (`sbl -bf`). A program SPITBOL gives no answer for is excluded rather than counted. Graded 18 and 19 November 2026, at commit `1b8d437`.
 
@@ -52,41 +87,6 @@ SNOBOL4.NET is graded by the snobol4ever test harness on 35 suites of SNOBOL4 pr
 | **Total** | 35 suites | | **4,166** | **4,166** | **154,371** | **189** | **6m53s** | **100%** | **✓** |
 
 *Lines of code* is the size of the suite's programs. *Time* is how long the suite's last grading took. *Fails (Δ)* is how many of its programs still print something other than SPITBOL's answer; ✓ means none.
-
-## Chapter 1: Installation
-
-### About This Manual
-#### Scope
-
-[Replace with:]
-
-This manual covers the .NET implementation of SNOBOL4 and the SPITBOL extensions. SNOBOL4.NET runs on Windows, Linux, and Mac OS.
-
-### MS-DOS, Windows 95, Windows NT
-
-[Deleted]
-
-### Windows 11 or later
-
-The Windows version consist of three files:
-
-* Snobol4.exe
-* Snobol4W.exe
-* Snobol.Common.dll
-
-These three files should be stored in the same folder and the folder placed anywhere accessible from the search path. Snobol4.exe is the command line version and Snobol4W is the Windows version. Snobol4.Common.dll is the code in common with both.
-
-### Installing SPITBOL
-
-[Deleted]
-
-### DOS-Extended SPITBOL-386
-
-[Deleted]
-
-### SPITBOL-8088
-
-[Deleted]
 
 ### Experienced Users
 If you want to run an existing SPITBOL program, consider the following items that may need to change:

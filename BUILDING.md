@@ -75,5 +75,4 @@ TestSnobol4/                 — xUnit test suite (~1876 tests)
 benchmarks/                  — wall-clock benchmark runner
 CustomFunction/              — native + managed external function fixtures
 perf/                        — baseline.md + profile docs
-corpus/                      — symlink/submodule to snobol4corpus (optional)
 ```

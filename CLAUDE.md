@@ -91,6 +91,6 @@ The old Roslyn C#-codegen engine is gone, even though `PR_DESCRIPTION.md` and so
 Don't take these as truth. Measure instead.
 
 - `BUILDING.md` says xUnit, about 1,876 tests and a required `-p:EnableWindowsTargeting=true`. The suite is MSTest with 3,451 tests, and the flag isn't needed. Its `CORPUS=.../snobol4corpus/benchmarks` example names the old corpus layout; the runner now wants the folder holding the `.sno` files, `corpus/benchmarks/snobol4/`.
-- `README.md` is Jeff Cooper's own README, as it stood before 2026-03-21. It gives old counts (1,874 of 1,876 tests, a corpus of 106 programs) and old wall-clock benchmark timings.
+- `README.md` is Jeff Cooper's original, untouched, as of his commit `5ef4dc0` (2026-03-01). It holds no test counts or benchmarks. Its INPUT and OUTPUT section numbers the extra arguments one lower than the code reads them: the file mode is the fourth argument (`arguments[3]` in `Input.cs` and `Output.cs`), the file share the fifth, and OUTPUT's end-of-line option the sixth.
 - `PR_DESCRIPTION.md` describes a Roslyn fallback switch that no longer exists.
 - Six `.dll` files are tracked in git: the four `CustomFunction/Spitbol*Lib/libspitbol_*.dll` fixtures, `Snobol4/Test Files/Init.dll` and `TestSnobol4/test2.dll`. `.gitignore` covers `bin/` and `obj/`, so don't add to them.

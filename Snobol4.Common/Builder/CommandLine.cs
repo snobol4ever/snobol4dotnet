@@ -6,7 +6,7 @@
 // - Boolean (no-argument) options may be concatenated SPITBOL-style:
 //   -bf == -b -f, -lcx == -l -c -x. The first option that takes an
 //   argument ends the boolean run and is handled normally:
-//   -bm4m == -b -m4m. -cs is the only multi-character option.
+//   -bm4m == -b -m4m.
 // - Parameters for command line options must follow the option without an
 //   intervening space (e.g. -o=filename or -o:filename) [DIFFERS FROM ORIGINAL SPITBOL]
 // - If the parameter has spaces, it must be enclosed in double quotes (e.g. -o="string data")
@@ -15,7 +15,6 @@
 // -a   equivalent to -l -c -x
 // -b   SuppressSignOnMessage
 // -c   ShowCompilerStatistics
-// -cs  WriteCSharpCode [NEW. DIFFERS FROM ORIGINAL SPITBOL]
 // -DN  InitialDump — &DUMP set to N before the first statement, as sbl -D#
 // -dN  HeapMaxBytes (default 64m) — recorded; .NET GC manages heap
 // -e   ErrorsToStdout — errors/trace go to stdout instead of stderr
@@ -108,10 +107,6 @@ public partial class Builder
                 return;
             }
         }
-
-        // Three-char prefix check for -cs before two-char dispatch
-        var prefix3 = command.Length >= 3 ? command[..3] : "";
-        if (prefix3 == "-cs") { BuildOptions.WriteCSharpCode = true; return; }
 
         // SPITBOL-compatible boolean-flag concatenation: -bf -> -b -f, -bfc -> -b -f -c, etc.
         // Only applies when every char after '-' is a boolean flag (not one that takes

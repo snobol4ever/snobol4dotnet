@@ -6,7 +6,7 @@ namespace Test.TestSpitbolSwitches;
 /// <summary>
 /// Tests for all SPITBOL command-line switches.
 /// Covers: -d -e -g -i -m -p -s -t -y -z  and channel -N=file association.
-/// Previously-existing switches (-a -b -c -cs -f -F -h -k -l -n -o -r -u -v -w -x -?)
+/// Previously-existing switches (-a -b -c -f -F -h -k -l -n -o -r -u -v -w -x -?)
 /// are tested by their respective existing test classes; this file adds the new ones.
 /// M-NET-SPITBOL-SWITCHES milestone: all tests here must pass.
 /// </summary>
@@ -339,6 +339,16 @@ public class SpitbolSwitchTests
         Assert.IsTrue(b.BuildOptions.ShowListing,             "-a should imply -l");
         Assert.IsTrue(b.BuildOptions.ShowCompilerStatistics,  "-a should imply -c");
         Assert.IsTrue(b.BuildOptions.ShowExecutionStatistics, "-a should imply -x");
+    }
+
+    // ── -cs is no option of its own: -c, then -s ─────────────────────────────
+
+    [TestMethod]
+    public void TEST_Switch_cs_IsMinusC()
+    {
+        // the C#-writing -cs went with the Roslyn engine; SPITBOL has no -cs, so the run of flags reads -c and then -s, as -c -s does
+        var b = Parse("-b -cs");
+        Assert.IsTrue(b.BuildOptions.ShowCompilerStatistics, "-cs should read as -c");
     }
 
     // ── -D#  &DUMP before the first statement ───────────────────────────────

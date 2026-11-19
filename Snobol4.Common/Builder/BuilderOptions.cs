@@ -18,11 +18,6 @@ public class BuilderOptions
     public bool ShowCompilerStatistics { get; set; }
 
     /// <summary>
-    /// Gets or sets whether to write C# code. Command line: -cs
-    /// </summary>
-    public bool WriteCSharpCode { get; set; }
-
-    /// <summary>
     /// Gets or sets whether case folding is enabled. Command line: -F and -f
     /// </summary>
     public bool CaseFolding { get; set; } = true;

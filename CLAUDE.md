@@ -60,7 +60,7 @@ Variants of the same pipeline:
 
 A statement in error does not stop the compile: it is listed on the page `sbl` prints (`BuilderErrors.WriteStatementInError`), marked `SourceLine.CompileError`, compiles to nothing, and the program does not run unless `-k` or `-ERRORS` asks. Two things raise such errors, both per statement in `Lexer.LexLines`, so they list in source order: the lexer itself, and `StatementChecker`, which does what SPITBOL's code generation does. It evaluates an arithmetic operator or an `svpre` function (`LEN`, `TAB`, `CHAR`, `REMDR`, …) whose operands are all constants, by calling the real builtin with `Executive.PreEvaluating` set, so `1 / 0` or `LEN(-1)` is a compile error with the run-time error's number; and it finds a value where a name is required (error 212, as in `'A' = 2` or `X . 1`). The run's exit status is `Builder.ExitStatus` (231 when execution is suppressed, 1 when the source cannot be read).
 
-The old Roslyn C#-codegen engine is gone, even though `PR_DESCRIPTION.md` and some comments still mention it.
+The old Roslyn C#-codegen engine is gone, even though some comments still mention it.
 
 ### Runtime (`Runtime/`)
 
@@ -92,5 +92,4 @@ Don't take these as truth. Measure instead.
 
 - `BUILDING.md` says xUnit, about 1,876 tests and a required `-p:EnableWindowsTargeting=true`. The suite is MSTest with 3,451 tests, and the flag isn't needed. Its `CORPUS=.../snobol4corpus/benchmarks` example names the old corpus layout; the runner now wants the folder holding the `.sno` files, `corpus/benchmarks/snobol4/`.
 - `README.md` is Jeff Cooper's original, untouched, as of his commit `5ef4dc0` (2026-03-01). It holds no test counts or benchmarks. Its INPUT and OUTPUT section numbers the extra arguments one lower than the code reads them: the file mode is the fourth argument (`arguments[3]` in `Input.cs` and `Output.cs`), the file share the fifth, and OUTPUT's end-of-line option the sixth.
-- `PR_DESCRIPTION.md` describes a Roslyn fallback switch that no longer exists.
 - Six `.dll` files are tracked in git: the four `CustomFunction/Spitbol*Lib/libspitbol_*.dll` fixtures, `Snobol4/Test Files/Init.dll` and `TestSnobol4/test2.dll`. `.gitignore` covers `bin/` and `obj/`, so don't add to them.

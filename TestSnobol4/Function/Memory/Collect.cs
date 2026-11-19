@@ -3,7 +3,10 @@ using Test.TestLexer;
 
 namespace Test.Memory;
 
+// COLLECT() answers from the .NET heap, which every test in the process shares: a test allocating in parallel moves the figure a
+// COLLECT() test measures (TEST_Collect_sees_the_storage_of_a_released_array_as_freed read red once in 35 batches, green alone)
 [TestClass]
+[DoNotParallelize]
 public class Collect
 {
     [TestMethod]

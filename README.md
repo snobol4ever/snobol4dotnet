@@ -12,24 +12,48 @@ One major difference is that SNOBOL4.NET is slower than SPITBOL. This is the tra
 
 SNOBOL4.NET is tested two ways: with its own unit tests, and by running whole SNOBOL4 programs and comparing their output with SPITBOL's.
 
-**Unit tests.** `TestSnobol4` (MSTest), run in batches at commit `c9e85c9` on 2026-10-29: **3,343 tests, 3,331 passed, 0 failed, 12 skipped.**
+**Unit tests.** `TestSnobol4` (MSTest), run in batches at commit `91f872e` on 2026-11-19: **3,451 tests, 3,439 passed, 0 failed, 12 skipped.**
 
-**Program suites.** Each program is run by SNOBOL4.NET, and its output is compared with the output of SPITBOL x64 (`sbl -bf`), the reference implementation. Programs SPITBOL gives no answer for are excluded rather than counted: SPITBOL refuses or crashes on them, or their expected output is not known. They appear in the *Excluded* column. The suites were all graded on 2026-10-31 by the snobol4ever test harness, which runs the same programs against SNOBOL4.NET and against SCRIP. *Graded at* names the SNOBOL4.NET commit each suite was last graded on.
+**Program suites.** Each program is run by SNOBOL4.NET, and its output is compared with the output of SPITBOL x64 (`sbl -bf`), the reference implementation. Programs SPITBOL gives no answer for are excluded rather than counted: SPITBOL refuses or crashes on them, or their expected output is not known. They appear in the *Excluded* column, together with 13 programs whose only difference from SPITBOL is that SNOBOL4.NET's strings are Unicode characters, not bytes: `SIZE` counts characters, and a character above 127, such as the upper half of `&ALPHABET`, is written as UTF-8. The snobol4ever test harness, which runs the same programs against SNOBOL4.NET and against SCRIP, graded every suite on 2026-11-18 and 2026-11-19 at SNOBOL4.NET commit `1b8d437`.
 
-| Suite | What it is | Passed | Excluded | Graded at |
-|---|---|---:|---:|---|
-| SnoRungs | the SNOBOL4 master suite: construct-by-construct programs and regression witnesses | 2,192 / 2,192 | 1 | `ff4eedc` |
-| Gimpel | the programs of Gimpel's *Algorithms in SNOBOL4*, with their test drivers | 144 / 144 | 1 | `ff4eedc` |
-| Flake | the snoflake suite: small programs that each exercise one feature | 126 / 126 | 54 | `ff4eedc` |
-| Budne | Philip L. Budne's CSNOBOL4 2.3.3 test suite | 68 / 68 | 64 | `ff4eedc` |
-| X64T | SPITBOL x64's own test programs | 33 / 33 | 3 | `ff4eedc` |
-| SnoDemo | demonstration programs (beauty, treebank, porter, roman, json and others) | 24 / 24 | – | `ff4eedc` |
-| SnoBench | benchmark programs | 23 / 23 | – | `ff4eedc` |
-| X32T | SPITBOL x32's own test programs | 16 / 16 | 5 | `ff4eedc` |
-| TPgm | SPITBOL's four standard diagnostic programs | 8 / 8 | 0 | `ff4eedc` |
-| AIS | the aisnobol programs (an ATN parser among them) | 8 / 8 | 1 | `ff4eedc` |
-| Dotnet | programs from this repository's own collection | 6 / 6 | 8 | `ff4eedc` |
-| **Total** | | **2,648 / 2,648** | **137** | |
+| Suite | What it is | Passed | Excluded |
+|---|---|---:|---:|
+| SnoRungs | the SNOBOL4 master suite: construct-by-construct programs and regression witnesses | 2,401 / 2,401 | 3 |
+| Cases | every SNOBOL4 program of the retired gate scripts | 532 / 532 | 81 |
+| Rosetta | every SNOBOL4 solution on Rosetta Code | 203 / 203 | 7 |
+| Flake | the snoflake suite: small programs that each exercise one feature | 148 / 148 | 32 |
+| Gimpel | the programs of Gimpel's *Algorithms in SNOBOL4*, with their test drivers | 145 / 145 | 0 |
+| Budne | Philip L. Budne's CSNOBOL4 2.3.3 test suite | 106 / 106 | 26 |
+| Exercism | the Exercism SNOBOL4 track | 72 / 72 | 0 |
+| SnoLib | the self-checking tests of Fred Weigel's SNOBOL4 library | 63 / 63 | 6 |
+| Cor24 | the examples of sw-cor24-snobol4 | 54 / 54 | 5 |
+| JmuCS430 | the teaching programs of a James Madison University course, CS430 | 39 / 39 | 3 |
+| X64T | SPITBOL x64's own test programs | 37 / 37 | 8 |
+| Playground | Joey Gibson's snobol-playground | 26 / 26 | 0 |
+| SnoDemo | demonstration programs (beauty, treebank, porter, roman, json and others) | 24 / 24 | – |
+| Exs | exercises from Forte 1967 and Griswold, Poage and Polonsky 1971 | 24 / 24 | 2 |
+| SnoBench | benchmark programs | 23 / 23 | – |
+| Sil | the test programs of Michael D. Henderson's SIL interpreter | 23 / 23 | 0 |
+| Brooker | programs from a college course (cbrooker-27/snobol) | 21 / 21 | 1 |
+| MikeBeer | the tests, examples and benchmarks of Mike Beer's SNOBOL4 interpreter | 19 / 19 | 0 |
+| Slobol | the test and trace programs of slobol, a SPITBOL in Go | 19 / 19 | 0 |
+| Vanilla | the sample programs of Catspaw's Vanilla SNOBOL4 | 19 / 19 | 2 |
+| X32T | SPITBOL x32's own test programs | 18 / 18 | 3 |
+| Haskell | the examples of snobol4hs, a SNOBOL4 in Haskell | 18 / 18 | 0 |
+| MatrixMike | MatrixMike's snobol4Tests | 17 / 17 | 2 |
+| StrangeCode | the SNOBOL4 programs of Kneusel's *Strange Code* | 16 / 16 | 4 |
+| Spitbol88 | the programs of Catspaw's SPITBOL-88 distribution | 15 / 15 | 0 |
+| Tkslide | the examples of the TkS*LIDE SNOBOL4 IDE | 15 / 15 | 0 |
+| Decus | the sample programs of Wendell Turner's VAX-11 SNOBOL4 (DECUS tape VAX84A) | 13 / 13 | 0 |
+| Begoon | the examples of begoon/snobol, a SNOBOL4 in TypeScript | 11 / 11 | 0 |
+| Setl4 | Dave Shields's SETL4, an implementation of SETL written in SPITBOL | 11 / 11 | 0 |
+| Dotnet | programs from this repository's own collection | 11 / 11 | 3 |
+| AIS | the aisnobol programs (an ATN parser among them) | 8 / 8 | 1 |
+| TPgm | SPITBOL's four standard diagnostic programs | 8 / 8 | 0 |
+| Dump | James P. D.'s SNOBOLDump | 5 / 5 | 0 |
+| BinTree | a binary-tree traversal | 1 / 1 | 0 |
+| Procmail | a toy procmail in SPITBOL | 1 / 1 | 0 |
+| **Total** | | **4,166 / 4,166** | **189** |
 
 Every suite passes all of its graded programs.
 

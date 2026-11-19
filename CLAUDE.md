@@ -31,7 +31,7 @@ bash build_native.sh                                       # rebuild the committ
 dotnet run --project benchmarks/Benchmarks.csproj -c Release
 ```
 
-- **The suite is green.** At `c9e85c9` it ran 3,343 tests: 3,331 passed, 0 failed and 12 skipped (README, *Test Results*). A failure is therefore new. Run the affected batch before you change anything, so you know whether your change caused it. The README's table of the eleven program suites graded against `sbl -bf` is the other bar.
+- **The suite is green.** At `91f872e` it ran 3,451 tests: 3,439 passed, 0 failed and 12 skipped (README, *Test Results*). A failure is therefore new. Run the affected batch before you change anything, so you know whether your change caused it. The README's table of the 35 program suites graded against `sbl -bf` is the other bar.
 - **Run the suite in batches of 100, never in one `dotnet test` of the whole suite.** Lon, 2026-10-18: *"You better be running tests in batches of 100."* A whole-suite run intermittently hangs or crashes its test host and loses every result. `scripts/test_in_batches.sh` runs each batch in its own bounded host and names any batch that did not complete.
 - **Builds are light by default.** `Directory.Build.rsp` gives every `dotnet build` and `dotnet test` `-maxcpucount:1 -nodeReuse:false -p:UseSharedCompilation=false`, because the machine is shared. A `-m` on the command line overrides it. A Release build of `Snobol4` also runs a ReadyToRun `dotnet publish` after the build and copies the precompiled `Snobol4.dll` and `Snobol4.Common.dll` over the plain ones (the `ReadyToRunBuildOutput` target in `Snobol4/Snobol4.csproj`). That pass is a second compile, and `-p:ReadyToRunBuild=false` skips it while you iterate.
 - `Snobol4W` targets `net10.0-windows` and sets `EnableWindowsTargeting` in its own csproj, so the solution builds on Linux without extra flags.
@@ -60,7 +60,7 @@ Variants of the same pipeline:
 
 A statement in error does not stop the compile: it is listed on the page `sbl` prints (`BuilderErrors.WriteStatementInError`), marked `SourceLine.CompileError`, compiles to nothing, and the program does not run unless `-k` or `-ERRORS` asks. Two things raise such errors, both per statement in `Lexer.LexLines`, so they list in source order: the lexer itself, and `StatementChecker`, which does what SPITBOL's code generation does. It evaluates an arithmetic operator or an `svpre` function (`LEN`, `TAB`, `CHAR`, `REMDR`, …) whose operands are all constants, by calling the real builtin with `Executive.PreEvaluating` set, so `1 / 0` or `LEN(-1)` is a compile error with the run-time error's number; and it finds a value where a name is required (error 212, as in `'A' = 2` or `X . 1`). The run's exit status is `Builder.ExitStatus` (231 when execution is suppressed, 1 when the source cannot be read).
 
-The old Roslyn C#-codegen engine is gone, even though `PR_DESCRIPTION.md`, some comments and the `-cs` option still mention it.
+The old Roslyn C#-codegen engine is gone, even though `PR_DESCRIPTION.md` and some comments still mention it.
 
 ### Runtime (`Runtime/`)
 
@@ -90,7 +90,7 @@ The old Roslyn C#-codegen engine is gone, even though `PR_DESCRIPTION.md`, some 
 
 Don't take these as truth. Measure instead.
 
-- `BUILDING.md` says xUnit, about 1,876 tests and a required `-p:EnableWindowsTargeting=true`. The suite is MSTest with 3,343 tests, and the flag isn't needed. Its `CORPUS=.../snobol4corpus/benchmarks` example names the old corpus layout; the runner now wants the folder holding the `.sno` files, `corpus/benchmarks/snobol4/`.
+- `BUILDING.md` says xUnit, about 1,876 tests and a required `-p:EnableWindowsTargeting=true`. The suite is MSTest with 3,451 tests, and the flag isn't needed. Its `CORPUS=.../snobol4corpus/benchmarks` example names the old corpus layout; the runner now wants the folder holding the `.sno` files, `corpus/benchmarks/snobol4/`.
 - `README.jeff.md` gives old counts (1,874 of 1,876 tests, a corpus of 106 programs) and old benchmark timings. `README.md`'s *Test Results* is current.
 - `PR_DESCRIPTION.md` describes a Roslyn fallback switch that no longer exists.
 - Six `.dll` files are tracked in git: the four `CustomFunction/Spitbol*Lib/libspitbol_*.dll` fixtures, `Snobol4/Test Files/Init.dll` and `TestSnobol4/test2.dll`. `.gitignore` covers `bin/` and `obj/`, so don't add to them.

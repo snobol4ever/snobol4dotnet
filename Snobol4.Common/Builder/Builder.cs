@@ -165,6 +165,8 @@ public partial class Builder : IDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
         Execute = new Executive(this);
         ApplyStartupOptions(Execute);
+        // sbl's end-of-run dump is of a run: a program that does not start (a compile error, no END, -n) prints none
+        var started = false;
         try
         {
             GetNameSpaceAndClassName(CompileTarget.PROGRAM);
@@ -198,6 +200,7 @@ public partial class Builder : IDisposable
             if (!BuildOptions.SuppressExecution && !SourceFailed && ErrorsInhibitingExecution == 0)
             {
                 Execute.StartTimer();
+                started = true;
                 Execute.ExecuteLoop(0);
             }
             else
@@ -208,7 +211,8 @@ public partial class Builder : IDisposable
         finally
         {
             Execute?.PrintExecutionStatistics();
-            Execute?.DisplayVariableValues();
+            if (started)
+                Execute?.DisplayVariableValues();
             Execute?.CloseAllStreams();
             ListFileWriter?.Close();
             ListFileWriter = null;

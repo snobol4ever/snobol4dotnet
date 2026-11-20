@@ -146,7 +146,9 @@ public class Parser
     {
         try
         {
-            foreach (var sourceLine in _parent.Code.SourceLines.Where(sourceLine => !sourceLine.Compiled))
+            var lines = _parent.Code.SourceLines.Where(sourceLine => !sourceLine.Compiled).ToList();
+            OperandReadOrder.Collect(lines.Select(line => line.LexBody), _parent.InputCandidates, _parent.FoldCase);
+            foreach (var sourceLine in lines)
                 ParseLine(sourceLine);
 
             var expressions = _parent.ExpressionList;
@@ -194,7 +196,7 @@ public class Parser
     private void ParseLine(SourceLine sourceLine)
     {
         _operatorStack.Clear();
-        sourceLine.ParseBody = ShuntYardAlgorithm(sourceLine.LexBody);
+        sourceLine.ParseBody = OperandReadOrder.Insert(ShuntYardAlgorithm(sourceLine.LexBody), _parent.InputCandidates, _parent.FoldCase);
         if (sourceLine.ParseBody is [.., { TokenType: Token.Type.IDENTIFIER } or { TokenType: Token.Type.UNARY_OPERATOR, MatchedString: "$" }])
             sourceLine.ParseBody.Add(new Token(Token.Type.SUBJECT_VALUE, "", 0));
         sourceLine.ParseUnconditionalGoto = ShuntYardAlgorithm(sourceLine.LexUnconditionalGoto);

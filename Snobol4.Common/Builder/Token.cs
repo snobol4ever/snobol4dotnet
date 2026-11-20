@@ -100,7 +100,10 @@ internal class Token
         EXPRESSION = 53,
         // The end of a statement whose body is only its subject, a variable (INPUT, $X): its value is read, as SPITBOL evaluates
         // the subject, so an input-associated one reads a record and the statement fails at end of input
-        SUBJECT_VALUE = 54
+        SUBJECT_VALUE = 54,
+        // A read of the value on top of the stack, put after an input-associated variable whose operator takes it later than the
+        // operands after it are read (OperandReadOrder), so its record is read in SPITBOL's left-to-right order
+        OPERAND_VALUE = 55
     }
 
     #endregion

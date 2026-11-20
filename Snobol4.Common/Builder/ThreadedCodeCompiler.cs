@@ -409,6 +409,10 @@ internal sealed class ThreadedCodeCompiler
                     Emit(OpCode.ReadSubject);
                     break;
 
+                case Token.Type.OPERAND_VALUE:
+                    Emit(OpCode.ReadOperand);
+                    break;
+
                 case Token.Type.L_PAREN_CHOICE:
                     // A selection begins: after a failure it is skipped with the failed value as its value, since that failure is no
                     // failure of its first alternative. Its end is patched at its close with the jump of each comma.

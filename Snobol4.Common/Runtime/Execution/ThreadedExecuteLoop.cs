@@ -269,6 +269,10 @@ public partial class Executive
                     ReadInputOperand();
                     break;
 
+                case OpCode.ReadOperand:
+                    ReadOperand();
+                    break;
+
                 case OpCode.CheckGotoFailure:
                     if (Failure)
                     {

@@ -108,6 +108,12 @@ public partial class Builder
             null, [], null)
         ?? throw new MissingMethodException(nameof(Executive), "ReadSubject");
 
+    private static readonly MethodInfo _readOperandMethod =
+        typeof(Executive).GetMethod("ReadOperand",
+            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
+            null, [], null)
+        ?? throw new MissingMethodException(nameof(Executive), "ReadOperand");
+
     private static readonly MethodInfo _pushFailedValueMethod =
         typeof(Executive).GetMethod("PushFailedValue",
             BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
@@ -891,6 +897,11 @@ public partial class Builder
             case Token.Type.SUBJECT_VALUE:
                 il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Call, _readSubjectMethod);
+                return true;
+
+            case Token.Type.OPERAND_VALUE:
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Call, _readOperandMethod);
                 return true;
 
             // ── Unary operators ───────────────────────────────────────

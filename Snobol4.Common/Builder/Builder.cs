@@ -279,6 +279,10 @@ public partial class Builder : IDisposable
     // Whether that text is the empty string, which holds no blank statement (PopulateCodeMetadata)
     internal bool CodeTextIsEmpty;
 
+    // The variables the compiler has seen named in a way that can make them input-associated (OperandReadOrder.Collect), over every
+    // compile of the run
+    internal readonly HashSet<string> InputCandidates = ["INPUT", "TERMINAL", "input", "terminal"];
+
     internal bool BuildCode()
     {
         ObjectDisposedException.ThrowIf(_disposed, this);

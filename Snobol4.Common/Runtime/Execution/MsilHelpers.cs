@@ -129,6 +129,17 @@ public partial class Executive
     internal void ReadSubject() => ReadInputOperand();
 
     /// <summary>
+    /// OPERAND_VALUE: the input-associated variable on top of the stack reads its record now, where SPITBOL evaluates it, and its
+    /// value (or, at end of input, the failed value) takes its place, so the operator that takes it later reads nothing.
+    /// </summary>
+    internal void ReadOperand()
+    {
+        if (Failure || SystemStack.Peek().InputChannel.Length == 0)
+            return;
+        SystemStack.Push(InputArgument(SystemStack.Pop()));
+    }
+
+    /// <summary>
     /// Statement-boundary initialisation called at the top of every MSIL delegate.
     /// Mirrors the <c>OpCode.Init</c> case in ThreadedExecuteLoop exactly,
     /// including the &amp;STLIMIT check.

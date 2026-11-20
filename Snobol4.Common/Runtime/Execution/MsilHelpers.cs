@@ -235,6 +235,57 @@ public partial class Executive
         return _trapTaken ? int.MinValue : -1;
     }
 
+    // The success goto of a statement that has a failure exit of its own (its :F label, or the next statement): a label that is not
+    // defined is error 38 as any goto's, and when &ERRLIMIT takes it with no handler armed the statement fails and takes that exit, as
+    // in SPITBOL (OUTPUT = 'a' :S(NOWHERE) goes on to the next statement, &ERRLIMIT one less); a handler takes it as before, and with
+    // &ERRLIMIT at 0 it ends the run
+    internal int ResolveSuccessLabel(string sym, string? failureLabel)
+    {
+        var target = LabelTable[sym];
+        if (target >= -7 || _trapTaken || SetExitNumber > 0 || AmpErrorLimit == 0)
+            return ResolveLabel(sym);
+        TraceGoto(sym);
+        LogRuntimeException(38);
+        SystemStack.Pop();
+        Failure = false;
+        return failureLabel is null ? int.MinValue : ResolveLabel(failureLabel);
+    }
+
+    // A computed success goto whose expression fails makes the statement fail, as in SPITBOL, with no error: its failure exit is taken
+    // (OUTPUT = 'd' :S($(DIFFER(1,1))) goes on to the next statement, whatever &ERRLIMIT is). The expression's value is taken off
+    internal int SuccessGotoFailed(string? failureLabel)
+    {
+        if (SystemStack.Count > 0 && SystemStack.Peek() is not StatementSeparator)
+            SystemStack.Pop();
+        Failure = false;
+        return failureLabel is null ? int.MinValue : ResolveLabel(failureLabel);
+    }
+
+    // A computed success goto to a label that is not defined, as ResolveSuccessLabel
+    internal int ResolveSuccessLabelFromStack(string? failureLabel)
+    {
+        if (ReferenceEquals(SystemStack.Peek(), ValueReturned) || LabelTable[SystemStack.Peek().Symbol] >= -7 || _trapTaken
+            || SetExitNumber > 0 || AmpErrorLimit == 0)
+            return ResolveLabelFromStack();
+        TraceGoto(SystemStack.Pop().Symbol);
+        LogRuntimeException(38);
+        SystemStack.Pop();
+        Failure = false;
+        return failureLabel is null ? int.MinValue : ResolveLabel(failureLabel);
+    }
+
+    // A direct success goto (:S<X>) to no CODE, as ResolveSuccessLabelFromStack: error 24, and the failure exit when &ERRLIMIT takes it
+    internal int ResolveSuccessCodeFromStack(string? failureLabel)
+    {
+        if (GotoCode(SystemStack.Peek()) is not null || _trapTaken || SetExitNumber > 0 || AmpErrorLimit == 0)
+            return ResolveCodeLabelFromStack();
+        TraceGoto(SystemStack.Pop().Symbol);
+        LogRuntimeException(24);
+        SystemStack.Pop();
+        Failure = false;
+        return failureLabel is null ? int.MinValue : ResolveLabel(failureLabel);
+    }
+
     // GotoNotFound or unknown label: a goto to a label that is not defined. A SETEXIT handler takes the error as it takes any other, and
     // counts &ERRLIMIT down; with none armed it ends the run, whatever &ERRLIMIT allows, and leaves &ERRLIMIT at 0, as SPITBOL does
     internal void UndefinedLabelError(int errorCode = 38) => TrappedOrFatalError(errorCode);

@@ -235,13 +235,16 @@ internal sealed class ThreadedCodeCompiler
 
     private void EmitBothGotos(SourceLine line, int next)
     {
+        // a label not defined, or a direct goto to no CODE, takes the failure goto when that is a label; a computed one is error 332
+        // there, as sbl -bf answers
+        var plainFailure = line.ParseFailureGoto is [{ TokenType: Token.Type.IDENTIFIER }];
         if (line.SuccessFirst)
         {
             int fp = EmitPlaceholder(OpCode.JumpOnFailure);
-            EmitTokenList(line.ParseSuccessGoto);
-            Emit(new Instruction(OpCode.CheckGotoFailure));
-            EmitDispatch(line.DirectGotoFirst);
+            var exits = EmitSuccessGoto(line.ParseSuccessGoto, line.DirectGotoFirst, plainFailure);
             PatchHere(fp);
+            foreach (var exit in exits)
+                PatchHere(exit);
             Emit(new Instruction(OpCode.ClearFailure));   // x.Failure = false before failure-goto eval
             EmitTokenList(line.ParseFailureGoto);
             Emit(new Instruction(OpCode.CheckGotoFailure));
@@ -257,18 +260,39 @@ internal sealed class ThreadedCodeCompiler
             Emit(new Instruction(OpCode.SetFailure));
             EmitDispatch(line.DirectGotoFirst);
             PatchHere(sp);
-            EmitTokenList(line.ParseSuccessGoto);
-            Emit(new Instruction(OpCode.CheckGotoFailure));
-            EmitDispatch(line.DirectGotoSecond);
+            // the failure goto stands before the success goto here: the exits jump back to it
+            foreach (var exit in EmitSuccessGoto(line.ParseSuccessGoto, line.DirectGotoSecond, plainFailure))
+                _thread[exit] = new Instruction(OpCode.JumpOnFailure, sp + 1);
         }
     }
 
     private void EmitSuccessOnly(SourceLine line, int next)
     {
         EmitJumpToStmt(OpCode.JumpOnFailure, next);
-        EmitTokenList(line.ParseSuccessGoto);
-        Emit(new Instruction(OpCode.CheckGotoFailure));
-        EmitDispatch(line.DirectGotoFirst);
+        // the statement's failure exit is the next statement
+        foreach (var exit in EmitSuccessGoto(line.ParseSuccessGoto, line.DirectGotoFirst, true))
+            _jumpFixups.Add((exit, next));
+    }
+
+    // A success goto: its expression failing makes the statement fail, with no error, and so does a label not defined or a direct goto
+    // to no CODE that &ERRLIMIT takes with no handler armed (when `takesExit`), as in SPITBOL: the failure exit is taken. Returns the
+    // JumpOnFailure placeholders that go there, for the caller to point
+    private List<int> EmitSuccessGoto(List<Token> tokens, bool isDirect, bool takesExit)
+    {
+        EmitTokenList(tokens);
+        var exits = new List<int>();
+        Emit(new Instruction(OpCode.CheckSuccessGotoFailure));
+        exits.Add(EmitPlaceholder(OpCode.JumpOnFailure));
+
+        if (!takesExit)
+        {
+            EmitDispatch(isDirect);
+            return exits;
+        }
+
+        Emit(new Instruction(OpCode.GotoIndirectSuccess, isDirect ? 24 : 38));
+        exits.Add(EmitPlaceholder(OpCode.JumpOnFailure));
+        return exits;
     }
 
     private void EmitFailureOnly(SourceLine line, int next)

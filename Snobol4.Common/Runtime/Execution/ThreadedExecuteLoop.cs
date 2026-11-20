@@ -283,6 +283,29 @@ public partial class Executive
                     }
                     break;
 
+                case OpCode.CheckSuccessGotoFailure:
+                    if (Failure && SystemStack.Count > 0 && SystemStack.Peek() is not StatementSeparator)
+                        SystemStack.Pop();
+                    break;
+
+                case OpCode.GotoIndirectSuccess:
+                    // a success goto to a label not defined (38), or a direct one to no CODE (24), that &ERRLIMIT takes with no handler
+                    // armed: the statement fails, and the JumpOnFailure after takes its failure exit
+                    if (!ReferenceEquals(SystemStack.Peek(), ValueReturned) && !_trapTaken && SetExitNumber == 0 && AmpErrorLimit > 0
+                        && (instr.IntOperand == 24 ? GotoCode(SystemStack.Peek()) is null : LabelTable[SystemStack.Peek().Symbol] < -7))
+                    {
+                        var operand = SystemStack.Pop();
+                        if (instr.IntOperand != 24)
+                            TraceGoto(operand.Symbol);
+                        LogRuntimeException(instr.IntOperand);
+                        SystemStack.Pop();
+                        break;
+                    }
+
+                    if (instr.IntOperand == 24)
+                        goto case OpCode.GotoIndirectCode;
+                    goto case OpCode.GotoIndirect;
+
                 case OpCode.GotoIndirect:
                 {
                     // the value a function called by name RETURNs in a goto field is error 21, as in SPITBOL (ResolveLabelFromStack)

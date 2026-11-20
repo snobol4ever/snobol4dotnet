@@ -108,6 +108,30 @@ public partial class Builder
             null, [], null)
         ?? throw new MissingMethodException(nameof(Executive), "ReadSubject");
 
+    private static readonly MethodInfo _resolveSuccessLabel =
+        typeof(Executive).GetMethod("ResolveSuccessLabel",
+            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
+            null, [typeof(string), typeof(string)], null)
+        ?? throw new MissingMethodException(nameof(Executive), "ResolveSuccessLabel");
+
+    private static readonly MethodInfo _successGotoFailed =
+        typeof(Executive).GetMethod("SuccessGotoFailed",
+            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
+            null, [typeof(string)], null)
+        ?? throw new MissingMethodException(nameof(Executive), "SuccessGotoFailed");
+
+    private static readonly MethodInfo _resolveSuccessLabelFromStack =
+        typeof(Executive).GetMethod("ResolveSuccessLabelFromStack",
+            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
+            null, [typeof(string)], null)
+        ?? throw new MissingMethodException(nameof(Executive), "ResolveSuccessLabelFromStack");
+
+    private static readonly MethodInfo _resolveSuccessCodeFromStack =
+        typeof(Executive).GetMethod("ResolveSuccessCodeFromStack",
+            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
+            null, [typeof(string)], null)
+        ?? throw new MissingMethodException(nameof(Executive), "ResolveSuccessCodeFromStack");
+
     private static readonly MethodInfo _readOperandMethod =
         typeof(Executive).GetMethod("ReadOperand",
             BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
@@ -562,9 +586,21 @@ public partial class Builder
     /// in a branch that skips it when the condition is not met.
     /// Returns false when any token in <paramref name="gotoExpr"/> is unhandled.
     /// </summary>
+    // successExitKnown: for a success goto, whether its statement's failure exit is a direct label (successExit) or the next statement
+    // (null), so that the goto failing, or naming no label, can take it (SuccessGotoFailed, ResolveSuccessLabelFromStack)
     private bool EmitIndirectGotoIL(ILGenerator il, List<Token> gotoExpr, bool isCode,
-                                     bool isConditional, bool isFailureSide)
+                                     bool isConditional, bool isFailureSide,
+                                     bool successExitKnown = false, string? successExit = null)
     {
+        var successSide = isConditional && !isFailureSide && successExitKnown;
+        void EmitExit()
+        {
+            if (successExit is null)
+                il.Emit(OpCodes.Ldnull);
+            else
+                il.Emit(OpCodes.Ldstr, successExit);
+        }
+
         // SaveFailure: stash Failure in a local before the skip branch so the
         // skip path can restore it correctly even when the body is not entered.
         var savedFailure = il.DeclareLocal(typeof(bool));
@@ -599,6 +635,20 @@ public partial class Builder
         }
         while (gotoChoiceLabels.Count > 0) il.MarkLabel(gotoChoiceLabels.Pop());
 
+        // A success goto that fails takes its statement's failure exit, with no error
+        if (successSide)
+        {
+            var succeeded = il.DefineLabel();
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldfld, _failureField);
+            il.Emit(OpCodes.Brfalse, succeeded);
+            il.Emit(OpCodes.Ldarg_0);
+            EmitExit();
+            il.Emit(OpCodes.Call, _successGotoFailed);
+            il.Emit(OpCodes.Ret);
+            il.MarkLabel(succeeded);
+        }
+
         // CheckGotoExprFailure: if expr failed, log error 20 and fall through.
         var exprOk = il.DefineLabel();
         il.Emit(OpCodes.Ldarg_0);
@@ -627,8 +677,16 @@ public partial class Builder
 
         // Resolve label from stack and return IP.
         il.Emit(OpCodes.Ldarg_0);
-        il.Emit(OpCodes.Ldc_I4, isCode ? 24 : 38);
-        il.Emit(OpCodes.Call, isCode ? _resolveCodeLabelFromStack : _resolveLabelFromStack);
+        if (successSide)
+        {
+            EmitExit();
+            il.Emit(OpCodes.Call, isCode ? _resolveSuccessCodeFromStack : _resolveSuccessLabelFromStack);
+        }
+        else
+        {
+            il.Emit(OpCodes.Ldc_I4, isCode ? 24 : 38);
+            il.Emit(OpCodes.Call, isCode ? _resolveCodeLabelFromStack : _resolveLabelFromStack);
+        }
         il.Emit(OpCodes.Ret);
 
         if (isConditional)
@@ -654,7 +712,7 @@ public partial class Builder
         if (successFirst)
         {
             if (successExpr != null)
-                if (!EmitIndirectGotoIL(il, successExpr, successCode, true, false)) return false;
+                if (!EmitIndirectGotoIL(il, successExpr, successCode, true, false, failureExpr == null)) return false;
             if (failureExpr != null)
                 if (!EmitIndirectGotoIL(il, failureExpr, failureCode, true, true))  return false;
         }
@@ -663,7 +721,7 @@ public partial class Builder
             if (failureExpr != null)
                 if (!EmitIndirectGotoIL(il, failureExpr, failureCode, true, true))  return false;
             if (successExpr != null)
-                if (!EmitIndirectGotoIL(il, successExpr, successCode, true, false)) return false;
+                if (!EmitIndirectGotoIL(il, successExpr, successCode, true, false, failureExpr == null)) return false;
         }
         il.Emit(OpCodes.Ldc_I4, int.MinValue);
         il.Emit(OpCodes.Ret);
@@ -713,7 +771,8 @@ public partial class Builder
                 return true;
             }
             if (indirectExpr != null)
-                return EmitIndirectGotoIL(il, indirectExpr, indirectCode, true, isFailureSide);
+                return EmitIndirectGotoIL(il, indirectExpr, indirectCode, true, isFailureSide,
+                    !isFailureSide && (failureLabel != null || failureExpr == null), failureLabel);
             return true; // absent side — nothing to emit
         }
 
@@ -751,6 +810,19 @@ public partial class Builder
             il.Emit(OpCodes.Ret);
         }
 
+        // The success side, whose failure exit is the failure label or, with none, the next statement (ResolveSuccessLabel)
+        void EmitResolveSuccess(string label, string? failure)
+        {
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldstr, label);
+            if (failure is null)
+                il.Emit(OpCodes.Ldnull);
+            else
+                il.Emit(OpCodes.Ldstr, failure);
+            il.Emit(OpCodes.Call, _resolveSuccessLabel);
+            il.Emit(OpCodes.Ret);
+        }
+
         // Local helper: ldc.i4 int.MinValue; ret  (fall through)
         void EmitFallthrough()
         {
@@ -773,7 +845,7 @@ public partial class Builder
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ldfld, _failureField);
             il.Emit(OpCodes.Brtrue, fallLabel);    // Failure == true → fall through
-            EmitResolve(successLabel);
+            EmitResolveSuccess(successLabel, null);
             il.MarkLabel(fallLabel);
             EmitFallthrough();
         }
@@ -798,7 +870,7 @@ public partial class Builder
                 il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Ldfld, _failureField);
                 il.Emit(OpCodes.Brtrue, failPath);   // Failure → go to fail path
-                EmitResolve(successLabel!);
+                EmitResolveSuccess(successLabel!, failureLabel);
                 il.MarkLabel(failPath);
                 EmitClearFailure();
                 EmitResolve(failureLabel!);
@@ -813,7 +885,7 @@ public partial class Builder
                 EmitClearFailure();
                 EmitResolve(failureLabel!);
                 il.MarkLabel(succPath);
-                EmitResolve(successLabel!);
+                EmitResolveSuccess(successLabel!, failureLabel);
             }
         }
     }

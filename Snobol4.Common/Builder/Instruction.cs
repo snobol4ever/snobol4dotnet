@@ -84,6 +84,8 @@ internal enum OpCode : byte
     SetFailure       = 78,  // x.Failure = true
     ClearFailure     = 79,  // x.Failure = false (used before failure-goto eval)
     CheckGotoFailure = 80,  // LogRuntimeException(20) if x.Failure
+    CheckSuccessGotoFailure = 81,  // a success goto that fails: its value off, Failure left set for the JumpOnFailure to the failure exit
+    GotoIndirectSuccess     = 82,  // GotoIndirect of a success goto: a label not defined that &ERRLIMIT takes sets Failure (ResolveSuccessLabelFromStack)
 
     // --- MSIL-compiled expression delegate ---
     CallMsil = 90,  // Operand: index into Builder.MsilDelegates

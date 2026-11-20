@@ -1018,7 +1018,9 @@ public partial class Builder
                 if (!VariableSlotIndex.TryGetValue(key, out var slotIdx)) return false;
                 il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Ldc_I4, slotIdx);
-                il.Emit(OpCodes.Call, _pushVarBySlot);
+                // the operand of the name operator (.N) is its name, no reference to its value: it fires no ACCESS trace, as in SPITBOL
+                il.Emit(OpCodes.Call, t.TokenType == Token.Type.IDENTIFIER && nextToken is { TokenType: Token.Type.UNARY_OPERATOR, MatchedString: "." }
+                    ? _pushTargetBySlot : _pushVarBySlot);
                 return true;
             }
 

@@ -41,6 +41,9 @@ public partial class Lexer
     /// match of a replacement inside the replacement.
     /// </summary>
     private bool _replacementStart;
+
+    // The text of EVAL, compiled as *( text ), has had the first blank of its own level read (ProcessImplicitOperators)
+    private bool _evalSubjectRead;
     
     /// <summary>
     /// Indicates whether an implicit pattern match operator has been inserted.
@@ -203,6 +206,7 @@ public partial class Lexer
         _cursorCurrent = 0;
         _equalFound = false;
         _replacementStart = false;
+        _evalSubjectRead = false;
         _failureGotoEnd = 0;
         _failureGotoStart = 0;
         _patternMatchFound = false;
@@ -835,6 +839,18 @@ public partial class Lexer
         if (!m.Success)
         {
             return;
+        }
+
+        // the text of EVAL is one level inside the *( ) it is compiled in: the first blank of that level ends the subject of a replacement
+        // when an = lies ahead on it, as SPITBOL's expression reads it (EVAL("A 'y' = 1") replaces y in A, EVAL('A B') concatenates)
+        if (sourceLine.DeferredExpression && _bracketStack.Count == 1 && !_evalSubjectRead)
+        {
+            _evalSubjectRead = true;
+            if (OperatorAhead(sourceLine.Text, _cursorCurrent) == '=')
+            {
+                AddImplicitPatternMatch(sourceLine);
+                return;
+            }
         }
 
         if (_patternMatchFound || _equalFound || _bracketStack.Count > 0)

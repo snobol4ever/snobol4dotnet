@@ -120,6 +120,13 @@ public partial class Executive
             return;
         }
 
+        // a file and the F option's descriptor are two files for one unit: error 116, as in SPITBOL (INPUT(.C, 8, 'in.txt -f0'))
+        if (fileName != "" && descriptor >= 0)
+        {
+            LogRuntimeException(116);
+            return;
+        }
+
         var symbol = Parent.FoldCase(((StringVar)identifierNameVar).Data);
         var fileModeInt = (long)fileModeObj;
         var fileShareInt = (long)fileShareObj;

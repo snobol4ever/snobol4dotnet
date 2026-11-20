@@ -34,14 +34,21 @@ public class NameComparisonStrategy : IComparisonStrategy
         if (nameSelf.Expression is not null || nameOther.Expression is not null)
             return ReferenceEquals(nameSelf, nameOther);
 
-        // Check collection reference equality
-        if (nameSelf.TargetCollection != nameOther.TargetCollection)
+        // the same collection: an element read out of another (T['a']['b'], A<1><2>) is a handle on the array or table it holds, a
+        // new one each read that shares its storage, so the names of one element are identical, as in SPITBOL
+        if (!SameCollection(nameSelf.TargetCollection, nameOther.TargetCollection))
             return false;
 
         // Check key equality (handles null correctly)
         return Equals(nameSelf.TargetKey, nameOther.TargetKey);
     }
 
+
+    private static bool SameCollection(Var? a, Var? b) =>
+        ReferenceEquals(a, b)
+        || a is TableVar ta && b is TableVar tb && ReferenceEquals(ta.Data, tb.Data)
+        || a is ArrayVar aa && b is ArrayVar ab && ReferenceEquals(aa.Data, ab.Data)
+        || a is ProgramDefinedDataVar da && b is ProgramDefinedDataVar db && ReferenceEquals(da.FieldValues, db.FieldValues);
 
     // Two names are identical when they name the same variable or element (SPITBOL's ident compares the
     // name blocks' base and offset); a name and any other value differ, so IDENT(.X) fails. Each .&KEYWORD

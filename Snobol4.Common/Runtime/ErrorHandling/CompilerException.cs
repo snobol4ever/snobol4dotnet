@@ -312,7 +312,7 @@ public class CompilerException(int error, int column, string? message = null) : 
         "inappropriate third argument to set" /* 294 */,
         "set file does not exist" /* 295 */,
         "set file does not permit setting file pointer" /* 296 */,
-        "set caused non-recoverable I/O error" /* 297 */,
+        "set caused non-recoverable i/o error" /* 297 */,
 
         "external function argument is not file" /* 298 */,
         "internal logic error   : unexpected ppm branch" /* 299 */,

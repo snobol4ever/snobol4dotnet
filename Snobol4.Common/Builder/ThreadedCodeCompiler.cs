@@ -230,7 +230,11 @@ internal sealed class ThreadedCodeCompiler
         EmitTokenList(line.ParseUnconditionalGoto);
         Emit(new Instruction(OpCode.CheckGotoFailure));
         Emit(new Instruction(OpCode.RestoreFailure));
-        EmitDispatch(line.DirectGotoFirst);
+        // a computed goto (operand 2 set) to RETURN at level zero errs as a computed goto does, its failure exit the goto again (332)
+        if (!line.DirectGotoFirst && line.ParseUnconditionalGoto is not [{ TokenType: Token.Type.IDENTIFIER }])
+            Emit(new Instruction(OpCode.GotoIndirect, 38, 1));
+        else
+            EmitDispatch(line.DirectGotoFirst);
     }
 
     private void EmitBothGotos(SourceLine line, int next)

@@ -242,10 +242,10 @@ public partial class Executive
     internal int ResolveSuccessLabel(string sym, string? failureLabel)
     {
         var target = LabelTable[sym];
-        if (target >= -7 || _trapTaken || SetExitNumber > 0 || AmpErrorLimit == 0)
+        if (!SuccessGotoErrTakesExit(target))
             return ResolveLabel(sym);
         TraceGoto(sym);
-        LogRuntimeException(38);
+        LogRuntimeException(target < -7 ? 38 : 242);
         SystemStack.Pop();
         Failure = false;
         return failureLabel is null ? int.MinValue : ResolveLabel(failureLabel);
@@ -264,11 +264,11 @@ public partial class Executive
     // A computed success goto to a label that is not defined, as ResolveSuccessLabel
     internal int ResolveSuccessLabelFromStack(string? failureLabel)
     {
-        if (ReferenceEquals(SystemStack.Peek(), ValueReturned) || LabelTable[SystemStack.Peek().Symbol] >= -7 || _trapTaken
-            || SetExitNumber > 0 || AmpErrorLimit == 0)
+        if (ReferenceEquals(SystemStack.Peek(), ValueReturned) || !SuccessGotoErrTakesExit(LabelTable[SystemStack.Peek().Symbol]))
             return ResolveLabelFromStack();
+        var target = LabelTable[SystemStack.Peek().Symbol];
         TraceGoto(SystemStack.Pop().Symbol);
-        LogRuntimeException(38);
+        LogRuntimeException(target < -7 ? 38 : 242);
         SystemStack.Pop();
         Failure = false;
         return failureLabel is null ? int.MinValue : ResolveLabel(failureLabel);
@@ -328,9 +328,22 @@ public partial class Executive
         ProcessTrappedErrorThreaded();
     }
 
-    // RETURN, FRETURN and NRETURN outside every function (&FNCLEVEL 0) end the run with error 242
+    // RETURN, FRETURN and NRETURN outside every function (&FNCLEVEL 0) are error 242: a SETEXIT handler takes it while &ERRLIMIT lasts,
+    // as in SPITBOL, and with none it ends the run
+    internal bool ReturnsAtLevelZero(int target) => target is <= -2 and >= -4 && AmpFunctionLevel == 0;
+
+    // the error of a success goto that &ERRLIMIT takes with no handler armed: the statement fails and takes its failure exit
+    private bool SuccessGotoErrTakesExit(int target) =>
+        (target < -7 || ReturnsAtLevelZero(target)) && !_trapTaken && SetExitNumber == 0 && AmpErrorLimit > 0;
+
     private int ReturnFromLevelZero()
     {
+        if (SetExitNumber > 0 && AmpErrorLimit > 0)
+        {
+            TrappedOrFatalError(242);
+            return _trapTaken ? int.MinValue : -1;
+        }
+
         AmpErrorLimit = 0;
         LogRuntimeException(242, fatal: true);
         return -1;

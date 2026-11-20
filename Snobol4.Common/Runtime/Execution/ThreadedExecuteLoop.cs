@@ -291,13 +291,15 @@ public partial class Executive
                 case OpCode.GotoIndirectSuccess:
                     // a success goto to a label not defined (38), or a direct one to no CODE (24), that &ERRLIMIT takes with no handler
                     // armed: the statement fails, and the JumpOnFailure after takes its failure exit
-                    if (!ReferenceEquals(SystemStack.Peek(), ValueReturned) && !_trapTaken && SetExitNumber == 0 && AmpErrorLimit > 0
-                        && (instr.IntOperand == 24 ? GotoCode(SystemStack.Peek()) is null : LabelTable[SystemStack.Peek().Symbol] < -7))
+                    if (!ReferenceEquals(SystemStack.Peek(), ValueReturned) && (instr.IntOperand == 24
+                            ? GotoCode(SystemStack.Peek()) is null && !_trapTaken && SetExitNumber == 0 && AmpErrorLimit > 0
+                            : SuccessGotoErrTakesExit(LabelTable[SystemStack.Peek().Symbol])))
                     {
                         var operand = SystemStack.Pop();
+                        var code = instr.IntOperand == 24 ? 24 : LabelTable[operand.Symbol] < -7 ? 38 : 242;
                         if (instr.IntOperand != 24)
                             TraceGoto(operand.Symbol);
-                        LogRuntimeException(instr.IntOperand);
+                        LogRuntimeException(code);
                         SystemStack.Pop();
                         break;
                     }
@@ -321,6 +323,17 @@ public partial class Executive
                     var target = LabelTable[sym];
                     SystemStack.Pop();
                     if (target == -1)                 { exitCode = -1; goto Done; }
+                    // RETURN at level zero is 242: by a computed unconditional goto it is that goto's error, whose failure exit is the
+                    // goto again (332 while &ERRLIMIT lasts), as sbl -bf answers :($('RETURN')); by a label it is the run's end
+                    if (ReturnsAtLevelZero(target))
+                    {
+                        if (instr.IntOperand2 == 1)
+                            ComputedGotoError(242);
+                        else
+                            ReturnFromLevelZero();
+                        if (!_trapTaken) InstructionPointer = -1;
+                        break;
+                    }
                     if (target <= -2 && target >= -7) { exitCode = target; goto Done; }
                     if (target >= 0)
                     {

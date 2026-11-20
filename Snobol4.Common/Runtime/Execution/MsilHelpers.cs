@@ -128,6 +128,9 @@ public partial class Executive
     /// </summary>
     internal void ReadSubject() => ReadInputOperand();
 
+    // A predefined pattern variable in a constant the compiler folded: its own pattern, as at the start of the run (StatementChecker.Fold)
+    internal void PushFoldedPattern(string symbol) => SystemStack.Push(ConstantVariable(symbol) ?? IdentifierTable[symbol]);
+
     /// <summary>
     /// OPERAND_VALUE: the input-associated variable on top of the stack reads its record now, where SPITBOL evaluates it, and its
     /// value (or, at end of input, the failed value) takes its place, so the operator that takes it later reads nothing.

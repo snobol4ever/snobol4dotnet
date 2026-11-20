@@ -132,6 +132,12 @@ public partial class Builder
             null, [typeof(string)], null)
         ?? throw new MissingMethodException(nameof(Executive), "ResolveSuccessCodeFromStack");
 
+    private static readonly MethodInfo _pushFoldedPattern =
+        typeof(Executive).GetMethod("PushFoldedPattern",
+            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
+            null, [typeof(string)], null)
+        ?? throw new MissingMethodException(nameof(Executive), "PushFoldedPattern");
+
     private static readonly MethodInfo _readOperandMethod =
         typeof(Executive).GetMethod("ReadOperand",
             BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
@@ -1015,6 +1021,13 @@ public partial class Builder
             case Token.Type.IDENTIFIER_ARRAY_OR_TABLE:
             {
                 var key = FoldCase(t.MatchedString);
+                if (t.TokenType == Token.Type.IDENTIFIER && t.FoldedConstant)
+                {
+                    il.Emit(OpCodes.Ldarg_0);
+                    il.Emit(OpCodes.Ldstr, key);
+                    il.Emit(OpCodes.Call, _pushFoldedPattern);
+                    return true;
+                }
                 if (!VariableSlotIndex.TryGetValue(key, out var slotIdx)) return false;
                 il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Ldc_I4, slotIdx);

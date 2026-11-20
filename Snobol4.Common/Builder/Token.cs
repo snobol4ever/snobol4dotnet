@@ -40,6 +40,9 @@ internal class Token
     /// </summary>
     internal int Index { get; set; }
 
+    // A predefined pattern variable inside a constant the compiler folded: its code pushes the variable's own pattern (StatementChecker.Fold)
+    internal bool FoldedConstant { get; set; }
+
     #endregion
 
     #region Enumerations

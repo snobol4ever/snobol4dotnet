@@ -46,7 +46,24 @@ internal sealed class StatementChecker(Builder parent)
     // IndirectionError is 239 for an indirection of a constant that is no string, number or name ($ARB, $LEN(1), $*X): SPITBOL's compiler
     // refuses it under unary . and @, which generate it by name, and finds its value as the program runs anywhere else
     private sealed record Operand(Kind Kind, Var? Value = null, Operand? Subject = null, string Name = "", bool Nested = false,
-        bool PatternMatch = false, bool Fixed = false, int Error = 0, Var? NameConstant = null, int IndirectionError = 0);
+        bool PatternMatch = false, bool Fixed = false, int Error = 0, Var? NameConstant = null, int IndirectionError = 0,
+        List<Token>? Sources = null);
+
+    // A constant the compiler folds that holds a predefined pattern variable takes the variable's own pattern, its value when the
+    // program begins, whatever has been assigned to it since through its name, as SPITBOL's compiler folds it (after $'FENCE' = 1,
+    // DATATYPE(FENCE) is PATTERN and 'a ' BAL a pattern; BAL read at run time is the value assigned): its tokens are marked for the
+    // code to push that pattern (Token.FoldedConstant)
+    private static List<Token>? Fold(IEnumerable<Operand> operands, bool folded)
+    {
+        List<Token>? all = null;
+        foreach (var operand in operands)
+            if (operand.Sources is { } s)
+                (all ??= []).AddRange(s);
+        if (folded && all is not null)
+            foreach (var t in all)
+                t.FoldedConstant = true;
+        return folded ? all : null;
+    }
 
     private static readonly Operand ArrayMark = new(Kind.ArrayMark);
 
@@ -107,6 +124,8 @@ internal sealed class StatementChecker(Builder parent)
             or Token.Type.EXPRESSION => true,
         Token.Type.UNARY_OPERATOR => token.MatchedString is "-" or "+" or "." or "@" or "&",
         Token.Type.IDENTIFIER_FUNCTION => FunctionEntry(token.MatchedString) is not null,
+        // a predefined pattern variable is a constant the compiler can fold (Fold)
+        Token.Type.IDENTIFIER => parent.Execute?.ConstantVariable(parent.FoldCase(token.MatchedString)) is not null,
         _ => false
     });
 
@@ -149,9 +168,12 @@ internal sealed class StatementChecker(Builder parent)
                     break;
                 // a variable is a name; one of the predefined pattern variables is a constant too (Executive.ConstantVariable)
                 case Token.Type.IDENTIFIER:
-                    stack.Add(new Operand(Kind.Name, parent.Execute!.ConstantVariable(parent.FoldCase(token.MatchedString)), Name: token.MatchedString,
-                        Fixed: true, NameConstant: new NameVar(parent.FoldCase(token.MatchedString), null, null)));
+                {
+                    var constant = parent.Execute!.ConstantVariable(parent.FoldCase(token.MatchedString));
+                    stack.Add(new Operand(Kind.Name, constant, Name: token.MatchedString,
+                        Fixed: true, NameConstant: new NameVar(parent.FoldCase(token.MatchedString), null, null), Sources: constant is null ? null : [token]));
                     break;
+                }
 
                 case Token.Type.EXPRESSION:
                 {
@@ -228,7 +250,7 @@ internal sealed class StatementChecker(Builder parent)
                     while (list.Count < entry.ArgumentCount)
                         list.Add(StringVar.Null());
                     var code = Evaluate(entry, list, out var value);
-                    stack.Add(new Operand(Kind.Name, code == 0 ? value : null, Error: code));
+                    stack.Add(new Operand(Kind.Name, code == 0 ? value : null, Error: code, Sources: Fold(arguments, code == 0 && value is not null)));
                     break;
                 }
 
@@ -419,7 +441,8 @@ internal sealed class StatementChecker(Builder parent)
                     if (error == 0 && left.Value is not null && right.Value is not null)
                         error = Evaluate(parent.Execute!.FunctionTable[concatenation ? "___" : "__|"]!, [left.Value, right.Value], out joined);
                     stack.Add(new Operand(Kind.Combination, error == 0 ? joined : null, Nested: token.Index > 0,
-                        PatternMatch: concatenation || left.Kind == Kind.Combination && left.PatternMatch, Error: error));
+                        PatternMatch: concatenation || left.Kind == Kind.Combination && left.PatternMatch, Error: error,
+                        Sources: Fold([left, right], error == 0 && joined is not null)));
                     break;
                 }
 

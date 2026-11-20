@@ -173,7 +173,8 @@ public partial class Executive
             // below the base and their difference is the heap's span (sbl answers the addresses; GT(HOST(-1,2),0) holds on both)
             2 => 1,
             3 => options.HeapMaxBytes,
-            4 => options.StackSizeBytes,
+            // the stack SPITBOL's interface records is the -s size less the 400 bytes it keeps back, at any depth (sbl -bf -s4096k: 4193904)
+            4 => options.StackSizeBytes - 400,
             5 or 7 => 0,
             6 => IntPtr.Size,
             _ => null

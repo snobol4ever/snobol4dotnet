@@ -27,7 +27,10 @@ public partial class Executive
             return;
         }
 
+        // DUMP returns the null string, as any function that only acts does (X = DUMP(0) makes X null, as in SPITBOL)
         DisplayVariableValues((long)value, Console.Out);
+        if (!Failure)
+            PredicateSuccess();
     }
 
     // The end-of-run dump that &DUMP asks for goes where SPITBOL's end-of-run report goes (stopr prints

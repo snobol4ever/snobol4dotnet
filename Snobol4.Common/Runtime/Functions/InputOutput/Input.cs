@@ -413,6 +413,9 @@ public partial class Executive
                 break;
 
             case "+console-input":
+                inputLine = ReadLineDelegate is not null ? ReadLineDelegate() : Console.ReadLine();
+                break;
+
             case "+terminal-input":
                 inputLine = ReadLineDelegate is not null ? ReadLineDelegate() : TerminalReader()?.ReadLine();
                 break;

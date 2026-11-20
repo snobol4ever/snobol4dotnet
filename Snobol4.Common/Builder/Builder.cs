@@ -429,9 +429,18 @@ public partial class Builder : IDisposable
                 Execute.LabelTable[key] = val;
 
         // :(END) goes to the END statement, which runs like any other: it is counted in &STCOUNT and is the
-        // statement &STNO and &LINE name at the end of the run, as in SPITBOL (falling into END did so already)
+        // statement &STNO and &LINE name at the end of the run, as in SPITBOL (falling into END did so already). Under -f (no folding)
+        // the END line labels itself as it is spelled: a goto to the other spelling is SPITBOL's system label, and the run ends in the
+        // statement whose goto it is (end, then :(END): &STNO is that statement's)
         if (Code.EndFound && Code.SourceLines.Count > 0)
-            Execute.LabelTable["END"] = Execute.LabelTable["end"] = StatementCount + Code.SourceLines.Count - 1;
+        {
+            var endLine = Code.SourceLines[^1];
+            var endStatement = StatementCount + Code.SourceLines.Count - 1;
+            if (endLine.CaseFolding || endLine.Text.Length < 3)
+                Execute.LabelTable["END"] = Execute.LabelTable["end"] = endStatement;
+            else
+                Execute.LabelTable[endLine.Text[..3]] = endStatement;
+        }
 
         StatementCount += Code.SourceLines.Count;
     }

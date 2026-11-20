@@ -725,6 +725,24 @@ public partial class Executive
     // An exit code (a return, END, ABORT, SCONTINUE) a trapped error's transfer is, which the loop then exits with
     private int _trapExitCode;
 
+    // The trap of a handler that is a system label (SetExitSystemCode): fired as any trap is, and the label is its transfer at the end
+    // of the statement in error, as a handler's :(RETURN) would be; CONTINUE and SCONTINUE take none
+    internal void SystemExit(int code)
+    {
+        FireTrap();
+        SetExitSystemCode = 0;
+        if (code is -6 or -7)
+        {
+            _trapPending = false;
+            _continueStatement = -1;
+            return;
+        }
+
+        _handlerTransfer = code;
+        _handlerTransferSet = true;
+        OnErrorGoto = int.MaxValue;
+    }
+
     private void FireTrap()
     {
         // firing the trap disarms SETEXIT: its stored label is reset to null, so the handler is taken once

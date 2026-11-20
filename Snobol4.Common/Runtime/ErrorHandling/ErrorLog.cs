@@ -83,6 +83,21 @@ public partial class Executive
             // an armed handler takes the error where it is, as in SPITBOL (RunHandlerAtError)
             if (OnErrorGoto > 0)
                 RunHandlerAtError();
+            else if (SetExitSystemCode != 0 && AmpErrorLimit >= 0 && ExpressionDepth == 0)
+            {
+                // a system label as the handler acts at once: ABORT makes the error the run's end, RETURN (FRETURN, NRETURN) and END
+                // are the statement's transfer, CONTINUE and SCONTINUE go on from the error as an error no handler takes does
+                var system = SetExitSystemCode;
+                if (system == -5)
+                {
+                    SetExitLabel = "";
+                    SetExitSystemCode = 0;
+                    PrintFatalReport(code);
+                    throw ce;
+                }
+
+                SystemExit(system);
+            }
             return;
         }
 

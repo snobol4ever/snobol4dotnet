@@ -341,6 +341,11 @@ public partial class Lexer
     }
 
 
+    // The system labels are labels already, defined before the program's: a statement of a source file labelled as one of them is a
+    // duplicate label, 217, as in SPITBOL (sbl -bf: ABORT OUTPUT = 'b'); a CODE text may use them (CODE('ABORT OUTPUT = 1') compiles)
+    private static bool IsSystemLabel(string label) =>
+        label is "RETURN" or "FRETURN" or "NRETURN" or "ABORT" or "CONTINUE" or "SCONTINUE";
+
     // The label of a statement that has an error in its body is declared all the same, as SPITBOL declares a label before it reads the
     // body that follows; false, with 217 reported, when the label is one already
     private bool DeclareLabel(SourceLine sourceLine)
@@ -351,7 +356,7 @@ public partial class Lexer
         var label = _parent.FoldCase(m.Value);
         // in a CODE text a label may stand twice, the later statement being the label's (sbl -bf: CODE('A OUTPUT = 1 :(E) ;A OUTPUT = 2
         // :(E)') then :(A) prints 2); in a source it is error 217
-        if (_parent.Code.Labels.ContainsKey(label) && !_parent.CompilingCode)
+        if ((_parent.Code.Labels.ContainsKey(label) || IsSystemLabel(label)) && !_parent.CompilingCode)
         {
             _parent.LogCompilerException(217, 0, sourceLine);
             return false;
@@ -455,7 +460,7 @@ public partial class Lexer
                 var label = _parent.FoldCase(m.Value);
 
                 // a label may stand twice in a CODE text, the later statement being the label's, as in SPITBOL (DeclareLabel)
-                if (_parent.Code.Labels.ContainsKey(label) && !_parent.CompilingCode)
+                if ((_parent.Code.Labels.ContainsKey(label) || IsSystemLabel(label)) && !_parent.CompilingCode)
                 {
                     _parent.LogCompilerException(217, _cursorCurrent, sourceLine);
                     return false;

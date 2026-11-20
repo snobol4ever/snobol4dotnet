@@ -76,4 +76,49 @@ public class Endfile
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("", build.Execute!.IdentifierTable[build.FoldCase("a")].OutputChannel);
     }
+
+    [TestMethod]
+    public void Endfile_happy_path()
+    {
+        // Write lines then endfile — file gets both lines
+        var testFile = Path.GetTempFileName();
+        try
+        {
+            var s = $"""
+                             output('write','3','{testFile}')
+                             write = 'alpha'
+                             write = 'beta'
+                             endfile('3')
+                     end
+                     """;
+            var directives = "-b";
+            var build = SetupTests.SetupScript(directives, s);
+            Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+            var lines = File.ReadAllLines(testFile);
+            Assert.IsTrue(lines.Length >= 2);
+            Assert.AreEqual("alpha", lines[0]);
+            Assert.AreEqual("beta", lines[1]);
+        }
+        finally { File.Delete(testFile); }
+    }
+
+    [TestMethod]
+    public void Endfile_numeric_channel_name()
+    {
+        // Channel name as integer-convertible string
+        var testFile = Path.GetTempFileName();
+        try
+        {
+            var s = $"""
+                             output('W2','4','{testFile}')
+                             W2 = 'line one'
+                             endfile('4')
+                     end
+                     """;
+            var directives = "-b";
+            var build = SetupTests.SetupScript(directives, s);
+            Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        }
+        finally { File.Delete(testFile); }
+    }
 }

@@ -1,0 +1,3 @@
+	OUTPUT = &LASTFILE ':' &LASTLINE ' (last)'
+	OUTPUT = &FILE ':' &LINE ' (line2)'
+*

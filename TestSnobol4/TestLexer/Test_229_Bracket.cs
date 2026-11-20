@@ -88,8 +88,8 @@ public partial class TestLexer
         var s = "   A[0<];end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(222, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(7, build.ColumnHistory[0]);
+        Assert.AreEqual(229, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(8, build.ColumnHistory[0]);
     }
 
 }

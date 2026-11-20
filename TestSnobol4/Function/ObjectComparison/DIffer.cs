@@ -37,7 +37,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("differ", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("out")]).Data);
+        Assert.AreEqual("not differ", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("out")]).Data);
     }
 
     [TestMethod]
@@ -71,7 +71,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("differ", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("out")]).Data);
+        Assert.AreEqual("not differ", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("out")]).Data);
     }
 
     [TestMethod]

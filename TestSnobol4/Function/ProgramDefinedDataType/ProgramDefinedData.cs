@@ -100,7 +100,7 @@ end
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("PRO+DUCT", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("R1")])).Data);
         Assert.AreEqual(2.39, ((RealVar)(build.Execute!.IdentifierTable[build.FoldCase("R2")])).Data);
-        Assert.AreEqual("1PRICE", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("R3")])).Data);
+        Assert.AreEqual("1PRICE", ((NameVar)(build.Execute!.IdentifierTable[build.FoldCase("R3")])).Pointer);
         Assert.AreEqual("", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("R4")])).Data);
     }
 }

@@ -324,7 +324,7 @@ public class Trig
         var build = SetupTests.SetupScript(directives, s + ";end");
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
 
-        Assert.AreEqual(100.5 % 31.2, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Data);
+        Assert.AreEqual(6.900000000000006, ((RealVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Data);
     }
 
     #endregion

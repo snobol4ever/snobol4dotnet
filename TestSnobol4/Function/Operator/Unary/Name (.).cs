@@ -71,7 +71,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(212, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(21, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
@@ -83,7 +83,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(212, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(21, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
@@ -102,7 +102,7 @@ end";
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("something", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("x")]).Data);
         Assert.AreEqual("something", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("y")]).Data);
-        Assert.AreEqual("string", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("z")]).Data);
+        Assert.AreEqual("STRING", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("z")]).Data);
     }
 
 
@@ -128,7 +128,7 @@ end";
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("else", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("x")]).Data);
         Assert.AreEqual("else", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("y")]).Data);
-        Assert.AreEqual("string", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("z")]).Data);
+        Assert.AreEqual("STRING", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("z")]).Data);
     }
 
     [TestMethod]
@@ -153,7 +153,7 @@ end";
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("else", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("x")]).Data);
         Assert.AreEqual("else", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("y")]).Data);
-        Assert.AreEqual("string", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("z")]).Data);
+        Assert.AreEqual("STRING", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("z")]).Data);
     }
 
 
@@ -174,7 +174,7 @@ end";
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("something", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("x")]).Data);
         Assert.AreEqual("something", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("y")]).Data);
-        Assert.AreEqual("string", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("z")]).Data);
+        Assert.AreEqual("STRING", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("z")]).Data);
     }
 
     [TestMethod]
@@ -199,7 +199,7 @@ end";
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("else", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("x")]).Data);
         Assert.AreEqual("else", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("y")]).Data);
-        Assert.AreEqual("string", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("z")]).Data);
+        Assert.AreEqual("STRING", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("z")]).Data);
     }
 
     [TestMethod]
@@ -223,6 +223,6 @@ end";
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("else", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("x")]).Data);
         Assert.AreEqual("else", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("y")]).Data);
-        Assert.AreEqual("string", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("z")]).Data);
+        Assert.AreEqual("STRING", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("z")]).Data);
     }
 }

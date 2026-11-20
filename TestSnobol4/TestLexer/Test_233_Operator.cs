@@ -130,8 +130,8 @@ public partial class TestLexer
         var s = " 123+;end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(233, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(4, build.ColumnHistory[0]);
+        Assert.AreEqual(231, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(1, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -140,8 +140,8 @@ public partial class TestLexer
         var s = " 123.123+;end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(233, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(8, build.ColumnHistory[0]);
+        Assert.AreEqual(231, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(1, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -150,8 +150,8 @@ public partial class TestLexer
         var s = " 123e45+;end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(233, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(7, build.ColumnHistory[0]);
+        Assert.AreEqual(231, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(1, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -160,8 +160,8 @@ public partial class TestLexer
         var s = " 123e+45+;end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(233, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(8, build.ColumnHistory[0]);
+        Assert.AreEqual(231, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(1, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -170,8 +170,8 @@ public partial class TestLexer
         var s = " 123e-45+;end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(233, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(8, build.ColumnHistory[0]);
+        Assert.AreEqual(231, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(1, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -180,8 +180,8 @@ public partial class TestLexer
         var s = " 123.e45+;end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(233, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(8, build.ColumnHistory[0]);
+        Assert.AreEqual(231, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(1, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -190,8 +190,8 @@ public partial class TestLexer
         var s = " 123.e+45+;end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(233, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(9, build.ColumnHistory[0]);
+        Assert.AreEqual(231, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(1, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -200,8 +200,8 @@ public partial class TestLexer
         var s = " 123.e-45+;end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(233, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(9, build.ColumnHistory[0]);
+        Assert.AreEqual(231, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(1, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -210,8 +210,8 @@ public partial class TestLexer
         var s = " 123.456e78+;end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(233, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(11, build.ColumnHistory[0]);
+        Assert.AreEqual(231, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(1, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -220,8 +220,8 @@ public partial class TestLexer
         var s = " 123.456e+78+;end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(233, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(12, build.ColumnHistory[0]);
+        Assert.AreEqual(231, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(1, build.ColumnHistory[0]);
     }
 
     [TestMethod]
@@ -230,7 +230,7 @@ public partial class TestLexer
         var s = " 123.456e-78+;end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(233, build.ErrorCodeHistory[0]);
-        Assert.AreEqual(12, build.ColumnHistory[0]);
+        Assert.AreEqual(231, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(1, build.ColumnHistory[0]);
     }
 }

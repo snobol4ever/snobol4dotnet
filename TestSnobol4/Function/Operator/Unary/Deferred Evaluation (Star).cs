@@ -176,7 +176,7 @@ end
         Assert.AreEqual("this is a test", build.Execute!.IdentifierTable[build.FoldCase("a")].ToString());
         Assert.AreEqual("this is a test", build.Execute!.IdentifierTable[build.FoldCase("b")].ToString());
         Assert.AreEqual("this is a test", build.Execute!.IdentifierTable[build.FoldCase("x")].ToString());
-        Assert.AreEqual("string", build.Execute!.IdentifierTable[build.FoldCase("y")].ToString());
+        Assert.AreEqual("STRING", build.Execute!.IdentifierTable[build.FoldCase("y")].ToString());
 
     }
 
@@ -194,9 +194,9 @@ end
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("expression", build.Execute!.IdentifierTable[build.FoldCase("b")].ToString());
+        Assert.AreEqual("EXPRESSION", build.Execute!.IdentifierTable[build.FoldCase("b")].ToString());
         Assert.AreEqual("6.28", build.Execute!.IdentifierTable[build.FoldCase("c")].ToString());
-        Assert.AreEqual("real", build.Execute!.IdentifierTable[build.FoldCase("d")].ToString());
+        Assert.AreEqual("REAL", build.Execute!.IdentifierTable[build.FoldCase("d")].ToString());
     }
 
 }

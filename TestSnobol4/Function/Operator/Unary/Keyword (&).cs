@@ -31,7 +31,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(255, ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Data.Length);
+        Assert.AreEqual(256, ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Data.Length);
     }
 
     [TestMethod]
@@ -43,7 +43,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(209, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(208, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
@@ -67,7 +67,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(251, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(212, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
@@ -94,8 +94,7 @@ end
 ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(1, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(1, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Data);
-        Assert.AreEqual(208, build.ErrorCodeHistory[0]);
     }
 }

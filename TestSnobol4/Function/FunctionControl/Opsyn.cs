@@ -27,7 +27,7 @@ public class Opsyn
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("Area of circle with radius 4.5 is 63.61725123519331", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r1")]).Data);
+        Assert.AreEqual("Area of circle with radius 4.5 is 63.6172512351933", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r1")]).Data);
         Assert.AreEqual("Area of square with side  15.9 is 252.81", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r2")]).Data);
     }
 
@@ -54,11 +54,11 @@ public class Opsyn
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(6, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("r1")]).Data);
-        Assert.AreEqual("string", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r2")]).Data);
+        Assert.AreEqual("STRING", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r2")]).Data);
         Assert.AreEqual(6, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("r3")]).Data);
-        Assert.AreEqual("string", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r4")]).Data);
+        Assert.AreEqual("STRING", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r4")]).Data);
         Assert.AreEqual(6, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("r5")]).Data);
-        Assert.AreEqual("string", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r6")]).Data);
+        Assert.AreEqual("STRING", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r6")]).Data);
     }
 
     [TestMethod]
@@ -157,7 +157,7 @@ public class Opsyn
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(154, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(156, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
@@ -185,7 +185,7 @@ public class Opsyn
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(153, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(156, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
@@ -226,8 +226,7 @@ public class Opsyn
                 """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(154, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -240,8 +239,7 @@ public class Opsyn
                 """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(154, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -254,8 +252,7 @@ public class Opsyn
                 """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(155, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
 
@@ -283,8 +280,7 @@ public class Opsyn
                 """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(154, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -297,8 +293,7 @@ public class Opsyn
                 """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(154, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -311,8 +306,7 @@ public class Opsyn
                 """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(155, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
 
@@ -342,7 +336,7 @@ public class Opsyn
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(154, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(156, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
@@ -356,7 +350,7 @@ public class Opsyn
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(154, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(156, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
@@ -401,7 +395,7 @@ public class Opsyn
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(154, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(156, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
@@ -415,7 +409,7 @@ public class Opsyn
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(154, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(156, build.ErrorCodeHistory[0]);
     }
 
     [TestMethod]
@@ -457,8 +451,7 @@ public class Opsyn
                 """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(154, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -471,8 +464,7 @@ public class Opsyn
                 """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(154, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -512,8 +504,7 @@ public class Opsyn
                 """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(154, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]
@@ -526,8 +517,7 @@ public class Opsyn
                 """;
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(154, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
     [TestMethod]

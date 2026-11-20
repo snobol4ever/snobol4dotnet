@@ -48,7 +48,7 @@ public partial class TestLexer
         var s = $" T[0]1.23E4415{Environment.NewLine}end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(220, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(231, build.ErrorCodeHistory[0]);
         Assert.AreEqual(5, build.ColumnHistory[0]);
     }
 

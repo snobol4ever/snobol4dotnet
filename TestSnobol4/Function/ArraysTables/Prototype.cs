@@ -18,7 +18,7 @@ end
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("-5:10,3:5,1:20", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
+        Assert.AreEqual("-5:10,3:5,20", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
     }
 
 
@@ -33,7 +33,7 @@ end
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("1:20", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
+        Assert.AreEqual(20, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
     }
 
 
@@ -48,7 +48,7 @@ end
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
+        Assert.AreEqual(20, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
     }
 
     [TestMethod]

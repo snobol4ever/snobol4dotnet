@@ -23,8 +23,8 @@ end
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(build.FoldCase("c"), ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r1")]).Data);
-        Assert.AreEqual(build.FoldCase("d"), ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r2")]).Data);
+        Assert.AreEqual(build.FoldCase("c"), ((NameVar)build.Execute!.IdentifierTable[build.FoldCase("r1")]).Pointer);
+        Assert.AreEqual(build.FoldCase("d"), ((NameVar)build.Execute!.IdentifierTable[build.FoldCase("r2")]).Pointer);
     }
 
     [TestMethod]

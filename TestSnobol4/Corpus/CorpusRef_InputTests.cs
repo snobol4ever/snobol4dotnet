@@ -16,7 +16,7 @@ namespace Test.Corpus;
 public class CorpusRef_InputTests
 {
 
-    [TestMethod, Ignore("M-NET-EVAL-COMPLETE: recursive expr evaluator uses NRETURN + *func() side-effects + EVAL — fix pending")]
+    [TestMethod]
     public void TEST_Corpus_control_expr_eval()
     {
         var s = @"

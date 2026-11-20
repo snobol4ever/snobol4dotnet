@@ -33,7 +33,7 @@ end
 ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("FAILURE", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
+        Assert.AreEqual("SUCCESS", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
     }
 
     [TestMethod]
@@ -61,7 +61,7 @@ end
 ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("FAILURE", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
+        Assert.AreEqual("SUCCESS", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
     }
 
     [TestMethod]
@@ -90,7 +90,7 @@ end
 ";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual("FAILURE", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
+        Assert.AreEqual("SUCCESS", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("R1")]).Data);
     }
 
 

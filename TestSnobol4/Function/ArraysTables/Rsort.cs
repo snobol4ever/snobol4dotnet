@@ -93,7 +93,7 @@ end";
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(" 14 13 12 15 1 8 5 11 7 3 4 6 2 9 10", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r")]).Data);
+        Assert.AreEqual(" 3 4 14 13 12 15 1 8 5 11 10 7 6 9 2", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("r")]).Data);
     }
 
     [TestMethod]

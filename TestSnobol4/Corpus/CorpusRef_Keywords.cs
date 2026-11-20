@@ -13,7 +13,7 @@ namespace Test.Corpus;
 public class CorpusRef_Keywords
 {
 
-    [TestMethod, Ignore("M-NET-PAT-PRIMITIVES: &ANCHOR='0' string coercion (ASGNIC) throws error 208 — fix pending")]
+    [TestMethod]
     public void TEST_Corpus_099_keyword_rw()
     {
         var s = @"

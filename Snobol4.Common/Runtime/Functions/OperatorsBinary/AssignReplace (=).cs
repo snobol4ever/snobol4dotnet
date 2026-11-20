@@ -74,6 +74,11 @@ public partial class Executive
             return;
         }
 
+        // the new subject is a string as any other, which SPITBOL builds with alocs: one longer than &MAXLNGTH is error 205
+        if (StringTooLong((long)subjectVar.Subject.Length - (subjectVar.MatchResult.PostCursor - subjectVar.MatchResult.PreCursor)
+                + ((string)subject).Length))
+            return;
+
         // Perform the replacement
         var resultsVar = subjectVar.MatchReplace((string)subject);
 

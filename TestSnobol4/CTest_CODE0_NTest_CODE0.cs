@@ -28,8 +28,8 @@ public class CTest_CODE0
         x.Parent.ShowExecutionStatistics = false;
         ConsoleExt.SetStdError(x.Parent.Listing, x.Parent.ListFileName, x.Parent.FilesToCompile[^1]);
 
-        x.SourceCode.Add("CODE1(1)\nL  a = a ' ' N");
-        x.SourceCode.Add("CODE1(1)\n N = lt(N,10) N + 1 :S(L)F(DONE)");
+        x.SourceCode.Add("CODE1(1)"+ Environment.NewLine + "L  a = a ' ' N");
+        x.SourceCode.Add("CODE1(1)"+ Environment.NewLine + " N = lt(N,10) N + 1 :S(L)F(DONE)");
 
         x.SourceFiles.Add(@"CODE1");
         x.SourceFiles.Add(@"CODE1");

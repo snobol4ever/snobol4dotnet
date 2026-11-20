@@ -26,9 +26,9 @@ public class Ctest
         x.Parent.ShowListing = false;
         x.Parent.ShowExecutionStatistics = false;
 
-        x.SourceCode.Add("test.sno(1)\n" + @"        g = 'Работа в германии'");
-        x.SourceCode.Add("test.sno(2)\n" + @"        output = g");
-        x.SourceCode.Add("test.sno(3)\n" + @"end");
+        x.SourceCode.Add("test.sno(1)"+ Environment.NewLine + "" + @"        g = 'Работа в германии'");
+        x.SourceCode.Add("test.sno(2)"+ Environment.NewLine + "" + @"        output = g");
+        x.SourceCode.Add("test.sno(3)"+ Environment.NewLine + "" + @"end");
 
         x.SourceFiles.Add(@"C:\Users\jcooper\Documents\Visual Studio 2022\Snobol4.Net\TestSnobol4\Output\test.sno");
         x.SourceFiles.Add(@"C:\Users\jcooper\Documents\Visual Studio 2022\Snobol4.Net\TestSnobol4\Output\test.sno");

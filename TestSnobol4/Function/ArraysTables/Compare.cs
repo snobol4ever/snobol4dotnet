@@ -5,7 +5,7 @@ namespace Test.ArraysTables;
 [TestClass]
 public class Compare
 {
-    [TestMethod]
+    [TestMethod] 
     public void TEST_Compare_Array_Array()
     {
         var v1 = new ArrayVar();

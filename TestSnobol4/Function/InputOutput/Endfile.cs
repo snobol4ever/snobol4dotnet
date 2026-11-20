@@ -14,9 +14,9 @@ public class Endfile
     [TestMethod]
     public void Endfile_096()
     {
-        var testFile = @"C:\Users\jcooper\Documents\Visual Studio 2022\Snobol4.Net\TestSnobol4\Output\Eject.txt";
+        var testFile = Path.Combine(SetupTests.WindowsOutput, "Eject.txt");
         if (SetupTests.IsLinux)
-            testFile = @"/mnt/c/Users/jcooper/Documents/Visual Studio 2022/Snobol4.Net/TestSnobol4/Eject.txt";
+            testFile = Path.Combine(SetupTests.LinuxOutput, "Eject.txt");
 
         var s = $"""
                          output('write','2','{testFile}')
@@ -36,9 +36,9 @@ public class Endfile
     [TestMethod]
     public void Endfile_093()
     {
-        var testFile = @"C:\Users\jcooper\Documents\Visual Studio 2022\Snobol4.Net\TestSnobol4\Output\Eject2.txt";
+        var testFile = Path.Combine(SetupTests.WindowsOutput, "Eject2.txt");
         if (SetupTests.IsLinux)
-            testFile = @"/mnt/c/Users/jcooper/Documents/Visual Studio 2022/Snobol4.Net/TestSnobol4/Eject2.txt";
+            testFile = Path.Combine(SetupTests.LinuxOutput, "Eject2.txt");
 
         var s = $"""
                          output('write','2','{testFile}')
@@ -58,9 +58,9 @@ public class Endfile
     [TestMethod]
     public void Endfile_098()
     {
-        var testFile = @"C:\Users\jcooper\Documents\Visual Studio 2022\Snobol4.Net\TestSnobol4\Output\Eject3.txt";
+        var testFile = Path.Combine(SetupTests.WindowsOutput, "Eject3.txt");
         if (SetupTests.IsLinux)
-            testFile = @"/mnt/c/Users/jcooper/Documents/Visual Studio 2022/Snobol4.Net/TestSnobol4/Eject3.txt";
+            testFile = Path.Combine(SetupTests.LinuxOutput, "Eject3.txt");
 
         var s = $"""
                          output('write','2','{testFile}')

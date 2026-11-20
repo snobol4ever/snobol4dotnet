@@ -8,11 +8,12 @@ public class Unload
 {
 
     [TestMethod]
-    public void TEST_Unload_001()
+   public void TEST_Unload_001()
     {
-        var dllName = @"C:\Users\jcooper\Documents\Visual Studio 2022\Snobol4.Net\CustomFunction\bin\Debug\net10.0\AreaLibrary.dll";
+        var dllName = SetupTests.WindowsDll;
         if (SetupTests.IsLinux)
-            dllName = @"/mnt/c/Users/jcooper/Documents/Visual Studio 2022/Snobol4.Net/CustomFunction/bin/Debug/net10.0/AreaLibrary.dll";
+            dllName = SetupTests.LinuxDll;
+
 
         var s = $"""
 

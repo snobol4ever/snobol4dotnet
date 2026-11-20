@@ -17,9 +17,9 @@ public class Set
     [TestMethod]
     public void Set_291()
     {
-        var testFile = @"C:\Users\jcooper\Documents\Visual Studio 2022\Snobol4.Net\TestSnobol4\Output\RecordTest.txt";
+        var testFile = Path.Combine(SetupTests.WindowsOutput, "RecordTest.txt");
         if (SetupTests.IsLinux)
-            testFile = @"/mnt/c/Users/jcooper/Documents/Visual Studio 2022/Snobol4.Net/TestSnobol4/RecordTest.txt";
+            testFile = Path.Combine(SetupTests.LinuxOutput, "RecordTest5.txt");
 
         var s = $@"
         input('READ','2','{testFile}')
@@ -42,9 +42,9 @@ end
     [TestMethod]
     public void Set_292()
     {
-        var testFile = @"C:\Users\jcooper\Documents\Visual Studio 2022\Snobol4.Net\TestSnobol4\Output\RecordTest2.txt";
+        var testFile = Path.Combine(SetupTests.WindowsOutput, "RecordTest2.txt");
         if (SetupTests.IsLinux)
-            testFile = @"/mnt/c/Users/jcooper/Documents/Visual Studio 2022/Snobol4.Net/TestSnobol4/RecordTest2.txt";
+            testFile = Path.Combine(SetupTests.LinuxOutput, "RecordTest2.txt");
 
         var s = $@"
         input('READ','2','{testFile}')
@@ -67,9 +67,9 @@ end
     [TestMethod]
     public void Set_293()
     {
-        var testFile = @"C:\Users\jcooper\Documents\Visual Studio 2022\Snobol4.Net\TestSnobol4\Output\RecordTest3.txt";
+        var testFile = Path.Combine(SetupTests.WindowsOutput, "RecordTest3.txt");
         if (SetupTests.IsLinux)
-            testFile = @"/mnt/c/Users/jcooper/Documents/Visual Studio 2022/Snobol4.Net/TestSnobol4/RecordTest3.txt";
+            testFile = Path.Combine(SetupTests.LinuxOutput, "RecordTest3.txt");
 
         var s = $@"
         input('READ','2','{testFile}')
@@ -92,9 +92,9 @@ end
     [TestMethod]
     public void Set_294()
     {
-        var testFile = @"C:\Users\jcooper\Documents\Visual Studio 2022\Snobol4.Net\TestSnobol4\Output\RecordTest4.txt";
+        var testFile = Path.Combine(SetupTests.WindowsOutput, "RecordTest4.txt");
         if (SetupTests.IsLinux)
-            testFile = @"/mnt/c/Users/jcooper/Documents/Visual Studio 2022/Snobol4.Net/TestSnobol4/RecordTest4.txt";
+            testFile = Path.Combine(SetupTests.LinuxOutput, "RecordTest4.txt");
 
         var s = $@"
         input('READ','2','{testFile}')
@@ -117,9 +117,9 @@ end
     [TestMethod]
     public void Set_295()
     {
-        var testFile = @"C:\Users\jcooper\Documents\Visual Studio 2022\Snobol4.Net\TestSnobol4\Output\RecordTest0.txt";
+        var testFile = Path.Combine(SetupTests.WindowsOutput, "RecordTest0.txt");
         if (SetupTests.IsLinux)
-            testFile = @"/mnt/c/Users/jcooper/Documents/Visual Studio 2022/Snobol4.Net/TestSnobol4/Output/RecordTest0.txt";
+            testFile = Path.Combine(SetupTests.LinuxOutput, "RecordTest0.txt");
 
         var s = $@"
         input('read','2','{testFile}')
@@ -143,9 +143,9 @@ end
     public void Set_001()
     {
 
-        var testFile = @"C:\Users\jcooper\Documents\Visual Studio 2022\Snobol4.Net\TestSnobol4\Output\RecordTest5.txt";
+        var testFile = Path.Combine(SetupTests.WindowsOutput, "RecordTest5.txt");
         if (SetupTests.IsLinux)
-            testFile = @"/mnt/c/Users/jcooper/Documents/Visual Studio 2022/Snobol4.Net/TestSnobol4/Output/RecordTest5.txt";
+            testFile = Path.Combine(SetupTests.LinuxOutput, "RecordTest5.txt");
 
         var s = $@"
         input('read','2','{testFile}')
@@ -168,9 +168,9 @@ end
     [TestMethod]
     public void Set_002()
     {
-        var testFile = @"C:\Users\jcooper\Documents\Visual Studio 2022\Snobol4.Net\TestSnobol4\Output\RecordTest6.txt";
+        var testFile = Path.Combine(SetupTests.WindowsOutput, "RecordTest4.txt");
         if (SetupTests.IsLinux)
-            testFile = @"/mnt/c/Users/jcooper/Documents/Visual Studio 2022/Snobol4.Net/TestSnobol4/Output/RecordTest6.txt";
+            testFile = Path.Combine(SetupTests.LinuxOutput, "RecordTest4.txt");
 
         var s = $@"
         input('read','2','{testFile}')
@@ -191,9 +191,9 @@ end
     [TestMethod]
     public void Set_003()
     {
-        var testFile = @"C:\Users\jcooper\Documents\Visual Studio 2022\Snobol4.Net\TestSnobol4\Output\RecordTest7.txt";
+        var testFile = Path.Combine(SetupTests.WindowsOutput, "RecordTest7.txt");
         if (SetupTests.IsLinux)
-            testFile = @"/mnt/c/Users/jcooper/Documents/Visual Studio 2022/Snobol4.Net/TestSnobol4/Output/RecordTest7.txt";
+            testFile = Path.Combine(SetupTests.LinuxOutput, "RecordTest7.txt");
 
         var s = $@"
         input('read','2','{testFile}')
@@ -214,9 +214,9 @@ end
     [TestMethod]
     public void Set_004()
     {
-        var testFile = @"C:\Users\jcooper\Documents\Visual Studio 2022\Snobol4.Net\TestSnobol4\Output\RecordTest8.txt";
+        var testFile = Path.Combine(SetupTests.WindowsOutput, "RecordTest8.txt");
         if (SetupTests.IsLinux)
-            testFile = @"/mnt/c/Users/jcooper/Documents/Visual Studio 2022/Snobol4.Net/TestSnobol4/RecordTest8.txt";
+            testFile = Path.Combine(SetupTests.LinuxOutput, "RecordTest8.txt");
 
         var s = $@"
         input('read','2','{testFile}')

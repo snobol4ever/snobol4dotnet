@@ -43,7 +43,7 @@ end";
         Assert.AreEqual(115, build.ErrorCodeHistory[0]);
     }
 
-    
+
 
     [TestMethod]
     public void TEST_116_001()
@@ -80,7 +80,7 @@ end";
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(116, build.ErrorCodeHistory[0]);
     }
-    
+
     [TestMethod]
     public void TEST_116_004()
     {
@@ -128,7 +128,7 @@ end";
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(116, build.ErrorCodeHistory[0]);
     }
-    
+
     [TestMethod]
     public void TEST_116_008()
     {
@@ -141,7 +141,7 @@ end";
         Assert.AreEqual(116, build.ErrorCodeHistory[0]);
     }
 
-                [TestMethod]
+    [TestMethod]
     public void TEST_157_001()
     {
         var s = @"
@@ -280,9 +280,9 @@ end";
     [TestMethod]
     public void TEST_Input_001()
     {
-        var testFile = @"C:\Users\jcooper\Documents\Visual Studio 2022\Snobol4.Net\TestSnobol4\Output\TestInput.txt";
+        var testFile = Path.Combine(SetupTests.WindowsOutput, "TestInput.txt");
         if (SetupTests.IsLinux)
-            testFile = @"/mnt/c/Users/jcooper/Documents/Visual Studio 2022/Snobol4.Net/TestSnobol4/Output/TestInput.txt";
+            testFile = Path.Combine(SetupTests.LinuxOutput, "TestInput.txt");
 
         var s = $@"
         input('input','2','{testFile}')
@@ -1011,6 +1011,24 @@ end
         Assert.AreEqual("+console-output", build.Execute!.IdentifierTable[build.FoldCase("b")].OutputChannel);
     }
 
+    [TestMethod]
+    public void RealOutput()
+    {
+        var s = @"
+        R1 = 1.0 ' '
+        R1 = R1 -1.0  ' '
+        R1 = R1 1. ' '
+        R1 = R1 -1. ' '
+        R1 = R1 0.1e4 ' '
+        R1 = R1 0.1e-4 ' '
+        R1 = R1 1E4 ' '
+        R1 = R1 1E-4
+END
+";
 
-
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("1.0 -1.0 1.0 -1.0 1000.0 1E-05 10000.0 0.0001", build.Execute!.IdentifierTable[build.FoldCase("R1")].ToString());
+    }
 }

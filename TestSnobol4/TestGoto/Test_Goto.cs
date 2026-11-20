@@ -257,4 +257,16 @@ end";
         Assert.AreEqual("failure", build.Execute!.IdentifierTable[build.FoldCase("a")].ToString());
     }
 
+    [TestMethod]
+    public void TEST_CONTINUE()
+    {
+        var s = @"
+        X = 0               :(CONTINUE)
+end";
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s + ";end");
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+    }
+
+
 }

@@ -9,10 +9,10 @@ public class Load
     [TestMethod]
     public void TEST_Load_001()
     {
-        var dllName = @"C:\Users\jcooper\Documents\Visual Studio 2022\Snobol4.Net\CustomFunction\bin\Debug\net10.0\AreaLibrary.dll";
+        var dllName = SetupTests.WindowsDll;
         if (SetupTests.IsLinux)
-            dllName = @"/mnt/c/Users/jcooper/Documents/Visual Studio 2022/Snobol4.Net/CustomFunction/bin/Debug/net10.0/AreaLibrary.dll";
-
+            dllName = SetupTests.LinuxDll;
+        
         var s = $"""
 
                          load('{dllName}', 'AreaFunction.Area')

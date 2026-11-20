@@ -186,6 +186,11 @@ public partial class Executive
                 RawLengths[symbol] = (int)Math.Min(rawLength, int.MaxValue);
             else
                 RawLengths.Remove(symbol);
+            // its L option cuts its own records, as in SPITBOL ('[-f0 -l4]' reads cdef of cdefgh); INPUT itself keeps 1024
+            if (recordLength > 0)
+                ConsoleRecordLengths[symbol] = (int)Math.Min(recordLength, int.MaxValue);
+            else
+                ConsoleRecordLengths.Remove(symbol);
             PredicateSuccess();
             return;
         }
@@ -315,6 +320,9 @@ public partial class Executive
     internal const int DefaultInputRecordLength = 1024;
     private readonly Dictionary<string, int> InputRecordLengths = [];
 
+    // The record length an F 0 unit's L option gave the variable read through it (standard input is one channel for every such variable)
+    private readonly Dictionary<string, int> ConsoleRecordLengths = [];
+
     // Raw mode (the R, Q and C options of INPUT): the characters an input request reads, line ends and all, by file channel, and
     // by variable for standard input. A raw read returns exactly that many characters unless the input ends first, and fails when it
     // has none; nothing is trimmed.
@@ -438,7 +446,7 @@ public partial class Executive
 
         if (inputLine is not null)
         {
-            var limit = InputRecordLength(arg.InputChannel);
+            var limit = arg.InputChannel == "+console-input" && ConsoleRecordLengths.TryGetValue(arg.Symbol, out var own) ? own : InputRecordLength(arg.InputChannel);
             if (!raw && inputLine.Length > limit)
                 inputLine = inputLine[..limit];
             var read = new StringVar(AmpTrim != 0 && !raw ? TrimRecord(inputLine) : inputLine);

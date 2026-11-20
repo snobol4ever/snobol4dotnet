@@ -455,7 +455,7 @@ public partial class Executive
     // An &FTRACE line is always printed; a TRACE'd call or return may name a trace function instead
     // A CALL or RETURN event of a program-defined function, as SPITBOL answers it: a TRACE of the function with a trace function calls
     // that function first, then &FTRACE prints the event's line, and with no trace function a TRACE prints the line once, &FTRACE on or
-    // off (sbl -bf: TRACE('F', 'CALL') under &FTRACE prints F(1) once); after a RETURN trace's function the line is the caller's
+    // off (sbl -bf: TRACE('F', 'CALL') under &FTRACE prints F(1) once, counting &TRACE); after a RETURN trace's function the line is the caller's
     // statement (afterHandler), as sbl prints it
     private bool TraceCallOrReturn(Dictionary<string, TraceHandler?> table, string functionName, Action printLine, int? afterHandler)
     {
@@ -469,14 +469,16 @@ public partial class Executive
                 AmpCurrentLineNumber = line;
         }
 
-        if (AmpFunctionTrace > 0)
-        {
-            AmpFunctionTrace--;
-            printLine();
-        }
-        else if (keyed && handler == null)
+        // a TRACE of the event with no trace function prints it and counts &TRACE down, leaving &FTRACE as it is; &FTRACE prints the
+        // events no such TRACE takes (sbl -bf: under &FTRACE 4 with TRACE('R','FUNCTION') R(1) prints four lines, &TRACE 96, &FTRACE 4)
+        if (keyed && handler == null)
         {
             AmpTrace--;
+            printLine();
+        }
+        else if (AmpFunctionTrace > 0)
+        {
+            AmpFunctionTrace--;
             printLine();
         }
 

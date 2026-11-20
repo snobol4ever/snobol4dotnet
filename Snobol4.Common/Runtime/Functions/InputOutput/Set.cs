@@ -34,6 +34,31 @@ public partial class Executive
         }
 
         // SPITBOL looks for the file (295) before it looks at the offset (293) and the origin (294)
+        // an output file is set as an input file is: the next record is written from there, over what stands (hello, SET(2,1,0), X
+        // leaves hX and lo), as in SPITBOL
+        if (!StreamInputs.ContainsKey(channel) && StreamOutputs.TryGetValue(channel, out var output) && output.CanSeek)
+        {
+            if (arguments[1] is RealVar || !arguments[1].Convert(VarType.INTEGER, out _, out var outOffsetObj, this)
+                || arguments[2] is RealVar || !arguments[2].Convert(VarType.INTEGER, out _, out var outWhenceObj, this))
+            {
+                LogRuntimeException(293);
+                return;
+            }
+
+            var outWhence = (long)outWhenceObj;
+            if (outWhence is < 0 or > 2)
+            {
+                LogRuntimeException(297);
+                return;
+            }
+
+            var outTarget = Math.Clamp(outWhence switch { 0 => (long)outOffsetObj, 1 => output.Position + (long)outOffsetObj, _ => output.Length + (long)outOffsetObj },
+                0, output.Length);
+            output.Position = outTarget;
+            SystemStack.Push(new IntegerVar(outTarget));
+            return;
+        }
+
         var sr = ChannelReader(channel);
         if (sr is null)
         {

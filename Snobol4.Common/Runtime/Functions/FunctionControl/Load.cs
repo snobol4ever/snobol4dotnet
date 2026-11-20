@@ -175,7 +175,8 @@ public partial class Executive
 
         // Dispatcher: prototype string if s1 contains '(' — spec-compliant path.
         // Path-like s1 (no '(') — existing .NET-native path (net-load-dotnet).
-        if (s1.Contains('('))
+        // a string with no '(' and no class to load from it is a prototype all the same, missing its left paren (139), as in SPITBOL
+        if (s1.Contains('(') || arguments.Count < 2 || arguments[1] is StringVar { Data: "" })
             LoadSpecPath(s1, arguments);
         else
             LoadDotNetPath(s1, arguments);

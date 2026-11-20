@@ -297,10 +297,18 @@ public partial class Executive
         // error recurs while a handler takes it, as in SPITBOL, and is the run's end once none does
         while (SetExitNumber > 0)
         {
+            var serial = TrapSerial;
             LogRuntimeException(errorCode);
             if (OnErrorGoto > 0)
             {
                 ProcessTrappedErrorThreaded();
+                return;
+            }
+
+            // the handler ran at the error and continued: the goto in error goes on at its statement's failure exit
+            if (TrapSerial != serial)
+            {
+                ContinueFromGotoError();
                 return;
             }
 

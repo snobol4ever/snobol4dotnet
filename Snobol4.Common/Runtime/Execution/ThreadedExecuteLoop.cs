@@ -712,6 +712,7 @@ public partial class Executive
 
     // Counts the traps fired, so that a handler run at its error knows whether a CONTINUE is still that error's (RunHandlerAtError)
     private long _trapSerial;
+    internal long TrapSerial => _trapSerial;
 
     // The handlers running at an error, one inside another (RunHandlerAtError), and how many may: each holds the .NET frames of the
     // statement it runs in, about 6 KB
@@ -753,11 +754,36 @@ public partial class Executive
         var errorStatement = ReportLineIndex >= 0 ? ReportLineIndex : AmpCurrentLineNumber;
         _trapStatement = errorStatement;
         _trapSerial++;
-        _continueStatement = Parent.FailureExits.TryGetValue(errorStatement, out var exitLabel) && exitLabel is not null
-            ? LabelTable[Parent.FoldCase(exitLabel)]
-            : Parent.FailureExitExpressions.ContainsKey(errorStatement) ? ContinueAtExpression
-            : Parent.FailureExitCodes.ContainsKey(errorStatement) ? ContinueAtCode : errorStatement + 1;
+        _continueStatement = ContinueTargetOf(errorStatement);
         _trapPending = true;
+    }
+
+    // Where :(CONTINUE) resumes after an error of `statement`: its failure exit, a label's statement (or exit code), the next statement,
+    // or one of the markers for an expression or a direct goto that is to be made
+    private int ContinueTargetOf(int statement) =>
+        Parent.FailureExits.TryGetValue(statement, out var exitLabel) && exitLabel is not null
+            ? LabelTable[Parent.FoldCase(exitLabel)]
+            : Parent.FailureExitExpressions.ContainsKey(statement) ? ContinueAtExpression
+            : Parent.FailureExitCodes.ContainsKey(statement) ? ContinueAtCode : statement + 1;
+
+    // A handler run at a goto's error (TrappedOrFatalError) ended in :(CONTINUE): the statement goes on at its failure exit, as in
+    // SPITBOL (:S(ABORT)F(NO) with no error before is 36, and the handler's CONTINUE resumes at NO). The transfer is the trap's
+    internal void ContinueFromGotoError()
+    {
+        var target = ContinueTargetOf(_trapStatement);
+        _trapTaken = true;
+        var resumeAt = target >= 0 ? StatementIndexToInstrIndex(target) : -1;
+        if (resumeAt >= 0)
+        {
+            InstructionPointer = resumeAt;
+            return;
+        }
+
+        // an exit code, an expression or a direct goto to make: the loop's :(CONTINUE) makes it
+        _continueStatement = target;
+        _trapPending = true;
+        _trapExitCode = -6;
+        InstructionPointer = -1;
     }
 
     private void ProcessTrappedErrorThreaded()

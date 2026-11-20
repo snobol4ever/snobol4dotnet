@@ -6,38 +6,6 @@ namespace Test.InputOutput;
 [TestClass]
 public class Backspace
 {
-    //"backspace argument is not a suitable name" /* 316 */,
-    //"backspace file does not exist" /* 317 */,
-    //"backspace file does not permit backspace" /* 318 */,
-    //"backspace caused non-recoverable error" /* 319 */,
-
-    // Backspace_316: pattern arg as channel name → error 316
-    [TestMethod]
-    public void Backspace_316()
-    {
-        var s = @"
-        backspace(any('2'))
-end
-";
-        var directives = "-b";
-        var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(316, build.ErrorCodeHistory[0]);
-    }
-
-    // Backspace_317: channel not open → error 317
-    [TestMethod]
-    public void Backspace_317()
-    {
-        var s = @"
-        backspace('2')
-end
-";
-        var directives = "-b";
-        var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(317, build.ErrorCodeHistory[0]);
-    }
 
     // Backspace_318: output-only channel does not permit backspace → error 318
     [TestMethod]

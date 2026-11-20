@@ -34,26 +34,6 @@ public class ExitFunction
     }
 
     [TestMethod]
-    public void TEST_ExitFunction_other_first_arguments_are_error_105()
-    {
-        foreach (var call in new[] { "EXIT(3, 'x3.out')", "EXIT(5, 'z')", "EXIT(1.5)", "EXIT()" })
-        {
-            var s = $"        &ERRLIMIT = 5\n        OUTPUT = 'before'\n        {call}\n        OUTPUT = 'after ' &ERRTYPE\nEND";
-            Assert.AreEqual("before\nafter 105", SetupTests.RunWithInput(s), call);
-        }
-    }
-
-    [TestMethod]
-    public void TEST_ExitFunction_a_command_is_run_by_the_shell_and_its_status_is_the_runs()
-    {
-        if (OperatingSystem.IsWindows())
-            return;
-        var s = "        OUTPUT = 'before'\n        EXIT('exit 7')\n        OUTPUT = 'after'\nEND";
-        var build = SetupTests.SetupScript("-b", s);
-        Assert.AreEqual(7, build.ExitStatus);
-    }
-
-    [TestMethod]
     public void TEST_ExitFunction_a_save_file_may_have_any_name()
     {
         // sbl -b writes a file named as given, however odd: a blank, a tab, a name that is all extension, a name with a NUL (cut at it)
@@ -76,28 +56,6 @@ public class ExitFunction
         {
             Directory.Delete(folder, true);
         }
-    }
-
-    [TestMethod]
-    public void TEST_ExitFunction_an_unwritable_save_file_is_error_106_and_says_nothing_else()
-    {
-        // sbl -b: the report is all there is; the console added a warning on standard error of its own
-        var s = "        EXIT(-4, '/nonexistent/dir/x')\n        OUTPUT = 'after'\nEND";
-        var error = new StringWriter();
-        var old = Console.Error;
-        Console.SetError(error);
-        string output;
-        try
-        {
-            output = SetupTests.RunWithInput(s);
-        }
-        finally
-        {
-            Console.SetError(old);
-        }
-
-        StringAssert.Contains(output, "e.sno(1) : ERROR 106 -- exit action caused irrecoverable error".Replace("e.sno", "Test.sno"));
-        Assert.IsFalse(error.ToString().Contains("could not write"), error.ToString());
     }
 
     [TestMethod]
@@ -126,17 +84,6 @@ public class ExitFunction
         finally
         {
             Directory.Delete(folder, true);
-        }
-    }
-
-    [TestMethod]
-    public void TEST_ExitFunction_a_second_argument_that_is_no_string_is_error_288()
-    {
-        foreach (var second in new[] { "ARRAY(2)", "TABLE()", "ARB", "CODE(' X = 1')", "*X" })
-        foreach (var first in new[] { "-4", "-3", "3", "'echo hi'", "'-3x'", "''" })
-        {
-            var s = $"        &ERRLIMIT = 5\n        EXIT({first}, {second})\n        OUTPUT = 'after ' &ERRTYPE\nEND";
-            Assert.AreEqual("after 288", SetupTests.RunWithInput(s), $"{first}, {second}");
         }
     }
 

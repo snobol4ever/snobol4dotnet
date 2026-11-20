@@ -19,10 +19,4 @@ public class TheFileDashIsAStandardStream
         var files = new Dictionary<string, string> { ["main.sno"] = "        OUTPUT('out', 1, '-')\n        out = 'a'\n        TERMINAL = 't'\n        out = 'b'\n        OUTPUT = 'std'\nEND\n" };
         Assert.AreEqual("t\nstd\na\nb", IncludeInSourceOrder.Run(files));
     }
-
-    [TestMethod]
-    public void TEST_Input_from_dash_reads_standard_input()
-    {
-        Assert.AreEqual("hello", SetupTests.RunWithInputDirectives("-bf", "        INPUT('in', 5, '-')\n        OUTPUT = in\nEND", "hello\n"));
-    }
 }

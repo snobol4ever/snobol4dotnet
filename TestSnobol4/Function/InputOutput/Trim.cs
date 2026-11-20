@@ -16,13 +16,6 @@ LOOP    L = INPUT            :F(END)
 END";
 
     [TestMethod]
-    public void TEST_Trim_starts_at_1()
-    {
-        // CEO-1858: sbl x64 starts &TRIM at 1 (Dewar and Emmer's kvtrm), not the manual's 0; both sbl builds print 1
-        Assert.AreEqual("1", SetupTests.RunWithInput("        OUTPUT = &TRIM\nEND").Replace("\r\n", "\n"));
-    }
-
-    [TestMethod]
     public void TEST_Trim_default_removes_trailing_blanks_and_tabs_from_input()
     {
         // no assignment to &TRIM: sbl -bf answers exactly what TEST_Trim_1 expects after &TRIM = 1

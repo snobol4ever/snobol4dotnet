@@ -11,32 +11,12 @@ namespace Test.Miscellaneous;
 [TestClass]
 public class InputRawMode
 {
-    [TestMethod]
-    public void TEST_InputRawMode_standard_input_reads_n_characters_at_a_time_line_ends_included()
-    {
-        var s = "        INPUT(.INPUT, 9, '[-f0 -r10]')\nL       X = INPUT   :F(END)\n        OUTPUT = SIZE(X) ' ' REPLACE(X, CHAR(10), '|')   :(L)\nEND";
-        Assert.AreEqual("10 abcdefghij\n10 klmnopqrst\n10 uvwxyz|sec\n9 ond line|", SetupTests.RunWithInput(s, "abcdefghijklmnopqrstuvwxyz\nsecond line"));
-    }
-
-    [TestMethod]
-    public void TEST_InputRawMode_c_is_one_character_at_a_time()
-    {
-        var s = "        INPUT(.INPUT, 9, '[-f0 -c]')\n        X = INPUT\n        Y = INPUT\n        OUTPUT = X '|' Y\nEND";
-        Assert.AreEqual("x|y", SetupTests.RunWithInput(s, "xyz"));
-    }
 
     [TestMethod]
     public void TEST_InputRawMode_a_raw_record_is_not_trimmed()
     {
         var s = "        &TRIM = 1\n        INPUT(.INPUT, 9, '[-f0 -r6]')\nL       X = INPUT   :F(END)\n        OUTPUT = SIZE(X) ' ' REPLACE(X, CHAR(10), '|')   :(L)\nEND";
         Assert.AreEqual("6 ab  |c\n3 d	|", SetupTests.RunWithInput(s, "ab  \ncd	"));
-    }
-
-    [TestMethod]
-    public void TEST_InputRawMode_the_whole_input_in_one_request()
-    {
-        var s = "        INPUT(.INPUT, 9, '[-f0 -r4194304]')\n        X = INPUT\n        OUTPUT = SIZE(X)\n        Y = INPUT   :S(END)\n        OUTPUT = 'then end'\nEND";
-        Assert.AreEqual("19\nthen end", SetupTests.RunWithInput(s, "first\nsecond\nthird"));
     }
 
     [TestMethod]

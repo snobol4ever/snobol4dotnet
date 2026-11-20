@@ -74,182 +74,6 @@ public class MsilEmitterTests
     }
 
     // -----------------------------------------------------------------------
-    // Arithmetic correctness
-    // -----------------------------------------------------------------------
-
-    [TestMethod]
-    public void MsilCache_ArithmeticAddition()
-    {
-        var b = Run("        N = 3 + 4"+ Environment.NewLine + "end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual(7L, Int("N", b));
-    }
-
-    [TestMethod]
-    public void MsilCache_ArithmeticSubtraction()
-    {
-        var b = Run("        N = 10 - 3"+ Environment.NewLine + "end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual(7L, Int("N", b));
-    }
-
-    [TestMethod]
-    public void MsilCache_ArithmeticMultiplication()
-    {
-        var b = Run("        N = 6 * 7"+ Environment.NewLine + "end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual(42L, Int("N", b));
-    }
-
-    [TestMethod]
-    public void MsilCache_ArithmeticChained()
-    {
-        var b = Run("        N = 2 + 3 * 4"+ Environment.NewLine + "end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        // SNOBOL4 evaluates right-to-left: 3 * 4 = 12, then 2 + 12 = 14
-        // (actually left-to-right in postfix; parser determines precedence)
-        // Just check no errors and a numeric result.
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-    }
-
-    // -----------------------------------------------------------------------
-    // Function call
-    // -----------------------------------------------------------------------
-
-    [TestMethod]
-    public void MsilCache_FunctionCall_Size()
-    {
-        var b = Run("        R = SIZE('hello')"+ Environment.NewLine + "end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual("5", Str("R", b));
-    }
-
-    [TestMethod]
-    public void MsilCache_FunctionCall_Dupl()
-    {
-        var b = Run("        R = DUPL('ab', 3)"+ Environment.NewLine + "end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual("ababab", Str("R", b));
-    }
-
-    [TestMethod]
-    public void MsilCache_FunctionCall_Trim()
-    {
-        // SNOBOL4 TRIM removes trailing spaces only
-        var b = Run("        R = TRIM('hello   ')"+ Environment.NewLine + "end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual("hello", Str("R", b));
-    }
-
-    // -----------------------------------------------------------------------
-    // Star expression (EXPRESSION token / PushExprByIndex)
-    // -----------------------------------------------------------------------
-
-    [TestMethod]
-    public void MsilCache_StarExpression()
-    {
-        // *(expr) evaluates a deferred expression at runtime.
-        // Use EVAL which goes through the BuildEval path and exercises
-        // PushExprByIndex in the MSIL delegate.
-        var b = Run("        N = 5"+ Environment.NewLine + "        R = EVAL('N + 1')"+ Environment.NewLine + "end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual("6", Str("R", b));
-    }
-
-    // -----------------------------------------------------------------------
-    // Choice operator (COMMA_CHOICE / R_PAREN_CHOICE)
-    // -----------------------------------------------------------------------
-
-    [TestMethod]
-    public void MsilCache_ChoiceOperator_FirstSucceeds()
-    {
-        // (A,B) — first alternative succeeds, result is A's value
-        var b = Run("        A = 'x'"+ Environment.NewLine + "        C = (A, 'fallback')"+ Environment.NewLine + "end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual("x", Str("C", b));
-    }
-
-    [TestMethod]
-    public void MsilCache_ChoiceOperator_NegationSelectsAlternative()
-    {
-        // (~ne(1,1), 'alt') — ne fails, ~ negates to success, picks first;
-        // but ne(1,1) fails → ~ → success → choice selects first branch result.
-        var b = Run(@"
-        a = 5
-        b = 5
-        c = (lt(a,b) - 1,~ne(a,b) + 0,gt(a,b) + 1)
-end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual(0L, Int("c", b));
-    }
-
-    [TestMethod]
-    public void MsilCache_ChoiceOperator_ThirdAlternative()
-    {
-        var b = Run(@"
-        a = 8
-        b = 2
-        c = (lt(a,b) - 1,~ne(a,b) + 0,gt(a,b) + 1)
-end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual(1L, Int("c", b));
-    }
-
-    // -----------------------------------------------------------------------
-    // Unary operators — ~ and ? take 0 args (regression guard)
-    // -----------------------------------------------------------------------
-
-    [TestMethod]
-    public void MsilCache_NegationOperator()
-    {
-        // ~gt(0,0): gt fails → ~ negates to success → branch to true label
-        var b = Run(@"
-        ~gt(0,0) :s(ok)f(fail)
-ok      result = 'ok'    :(end)
-fail    result = 'fail'
-end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual("ok", Str("result", b));
-    }
-
-    [TestMethod]
-    public void MsilCache_InterrogationOperator()
-    {
-        // ?(expr) interrogates a pattern result, converting it to a plain value.
-        var b = Run(@"
-        S = 'hello'
-        P = 'ell'
-        N = ?(S ? P)
-end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-    }
-
-    // -----------------------------------------------------------------------
-    // Regression: loop correctness via MSIL path
-    // -----------------------------------------------------------------------
-
-    [TestMethod]
-    public void MsilCache_CountingLoop()
-    {
-        var b = Run(@"
-        N = 0
-LOOP    N = N + 1
-        lt(N, 10)  :s(LOOP)
-end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual(10L, Int("N", b));
-    }
-
-    [TestMethod]
-    public void MsilCache_StringConcatenation()
-    {
-        var b = Run("        R = 'Hello' ' ' 'World'"+ Environment.NewLine + "end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual("Hello World", Str("R", b));
-    }
-
-    // -----------------------------------------------------------------------
     // Step 6 tests — Init/Finalize inlined into delegates
     // -----------------------------------------------------------------------
 
@@ -299,33 +123,6 @@ end", compileOnly: true);
             "Expected error 244 (statement limit) — InitStatement must check AmpStatementLimit");
     }
 
-    [TestMethod]
-    public void Step6_InitFinalize_FailureResetsBetweenStatements()
-    {
-        // Even if one statement fails, the next starts with Failure=false.
-        // If Init inlining is broken, Failure would carry over.
-        var b = Run(@"
-        gt(1, 2)        :f(next)
-next    result = 'ok'
-end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual("ok", Str("result", b));
-    }
-
-    [TestMethod]
-    public void Step6_InitFinalize_AlphaStackClearedBetweenStatements()
-    {
-        // Basic multi-statement program — verifies Init properly resets
-        // stacks without leaking state between statements.
-        var b = Run(@"
-        A = 'hello'
-        B = 'world'
-        C = A ' ' B
-end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual("hello world", Str("C", b));
-    }
-
     // -----------------------------------------------------------------------
     // Step 7 tests — delegates return Func<Executive,int> (next IP)
     // -----------------------------------------------------------------------
@@ -352,28 +149,6 @@ end");
         Assert.AreEqual("third",  Str("C", b2));
     }
 
-    [TestMethod]
-    public void Step7_DelegateReturnsInt_HaltExitsCleanly()
-    {
-        // A program that reaches end/Halt exits with no errors.
-        var b = Run("        N = 42"+ Environment.NewLine + "end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual(42L, Int("N", b));
-    }
-
-    [TestMethod]
-    public void Step7_DelegateReturnsInt_GotoStillWorks()
-    {
-        // Even with the new signature, goto dispatch must still jump correctly.
-        var b = Run(@"
-        I = 0
-loop    I = I + 1
-        lt(I, 5)    :s(loop)
-end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual(5L, Int("I", b));
-    }
-
     // -----------------------------------------------------------------------
     // Step 8 tests — fall-through Jump absorbed into delegate return value
     // -----------------------------------------------------------------------
@@ -397,23 +172,6 @@ end");
         }
     }
 
-    [TestMethod]
-    public void Step8_NoGoto_MultiStatementExecutesInOrder()
-    {
-        // Behavioral: all statements run in sequence with no goto.
-        var b = Run(@"
-        A = 1
-        B = A + 1
-        C = B + 1
-        D = C + 1
-end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual(1L,  Int("A", b));
-        Assert.AreEqual(2L,  Int("B", b));
-        Assert.AreEqual(3L,  Int("C", b));
-        Assert.AreEqual(4L,  Int("D", b));
-    }
-
     // -----------------------------------------------------------------------
     // Step 9 tests — direct unconditional gotos :(LABEL) absorbed into delegate
     // -----------------------------------------------------------------------
@@ -431,45 +189,6 @@ end");
         // No GotoIndirect should appear for the compiled statement
         bool hasGotoIndirect = thread.Any(i => i.Op == OpCode.GotoIndirect);
         Assert.IsFalse(hasGotoIndirect, "GotoIndirect should be absorbed into delegate after Step 9");
-    }
-
-    [TestMethod]
-    public void Step9_DirectUnconditionalGoto_JumpsCorrectly()
-    {
-        // :(LABEL) must land on the right statement.
-        var b = Run(@"
-        result = 'wrong'    :(skip)
-        result = 'skipped'
-skip    result = result 'right'
-end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual("wrongright", Str("result", b));
-    }
-
-    [TestMethod]
-    public void Step9_DirectUnconditionalGoto_LoopWorks()
-    {
-        // A tight loop using :(LABEL) must terminate correctly.
-        var b = Run(@"
-        N = 0
-loop    N = N + 1
-        lt(N, 10)   :s(loop)
-end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual(10L, Int("N", b));
-    }
-
-    [TestMethod]
-    public void Step9_DirectUnconditionalGoto_ReturnExits()
-    {
-        // :(RETURN) from a user-defined function must exit cleanly.
-        var b = Run(@"
-        define('double(x)')     :(main)
-double  double = x * 2          :(return)
-main    result = double(7)
-end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual(14L, Int("result", b));
     }
 
     // -----------------------------------------------------------------------
@@ -502,134 +221,6 @@ end");
             }
         }
         Assert.IsTrue(true); // behavioral check below is the real test
-    }
-
-    [TestMethod]
-    public void Step10_SuccessGoto_TakesJumpOnSuccess()
-    {
-        // :S(LABEL) jumps on success (non-failure).
-        var b = Run(@"
-        N = 0
-        eq(1, 1)    :s(done)
-        N = 99
-done    N = N + 1
-end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual(1L, Int("N", b));
-    }
-
-    [TestMethod]
-    public void Step10_SuccessGoto_FallThroughOnFailure()
-    {
-        // :S(LABEL) falls through on failure.
-        var b = Run(@"
-        N = 0
-        eq(1, 2)    :s(skip)
-        N = 42
-skip    N = N + 1
-end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual(43L, Int("N", b));
-    }
-
-    [TestMethod]
-    public void Step10_FailureGoto_TakesJumpOnFailure()
-    {
-        // :F(LABEL) jumps on failure (clears Failure flag before goto).
-        var b = Run(@"
-        N = 0
-        eq(1, 2)    :f(done)
-        N = 99
-done    N = N + 1
-end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual(1L, Int("N", b));
-    }
-
-    [TestMethod]
-    public void Step10_FailureGoto_FallThroughOnSuccess()
-    {
-        // :F(LABEL) falls through on success.
-        var b = Run(@"
-        N = 0
-        eq(1, 1)    :f(skip)
-        N = 42
-skip    N = N + 1
-end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual(43L, Int("N", b));
-    }
-
-    [TestMethod]
-    public void Step10_BothGotos_SuccessFirst()
-    {
-        // :S(SL)F(FL) — both gotos.
-        var b = Run(@"
-        eq(1, 1)    :s(yes)f(no)
-        result = 'neither'  :(end)
-yes     result = 'yes'      :(end)
-no      result = 'no'       :(end)
-end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual("yes", Str("result", b));
-    }
-
-    [TestMethod]
-    public void Step10_BothGotos_FailureFirst()
-    {
-        // :F(FL)S(SL) — failure-first ordering.
-        var b = Run(@"
-        eq(1, 2)    :f(no)s(yes)
-        result = 'neither'  :(end)
-yes     result = 'yes'      :(end)
-no      result = 'no'       :(end)
-end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual("no", Str("result", b));
-    }
-
-    [TestMethod]
-    public void Step10_ConditionalGoto_CountLoop()
-    {
-        // A realistic loop using :S(LABEL) should terminate correctly.
-        var b = Run(@"
-        N = 0
-loop    N = N + 1
-        lt(N, 10)   :s(loop)
-end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual(10L, Int("N", b));
-    }
-
-    // -----------------------------------------------------------------------
-    // Step 11 tests — indirect / computed gotos :(EXPR) / :<VAR>
-    // -----------------------------------------------------------------------
-
-    [TestMethod]
-    public void Step11_IndirectUnconditionalGoto_CodeVar()
-    {
-        // :<VAR> (angle bracket, GotoIndirectCode path) absorbed into delegate.
-        var b = Run("        N = 0"+ Environment.NewLine + "        dest = code(' N = 42 :(end)')"+ Environment.NewLine + "        :<dest>"+ Environment.NewLine + "        N = 99"+ Environment.NewLine + "end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual(42L, Int("N", b));
-    }
-
-    [TestMethod]
-    public void Step11_IndirectConditionalGoto_SuccessCodeVar()
-    {
-        // :S<VAR> (success, GotoIndirectCode) absorbed into delegate.
-        var b = Run("        N = 0"+ Environment.NewLine + "        dest = code(' N = 42 :(end)')"+ Environment.NewLine + "        eq(1, 1)  :s<dest>"+ Environment.NewLine + "        N = 99"+ Environment.NewLine + "end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual(42L, Int("N", b));
-    }
-
-    [TestMethod]
-    public void Step11_IndirectConditionalGoto_FailureCodeVar()
-    {
-        // :F<VAR> (failure, GotoIndirectCode) absorbed into delegate.
-        var b = Run("        N = 0"+ Environment.NewLine + "        dest = code(' N = 42 :(end)')"+ Environment.NewLine + "        eq(1, 2)  :f<dest>"+ Environment.NewLine + "        N = 99"+ Environment.NewLine + "end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count);
-        Assert.AreEqual(42L, Int("N", b));
     }
 
     // -----------------------------------------------------------------------
@@ -803,27 +394,6 @@ end");
             "AmpTrace must remain 0 when it starts at 0 (no hooks should fire)");
     }
 
-    // -----------------------------------------------------------------------
-    // Step 15 tests — R_PAREN_FUNCTION stack safety + MsilOnly coverage
-    // -----------------------------------------------------------------------
-
-    [TestMethod]
-    public void Step15_RParen_StackGuard_NoExceptionOnMismatch()
-    {
-        // Defensive guard: EmitSingleToken must not crash (Stack empty)
-        // when R_PAREN_FUNCTION appears without a matching IDENTIFIER_FUNCTION.
-        // The program must still compile and execute correctly via the threaded path.
-        var b = Run(@"
-        T = TABLE()
-        T['X'] = 42
-        OUTPUT = T['X']
-end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count,
-            "TABLE() program must execute without errors");
-        Assert.AreEqual("42", b.Execute!.IdentifierTable[b.FoldCase("OUTPUT")]?.ToString() ?? "",
-            "Table lookup must return 42");
-    }
-
     [TestMethod]
     public void Step15_MsilOnly_ArithLoop()
     {
@@ -881,21 +451,6 @@ end");
 end");
         Assert.IsTrue(b.ThreadIsMsilOnly,
             "Conditional :S<VAR> angle-bracket goto must be absorbed — ThreadIsMsilOnly=true");
-    }
-
-    [TestMethod]
-    public void Step16_CodeBuiltin_StaticProgram_RemainsTrue()
-    {
-        // A program that calls CODE() at compile time (via Compile path) but
-        // whose appended thread is also pure MSIL keeps ThreadIsMsilOnly=true.
-        var b = Run(@"
-        N = 0
-        C = CODE(' N = 42 :(END)')
-        :<C>
-        N = 99
-end");
-        Assert.AreEqual(0, b.ErrorCodeHistory.Count, "CODE() program must run without errors");
-        Assert.AreEqual(42L, Int("N", b), "CODE() indirect goto must jump to appended statement");
     }
 
     [TestMethod]

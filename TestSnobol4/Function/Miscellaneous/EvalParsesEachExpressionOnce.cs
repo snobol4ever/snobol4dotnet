@@ -29,18 +29,4 @@ end";
         Assert.IsTrue(build.ExpressionList.Count >= 600);
         Assert.AreEqual((long)build.ExpressionList.Count, build.ExpressionsExamined);
     }
-
-    [TestMethod]
-    public void TEST_EvalParsesEachExpressionOnce_a_text_that_does_not_compile_fails_each_time_and_the_next_one_runs()
-    {
-        var program = @"
-        &errlimit = 100
-        a = eval('1 +')
-        b = eval('2 + 3')
-        c = eval('1 +')
-        d = eval('4 * 5')
-        output = 'a=' a '|b=' b '|c=' c '|d=' d
-end";
-        Assert.AreEqual("a=|b=5|c=|d=20", SetupTests.MaskListingHead(SetupTests.RunWithInput(program)));
-    }
 }

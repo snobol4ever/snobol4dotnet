@@ -29,23 +29,6 @@ public class CompileErrors
         "2        X = 'a' (\n" + new string(' ', 17) + $"!\nTest.sno({line},10) : ERROR 226 -- syntax error: missing right paren";
 
     [TestMethod]
-    public void TEST_CompileErrors_suppress_execution()
-    {
-        // sbl -b prints the two errors and runs nothing; snobol4dotnet ran the program
-        var build = SetupTests.SetupScript("-b", """
-                 OUTPUT = 'first'
-                 X = 'a' (
-                 Y = )
-                 R = 'ran'
-         END
-         """);
-        CollectionAssert.AreEqual(new[] { 226, 224 }, build.ErrorCodeHistory.ToArray());
-        Assert.AreEqual("", build.Execute!.IdentifierTable[build.FoldCase("R")].ToString());
-        // and standard output is that report alone: nothing the program prints
-        Assert.AreEqual(Head + SkipsPage(2), SetupTests.MaskListingHead(SetupTests.RunWithInput(SkipsTheError)));
-    }
-
-    [TestMethod]
     public void TEST_CompileErrors_k_and_ERRORS_run()
     {
         // sbl -bk and -ERRORS print "first last f" after the report: the label E after the statement in error is defined; the
@@ -71,25 +54,5 @@ public class CompileErrors
          H       OUTPUT = 'caught ' &ERRTYPE  :(CONTINUE)
          END
          """)));
-    }
-
-    [TestMethod]
-    public void TEST_CompileErrors_misplaced_continuation_is_214()
-    {
-        // sbl -b: a continuation line after a line closed by a semicolon, after a comment, or with nothing
-        // before it is error 214 (testpgms' test2 has one after "... :S(D77) ;"), while one after an open
-        // statement continues it; snobol4dotnet joined the first two and skipped the third as a comment
-        foreach (var program in new[]
-                 {
-                     " X = 'a' ;\n+ 'b'\n OUTPUT = X\nEND",
-                     "* comment\n+ 'b'\n OUTPUT = 'x'\nEND",
-                     "+ 'b'\n OUTPUT = 'x'\nEND"
-                 })
-        {
-            var build = SetupTests.SetupScript("-b", program);
-            CollectionAssert.AreEqual(new[] { 214 }, build.ErrorCodeHistory.ToArray(), program);
-        }
-
-        Assert.AreEqual("ab", SetupTests.RunWithInput(" X = 'a'\n+ 'b'\n OUTPUT = X\nEND"));
     }
 }

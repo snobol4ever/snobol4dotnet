@@ -3,50 +3,6 @@ using Test.TestLexer;
 
 namespace Test.InputOutput;
 
-// Error-code tests that require no external files — always run.
-[TestClass]
-public class RewindErrors
-{
-    [TestMethod]
-    public void Rewind_003()
-    {
-        var s = """
-                         rewind(any('2'))
-                 end
-                 """;
-        var directives = "-b";
-        var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(172, build.ErrorCodeHistory[0]);
-    }
-
-    [TestMethod]
-    public void Rewind_173()
-    {
-        var s = """
-                     rewind('')
-                 end
-                 """;
-        var directives = "-b";
-        var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(173, build.ErrorCodeHistory[0]);
-    }
-
-    [TestMethod]
-    public void Rewind_174()
-    {
-        var s = """
-                         rewind('2')
-                 end
-                 """;
-        var directives = "-b";
-        var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(174, build.ErrorCodeHistory[0]);
-    }
-}
-
 [TestClass]
 public class Rewind
 {

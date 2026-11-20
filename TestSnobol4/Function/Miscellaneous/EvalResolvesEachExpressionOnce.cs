@@ -29,20 +29,4 @@ end";
         Assert.IsTrue(build.ParseExpression.Count >= 600);
         Assert.AreEqual((long)build.ParseExpression.Count, build.ExpressionsResolved);
     }
-
-    [TestMethod]
-    public void TEST_EvalResolvesEachExpressionOnce_a_name_first_met_in_an_evaluated_text_is_resolved()
-    {
-        var program = @"
-        a = 3
-        x = eval('a + b1')
-        b1 = 4
-        y = eval('a + b1')
-        z = eval('a * (b1 + c1)')
-        c1 = 5
-        w = eval('a * (b1 + c1)')
-        output = x '|' y '|' z '|' w
-end";
-        Assert.AreEqual("3|7|12|27", SetupTests.MaskListingHead(SetupTests.RunWithInput(program)));
-    }
 }

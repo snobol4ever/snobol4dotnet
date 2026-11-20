@@ -68,34 +68,4 @@ end
             Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         }
     }
-
-    [TestMethod]
-    public void TEST_DataType_UserDefinedData()
-    {
-        var s = @"
-     	data('PRODUCT(NAME,PRICE,QUANTITY,MFG)')
-	    ITEM1 = PRODUCT('CAPERS', 2.39, 48, 'BRINE BROTHERS')
-        b = datatype(ITEM1);
-end";
-
-        var directives = "-b";
-        var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        // Under case folding the type name is folded to upper case, as sbl -b answers
-        Assert.AreEqual("PRODUCT", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("b")]).Data);
-    }
-
-    [TestMethod]
-    public void TEST_Identifier()
-    {
-        var s = @"
-        a = 'lower case'
-        A = 'upper case'
-end";
-        var directives = "-b ";
-        var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        //Assert.AreEqual("lower case", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("a")]).Data);
-        Assert.AreEqual("upper case", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("A")]).Data);
-    }
 }

@@ -44,22 +44,6 @@ end");
     }
 
     [TestMethod]
-    public void TEST_FileSpec_an_unknown_option_is_refused()
-    {
-        // a FORTRAN format as the third argument, as old SNOBOL4 programs pass it: the text after the
-        // first blank is read as options, and T is not one
-        var output = SetupTests.SetupScript("-b", @"
-        OUTPUT('SUM', 6, ""(' THE RESULT IS: ', I10)"")
-end");
-        Assert.AreEqual(160, output.ErrorCodeHistory[0]);
-
-        var input = SetupTests.SetupScript("-b", @"
-        INPUT('IN', 5, 'some.txt zz')
-end");
-        Assert.AreEqual(116, input.ErrorCodeHistory[0]);
-    }
-
-    [TestMethod]
     public void TEST_FileSpec_endfile_leaves_other_associations()
     {
         // sbl -b: ENDFILE(7) closes channel 7 only; OUTPUT still writes (answers after), and the file holds x

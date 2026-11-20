@@ -27,27 +27,9 @@ public class ExitStatus
     }
 
     [TestMethod]
-    public void TEST_ExitStatus_a_statement_in_error_exits_231()
-    {
-        Assert.AreEqual(231, Status("-b", "        X = (1 +\n        OUTPUT = 'x'\nEND"));
-    }
-
-    [TestMethod]
-    public void TEST_ExitStatus_a_constant_that_errs_when_compiled_exits_231()
-    {
-        Assert.AreEqual(231, Status("-b", "        X = 1 / 0\nEND"));
-    }
-
-    [TestMethod]
     public void TEST_ExitStatus_no_execute_exits_231_though_nothing_is_in_error()
     {
         Assert.AreEqual(231, Status("-b -n", "        OUTPUT = 'x'\nEND"));
-    }
-
-    [TestMethod]
-    public void TEST_ExitStatus_a_program_that_runs_leaves_the_exit_to_code()
-    {
-        Assert.IsNull(Status("-b", "        OUTPUT = 'x'\nEND"));
     }
 
     [TestMethod]

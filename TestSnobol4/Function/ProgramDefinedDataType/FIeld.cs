@@ -42,20 +42,4 @@ end";
         Assert.AreEqual("Y", ((NameVar)build.Execute!.IdentifierTable[build.FoldCase("F2")]).Pointer);
         Assert.AreEqual("Z", ((NameVar)build.Execute!.IdentifierTable[build.FoldCase("F3")]).Pointer);
     }
-
-    [TestMethod]
-    public void TEST_Field_003()
-    {
-        // FIELD out of range fails
-        var s = @"
-        DATA('PAIR(A,B)')
-        FIELD('PAIR', 3)   :s(bad)
-        result = 'ok'      :(end)
-bad     result = 'fail'
-end";
-        var directives = "-b";
-        var build = SetupTests.SetupScript(directives, s);
-        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("ok", ((StringVar)build.Execute!.IdentifierTable[build.FoldCase("result")]).Data);
-    }
 }

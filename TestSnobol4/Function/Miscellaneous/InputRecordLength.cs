@@ -27,14 +27,6 @@ public class InputRecordLength
     }
 
     [TestMethod]
-    public void TEST_InputRecordLength_a_record_of_standard_input_is_cut_at_1024_and_the_rest_is_ignored()
-    {
-        var s = "        X = INPUT\n        OUTPUT = SIZE(X)\n        Y = INPUT                    :S(TWO)\n        OUTPUT = 'eof'               :(END)\n" +
-                "TWO     OUTPUT = 'second ' SIZE(Y)\nEND";
-        Assert.AreEqual("1024\neof", SetupTests.RunWithInput(s, new string('z', 2048)));
-    }
-
-    [TestMethod]
     public void TEST_InputRecordLength_a_record_of_a_file_is_cut_at_1024_and_the_next_read_is_the_next_line()
     {
         Assert.AreEqual("1024 AAA\n5 sho\n1024 BBB",

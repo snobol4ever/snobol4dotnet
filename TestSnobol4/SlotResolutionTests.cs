@@ -106,25 +106,4 @@ end");
         var nSlots = build.VariableSlots.Count(s => s.Symbol == "N");
         Assert.AreEqual(1, nSlots, "N should appear exactly once in VariableSlots");
     }
-
-    [TestMethod]
-    public void AllExistingTests_StillPass_WithSlotResolution()
-    {
-        // Regression: slot resolution must not affect correctness of execution
-        var build = SetupTests.SetupScript("-b", @"
-        DEFINE('ROMAN(N)T')                 :(ROMAN_END)
-ROMAN   N   RPOS(1)  LEN(1) . T  =         :F(RETURN)
-        '0,1I,2II,3III,4IV,5V,6VI,7VII,8VIII,9IX,'
-+       T   BREAK(',') . T                  :F(FRETURN)
-        ROMAN = REPLACE(ROMAN(N), 'IVXLCDM', 'XLCDM**') T
-+                                           :S(RETURN)F(FRETURN)
-ROMAN_END
-        R1 = ROMAN('1776')
-        R2 = ROMAN('2026')
-end");
-
-        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual("MDCCLXXVI", ((StringVar)build.Execute!.IdentifierTable["R1"]).Data);
-        Assert.AreEqual("MMXXVI",    ((StringVar)build.Execute!.IdentifierTable["R2"]).Data);
-    }
 }

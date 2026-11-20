@@ -445,6 +445,7 @@ public partial class Executive
                 break;
             
             default:
+                RecordStart(outputVar.OutputChannel, StreamOutputs[outputVar.OutputChannel]);
                 StreamOutputs[outputVar.OutputChannel].Write(Encoding.UTF8.GetBytes(RawOutputChannels.Contains(outputVar.OutputChannel)
                     ? outputVar.ToString()
                     : outputVar + Environment.NewLine));

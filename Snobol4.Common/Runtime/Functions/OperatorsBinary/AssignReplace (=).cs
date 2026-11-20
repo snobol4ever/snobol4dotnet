@@ -189,8 +189,9 @@ public partial class Executive
             return;
         }
 
-        // Protected natural variables (arb, bal, fail, fence, rem, succeed) — error 42
-        if (!leftVar.IsKeyword && leftVar.IsReadOnly)
+        // Protected natural variables (arb, bal, fail, fence, rem, succeed) — error 42, for an assignment the program makes to the
+        // variable directly; one made through its name ($'BAL' = 'y', a capture . SUCCEED) is made, as in SPITBOL
+        if (!leftVar.IsKeyword && leftVar.IsReadOnly && !AssignThroughName)
         {
             LogRuntimeException(42);
             return;
@@ -346,6 +347,9 @@ public partial class Executive
                 // write branch instead of the scalar IdentifierTable path.
                 newVar.Key        = null;
                 newVar.Collection = null;
+                // the protection is the variable's: a direct assignment to it after one made through its name is still 42
+                if (ProtectedPatternVariables.Contains(targetSymbol))
+                    newVar.IsReadOnly = true;
                 newVar.OutputChannel = leftVar.OutputChannel;
                 newVar.InputChannel = leftVar.InputChannel;
                 IdentifierTable[newVar.Symbol] = newVar;
@@ -477,6 +481,23 @@ public partial class Executive
             return;
         SystemStack.Pop();
         SystemStack.Push(assigned.Unnamed());
+    }
+
+    // The predefined pattern variables SPITBOL protects from a direct assignment (error 42), spelled as the identifier table holds them
+    internal static readonly HashSet<string> ProtectedPatternVariables = ["ABORT", "ARB", "BAL", "FAIL", "FENCE", "REM", "SUCCEED"];
+
+    // Set while an assignment is made through a name (a capture, CursorAssignment): the target's protection does not refuse it
+    internal bool AssignThroughName;
+
+    // What $ resolves to as a target: a protected variable through its name is assigned as any other (AssignThroughName's rule)
+    internal static Var IndirectTarget(Var target)
+    {
+        if (!target.IsReadOnly || target.IsKeyword)
+            return target;
+        var handle = target.Clone();
+        handle.Symbol = target.Symbol;
+        handle.IsReadOnly = false;
+        return handle;
     }
 
     private static Var StoredCopy(Var value)

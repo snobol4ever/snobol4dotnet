@@ -64,7 +64,9 @@ internal class ImmediateVariableAssociation2 : NullPattern
         // assignment statement; here it is not a value of the statement, so it comes off again: left there, it became
         // an operand of the statement's own operators (V = (S ? LEN(3) $ W) assigned the match to W, not V)
         var depth = scan.Exec.SystemStack.Count;
-        scan.Exec.Assign(arguments);
+        scan.Exec.AssignThroughName = true;
+        try { scan.Exec.Assign(arguments); }
+        finally { scan.Exec.AssignThroughName = false; }
         while (scan.Exec.SystemStack.Count > depth)
             scan.Exec.SystemStack.Pop();
 

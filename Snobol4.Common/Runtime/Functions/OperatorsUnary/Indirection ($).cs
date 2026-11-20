@@ -12,12 +12,12 @@ public partial class Executive
         {
             case RealVar:
                 var symbol1 = FoldName(((RealVar)arguments[0]).Data.ToString(CultureInfo.InvariantCulture));
-                SystemStack.Push(IdentifierTable[symbol1]);
+                SystemStack.Push(IndirectTarget(IdentifierTable[symbol1]));
                 return;
 
             case IntegerVar:
                 var symbol2 = FoldName(((IntegerVar)arguments[0]).Data.ToString(CultureInfo.InvariantCulture));
-                SystemStack.Push(IdentifierTable[symbol2]);
+                SystemStack.Push(IndirectTarget(IdentifierTable[symbol2]));
                 return;
 
             case StringVar:
@@ -29,7 +29,7 @@ public partial class Executive
                     return;
                 }
 
-                SystemStack.Push(IdentifierTable[symbol3]);
+                SystemStack.Push(IndirectTarget(IdentifierTable[symbol3]));
                 return;
 
             case NameVar { Expression: { } deferred }:
@@ -37,7 +37,7 @@ public partial class Executive
                 return;
 
             case NameVar nameVar:
-                SystemStack.Push(ElementOrVariable(nameVar) ?? IdentifierTable[nameVar.Pointer]);
+                SystemStack.Push(ElementOrVariable(nameVar) ?? IndirectTarget(IdentifierTable[nameVar.Pointer]));
                 return;
 
             default:

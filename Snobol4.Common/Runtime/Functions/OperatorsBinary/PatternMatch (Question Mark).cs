@@ -100,7 +100,9 @@ public partial class Executive
             // an assignment that was not made (the evaluation of its deferred target failed or was an error) leaves nothing to take off
             var depth = SystemStack.Count;
             Failure = false;
-            Assign(assignment);
+            AssignThroughName = true;
+            try { Assign(assignment); }
+            finally { AssignThroughName = false; }
             while (SystemStack.Count > depth)
                 SystemStack.Pop();
             if (Failure)

@@ -82,7 +82,8 @@ end
 
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(318, build.ErrorCodeHistory[0]);
+        // sbl -b runs this program with no error, rc 0 (2026-11-20, seat dotnet): a BACKSPACE of an output file is no error, even
+        // with nothing written to it
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 }

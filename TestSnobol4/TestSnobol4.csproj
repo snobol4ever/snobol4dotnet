@@ -23,15 +23,10 @@
     <Compile Remove="Test_CODE1.Test.cs" />
   </ItemGroup>
   <ItemGroup>
-    <!-- The tests of Budne's CSNOBOL4 suite -INCLUDE these files, which sit beside the program they run. The in-process tests run
-         as Test.sno in TestSnobol4 of the output folder, so the files go there. -->
-    <None Update="Csnobol4Suite\*.sno">
-      <Link>TestSnobol4\%(Filename)%(Extension)</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="CTest_CODE0_NTest_CODE0.cs" />
+    <None Include="Function\StringComparison\LGe.cs" />
+    <None Include="Function\Operator\Unary\Minus. %28-%29.cs" />
+    <None Include="Function\Pattern\ArbNo.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.11.0" />
@@ -42,30 +37,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Snobol4.Common\Snobol4.Common.csproj" />
-    <!--
-      These three projects are loaded at runtime via LOAD() and are not linked
-      into the test binary.  ReferenceOutputAssembly="false" tells MSBuild to
-      build them first (so the DLLs are up to date) without adding them as
-      compile-time references.  Without this, changes to the plugin sources are
-      silently ignored until the plugins are rebuilt manually, which has caused
-      confusing test failures in the past.
-    -->
-    <ProjectReference Include="..\CustomFunction\AreaLibrary.csproj"
-                      ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\CustomFunction\MathLibrary\MathLibrary.csproj"
-                      ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\CustomFunction\FSharpLibrary\FSharpLibrary.fsproj"
-                      ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\CustomFunction\ReflectLibrary\ReflectLibrary.csproj"
-                      ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\CustomFunction\ObjectLifecycleLibrary\ObjectLifecycleLibrary.csproj"
-                      ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\CustomFunction\NoconvDotNetLibrary\NoconvDotNetLibrary.csproj"
-                      ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\CustomFunction\FSharpOptionLibrary\FSharpOptionLibrary.fsproj"
-                      ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\CustomFunction\VbLibrary\VbLibrary.vbproj"
-                      ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
@@ -73,22 +44,4 @@
   <ItemGroup>
     <Folder Include="Function\ProgramControl\" />
   </ItemGroup>
-
-  <!--
-    Build the native C fixture DLLs (libspitbol_math, libspitbol_create,
-    libspitbol_noconv, libspitbol_xn) before the test project compiles.
-    Only runs on Windows; skipped silently on Linux/macOS.
-    ContinueOnError="WarnAndContinue" means a missing C++ toolchain is a
-    warning, not a hard error — tests that need the DLLs will self-mark
-    as Inconclusive rather than breaking the whole build.
-  -->
-  <Target Name="BuildNativeCLibraries"
-          BeforeTargets="PreBuildEvent"
-          Condition="'$(OS)' == 'Windows_NT'">
-    <Message Text="Building native C fixture libraries..." Importance="High" />
-    <Exec Command="powershell.exe -ExecutionPolicy Bypass -NonInteractive -File &quot;$(MSBuildThisFileDirectory)..\build_native.ps1&quot;"
-          WorkingDirectory="$(MSBuildThisFileDirectory).."
-          ContinueOnError="WarnAndContinue" />
-  </Target>
-
 </Project>

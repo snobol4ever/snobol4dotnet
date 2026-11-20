@@ -1,4 +1,4 @@
-using Test.TestLexer;
+﻿using Test.TestLexer;
 
 namespace Test.Miscellaneous;
 

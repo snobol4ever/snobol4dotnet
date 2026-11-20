@@ -6,6 +6,39 @@ namespace Test.ProgramDefinedDataType;
 [TestClass]
 public class Data
 {
+    [TestMethod]
+    public void TEST_Data_001()
+    {
+        var s = @"
+        data('complex(real,imag)')
+        x = complex(3.2, -2.0)
+        i = imag(x)
+        r = real(x)
+end";
+
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(-2.0, ((RealVar)(build.Execute!.IdentifierTable[build.FoldCase("i")])).Data);
+        Assert.AreEqual(3.2, ((RealVar)(build.Execute!.IdentifierTable[build.FoldCase("r")])).Data);
+    }
+
+    [TestMethod]
+    public void TEST_Data_002()
+    {
+        var s = @"
+        DATA('COMPLEX(REAL,IMAG)')
+        X = COMPLEX('AAA', 'BBB')
+        I = IMAG(X)
+        R = REAL(X)
+end";
+
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual("BBB", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("I")])).Data);
+        Assert.AreEqual("AAA", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("R")])).Data);
+    }
 
     [TestMethod]
     public void TEST_Data_003()
@@ -22,6 +55,30 @@ end";
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("Snobol4.Common.SpanPattern", ((PatternVar)(build.Execute!.IdentifierTable[build.FoldCase("I")])).Data.ToString());
         Assert.AreEqual("Snobol4.Common.AnyPattern", ((PatternVar)(build.Execute!.IdentifierTable[build.FoldCase("R")])).Data.ToString());
+    }
+
+    [TestMethod]
+    public void TEST_Data_004()
+    {
+        var s = @"
+        DATA('COMPLEX(REAL,IMAG)')
+        X1 = COMPLEX(3.2, -2.0)
+        I1 = IMAG(X1)
+        R1 = REAL(X1)
+        X2 = COMPLEX('AAA', 'BBB')
+        IMAG(X2) = 45
+        REAL(X2) = -5
+        I2 = IMAG(X2)
+        R2 = REAL(X2)
+end";
+
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        Assert.AreEqual(-2.0, ((RealVar)(build.Execute!.IdentifierTable[build.FoldCase("I1")])).Data);
+        Assert.AreEqual(3.2, ((RealVar)(build.Execute!.IdentifierTable[build.FoldCase("R1")])).Data);
+        Assert.AreEqual(45, ((IntegerVar)(build.Execute!.IdentifierTable[build.FoldCase("I2")])).Data);
+        Assert.AreEqual(-5, ((IntegerVar)(build.Execute!.IdentifierTable[build.FoldCase("R2")])).Data);
     }
 
 
@@ -41,11 +98,9 @@ end
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
-        // Under case folding the type name is folded to upper case, as sbl -b answers
         Assert.AreEqual("PRO+DUCT", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("R1")])).Data);
         Assert.AreEqual(2.39, ((RealVar)(build.Execute!.IdentifierTable[build.FoldCase("R2")])).Data);
-        // FIELD gives the field's NAME, as sbl does
-        Assert.AreEqual("1PRICE", ((NameVar)(build.Execute!.IdentifierTable[build.FoldCase("R3")])).Pointer);
+        Assert.AreEqual("1PRICE", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("R3")])).Data);
         Assert.AreEqual("", ((StringVar)(build.Execute!.IdentifierTable[build.FoldCase("R4")])).Data);
     }
 }

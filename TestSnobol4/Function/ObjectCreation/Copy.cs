@@ -1,4 +1,4 @@
-using Test.TestLexer;
+﻿using Test.TestLexer;
 
 namespace Test.ObjectCreation;
 
@@ -46,4 +46,5 @@ end";
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreNotEqual(build.Execute!.IdentifierTable[build.FoldCase("a")].SequenceId, build.Execute!.IdentifierTable[build.FoldCase("b")].SequenceId);
     }
+
 }

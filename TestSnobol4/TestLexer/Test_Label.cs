@@ -64,6 +64,18 @@ public partial class TestLexer
     }
 
     [TestMethod]
+    public void TEST_LABEL_004()
+    {
+        var s = @"
+end
+";
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
+        //Assert.AreEqual(231, build.ErrorCodeHistory[0]);
+    }
+
+    [TestMethod]
     public void TEST_LABEL_005()
     {
         var s = $"test c = 1{Environment.NewLine}end test";
@@ -81,6 +93,15 @@ public partial class TestLexer
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual("", build.EntryLabel);
+    }
+
+    [TestMethod]
+    public void TEST_LABEL_007()
+    {
+        var s = "end   ";
+        var directives = "-b";
+        var build = SetupTests.SetupScript(directives, s);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
 }

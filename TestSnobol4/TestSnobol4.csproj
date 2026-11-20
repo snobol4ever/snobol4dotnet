@@ -18,11 +18,6 @@
     <None Remove="OutputFiles\**" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Remove="CTest_CODE0_NTest_CODE0.cs" />
-    <Compile Remove="Test0.Test.cs" />
-    <Compile Remove="Test_CODE1.Test.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <!-- The tests of Budne's CSNOBOL4 suite -INCLUDE these files, which sit beside the program they run. The in-process tests run
          as Test.sno in TestSnobol4 of the output folder, so the files go there. -->
     <None Update="Csnobol4Suite\*.sno">
@@ -31,7 +26,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="CTest_CODE0_NTest_CODE0.cs" />
     <None Include="Function\StringComparison\LGe.cs" />
     <None Include="Function\Operator\Unary\Minus. %28-%29.cs" />
     <None Include="Function\Pattern\ArbNo.cs" />

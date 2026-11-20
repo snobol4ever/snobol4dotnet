@@ -354,6 +354,25 @@ public partial class Executive
     private int InputRecordLength(string channel) =>
         InputRecordLengths.TryGetValue(channel, out var length) ? length : DefaultInputRecordLength;
 
+    // TERMINAL reads the terminal, as SPITBOL's does, never standard input: where the process has none (/dev/tty does not open, as
+    // under a pipe or a grader) the read fails, as in SPITBOL. Windows reads its console
+    private StreamReader? _terminalReader;
+    private bool _terminalTried;
+
+    private TextReader? TerminalReader()
+    {
+        if (OperatingSystem.IsWindows())
+            return Console.In;
+        if (!_terminalTried)
+        {
+            _terminalTried = true;
+            try { _terminalReader = new StreamReader(new FileStream("/dev/tty", FileMode.Open, FileAccess.Read)); }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException) { _terminalReader = null; }
+        }
+
+        return _terminalReader;
+    }
+
     private Var InputArgument(Var arg)
     {
         // &INPUT 0 turns input association off: the variable gives the value it holds and reads nothing, as in SPITBOL
@@ -395,7 +414,7 @@ public partial class Executive
 
             case "+console-input":
             case "+terminal-input":
-                inputLine = ReadLineDelegate is not null ? ReadLineDelegate() : Console.ReadLine();
+                inputLine = ReadLineDelegate is not null ? ReadLineDelegate() : TerminalReader()?.ReadLine();
                 break;
 
             default:

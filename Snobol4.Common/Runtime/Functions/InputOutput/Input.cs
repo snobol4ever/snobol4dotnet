@@ -356,6 +356,14 @@ public partial class Executive
 
     private Var InputArgument(Var arg)
     {
+        // &INPUT 0 turns input association off: the variable gives the value it holds and reads nothing, as in SPITBOL
+        if (AmpInput == 0 && arg.InputChannel.Length > 0)
+        {
+            var held = arg.Clone();
+            held.InputChannel = "";
+            return held;
+        }
+
         string? inputLine;
         var raw = false;
 

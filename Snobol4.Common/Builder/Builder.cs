@@ -276,6 +276,9 @@ public partial class Builder : IDisposable
     // Whether the text being compiled is a CODE text, in which a label may stand twice (the later statement is the label's), as in SPITBOL
     internal bool CompilingCode;
 
+    // Whether that text is the empty string, which holds no blank statement (PopulateCodeMetadata)
+    internal bool CodeTextIsEmpty;
+
     internal bool BuildCode()
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
@@ -494,6 +497,19 @@ public partial class Builder : IDisposable
             Execute.SourceLineNumbers.Add(last.LineCountFile);
             Execute.SourceStatementNumbers.Add(stmtNumber + 1);
             Execute.SourceStno.Add(stnoBase + Code.SourceLines.Count + Code.BlankLineCount + (Code.EndFound ? 0 : 1));
+        }
+        else
+        {
+            // a block with no statement (CODE(''), CODE('* a comment')) is its implicit statement alone, which takes the next number
+            // as any block's does; BuildCode counts it, so its entry is made here too, or every block after it is read one entry off
+            // (two such blocks put a later block's &STNO past the table, 0, where SPITBOL says 22). Its blank statements are numbered
+            // before it (CODE(' ') takes two numbers, CODE('; ') three), but the empty text is no blank statement (CODE('') takes one)
+            var path = FilesToCompile.Count > 0 ? FilesToCompile[^1] : "";
+            Execute.SourceCode.Add($"{Path.GetFileName(path)}:0/0)\n");
+            Execute.SourceFiles.Add(path);
+            Execute.SourceLineNumbers.Add(Execute.SourceLineNumbers.Count > 0 ? Execute.SourceLineNumbers[^1] : 0);
+            Execute.SourceStatementNumbers.Add(stmtNumber + 1);
+            Execute.SourceStno.Add(stnoBase + 1 + (CodeTextIsEmpty ? 0 : Code.BlankLineCount));
         }
     }
 

@@ -66,6 +66,7 @@ public partial class Executive
             return null;
         Parent.FirstErrorSource = null;
         var numbered = SourceStno.Count;
+        Parent.CodeTextIsEmpty = text.Length == 0;
         if (CompileQuietly(Parent.BuildCode))
             return code;
 

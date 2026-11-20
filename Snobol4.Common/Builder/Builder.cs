@@ -167,6 +167,7 @@ public partial class Builder : IDisposable
         ApplyStartupOptions(Execute);
         // sbl's end-of-run dump is of a run: a program that does not start (a compile error, no END, -n) prints none
         var started = false;
+        var crashed = false;
         try
         {
             GetNameSpaceAndClassName(CompileTarget.PROGRAM);
@@ -207,10 +208,17 @@ public partial class Builder : IDisposable
                 ExitStatus ??= 231;
         }
         catch (CompilerException) { }
+        catch (OracleCrashException)
+        {
+            // sbl dies of signal 11 here: what it printed stands, and nothing more is printed (SyntaxScanner.OracleCrash)
+            ExitStatus = 139;
+            crashed = true;
+        }
         catch (Exception e) { ReportProgrammingError(e); }
         finally
         {
-            Execute?.PrintExecutionStatistics();
+            if (!crashed)
+                Execute?.PrintExecutionStatistics();
             if (started)
                 Execute?.DisplayVariableValues();
             Execute?.CloseAllStreams();

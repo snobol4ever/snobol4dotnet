@@ -286,7 +286,7 @@ public partial class Lexer
             }
 
             // a syntax error is reported as SPITBOL meets it, at the element it meets it at
-            if (SyntaxScanner.FirstError(sourceLine.SyntaxText, name => _parent.Code.Labels.ContainsKey(_parent.FoldCase(name)), LineEnds(sourceLine), sourceLine.CaseFolding) is { } syntax)
+            if (SyntaxScanner.FirstError(sourceLine.SyntaxText, name => _parent.Code.Labels.ContainsKey(_parent.FoldCase(name)), LineEnds(sourceLine), sourceLine.CaseFolding, sourceLine.ControlNameStuck) is { } syntax)
             {
                 allLexed = false;
                 sourceLine.CompileError = true;
@@ -296,6 +296,8 @@ public partial class Lexer
                 // on the last card of a source with no END, SPITBOL has not read to the end of the statement when the source runs out
                 if (syntax.AtEnd && sourceLine.EndsTheSource)
                     continue;
+                if (syntax.Code == SyntaxScanner.OracleCrash)
+                    throw new OracleCrashException();
                 _parent.LogCompilerException(syntax.Code, syntax.Cursor, sourceLine);
                 continue;
             }

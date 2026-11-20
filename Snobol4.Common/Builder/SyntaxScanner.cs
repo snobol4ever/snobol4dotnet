@@ -63,6 +63,16 @@ internal sealed partial class SyntaxScanner
     // Under folding END is read in any case; under -f (no folding) sbl reads END and end alone as the END line, and End is a label
     private bool _folding = true;
 
+    // scncc left set by an error in a control's name: a name is read as a control's name, type zero, a unary operator
+    private bool _controlName;
+
+    // and that operator's dvblk is the name's string block, whose left precedence (its first characters) is never lluno, so expop
+    // builds it as a binary operator over the stack's level marker: no syntax error follows, but an expression holding one that is
+    // read to its end without error is code sbl cannot generate, and it dies there of signal 11 with what it has printed so far
+    // (exit status 139). An error later in the expression stops the compile of it first
+    internal const int OracleCrash = -11;
+    private bool _fakeUnary;              // the element read last is such a name
+
     internal static bool IsEndWord(string word, bool folding) =>
         folding ? word.Equals("END", StringComparison.OrdinalIgnoreCase) : word is "END" or "end";
 
@@ -73,12 +83,13 @@ internal sealed partial class SyntaxScanner
     /// name SPITBOL could read is left to the lexer. The END statement may carry the name of the label the run starts at, which must
     /// be one the program has defined (`defined` says so): anything else after END is error 215.
     /// </summary>
-    internal static Error? FirstError(string text, Func<string, bool>? defined = null, int[]? lineEnds = null, bool folding = true)
+    internal static Error? FirstError(string text, Func<string, bool>? defined = null, int[]? lineEnds = null, bool folding = true,
+        bool controlName = false)
     {
         if (text.Length == 0)
             return null;
 
-        var scanner = new SyntaxScanner(text) { _defined = defined, _lineEnds = lineEnds ?? [], _folding = folding };
+        var scanner = new SyntaxScanner(text) { _defined = defined, _lineEnds = lineEnds ?? [], _folding = folding, _controlName = controlName };
         try
         {
             return scanner.Statement();
@@ -187,6 +198,8 @@ internal sealed partial class SyntaxScanner
         // 0 nothing scanned at this level, 1 an operand expected, 2 an operator expected
         var state = 0;
         var outer = new Stack<int>();
+        // a name read as a unary operator stands in the expression
+        var fake = false;
         while (true)
         {
             var type = Read();
@@ -230,6 +243,8 @@ internal sealed partial class SyntaxScanner
                     switch (level)
                     {
                         case NormalGoto:
+                            if (fake)
+                                throw new SyntaxFault(OracleCrash);
                             return;
                         case Arguments:
                         case Grouping:
@@ -267,6 +282,8 @@ internal sealed partial class SyntaxScanner
                             state = 2;
                             break;
                         case DirectGoto:
+                            if (fake)
+                                throw new SyntaxFault(OracleCrash);
                             return;
                         default:
                             throw new SyntaxFault(225);
@@ -277,6 +294,7 @@ internal sealed partial class SyntaxScanner
                 case Unary:
                     if (state == 2)
                         Concatenation();
+                    fake |= _fakeUnary;
                     state = 1;
                     break;   // a unary operator after an operand is read again, in state 1, as what follows a concatenation
 
@@ -316,6 +334,8 @@ internal sealed partial class SyntaxScanner
                     switch (level)
                     {
                         case Outer:
+                            if (fake)
+                                throw new SyntaxFault(OracleCrash);
                             return;
                         case NormalGoto:
                             throw new SyntaxFault(227);
@@ -500,6 +520,14 @@ internal sealed partial class SyntaxScanner
                 return Exit(Function);
             }
 
+            // scn15: under scncc the name is a control's, returned with type zero
+            if (_controlName)
+            {
+                Exit(Unary);
+                _fakeUnary = true;
+                return Unary;
+            }
+
             return Exit(Variable);
         }
 
@@ -514,6 +542,7 @@ internal sealed partial class SyntaxScanner
         _semicolon = false;
         _atEnd = type == Semicolon;
         _operator = op;
+        _fakeUnary = false;
         _previous = type;
         _gotoField = false;
         return type;
@@ -533,3 +562,6 @@ internal sealed partial class SyntaxScanner
     [GeneratedRegex(@"^(\d+)(\.\d*)?([eEdD][+-]?\d+)?$")]
     private static partial Regex NumberPattern();
 }
+
+/// <summary>The point at which sbl itself dies of signal 11 compiling the statement (SyntaxScanner.OracleCrash).</summary>
+internal sealed class OracleCrashException : Exception;

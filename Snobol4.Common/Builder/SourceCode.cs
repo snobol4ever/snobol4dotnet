@@ -392,6 +392,10 @@ public class SourceCode
     /// <param name="pathName">Path to the source file</param>
     // Whether the line just read ended in a semicolon, or in a comment after one, so that a statement begins where it ends
     private bool _lineEndsInANewStatement;
+
+    // SPITBOL's scncc left set: cncrd sets it to scan a control's name (or the file of -INCLUDE) and clears it after, so an error the
+    // scanner meets there (-FILE-ENTER, a name and a minus, 233; -1X, 231) leaves it set until the name of a later control is read whole
+    private bool _controlNameStuck;
     private bool _lastLineOpensAStatement;
 
     private void ProcessLineWithSubLines(string line, string pathName, bool codeText = false)
@@ -530,6 +534,20 @@ public class SourceCode
         {
             CommentContinuationDirectiveCount++;
             ExecuteDirectives(subLine, pathName, true, 0, subLine);
+            return;
+        }
+
+        if (_controlNameStuck && !codeText)
+        {
+            // scncc set: the label is scanned as a control's name, no label (214), and so END is never found; a statement without one is
+            // read by the syntax scanner, each name an operator
+            var label = subLine[0] is not (' ' or '\t');
+            SourceLines.Add(new SourceLine(pathName, _includeDepth, subLine, this, _parent.BuildOptions.ErrorOnUnhandledFail)
+            {
+                ControlNameStuck = true,
+                CompileError = label,
+                PendingError = label ? 214 : 0
+            });
             return;
         }
 
@@ -681,6 +699,13 @@ public class SourceCode
                 var begin = Position;
                 while (Position < Text.Length && (char.IsAsciiLetterOrDigit(Text[Position]) || Text[Position] is '_' or '.'))
                     Position++;
+                // a plus or a minus cannot end a name (scn33, scn34): -FILE-ENTER is error 233 where the name starts
+                if (Position < Text.Length && Text[Position] is '+' or '-')
+                {
+                    Error = 233;
+                    return new CardToken(CardElement.Other);
+                }
+
                 // a name and a left paren is a call of a function, no control's name
                 if (Position < Text.Length && Text[Position] == '(')
                 {
@@ -768,6 +793,9 @@ public class SourceCode
             else
             {
                 var name = card.Scan();
+                // an error the scanner meets in the name leaves scncc set; a name read whole clears it (cnc0a)
+                if (!codeText)
+                    _controlNameStuck = card.Error != 0;
                 if (card.Error != 0 || name.Kind != CardElement.Name)
                 {
                     Reject();
@@ -827,6 +855,9 @@ public class SourceCode
             case "INCL":
             {
                 var file = card.Scan();
+                // the file is scanned with scncc set too (cnc41)
+                if (!codeText && card.Error != 0)
+                    _controlNameStuck = true;
                 if (card.Error != 0 || file.Kind != CardElement.String)
                 {
                     RejectCard(card, pathName, codeText);

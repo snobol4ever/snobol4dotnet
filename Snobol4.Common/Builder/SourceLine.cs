@@ -18,6 +18,10 @@ public class SourceLine
     // The number of an error found as the line was read (a continuation with nothing to continue), reported where the lexer reaches
     // the line so that it follows the line's listing
     internal int PendingError { get; set; }
+
+    // Read while SPITBOL's scncc stood set: an error its scanner met in the name of a control left the flag set, so it reads each name
+    // of the statement as a control's name, an element of type zero, a unary operator, until a control's name is read whole
+    internal bool ControlNameStuck { get; init; }
     // Case folding as it stood when the line was read: a -CASE control acts from its own line on
     internal bool CaseFolding { get; }
 

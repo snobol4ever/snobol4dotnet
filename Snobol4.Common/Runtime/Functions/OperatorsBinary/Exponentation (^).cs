@@ -101,6 +101,14 @@ public partial class Executive
         {
             x = -x;
             var whole = Math.Truncate(y);
+            // the chopped exponent is made an integer by rti, whose overflow SPITBOL's x64 build reads as the result 0x80000000: an
+            // exponent that chops to 2147483648 is error 266, real overflow (-1.0 ** 2147483648.0 and ** 2147483648.5, sbl -bf)
+            if (whole == 2147483648.0)
+            {
+                LogRuntimeException(266);
+                return null;
+            }
+
             if (whole - y != 0)
             {
                 LogRuntimeException(311);

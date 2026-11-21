@@ -37,9 +37,23 @@ public partial class Executive
     // on the listing channel): the -o file when one is named, else standard output
     internal void DisplayVariableValues()
     {
+        var writer = Parent.ListingPath != "" ? Parent.ListingWriter : Console.Out;
+        // A dump of 1 to 3 after a stack overflow the collector cannot run in prints SPITBOL's report of that instead (stak1: the
+        // message, then stopr's summary from the statement on), on the listing channel alone
+        if (DumpCollectorOverflows)
+        {
+            if (AmpDump is >= 1 and <= 3)
+            {
+                string[] block = ["", "", "", "stack overflow in garbage collection", .. RunSummary()[2..], ""];
+                foreach (var text in block)
+                    writer.WriteLine(text);
+                writer.Flush();
+            }
+            return;
+        }
         if (RunLeftAtOnce)
             return;
-        DisplayVariableValues(AmpDump, Parent.ListingPath != "" ? Parent.ListingWriter : Console.Out);
+        DisplayVariableValues(AmpDump, writer);
     }
 
     /// <summary>

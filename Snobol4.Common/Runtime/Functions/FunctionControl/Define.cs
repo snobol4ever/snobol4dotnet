@@ -288,7 +288,15 @@ public partial class Executive
         if (StackBytesUsed + frameBytes + StackBaseBytes > Parent.BuildOptions.StackSizeBytes
             || !RuntimeHelpers.TryEnsureSufficientExecutionStack())
         {
-            RunLeftAtOnce = true;
+            // SPITBOL pops its stack only to the start of the statement in error and goes on to the end of the run, where the dump
+            // &DUMP asks for starts with a collection (dumpr calls gbcol): the room a frame of 72 bytes or less leaves past that start
+            // is too little for the collector, so the run ends with "stack overflow in garbage collection" and no dump, while a bigger
+            // frame leaves room and the dump is printed (MEASURED on sbl -bf at -s64k to -s16384k, frames of 64 to 144 bytes)
+            if (frameBytes <= 72)
+            {
+                RunLeftAtOnce = true;
+                DumpCollectorOverflows = true;
+            }
             LogRuntimeException(246, fatal: true);
         }
         StackBytesUsed += frameBytes;

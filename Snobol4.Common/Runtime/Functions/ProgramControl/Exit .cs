@@ -129,4 +129,7 @@ public partial class Executive
     // Set when the run is left at once: by an EXIT that ends it (a save with -3 or the like, or a command) or by a stack overflow. SPITBOL
     // then prints no end-of-run dump and none of the statistics of -x
     internal bool RunLeftAtOnce;
+
+    // Set by a stack overflow that leaves the collector too little stack for the end-of-run dump (Define.cs)
+    internal bool DumpCollectorOverflows;
 }

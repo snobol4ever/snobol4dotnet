@@ -159,6 +159,8 @@ public partial class Executive
         }
 
         var symbol = Parent.FoldCase(((StringVar)identifierNameVar).Data);
+        if (symbol != "")
+            RuntimeNames.Add(symbol);
         var fileModeInt = (long)fileModeObj;
         var fileShareInt = (long)fileShareObj;
 

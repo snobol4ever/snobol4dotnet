@@ -93,6 +93,10 @@ public partial class Executive
                 break;
         }
 
+        RuntimeNames.Add(functionName);
+        RuntimeNames.UnionWith(parameters);
+        RuntimeNames.UnionWith(locals);
+
         // function name cannot redefine a protected (system) function, FENCE among them (sbl -bf: DEFINE('FENCE(X)') is 248)
         var existingEntry = FunctionTable[functionName];
         if (existingEntry is not null && existingEntry.IsProtected)

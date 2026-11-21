@@ -168,6 +168,7 @@ public partial class Executive
             return 154;
 
         existingFunction = FoldName((string)function);
+        RuntimeNames.Add(existingFunction);
 
         // Any non-null name will do, as in SPITBOL (gtnvr): a function that is not defined, or an
         // operator's symbol such as '+', which names no function, makes the synonym undefined
@@ -188,6 +189,8 @@ public partial class Executive
 
         // a function's name folds as every name does (OPSYN('h', 'f') defines H under -b); an operator is its symbol
         newFunction = operands == 0 ? exec.FoldName((string)synonym) : (string)synonym;
+        if (operands == 0)
+            exec.RuntimeNames.Add(newFunction);
         return operands == 0 && newFunction == "" ? 155 : 0;
     }
 }

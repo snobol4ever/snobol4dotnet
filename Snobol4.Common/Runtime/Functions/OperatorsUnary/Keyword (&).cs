@@ -380,6 +380,11 @@ public partial class Executive
     // was compiled, and &CASE does not change it after
     internal string FoldName(string name) => AmpCaseFolding != 0 ? name.ToUpperInvariant() : name;
 
+    // The names a string became at run time (SPITBOL's gtnvr: $'FENCE', DEFINE('FENCE(X)'), APPLY, TRACE, INPUT, OPSYN, DATA,
+    // CONVERT to NAME), each of which SPITBOL gives a variable block whatever comes of the call, so a protected variable (FENCE, ARB)
+    // named so is in the dump as one the program's text names is (Dump.NaturalVariables)
+    internal readonly HashSet<string> RuntimeNames = [];
+
     internal void HandleCase(Var value, bool set)
     {
         if (set)

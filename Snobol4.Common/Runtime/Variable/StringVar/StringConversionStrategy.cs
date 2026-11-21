@@ -49,6 +49,7 @@ public class StringConversionStrategy : IConversionStrategy
                     return false;
                 varOut = new NameVar(exec.AmpCaseFolding != 0 ? stringSelf.Data.ToUpperInvariant() : stringSelf.Data, stringSelf.Key,
                     stringSelf.Collection);
+                exec.RuntimeNames.Add(((NameVar)varOut).Pointer);
                 valueOut = stringSelf.Data;
                 return true;
 

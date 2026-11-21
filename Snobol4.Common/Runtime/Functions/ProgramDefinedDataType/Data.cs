@@ -89,6 +89,9 @@ public partial class Executive
                 break;
         }
 
+        RuntimeNames.Add(dataName);
+        RuntimeNames.UnionWith(fields);
+
         // a datatype or field name that is a system function's cannot be defined (248)
         foreach (var fieldName in fields)
         {

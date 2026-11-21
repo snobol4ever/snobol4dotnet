@@ -97,7 +97,7 @@ public partial class Executive
     private IEnumerable<KeyValuePair<string, Var>> NaturalVariables()
     {
         var referenced = Parent.VariableSlots.Select(slot => slot.Symbol)
-            .Concat(Parent.FunctionSlots.Select(slot => slot.Symbol)).ToHashSet();
+            .Concat(Parent.FunctionSlots.Select(slot => slot.Symbol)).Concat(RuntimeNames).ToHashSet();
         return IdentifierTable.Where(kv => kv.Key.Length > 0 && kv.Key[0] != '&'
                                            && (!kv.Value.IsReadOnly || referenced.Contains(kv.Key)));
     }
@@ -131,6 +131,9 @@ public partial class Executive
             extra.Add(type);
             extra.AddRange(definition.FieldNames);
         }
+
+        // and every name a string became at run time, whatever came of the call (APPLY('QQ'), a DEFINE that was 248)
+        extra.AddRange(RuntimeNames.Where(name => name.Length > 0));
 
         return extra.Select(Parent.FoldCase).Where(name => name[0] != '&' && have.Add(name))
                     .Select(name => new KeyValuePair<string, Var>(name, StringVar.Null()));

@@ -12,11 +12,13 @@ public partial class Executive
         {
             case RealVar:
                 var symbol1 = FoldName(((RealVar)arguments[0]).Data.ToString(CultureInfo.InvariantCulture));
+                RuntimeNames.Add(symbol1);
                 SystemStack.Push(IndirectTarget(IdentifierTable[symbol1]));
                 return;
 
             case IntegerVar:
                 var symbol2 = FoldName(((IntegerVar)arguments[0]).Data.ToString(CultureInfo.InvariantCulture));
+                RuntimeNames.Add(symbol2);
                 SystemStack.Push(IndirectTarget(IdentifierTable[symbol2]));
                 return;
 
@@ -29,6 +31,7 @@ public partial class Executive
                     return;
                 }
 
+                RuntimeNames.Add(symbol3);
                 SystemStack.Push(IndirectTarget(IdentifierTable[symbol3]));
                 return;
 

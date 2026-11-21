@@ -26,6 +26,7 @@ public partial class Executive
         if (!argument.Convert(VarType.STRING, out _, out var text, this) || (string)text == "")
             return false;
         name = FoldName((string)text);
+        RuntimeNames.Add(name);
         return true;
     }
 

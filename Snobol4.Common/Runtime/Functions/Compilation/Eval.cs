@@ -8,8 +8,9 @@ public partial class Executive
     {
         var arg = arguments[0];
 
-        // A NAME evaluates to the value of what it names, as SPITBOL's expression for the name does; the name of an element of an
-        // array or table, or of a keyword, has no text and is no expression (103)
+        // A NAME is converted to its text, which is compiled as a string's is, as in SPITBOL: .X evaluates X, but the name of a
+        // variable called '1 + 2' (CONVERT('1 + 2', 'NAME')) evaluates to 3 and one called 'A B' concatenates A and B (sbl -bf); the
+        // name of an element of an array or table, or of a keyword, has no text and is no expression (103)
         if (arg is NameVar nameVar)
         {
             if (!nameVar.HasText)
@@ -18,8 +19,7 @@ public partial class Executive
                 return;
             }
 
-            SystemStack.Push(NameReturnValue(nameVar));
-            return;
+            arg = new StringVar(nameVar.Pointer);
         }
 
         switch (arg)

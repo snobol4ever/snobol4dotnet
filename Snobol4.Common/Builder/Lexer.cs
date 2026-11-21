@@ -328,8 +328,9 @@ public partial class Lexer
             // an error found pre-evaluating the constants of the statement is an error in it, as in SPITBOL
             if (!_parent.SyntaxOnly && preEvaluator.FirstError(sourceLine) is var code and not 0)
             {
-                // found once the whole statement is read, which the last card of a source with no END never is
-                if (!sourceLine.EndsTheSource)
+                // found once the whole statement is read, which the last card of a source with no END never is, unless a semicolon
+                // ends the statement on it (a = 'a' + 3.1;END, whose END the statement in error takes, reports 001 and has no END)
+                if (!sourceLine.EndsTheSource || sourceLine.SyntaxText.EndsWith(';'))
                     _parent.LogCompilerException(code, Builder.WholeStatementRead, sourceLine);
                 allLexed = false;
                 sourceLine.CompileError = true;
@@ -344,6 +345,44 @@ public partial class Lexer
         return allLexed;
     }
 
+
+    // Whether the checker (StatementChecker) finds an error in the statement `line` just read from `code`, as LexLines will: SPITBOL finds
+    // it as it compiles the statement, before it reads on, and takes the next statement on the line for the rest of the statement in
+    // error, as at a syntax error at the semicolon (sbl -bf: a = 1 + 'x'; b = 2; c = 3 + numbers c 2, and a = 'a' + 3.1;END has no
+    // END). The statement is lexed as a copy with its label field blank, reporting nothing, and what the lex adds is taken back
+    internal static bool CheckerFindsError(Builder parent, SourceLine line, SourceCode code)
+    {
+        if (parent.SyntaxOnly)
+            return false;
+        var text = line.Text;
+        var labelEnd = 0;
+        while (labelEnd < text.Length && text[labelEnd] is not (' ' or '\t'))
+            labelEnd++;
+        var probe = new SourceLine(line.PathName, line.IncludeDepth, new string(' ', labelEnd) + text[labelEnd..], code, line.ErrorOnUnhandledFail);
+        var expressionsBefore = parent.ExpressionList.Count;
+        var probing = parent.ProbingStatement;
+        var execute = parent.Execute;
+        // a source file is read before the program's Executive is made: the constants are evaluated on one kept for this
+        parent.Execute ??= parent.ProbeExecutive;
+        parent.ProbingStatement = true;
+        try
+        {
+            var lexer = new Lexer(parent);
+            if (!lexer.LexLine(probe))
+                return false;
+            lexer.ConvertUnaryStarOperatorsToDeferredExpressions(probe.LexBody);
+            lexer.ConvertUnaryStarOperatorsToDeferredExpressions(probe.LexFailureGoto);
+            lexer.ConvertUnaryStarOperatorsToDeferredExpressions(probe.LexSuccessGoto);
+            lexer.ConvertUnaryStarOperatorsToDeferredExpressions(probe.LexUnconditionalGoto);
+            return new StatementChecker(parent).FirstError(probe) != 0;
+        }
+        finally
+        {
+            parent.ExpressionList.RemoveRange(expressionsBefore, parent.ExpressionList.Count - expressionsBefore);
+            parent.ProbingStatement = probing;
+            parent.Execute = execute;
+        }
+    }
 
     // The system labels are labels already, defined before the program's: a statement of a source file labelled as one of them is a
     // duplicate label, 217, as in SPITBOL (sbl -bf: ABORT OUTPUT = 'b'); a CODE text may use them (CODE('ABORT OUTPUT = 1') compiles)

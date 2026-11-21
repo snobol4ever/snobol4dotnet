@@ -500,7 +500,9 @@ public class SourceCode
                     offset += subLine.Length + 1;
                     continue;
                 }
-                swallowed = SyntaxScanner.FirstError(added.SyntaxText, null, Lexer.LineEnds(added), added.CaseFolding) is { SwallowsNext: true };
+                var syntax = SyntaxScanner.FirstError(added.SyntaxText, null, Lexer.LineEnds(added), added.CaseFolding);
+                swallowed = syntax is { SwallowsNext: true }
+                            || syntax is null && !added.CompileError && Lexer.CheckerFindsError(_parent, added, this);
             }
 
             offset += subLine.Length + 1;

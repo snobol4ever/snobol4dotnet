@@ -84,9 +84,31 @@ public partial class Builder
     /// <param name="source">The source line where the error occurred.</param>
     public void LogCompilerException(int code, int cursorCurrent, SourceLine source)
     {
+        if (ProbingStatement)
+            return;
         FirstErrorSource ??= source;
         LogCompilerExceptionCore(code, cursorCurrent, BuildErrorMessage(code, cursorCurrent, source), source);
     }
+
+    // Set while a statement is lexed and checked only to learn whether it holds an error (Lexer.CheckerFindsError): nothing is reported
+    internal bool ProbingStatement;
+
+    // The Executive the constants of such a statement are evaluated on while the source is read, before the program's own is made,
+    // with the command line's options as the program's will have them
+    internal Executive ProbeExecutive
+    {
+        get
+        {
+            if (_probeExecutive is null)
+            {
+                _probeExecutive = new Executive(this);
+                ApplyStartupOptions(_probeExecutive);
+            }
+            return _probeExecutive;
+        }
+    }
+
+    private Executive? _probeExecutive;
 
     // The first statement a compile found in error, reset by whoever needs it (CODE numbers only the
     // statements before it)
@@ -103,6 +125,8 @@ public partial class Builder
     /// <param name="message">The formatted error message.</param>
     private void LogCompilerExceptionCore(int code, int cursorCurrent, string message, SourceLine? source = null, Action? report = null)
     {
+        if (ProbingStatement)
+            return;
         if (Execute is not null)
         {
             Execute.Failure = true;

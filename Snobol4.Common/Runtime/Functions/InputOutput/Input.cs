@@ -61,22 +61,20 @@ public partial class Executive
         //                      However, even if this flag is specified, additional permissions might still be needed to access the file.
         // 4 - Allows subsequent deleting of a file.
 
-        // identifier name has to be a string 
-        if (!arguments[0].Convert(VarType.STRING, out var identifierNameVar, out _, this))
+        // the variable's name has to be a string that is not empty (115), which SPITBOL checks only where it takes the name, once the
+        // unit and the file specification are read and the file is open, so a file that cannot be opened fails first (sbl -bf:
+        // INPUT(ARRAY(1),'u') is 116, INPUT(ARRAY(1),1,'nofile') and INPUT('',1,'nofile') fail, INPUT('',1,'file') is 115)
+        var nameIsString = arguments[0].Convert(VarType.STRING, out var identifierNameVar, out _, this);
+        var name = nameIsString ? ((StringVar)identifierNameVar).Data : "";
+        bool NameError()
         {
+            if (name != "")
+                return false;
             LogRuntimeException(115);
-            return;
-        }
-
-        // identifier name cannot be blank
-        if (((StringVar)identifierNameVar).Data == "")
-        {
-            LogRuntimeException(115);
-            return;
+            return true;
         }
 
         // identifier name cannot be "terminal" or "TERMINAL"
-        var name = ((StringVar)identifierNameVar).Data;
         if (name is "terminal" or "TERMINAL")
         {
             LogRuntimeException(159);
@@ -127,7 +125,7 @@ public partial class Executive
             return;
         }
 
-        var symbol = Parent.FoldCase(((StringVar)identifierNameVar).Data);
+        var symbol = Parent.FoldCase(name);
         var fileModeInt = (long)fileModeObj;
         var fileShareInt = (long)fileShareObj;
 
@@ -147,6 +145,8 @@ public partial class Executive
         // If both channel and file name are blank, associate the identifier with standard input  
         if (channel == "" && fileName == "")
         {
+            if (NameError())
+                return;
             IdentifierTable[symbol].InputChannel = "+console-input";   // standard input, as INPUT reads it
             PredicateSuccess();
             return;
@@ -178,9 +178,13 @@ public partial class Executive
                     return;
                 }
 
+                if (NameError())
+                    return;
                 ConsoleInputUnits.Add(channel);
             }
 
+            if (NameError())
+                return;
             IdentifierTable[symbol].InputChannel = "+console-input";
             if (rawLength > 0)
                 RawLengths[symbol] = (int)Math.Min(rawLength, int.MaxValue);
@@ -198,6 +202,8 @@ public partial class Executive
         // no file specification for a unit an F 0 option opened joins it: standard input
         if (fileName == "" && (string)fileNameStr == "" && ConsoleInputUnits.Contains(channel))
         {
+            if (NameError())
+                return;
             IdentifierTable[symbol].InputChannel = "+console-input";
             PredicateSuccess();
             return;
@@ -219,6 +225,8 @@ public partial class Executive
                 }
 
                 // a variable is given its new channel, whatever it was associated with before, as in SPITBOL
+                if (NameError())
+                    return;
                 IdentifierTable[symbol].InputChannel = channel;
                 PredicateSuccess();
                 return;
@@ -241,6 +249,12 @@ public partial class Executive
         try
         {
             var stream = new FileStream(Path.GetFullPath(fileName), (FileMode)fileModeInt, FileAccess.Read, (FileShare)fileShareInt);
+            if (name == "")
+            {
+                stream.Dispose();
+                LogRuntimeException(115);
+                return;
+            }
             DropChannelReaders(channel);
             StreamInputs[channel] = stream;
             InputRecordLengths[channel] = recordLength > 0 ? (int)Math.Min(recordLength, int.MaxValue) : DefaultInputRecordLength;

@@ -37,10 +37,10 @@ end";
         var s = @"
         input('a' | 'b','1','file25.txt')
 end";
+        // the name is checked once the file is open, and there is no file25.txt: the call fails with no error (sbl -b)
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
-        Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(115, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(0, build.ErrorCodeHistory.Count);
     }
 
 

@@ -273,6 +273,53 @@ public partial class Builder : IDisposable
         catch (Exception e) { ReportProgrammingError(e); }
     }
 
+    // How far the tables that every compile appends to stand: the deferred expressions, their parses, the star functions and the
+    // statement delegates (ReleaseEvalCompile)
+    internal readonly record struct CompileMark(int Expressions, int Parsed, long Resolved, int Stars, int Msil, int Cached);
+
+    internal CompileMark MarkCompile() =>
+        new(ExpressionList.Count, ParseExpression.Count, ExpressionsResolved, Execute!.StarFunctionList.Count, MsilDelegates.Count,
+            MsilCache.Count);
+
+    // The statement delegates the compile since before made for the lines of the text it compiled (the EVAL line's body and gotos)
+    internal List<List<Token>> MsilKeysSince(CompileMark before)
+    {
+        var keys = new List<List<Token>>();
+        foreach (var line in Code.SourceLines)
+            foreach (var tokens in (List<Token>[])[line.ParseBody, line.ParseUnconditionalGoto, line.ParseSuccessGoto, line.ParseFailureGoto])
+                if (MsilCache.TryGetValue(tokens, out var index) && index >= before.Msil)
+                    keys.Add(tokens);
+        return keys;
+    }
+
+    // EVAL of a string compiles its text into one star function, runs it once, and nothing can reach it after: the value it gives is
+    // a value, and the statement delegate made for the text is never run. So what that compile added to the tables is released when
+    // the run of the expression added nothing on top (after is the mark right after the compile, keys its statement delegates), and a
+    // program that evaluates text in a loop keeps no memory for it, as SPITBOL's collector frees the code of an EVAL (sbl -bf runs
+    // 48,000 EVALs in a 128 MB -d). A text holding a deferred expression of its own (*X, a second star function another may hold
+    // by its index), or a run that compiled more (CODE, an EVAL that kept its own), keeps everything, as before
+    internal void ReleaseEvalCompile(CompileMark before, CompileMark after, List<List<Token>> keys)
+    {
+        var execute = Execute!;
+        if (MarkCompile() != after || after.Stars != before.Stars + 1 || before.Expressions != before.Stars
+            || before.Parsed != before.Stars || after.Expressions != after.Stars || after.Parsed != after.Stars
+            || after.Cached - before.Cached != keys.Count || after.Msil - before.Msil != keys.Count)
+            return;
+
+        var function = execute.StarFunctionList[before.Stars];
+        execute.SimpleExpressionNames.Remove(function);
+        execute.ValueExpressions.Remove(function);
+        execute.StarFunctionList.RemoveRange(before.Stars, 1);
+        execute.PreviousStarFunctionCount = execute.StarFunctionList.Count;
+        ExpressionList.RemoveRange(before.Expressions, after.Expressions - before.Expressions);
+        ParseExpression.RemoveRange(before.Parsed, after.Parsed - before.Parsed);
+        ExpressionsResolved = before.Resolved;
+        ExpressionsParsedPrefix = Math.Min(ExpressionsParsedPrefix, ExpressionList.Count);
+        foreach (var tokens in keys)
+            MsilCache.Remove(tokens);
+        MsilDelegates.RemoveRange(before.Msil, after.Msil - before.Msil);
+    }
+
     // Whether the text being compiled is a CODE text, in which a label may stand twice (the later statement is the label's), as in SPITBOL
     internal bool CompilingCode;
 

@@ -7,7 +7,8 @@ namespace Test.Miscellaneous;
 /// Each EVAL of a text adds one deferred expression to the list of every one the program has lexed, and the parse that follows looked
 /// at the whole list for the ones not parsed yet, so after the slot resolution was made linear the n-th EVAL still cost n times the
 /// first: 40,000 EVALs of '1 + 2' took 46 seconds where 20,000 took 11, and Parse was 68 percent of the profile. The parse now takes
-/// up where its last call stopped, and an expression that failed to parse is looked at again, as before.
+/// up where its last call stopped, and an expression that failed to parse is looked at again, as before. Since EVAL releases what its
+/// compile added once it has run (Builder.ReleaseEvalCompile), the list holds none of the 600 at the end, and each was looked at once.
 /// </summary>
 [DoNotParallelize]
 [TestClass]
@@ -26,7 +27,7 @@ end";
         var build = SetupTests.SetupScript("-b", program);
         Assert.AreEqual(0, build.ErrorCodeHistory.Count);
         Assert.AreEqual(6, ((IntegerVar)build.Execute!.IdentifierTable[build.FoldCase("y")]).Data);
-        Assert.IsTrue(build.ExpressionList.Count >= 600);
-        Assert.AreEqual((long)build.ExpressionList.Count, build.ExpressionsExamined);
+        Assert.AreEqual(0, build.ExpressionList.Count);
+        Assert.AreEqual(600L, build.ExpressionsExamined);
     }
 }

@@ -60,6 +60,7 @@ public partial class Executive
                 var expressionText = statementMark >= 0 ? stringVar.Data[..statementMark] : stringVar.Data;
 
                 var previousCaseFolding = Parent.BuildOptions.CaseFolding;
+                var beforeCompile = Parent.MarkCompile();
                 Parent.BuildOptions.CaseFolding = AmpCaseFolding != 0;
                 Parent.CodeMode = true;
                 Parent.Code = new SourceCode(Parent);
@@ -91,9 +92,12 @@ public partial class Executive
                     return;
                 }
 
+                var afterCompile = Parent.MarkCompile();
+                var statementDelegates = Parent.MsilKeysSince(beforeCompile);
                 StarFunctionList[^1](this);
                 Parent.CodeMode = false;
                 MarkValueEvaluated();
+                Parent.ReleaseEvalCompile(beforeCompile, afterCompile, statementDelegates);
                 return;
 
             case ExpressionVar expression:

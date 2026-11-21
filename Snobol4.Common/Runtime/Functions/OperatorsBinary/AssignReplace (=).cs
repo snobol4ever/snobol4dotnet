@@ -182,10 +182,12 @@ public partial class Executive
         if (Failure)
             return;
 
-        //LeftPattern side must have a symbol, be keyed to a collection, or be a NameVar
+        // LeftPattern side must have a symbol, be keyed to a collection, or be a NameVar. A value that is no name and reaches the
+        // assignment is a builtin call's, called by name (ARRAY(3) = 1, LEN(1) = 2): error 21, as in SPITBOL, which compiles every call
+        // as a target by name; every other value in a name's place ('A' = 1, (X Y) = 1) is error 212, found as the statement is compiled
         if (leftVar is { Symbol: "", Key: null } and not NameVar)
         {
-            LogRuntimeException(leftVar.IsKeyword ? 211 : 212);
+            LogRuntimeException(leftVar.IsKeyword ? 211 : 21);
             return;
         }
 

@@ -9,6 +9,18 @@ public class CompilerException(int error, int column, string? message = null) : 
 
     #endregion
 
+    // The line that reports an error, `place` (file(line) : ) before it, as SPITBOL writes it on a page `width` columns wide: the field
+    // is put as ERROR1nnn, the 1 being blanked once the field ends on the line it began on, so a page edge that falls from the 1 to the
+    // number's last digit leaves the 1 (sbl -bf with a long file name: ERROR1|038, ERROR|1038, ERROR103|8, but ERRO|R 038)
+    internal static string ReportLine(string place, int code, string message, int width)
+    {
+        var line = $"{place}ERROR {code:D3} -- {message}";
+        var one = place.Length + 5;
+        if (width > 0 && (one + width - 1) / width * width is var edge && edge >= one && edge <= one + 3)
+            line = line[..one] + "1" + line[(one + 1)..];
+        return line;
+    }
+
     #region Error Messages
 
     internal static readonly string[] ErrorMessage =

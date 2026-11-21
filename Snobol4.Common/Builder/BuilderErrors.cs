@@ -387,7 +387,7 @@ public partial class Builder
         }
         WriteReportPageLine(pointer.ToString());
         var where = column > 0 ? $"{line},{column}" : $"{line}";
-        WriteReportPageLine($"{file}({where}) : ERROR {code:D3} -- {CompilerException.ErrorMessage[code]}");
+        WriteReportPageLine(CompilerException.ReportLine($"{file}({where}) : ", code, CompilerException.ErrorMessage[code], BuildOptions.PageWidth));
         WriteReportPageLine("");
     }
 

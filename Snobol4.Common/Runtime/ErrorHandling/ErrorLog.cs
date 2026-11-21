@@ -149,7 +149,7 @@ public partial class Executive
         string[] report =
         [
             "", "", "",
-            $"{file}({line}) : ERROR {code:D3} -- {ErrorMessageText(code)}",
+            CompilerException.ReportLine($"{file}({line}) : ", code, ErrorMessageText(code), width),
             "", "", "", "", "",
             .. RunSummary(),
             ""

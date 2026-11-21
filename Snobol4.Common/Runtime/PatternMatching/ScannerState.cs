@@ -9,7 +9,12 @@ internal class ScannerState
     // One entry of the alternate stack: the node to resume at the cursor saved with it, or a sentinel, and the frames of
     // the patterns it was saved inside (see Frame).  Base is used only by the entries of an immediate assignment (see
     // StartImmediate).
-    private readonly record struct Alternate(int Node, int Cursor, int Base = -1, Frame? Frames = null);
+    private readonly record struct Alternate(int Node, int Cursor, int Base = -1, Frame? Frames = null, long History = 0);
+
+    // The words SPITBOL's history stack holds for this match (p_alt 2, a conditional assignment 2 and 4, ARB 4, an ARBNO repetition
+    // 4 and 2, FENCE 2 and 2; Scanner.SaveAlternate and the Match loop charge them).  Each entry keeps the height below it, which
+    // backup restores, as SPITBOL pops its stack to the alternative it resumes.
+    public long History { get; set; }
 
     private readonly List<Alternate> _alternates = [];
 
@@ -42,7 +47,7 @@ internal class ScannerState
     // its end returns to: the node after the *X, or the ARBNO's loop, with the cursor its repetition must get past.  The
     // frames are a list each activation extends without changing it, so an alternate keeps the list it was saved under
     // and backup restores it with the cursor, as SPITBOL's history stack keeps a recursive pattern's place.
-    internal sealed record Frame(int ReturnNode, int AdvanceFrom, Frame? Parent);
+    internal sealed record Frame(int ReturnNode, int AdvanceFrom, Frame? Parent, long History = 0);
 
     // The frames of the patterns being matched, innermost first; null in the statement's own pattern
     public Frame? Frames { get; set; }
@@ -60,7 +65,14 @@ internal class ScannerState
 
     public void SaveAlternate(int nodeIndex)
     {
-        _alternates.Add(new Alternate(nodeIndex, CursorPosition, Frames: Frames));
+        _alternates.Add(new Alternate(nodeIndex, CursorPosition, Frames: Frames, History: History));
+    }
+
+    // An alternate that takes `words` of SPITBOL's history stack
+    public void SaveAlternate(int nodeIndex, int words)
+    {
+        _alternates.Add(new Alternate(nodeIndex, CursorPosition, Frames: Frames, History: History));
+        History += words;
     }
 
     public (int nodeIndex, int cursorPosition) RestoreAlternate()
@@ -76,10 +88,11 @@ internal class ScannerState
             _alternates.RemoveAt(_alternates.Count - 1);
         }
 
-        var (node, cursor, _, frames) = _alternates[^1];
+        var (node, cursor, _, frames, history) = _alternates[^1];
         _alternates.RemoveAt(_alternates.Count - 1);
         CursorPosition = cursor;
         Frames = frames;
+        History = history;
         return (node, cursor);
     }
 
@@ -101,6 +114,7 @@ internal class ScannerState
         _alternates.Add(new Alternate(-1, -1));
         _immediateBase = -1;
         Frames = null;
+        History = 0;
     }
 
     // P $ V, entering P (SPITBOL p_ima): stack the cursor P starts at with the immediate base it replaces, and make
@@ -108,7 +122,7 @@ internal class ScannerState
     // inside itself (LIST = ('(' *LIST ')') $ GRP) before it ends here.
     public void StartImmediate()
     {
-        _alternates.Add(new Alternate(ImmediateStart, CursorPosition, _immediateBase));
+        _alternates.Add(new Alternate(ImmediateStart, CursorPosition, _immediateBase, History: History));
         _immediateBase = _alternates.Count - 1;
     }
 
@@ -118,12 +132,12 @@ internal class ScannerState
     public int FinishImmediate()
     {
         var start = _immediateBase;
-        var (_, cursor, outer, _) = _alternates[start];
+        var (_, cursor, outer, _, _) = _alternates[start];
         _immediateBase = outer;
         if (start == _alternates.Count - 1)
             _alternates.RemoveAt(start);
         else
-            _alternates.Add(new Alternate(ImmediateInner, CursorPosition, start));
+            _alternates.Add(new Alternate(ImmediateInner, CursorPosition, start, History: History));
         return cursor;
     }
 
@@ -132,7 +146,8 @@ internal class ScannerState
     // alternates that were on the stack before FENCE was entered.
     public void MarkAlternates()
     {
-        _alternates.Add(new Alternate(-3, CursorPosition));
+        _alternates.Add(new Alternate(-3, CursorPosition, History: History));
+        History += 2;   // p_fna
     }
 
     // SealAlternates: pop entries until we find the most recent -3 mark;
@@ -147,11 +162,13 @@ internal class ScannerState
     public void SealAlternates(Func<int, bool> undoes)
     {
         List<Alternate> kept = [];
+        var markHistory = -1L;
         while (_alternates.Count > 0)
         {
             var top = _alternates[^1];
             if (top.Node == -3)
             {
+                markHistory = top.History;
                 _alternates.RemoveAt(_alternates.Count - 1);
                 break;
             }
@@ -165,6 +182,11 @@ internal class ScannerState
         }
         for (var i = kept.Count - 1; i >= 0; i--)
             _alternates.Add(kept[i]);
-        _alternates.Add(new Alternate(-2, CursorPosition));
+        _alternates.Add(new Alternate(-2, CursorPosition, History: History));
+        // p_fnc: P left history above p_fna, so a trap entry of 2 words is stacked; if not, the 2 of p_fna come off
+        if (History == markHistory + 2)
+            History = markHistory;
+        else
+            History += 2;
     }
 }

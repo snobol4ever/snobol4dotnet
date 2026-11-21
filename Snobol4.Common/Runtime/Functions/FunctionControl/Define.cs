@@ -136,6 +136,9 @@ public partial class Executive
     private long StackBytesUsed;
     private const long StackBaseBytes = 3216;
 
+    // Whether SPITBOL's stack holds `bytes` more above the frames of the calls in progress (a match's history stack, ScannerState)
+    internal bool StackHolds(long bytes) => StackBytesUsed + bytes + StackBaseBytes <= Parent.BuildOptions.StackSizeBytes;
+
     // The operands of the calling expression that wait on the stack, which SPITBOL's call frame also carries: those above the
     // statement's separator, less the one that is the target of an assignment
     private int OperandsWaiting()

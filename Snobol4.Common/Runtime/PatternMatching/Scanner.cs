@@ -90,7 +90,38 @@ public class Scanner
 
     internal void SaveAlternate(int node)
     {
-        _state?.SaveAlternate(node);
+        if (_state is null)
+            return;
+        PushAlternate(node);
+    }
+
+    // An alternate as SPITBOL stacks it on its history stack, by the node backup resumes: the start of a conditional assignment
+    // (p_paa) 2 words, its end (p_pac) 4, ARB (p_arb, p_arc) 4, and any other alternative (p_alt) 2, which is checked against the stack
+    private void PushAlternate(int node)
+    {
+        switch (_ast![node].Self)
+        {
+            case ConditionalVariableAssociationBackup1:
+                _state!.SaveAlternate(node, 2);
+                break;
+            case ConditionalVariableAssociationBackup2:
+            case ArbPattern:
+                _state!.SaveAlternate(node, 4);
+                break;
+            default:
+                _state!.SaveAlternate(node, 2);
+                CheckHistory(0);
+                break;
+        }
+    }
+
+    // SPITBOL's chk: the history stack and `extra` words past it must fit in the stack the calls in progress leave, else error 246
+    private void CheckHistory(long extra)
+    {
+        if (Exec.StackHolds(8 * (_state!.History + extra)))
+            return;
+        Exec.RunLeftAtOnce = true;
+        Exec.LogRuntimeException(246, fatal: true);
     }
 
     internal void SealAlternates()
@@ -120,7 +151,12 @@ public class Scanner
     internal void Call(int returnNode, int advanceFrom)
     {
         if (returnNode >= 0 && _state is not null)
-            _state.Frames = new ScannerState.Frame(returnNode, advanceFrom, _state.Frames);
+        {
+            _state.Frames = new ScannerState.Frame(returnNode, advanceFrom, _state.Frames, _state.History);
+            // an ARBNO repetition: p_aba stacks the cursor, a node, the outer base and ndabb
+            if (advanceFrom >= 0)
+                _state.History += 4;
+        }
     }
 
     internal AbstractSyntaxTreeNode GetNode(int index) => _ast![index];
@@ -186,7 +222,7 @@ public class Scanner
         {
             if (node.HasAlternate() && !noFurtherRepetition)
             {
-                _state.SaveAlternate(node.Alternate);
+                PushAlternate(node.Alternate);
             }
             noFurtherRepetition = false;
 
@@ -237,8 +273,18 @@ public class Scanner
                     // to its caller. An ARBNO repetition that did not get past its start still goes on to what follows
                     // the ARBNO, as in SPITBOL, but no further repetition is tried from it, which would repeat forever
                     if (_state.Frames is not { } frame)
+                    {
+                        // pnth3: the conditional assignments are made by scanning the history stack, each start stacking its
+                        // cursor and checking the stack, so a match whose history fills it ends in error 246 once it has succeeded
+                        if (Exec.BetaStack.Count > 0)
+                            CheckHistory(1);
                         return MatchResult.Success(_state);
+                    }
                     _state.Frames = frame.Parent;
+                    // p_abc: a repetition that left history stacks the inner base and ndabd (2 words); one that left none
+                    // removes what p_aba stacked
+                    if (frame.AdvanceFrom >= 0)
+                        _state.History = _state.History == frame.History + 4 ? frame.History : _state.History + 2;
                     noFurtherRepetition = _state.CursorPosition <= frame.AdvanceFrom;
                     node = _ast![frame.ReturnNode];
                     break;

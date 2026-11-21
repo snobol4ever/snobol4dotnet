@@ -54,6 +54,8 @@ internal sealed class ThreadedCodeCompiler
         {
             var line = lines[si];
             _statementStart.Add(_thread.Count);
+            if (CompilesToNothing(line))
+                continue;
             bool bodyHasDelegate = _parent.MsilCache.ContainsKey(line.ParseBody);
             if (!bodyHasDelegate)
                 Emit(new Instruction(OpCode.Init, stmtOffset + si));
@@ -143,6 +145,8 @@ internal sealed class ThreadedCodeCompiler
         {
             var line = lines[si];
             _statementStart.Add(_thread.Count);
+            if (CompilesToNothing(line))
+                continue;
 
             // If the body has a compiled delegate, Init/Finalize are inlined
             // inside it — skip emitting them as separate opcodes.
@@ -158,6 +162,17 @@ internal sealed class ThreadedCodeCompiler
 
         Emit(new Instruction(OpCode.Halt));
     }
+
+    // A statement with no label and no goto whose body is a constant alone (123, 'abc', (1)) is compiled to no code, as SPITBOL's code
+    // generator makes none for it: it is not counted, checked against &STLIMIT or read as &LASTNO, and control passes to the statement
+    // after it (sbl -bf -D1: 123;END reads &STCOUNT 1 and &LASTNO 0; a label, a goto or an operator makes code)
+    private static bool CompilesToNothing(SourceLine line) =>
+        line is
+        {
+            Label.Length: 0, CompileError: false, ParseUnconditionalGoto.Count: 0, ParseSuccessGoto.Count: 0, ParseFailureGoto.Count: 0,
+            EmptyUnconditionalGoto: false, EmptySuccessGoto: false, EmptyFailureGoto: false,
+            ParseBody: [{ TokenType: Token.Type.STRING or Token.Type.INTEGER or Token.Type.REAL }]
+        };
 
     // -----------------------------------------------------------------------
     // Goto logic

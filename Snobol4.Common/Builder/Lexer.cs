@@ -689,9 +689,11 @@ public partial class Lexer
                 }
 
                 // the bracket that closes a direct goto opened by [ ends the goto as > ends one opened by <
-                // (an unconditional direct goto is pushed as L_PAREN_UNCONDITIONAL, its directness in DirectGotoFirst; no subscript's [ is)
+                // (an unconditional direct goto is pushed as L_PAREN_UNCONDITIONAL, its directness in DirectGotoFirst; no subscript's [ is;
+                // the second goto of a pair takes the mirror of the first one's context, L_PAREN_FAILURE after S(...), its directness in
+                // DirectGotoSecond: :S(END)F[E] is a direct failure goto, as in SPITBOL)
                 if (_bracketStack.Peek().Context is Token.Type.L_ANGLE_SUCCESS or Token.Type.L_ANGLE_FAILURE or Token.Type.L_ANGLE_UNCONDITIONAL
-                    or Token.Type.L_PAREN_UNCONDITIONAL)
+                    or Token.Type.L_PAREN_UNCONDITIONAL or Token.Type.L_PAREN_SUCCESS or Token.Type.L_PAREN_FAILURE)
                 {
                     _cursorCurrent++;
                     if (!ProcessClosingBracket(sourceLine))

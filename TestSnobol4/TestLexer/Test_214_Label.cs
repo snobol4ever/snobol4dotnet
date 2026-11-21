@@ -10,7 +10,7 @@ public partial class TestLexer
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(230, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(214, build.ErrorCodeHistory[0]);
         Assert.AreEqual(0, build.ColumnHistory[0]);
     }
 
@@ -21,7 +21,7 @@ public partial class TestLexer
         var directives = "-b";
         var build = SetupTests.SetupScript(directives, s);
         Assert.AreNotEqual(0, build.ErrorCodeHistory.Count);
-        Assert.AreEqual(230, build.ErrorCodeHistory[0]);
+        Assert.AreEqual(214, build.ErrorCodeHistory[0]);
         Assert.AreEqual(0, build.ColumnHistory[0]);
     }
 

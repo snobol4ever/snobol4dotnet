@@ -236,7 +236,9 @@ public partial class Lexer
         // UTF8 characters are allowed in literals, labels, and comments.
         if (c > 127)
         {
-            _parent.LogCompilerException(230, _cursorCurrent, sourceLine);
+            // in the first column it begins the label field, where anything but a letter or a digit is a bad label (214), as '#' is,
+            // as in SPITBOL (sbl -bf reads the first byte of é there as 214); elsewhere outside a literal it is an illegal character
+            _parent.LogCompilerException(_cursorCurrent == 0 ? 214 : 230, _cursorCurrent, sourceLine);
             return false;
         }
         return true;

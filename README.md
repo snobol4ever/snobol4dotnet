@@ -45,7 +45,7 @@ These three files should be stored in the same folder and the folder placed anyw
 
 ### Checkout
 
-SNOBOL4.NET is graded by the snobol4ever test harness on 35 suites of SNOBOL4 programs, 4,166 programs in all, collected from the sources named below. Each program's output is compared with what SPITBOL x64 prints for it (`sbl -bf`). A program SPITBOL gives no answer for is excluded rather than counted. Graded 18 and 19 November 2026, at commit `1b8d437`.
+SNOBOL4.NET is graded by the snobol4ever test harness on 36 suites of SNOBOL4 programs, 8,961 programs in all, collected from the sources named below. Each program's output is compared with what SPITBOL x64 prints for it (`sbl -bf`). A program SPITBOL gives no answer for is excluded rather than counted. Graded 21 and 22 November 2026, at commit `1ad1271`.
 
 | Suite | What it is | Source | Pass | Total | Lines of code | Excluded | Time | Percent | Fails (Δ) |
 |---|---|---|---:|---:|---:|---:|---:|---:|---:|
@@ -55,11 +55,11 @@ SNOBOL4.NET is graded by the snobol4ever test harness on 35 suites of SNOBOL4 pr
 | Snobol4BinTree | a binary-tree traversal | [ad2108/traverse-binary-tree-in-snobol4](https://github.com/ad2108/traverse-binary-tree-in-snobol4) | 1 | 1 | 0 | 0 | 0s | 100% | ✓ |
 | Snobol4Brooker | programs from a college course | [cbrooker-27/snobol](https://github.com/cbrooker-27/snobol) | 21 | 21 | 1,829 | 1 | 2s | 100% | ✓ |
 | Snobol4Budne | Philip L. Budne's CSNOBOL4 2.3.3 test suite | [regressive.org/snobol4/csnobol4](http://www.regressive.org/snobol4/csnobol4) | 106 | 106 | 2,761 | 26 | 9s | 100% | ✓ |
-| Snobol4Cases | every SNOBOL4 test case the fleet's retired gate scripts carried | [snobol4ever/corpus](https://github.com/snobol4ever/corpus) | 532 | 532 | 6,320 | 81 | 47s | 100% | ✓ |
+| Snobol4Cases | every SNOBOL4 test case the fleet's retired gate scripts carried | [snobol4ever/corpus](https://github.com/snobol4ever/corpus) | 532 | 532 | 6,320 | 81 | 46s | 100% | ✓ |
 | Snobol4Cor24 | the examples of a SNOBOL4 for the COR24 machine | [sw-embed/sw-cor24-snobol4](https://github.com/sw-embed/sw-cor24-snobol4) | 54 | 54 | 1,945 | 5 | 4s | 100% | ✓ |
 | Snobol4Decus | the samples of Wendell Turner's VAX-11 SNOBOL4 | [DECUS tape VAX84A](https://www.digiater.nl/openvms/decus/vax84a/sdc/snobol/) | 13 | 13 | 1,930 | 0 | 1s | 100% | ✓ |
 | Snobol4Demo | demonstration programs: beauty, porter, treebank, json, roman and others | [snobol4ever/corpus](https://github.com/snobol4ever/corpus) | 24 | 24 | 1,998 | – | 8s | 100% | ✓ |
-| Snobol4Dotnet | this repository's own programs | [snobol4ever/snobol4dotnet](https://github.com/snobol4ever/snobol4dotnet) | 11 | 11 | 322 | 3 | 1s | 100% | ✓ |
+| Snobol4Dotnet | this repository's own programs | [snobol4ever/snobol4dotnet](https://github.com/snobol4ever/snobol4dotnet) | 2,878 | 2,878 | 21,354 | 6 | 4m26s | 100% | ✓ |
 | Snobol4Dump | programs written while learning SNOBOL4 | [James-P-D/SNOBOLDump](https://github.com/James-P-D/SNOBOLDump) | 5 | 5 | 74 | 0 | 0s | 100% | ✓ |
 | Snobol4Exercism | the Exercism SNOBOL4 track's exercises | [exercism/snobol4](https://github.com/exercism/snobol4) | 72 | 72 | 1,324 | 0 | 6s | 100% | ✓ |
 | Snobol4Exs | exercises from Forte (1967) and Griswold, Poage and Polonsky (1971) | [bitfragment/exs-sno](https://github.com/bitfragment/exs-sno) | 24 | 24 | 627 | 2 | 2s | 100% | ✓ |
@@ -67,6 +67,7 @@ SNOBOL4.NET is graded by the snobol4ever test harness on 35 suites of SNOBOL4 pr
 | Snobol4Gimpel | the programs of Gimpel's *Algorithms in SNOBOL4*, with test drivers | Catspaw, Inc. (Mark Emmer's SPITBOL edition) | 145 | 145 | 2,591 | 0 | 15s | 100% | ✓ |
 | Snobol4Haskell | the examples of a SNOBOL4 in Haskell | [meln5674/snobol4hs](https://github.com/meln5674/snobol4hs) | 18 | 18 | 149 | 0 | 2s | 100% | ✓ |
 | Snobol4JmuCS430 | a university course's teaching programs | [James Madison University, CS430](https://users.cs.jmu.edu/adamses/Web/CS430/CodeExamples/Snobol/) | 39 | 39 | 912 | 3 | 4s | 100% | ✓ |
+| Snobol4Jvm | snobol4jvm's own SNOBOL4 test programs, moved to the corpus | [snobol4ever/snobol4jvm](https://github.com/snobol4ever/snobol4jvm) | 1,928 | 1,928 | 11,986 | 5 | 2m42s | 100% | ✓ |
 | Snobol4MatrixMike | MatrixMike's SNOBOL4 tests | [MatrixMike/snobol4Tests](https://github.com/MatrixMike/snobol4Tests) | 17 | 17 | 324 | 2 | 2s | 100% | ✓ |
 | Snobol4MikeBeer | tests, examples and benchmarks of a SNOBOL4 in CREXX and C | [mikebeer/snobol](https://github.com/mikebeer/snobol) | 19 | 19 | 503 | 0 | 3s | 100% | ✓ |
 | Snobol4Playground | Joey Gibson's SNOBOL4 experiments | [joeygibson/snobol-playground](https://github.com/joeygibson/snobol-playground) | 26 | 26 | 383 | 0 | 3s | 100% | ✓ |
@@ -84,7 +85,7 @@ SNOBOL4.NET is graded by the snobol4ever test harness on 35 suites of SNOBOL4 pr
 | Snobol4Vanilla | the sample programs of Catspaw's Vanilla SNOBOL4 | Catspaw, Inc. (Vanilla SNOBOL4) | 19 | 19 | 1,819 | 2 | 2s | 100% | ✓ |
 | Snobol4X32Tests | SPITBOL x32's own test programs | [spitbol/x32](https://github.com/spitbol/x32) | 18 | 18 | 675 | 3 | 2s | 100% | ✓ |
 | Snobol4X64Tests | SPITBOL x64's own test programs | [spitbol/x64](https://github.com/spitbol/x64) | 37 | 37 | 81,688 | 8 | 28s | 100% | ✓ |
-| **Total** | 35 suites | | **4,166** | **4,166** | **154,371** | **189** | **6m53s** | **100%** | **✓** |
+| **Total** | 36 suites | | **8,961** | **8,961** | **187,389** | **197** | **13m59s** | **100%** | **✓** |
 
 *Lines of code* is the size of the suite's programs. *Time* is how long the suite's last grading took. *Fails (Δ)* is how many of its programs still print something other than SPITBOL's answer; ✓ means none.
 
